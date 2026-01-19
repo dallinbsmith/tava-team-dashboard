@@ -1,0 +1,535 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Invitation, CreateInvitationRequest } from "@/shared/types";
+import { getInvitations, createInvitation, revokeInvitation } from "@/lib/api";
+import { useCurrentUser, useOrganization } from "@/providers";
+import { parseErrorMessage, parseSquadErrorMessage } from "@/lib/errors";
+import {
+  Mail,
+  UserPlus,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Copy,
+  Shield,
+  Users,
+  Building2,
+  ChevronDown,
+  X,
+  Plus,
+} from "lucide-react";
+
+export default function InvitationsPage() {
+  const router = useRouter();
+  const { currentUser, loading: userLoading, isAdmin } = useCurrentUser();
+  const { squads, addSquad } = useOrganization();
+
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newInvitation, setNewInvitation] = useState<CreateInvitationRequest>({
+    email: "",
+    role: "supervisor",
+    department: "",
+    squad_ids: [],
+  });
+  const [createdInvitation, setCreatedInvitation] = useState<Invitation | null>(null);
+  const [copiedToken, setCopiedToken] = useState(false);
+
+  // Squad selection state
+  const [squadDropdownOpen, setSquadDropdownOpen] = useState(false);
+  const [newSquadName, setNewSquadName] = useState("");
+  const [creatingSquad, setCreatingSquad] = useState(false);
+
+  // Redirect non-admins
+  useEffect(() => {
+    if (!userLoading && currentUser && !isAdmin) {
+      router.push("/");
+    }
+  }, [userLoading, currentUser, isAdmin, router]);
+
+  // Fetch invitations when admin is confirmed
+  useEffect(() => {
+    async function fetchInvitations() {
+      try {
+        const invs = await getInvitations();
+        setInvitations(invs);
+      } catch (e) {
+        console.error("Failed to fetch invitations:", e);
+        setError("Failed to load invitations");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (!userLoading && isAdmin) {
+      fetchInvitations();
+    }
+  }, [userLoading, isAdmin]);
+
+  const handleCreateInvitation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    setError(null);
+
+    try {
+      const invitation = await createInvitation(undefined, newInvitation);
+      setCreatedInvitation(invitation);
+      setInvitations([invitation, ...invitations]);
+      setNewInvitation({ email: "", role: "supervisor", department: "", squad_ids: [] });
+    } catch (e: unknown) {
+      setError(parseErrorMessage(e));
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleRevokeInvitation = async (id: number) => {
+    if (!confirm("Are you sure you want to revoke this invitation?")) return;
+
+    try {
+      await revokeInvitation(undefined, id);
+      setInvitations(
+        invitations.map((inv) =>
+          inv.id === id ? { ...inv, status: "revoked" as const } : inv
+        )
+      );
+    } catch (e) {
+      console.error("Failed to revoke invitation:", e);
+      setError("Failed to revoke invitation");
+    }
+  };
+
+  const copyInviteLink = (token: string) => {
+    const link = `${window.location.origin}/invite/${token}`;
+    navigator.clipboard.writeText(link);
+    setCopiedToken(true);
+    setTimeout(() => setCopiedToken(false), 2000);
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "pending":
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case "accepted":
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "expired":
+        return <AlertCircle className="w-4 h-4 text-gray-500" />;
+      case "revoked":
+        return <XCircle className="w-4 h-4 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-900/40 text-yellow-300 border-yellow-500/30";
+      case "accepted":
+        return "bg-green-900/40 text-green-300 border-green-500/30";
+      case "expired":
+        return "bg-gray-700/40 text-gray-400 border-gray-500/30";
+      case "revoked":
+        return "bg-red-900/40 text-red-300 border-red-500/30";
+      default:
+        return "bg-gray-700/40 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  // Squad selection helpers
+  const toggleSquad = (squadId: number) => {
+    const currentIds = newInvitation.squad_ids || [];
+    const newIds = currentIds.includes(squadId)
+      ? currentIds.filter((id) => id !== squadId)
+      : [...currentIds, squadId];
+    setNewInvitation({ ...newInvitation, squad_ids: newIds });
+  };
+
+  const removeSquad = (squadId: number) => {
+    const newIds = (newInvitation.squad_ids || []).filter((id) => id !== squadId);
+    setNewInvitation({ ...newInvitation, squad_ids: newIds });
+  };
+
+  const handleCreateSquad = async () => {
+    if (!newSquadName.trim()) return;
+    setCreatingSquad(true);
+    try {
+      const squad = await addSquad(newSquadName.trim());
+      setNewInvitation({
+        ...newInvitation,
+        squad_ids: [...(newInvitation.squad_ids || []), squad.id],
+      });
+      setNewSquadName("");
+      setError(null);
+    } catch (e) {
+      setError(parseSquadErrorMessage(e));
+    } finally {
+      setCreatingSquad(false);
+    }
+  };
+
+  const getSelectedSquads = () => {
+    return squads.filter((s) =>
+      (newInvitation.squad_ids || []).includes(s.id)
+    );
+  };
+
+  if (userLoading || loading) {
+    return null;
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-theme-text">Invitations</h1>
+          <p className="text-theme-text-muted mt-1">
+            Invite new supervisors and admins to join the platform
+          </p>
+        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="inline-flex items-center px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+        >
+          <UserPlus className="w-5 h-5 mr-2" />
+          Send Invitation
+        </button>
+      </div>
+
+      {error && (
+        <div className="bg-red-900/30 border border-red-500/30 p-4 mb-6">
+          <p className="text-red-400">{error}</p>
+        </div>
+      )}
+
+      {/* Invitations List */}
+      <div className="bg-theme-surface border border-theme-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-theme-border">
+          <h2 className="text-lg font-semibold text-theme-text">All Invitations</h2>
+        </div>
+
+        {invitations.length === 0 ? (
+          <div className="px-6 py-12 text-center text-theme-text-muted">
+            <Mail className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
+            <p>No invitations yet</p>
+            <p className="text-sm mt-1">Send your first invitation to get started</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-theme-border">
+            {invitations.map((invitation) => (
+              <div key={invitation.id} className="px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-theme-elevated flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-theme-text-muted" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-theme-text">{invitation.email}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${invitation.role === "admin"
+                            ? "bg-purple-900/40 text-purple-300 border-purple-500/30"
+                            : "bg-blue-900/40 text-blue-300 border-blue-500/30"
+                          }`}
+                      >
+                        {invitation.role === "admin" ? (
+                          <Shield className="w-3 h-3" />
+                        ) : (
+                          <Users className="w-3 h-3" />
+                        )}
+                        {invitation.role}
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${getStatusColor(
+                          invitation.status
+                        )}`}
+                      >
+                        {getStatusIcon(invitation.status)}
+                        {invitation.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-theme-text-muted">
+                    {new Date(invitation.created_at).toLocaleDateString()}
+                  </span>
+                  {invitation.status === "pending" && (
+                    <button
+                      onClick={() => handleRevokeInvitation(invitation.id)}
+                      className="px-3 py-1 text-sm text-red-400 hover:bg-red-900/30 transition-colors"
+                    >
+                      Revoke
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Create Invitation Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-theme-surface shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-theme-border">
+              <h3 className="text-lg font-semibold text-theme-text">Send Invitation</h3>
+            </div>
+
+            {createdInvitation ? (
+              <div className="p-6">
+                <div className="text-center mb-6">
+                  <div className="w-12 h-12 bg-green-900/40 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-6 h-6 text-green-400" />
+                  </div>
+                  <h4 className="text-lg font-medium text-theme-text">Invitation Created!</h4>
+                  <p className="text-sm text-theme-text-muted mt-1">
+                    Share this link with {createdInvitation.email}
+                  </p>
+                </div>
+
+                <div className="bg-theme-elevated p-3 mb-4">
+                  <p className="text-xs text-theme-text-muted mb-1">Invitation Link</p>
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm text-theme-text flex-1 truncate">
+                      {`${typeof window !== "undefined" ? window.location.origin : ""}/invite/${createdInvitation.token}`}
+                    </code>
+                    <button
+                      onClick={() => copyInviteLink(createdInvitation.token || "")}
+                      className="p-2 hover:bg-theme-muted transition-colors"
+                    >
+                      <Copy className="w-4 h-4 text-theme-text-muted" />
+                    </button>
+                  </div>
+                  {copiedToken && (
+                    <p className="text-xs text-green-400 mt-1">Copied to clipboard!</p>
+                  )}
+                </div>
+
+                <p className="text-xs text-theme-text-muted text-center mb-4">
+                  This invitation expires in 7 days
+                </p>
+
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setCreatedInvitation(null);
+                  }}
+                  className="w-full px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleCreateInvitation} className="p-6">
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-theme-text mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={newInvitation.email}
+                    onChange={(e) =>
+                      setNewInvitation({ ...newInvitation, email: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="Enter email address"
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-theme-text mb-1">
+                    Role
+                  </label>
+                  <select
+                    value={newInvitation.role}
+                    onChange={(e) =>
+                      setNewInvitation({
+                        ...newInvitation,
+                        role: e.target.value as "admin" | "supervisor",
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  >
+                    <option value="supervisor">Supervisor</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  <p className="text-xs text-theme-text-muted mt-1">
+                    {newInvitation.role === "admin"
+                      ? "Admins can manage all users and send invitations"
+                      : "Supervisors can manage their direct reports"}
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-theme-text mb-1">
+                    Department
+                  </label>
+                  <div className="relative">
+                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted" />
+                    <input
+                      type="text"
+                      value={newInvitation.department || ""}
+                      onChange={(e) =>
+                        setNewInvitation({ ...newInvitation, department: e.target.value })
+                      }
+                      className="w-full pl-10 pr-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="e.g. Engineering, Sales, Marketing"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-theme-text mb-1">
+                    Squads
+                  </label>
+
+                  {/* Selected squads */}
+                  {getSelectedSquads().length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {getSelectedSquads().map((squad) => (
+                        <span
+                          key={squad.id}
+                          className="inline-flex items-center gap-1 px-2 py-1 text-sm bg-primary-900/40 text-primary-300 border border-primary-500/30"
+                        >
+                          <Users className="w-3 h-3" />
+                          {squad.name}
+                          <button
+                            type="button"
+                            onClick={() => removeSquad(squad.id)}
+                            className="ml-1 hover:text-primary-100"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Squad dropdown */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setSquadDropdownOpen(!squadDropdownOpen)}
+                      className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text text-left flex items-center justify-between focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    >
+                      <span className="text-theme-text-muted">
+                        {getSelectedSquads().length === 0
+                          ? "Select squads..."
+                          : `${getSelectedSquads().length} squad${getSelectedSquads().length > 1 ? "s" : ""} selected`}
+                      </span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${squadDropdownOpen ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {squadDropdownOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-theme-surface border border-theme-border shadow-lg max-h-48 overflow-y-auto">
+                        {squads.map((squad) => (
+                          <button
+                            key={squad.id}
+                            type="button"
+                            onClick={() => toggleSquad(squad.id)}
+                            className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-theme-elevated ${(newInvitation.squad_ids || []).includes(squad.id)
+                                ? "bg-primary-900/20"
+                                : ""
+                              }`}
+                          >
+                            <div
+                              className={`w-4 h-4 border flex items-center justify-center ${(newInvitation.squad_ids || []).includes(squad.id)
+                                  ? "border-primary-500 bg-primary-500"
+                                  : "border-theme-border"
+                                }`}
+                            >
+                              {(newInvitation.squad_ids || []).includes(squad.id) && (
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              )}
+                            </div>
+                            <span className="text-theme-text">{squad.name}</span>
+                          </button>
+                        ))}
+
+                        {/* Create new squad */}
+                        <div className="border-t border-theme-border p-2">
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={newSquadName}
+                              onChange={(e) => setNewSquadName(e.target.value)}
+                              placeholder="New squad name"
+                              className="flex-1 px-2 py-1 text-sm border border-theme-border bg-theme-elevated text-theme-text"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleCreateSquad();
+                                }
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={handleCreateSquad}
+                              disabled={creatingSquad || !newSquadName.trim()}
+                              className="px-2 py-1 bg-primary-600 text-white text-sm hover:bg-primary-700 disabled:opacity-50"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-theme-text-muted mt-1">
+                    Assign the user to one or more squads (optional)
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="mb-4 p-3 bg-red-900/30 border border-red-500/30">
+                    <p className="text-sm text-red-400">{error}</p>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setError(null);
+                      setSquadDropdownOpen(false);
+                      setNewSquadName("");
+                    }}
+                    className="flex-1 px-4 py-2 border border-theme-border text-theme-text hover:bg-theme-elevated transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creating}
+                    className="flex-1 px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 transition-colors disabled:opacity-50"
+                  >
+                    {creating ? "Sending..." : "Send Invitation"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

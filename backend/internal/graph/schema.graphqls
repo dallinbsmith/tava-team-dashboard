@@ -1,0 +1,77 @@
+# GraphQL Schema for Employee Management
+
+scalar Time
+
+enum Role {
+  supervisor
+  employee
+}
+
+type Squad {
+  id: ID!
+  name: String!
+}
+
+type Employee {
+  id: ID!
+  auth0_id: String!
+  email: String!
+  first_name: String!
+  last_name: String!
+  role: Role!
+  title: String!
+  department: String!
+  squads: [Squad!]!
+  avatar_url: String
+  supervisor_id: ID
+  supervisor: Employee
+  direct_reports: [Employee!]
+  date_started: Time
+  created_at: Time!
+  updated_at: Time!
+}
+
+input CreateEmployeeInput {
+  email: String!
+  first_name: String!
+  last_name: String!
+  role: Role!
+  title: String
+  department: String!
+  avatar_url: String
+  supervisor_id: ID
+  squad_ids: [ID!]
+}
+
+input UpdateEmployeeInput {
+  first_name: String
+  last_name: String
+  role: Role
+  title: String
+  department: String
+  avatar_url: String
+  supervisor_id: ID
+  squad_ids: [ID!]
+}
+
+type Query {
+  # Get all employees
+  employees: [Employee!]!
+
+  # Get a single employee by ID
+  employee(id: ID!): Employee
+
+  # Get the current authenticated user
+  me: Employee
+}
+
+type Mutation {
+  # Create a new employee
+  createEmployee(input: CreateEmployeeInput!): Employee!
+
+  # Update an existing employee
+  updateEmployee(id: ID!, input: UpdateEmployeeInput!): Employee!
+
+  # Delete an employee
+  deleteEmployee(id: ID!): Boolean!
+}

@@ -1,0 +1,319 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Primary Color Palette (Sky Blue) */
+  --color-primary-50: 240 249 255;
+  --color-primary-100: 224 242 254;
+  --color-primary-200: 186 230 253;
+  --color-primary-300: 125 211 252;
+  --color-primary-400: 56 189 248;
+  --color-primary-500: 14 165 233;
+  --color-primary-600: 2 132 199;
+  --color-primary-700: 3 105 161;
+  --color-primary-800: 7 89 133;
+  --color-primary-900: 12 74 110;
+  --color-primary-950: 8 47 73;
+
+  /* Secondary Color Palette (Purple) */
+  --color-secondary-50: 250 245 255;
+  --color-secondary-100: 243 232 255;
+  --color-secondary-200: 233 213 255;
+  --color-secondary-300: 216 180 254;
+  --color-secondary-400: 192 132 252;
+  --color-secondary-500: 168 85 247;
+  --color-secondary-600: 147 51 234;
+  --color-secondary-700: 126 34 206;
+  --color-secondary-800: 107 33 168;
+  --color-secondary-900: 88 28 135;
+  --color-secondary-950: 59 7 100;
+
+  /* Accent Color Palette (Teal) */
+  --color-accent-50: 240 253 250;
+  --color-accent-100: 204 251 241;
+  --color-accent-200: 153 246 228;
+  --color-accent-300: 94 234 212;
+  --color-accent-400: 45 212 191;
+  --color-accent-500: 20 184 166;
+  --color-accent-600: 13 148 136;
+  --color-accent-700: 15 118 110;
+  --color-accent-800: 17 94 89;
+  --color-accent-900: 19 78 74;
+  --color-accent-950: 4 47 46;
+
+  /* Status Colors */
+  --color-success: 34 197 94;
+  --color-warning: 234 179 8;
+  --color-error: 239 68 68;
+  --color-info: 59 130 246;
+
+  /* ========================================
+     SEMANTIC THEME VARIABLES (Dark Mode)
+     ======================================== */
+
+  /* Background colors */
+  --bg-base: 17 24 39;           /* gray-900 - Main app background */
+  --bg-surface: 31 41 55;        /* gray-800 - Cards, panels */
+  --bg-elevated: 55 65 81;       /* gray-700 - Dropdowns, popovers */
+  --bg-muted: 75 85 99;          /* gray-600 - Disabled, subtle backgrounds */
+  --bg-subtle: 107 114 128;      /* gray-500 - Very subtle backgrounds */
+
+  /* Sidebar specific */
+  --bg-sidebar: 17 24 39;        /* gray-900 - Sidebar background */
+  --bg-sidebar-hover: 31 41 55;  /* gray-800 - Sidebar hover state */
+  --bg-sidebar-active: 55 65 81; /* gray-700 - Sidebar active state */
+
+  /* Text colors */
+  --text-base: 243 244 246;      /* gray-100 - Primary text */
+  --text-muted: 156 163 175;     /* gray-400 - Secondary text */
+  --text-subtle: 107 114 128;    /* gray-500 - Tertiary/disabled text */
+  --text-inverted: 17 24 39;     /* gray-900 - Text on light backgrounds */
+
+  /* Border colors */
+  --border-base: 55 65 81;       /* gray-700 - Default borders */
+  --border-muted: 75 85 99;      /* gray-600 - Subtle borders */
+  --border-subtle: 107 114 128;  /* gray-500 - Very subtle borders */
+
+  /* Input colors */
+  --input-bg: 31 41 55;          /* gray-800 - Input background */
+  --input-border: 75 85 99;      /* gray-600 - Input border */
+  --input-border-focus: 14 165 233; /* primary-500 - Input focus border */
+
+  /* Interactive states */
+  --hover-overlay: 255 255 255;  /* White overlay for hover (use with low opacity) */
+  --focus-ring: 14 165 233;      /* primary-500 - Focus ring color */
+
+  /* Divider */
+  --divider: 55 65 81;           /* gray-700 - Horizontal/vertical dividers */
+
+  /* Typography */
+  --font-primary: var(--font-manrope), 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-secondary: var(--font-manrope), 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Border Radius (set to 0 for square corners) */
+  --radius-none: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-full: 0;
+
+  /* Shadows (adjusted for dark mode) */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+
+  /* Transitions */
+  --transition-fast: 150ms;
+  --transition-normal: 200ms;
+  --transition-slow: 300ms;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    font-family: var(--font-primary);
+    background-color: rgb(var(--bg-base));
+    color: rgb(var(--text-base));
+    @apply antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-secondary);
+  }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
+  }
+
+  /* Custom scrollbar for dark mode */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgb(var(--bg-surface));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--border-muted));
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--border-subtle));
+  }
+}
+
+@layer components {
+  /* Reusable component styles using CSS variables */
+  .btn-primary {
+    background-color: rgb(var(--color-primary-600));
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-weight: var(--font-medium);
+    transition: background-color var(--transition-normal);
+  }
+
+  .btn-primary:hover {
+    background-color: rgb(var(--color-primary-500));
+  }
+
+  .btn-secondary {
+    background-color: rgb(var(--color-secondary-600));
+    color: white;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-weight: var(--font-medium);
+    transition: background-color var(--transition-normal);
+  }
+
+  .btn-secondary:hover {
+    background-color: rgb(var(--color-secondary-500));
+  }
+
+  .card {
+    background-color: rgb(var(--bg-surface));
+    border: 1px solid rgb(var(--border-base));
+    padding: var(--spacing-lg);
+  }
+
+  .input-field {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: rgb(var(--input-bg));
+    border: 1px solid rgb(var(--input-border));
+    color: rgb(var(--text-base));
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+  }
+
+  .input-field::placeholder {
+    color: rgb(var(--text-subtle));
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: rgb(var(--input-border-focus));
+    box-shadow: 0 0 0 2px rgb(var(--input-border-focus) / 0.2);
+  }
+
+  /* Surface utilities */
+  .bg-base { background-color: rgb(var(--bg-base)); }
+  .bg-surface { background-color: rgb(var(--bg-surface)); }
+  .bg-elevated { background-color: rgb(var(--bg-elevated)); }
+  .bg-muted { background-color: rgb(var(--bg-muted)); }
+
+  .text-base-color { color: rgb(var(--text-base)); }
+  .text-muted { color: rgb(var(--text-muted)); }
+  .text-subtle { color: rgb(var(--text-subtle)); }
+
+  .border-base { border-color: rgb(var(--border-base)); }
+  .border-muted { border-color: rgb(var(--border-muted)); }
+  .border-subtle { border-color: rgb(var(--border-subtle)); }
+
+  .divide-base > * + * { border-color: rgb(var(--divider)); }
+}
+
+/* Calendar dark mode overrides */
+.rbc-calendar {
+  background-color: rgb(var(--bg-surface));
+  color: rgb(var(--text-base));
+}
+
+.rbc-toolbar {
+  color: rgb(var(--text-base));
+}
+
+.rbc-toolbar button {
+  color: rgb(var(--text-base));
+  border-color: rgb(var(--border-base));
+}
+
+.rbc-toolbar button:hover {
+  background-color: rgb(var(--bg-elevated));
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: rgb(var(--color-primary-600));
+  border-color: rgb(var(--color-primary-600));
+}
+
+.rbc-header {
+  border-color: rgb(var(--border-base));
+  color: rgb(var(--text-muted));
+}
+
+.rbc-day-bg {
+  background-color: rgb(var(--bg-surface));
+}
+
+.rbc-off-range-bg {
+  background-color: rgb(var(--bg-base));
+}
+
+.rbc-today {
+  background-color: rgb(var(--color-primary-900) / 0.3);
+}
+
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  border-color: rgb(var(--border-base));
+}
+
+.rbc-month-row,
+.rbc-day-slot,
+.rbc-time-header,
+.rbc-time-content {
+  border-color: rgb(var(--border-base));
+}
+
+.rbc-event {
+  background-color: rgb(var(--color-primary-600));
+  border: none;
+}
+
+.rbc-event.rbc-selected {
+  background-color: rgb(var(--color-primary-500));
+}
+
+.rbc-show-more {
+  color: rgb(var(--color-primary-400));
+}
+
+.rbc-date-cell {
+  color: rgb(var(--text-base));
+}
+
+.rbc-date-cell.rbc-off-range {
+  color: rgb(var(--text-subtle));
+}

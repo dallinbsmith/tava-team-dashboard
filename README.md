@@ -218,9 +218,13 @@ You should see:
 │   ├── cmd/server/            # Entry point (main.go)
 │   ├── config/                # Environment configuration
 │   └── internal/
-│       ├── database/          # PostgreSQL connection & user repository
+│       ├── app/               # Application setup and routing
+│       ├── apperrors/         # Custom error types
+│       ├── database/          # PostgreSQL connection & repositories
+│       │   └── migrations/    # SQL migration files (golang-migrate)
 │       ├── handlers/          # REST API handlers
-│       ├── middleware/        # Auth0 JWT validation
+│       ├── middleware/        # Auth0 JWT validation, logging, rate limiting
+│       ├── services/          # Business logic layer
 │       └── models/            # User/Employee data models
 ├── frontend/                   # Next.js application
 │   ├── app/
@@ -408,7 +412,23 @@ npm run dev
 
 ### Database Migrations
 
-Migrations run automatically when the backend starts. The schema is defined in `backend/internal/database/database.go`.
+Migrations run automatically when the backend starts using [golang-migrate](https://github.com/golang-migrate/migrate). Migration files are located in `backend/internal/database/migrations/` and are embedded into the binary at compile time.
+
+**Migration files follow the naming convention:**
+```
+000001_initial_schema.up.sql    # Apply migration
+000001_initial_schema.down.sql  # Rollback migration
+```
+
+**To add a new migration:**
+1. Create two files with the next sequence number:
+   - `000002_add_feature.up.sql` - SQL to apply the change
+   - `000002_add_feature.down.sql` - SQL to rollback the change
+2. Restart the server - migrations run automatically on startup
+
+**Migration tracking:**
+- golang-migrate creates a `schema_migrations` table to track applied versions
+- Migrations are idempotent - running the server multiple times is safe
 
 ### Adding New Users as Supervisors
 

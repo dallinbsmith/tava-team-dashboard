@@ -71,7 +71,7 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
         setSettings(jiraSettings);
 
         if (jiraSettings.org_configured) {
-          const issues = await getTeamJiraTasks(undefined, compact ? 5 : 20);
+          const issues = await getTeamJiraTasks(compact ? 5 : 20);
           setTasks(issues);
         }
       }

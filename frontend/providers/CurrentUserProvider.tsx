@@ -1,9 +1,7 @@
 "use client";
 
 import { createContext, useContext, ReactNode } from "react";
-import { useUser } from "@auth0/nextjs-auth0/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCurrentUser } from "@/lib/api";
+import { useCurrentUserQuery } from "@/hooks";
 import { User } from "@/shared/types";
 
 interface CurrentUserContextType {
@@ -19,32 +17,22 @@ interface CurrentUserContextType {
 const CurrentUserContext = createContext<CurrentUserContextType | undefined>(undefined);
 
 export function CurrentUserProvider({ children }: { children: ReactNode }) {
-  const { user: auth0User, isLoading: authLoading } = useUser();
-  const queryClient = useQueryClient();
-
+  // Use custom hook with centralized query key
   const {
-    data: currentUser,
-    isLoading: queryLoading,
-    error: queryError,
-  } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: () => getCurrentUser(),
-    enabled: !!auth0User && !authLoading,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+    currentUser,
+    isLoading,
+    error,
+    isAdmin,
+    isSupervisor,
+    refetch,
+  } = useCurrentUserQuery();
 
-  const isAdmin = currentUser?.role === "admin";
-  const isSupervisor = currentUser?.role === "supervisor";
   const isSupervisorOrAdmin = isAdmin || isSupervisor;
 
-  const refetch = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-  };
-
   const value: CurrentUserContextType = {
-    currentUser: currentUser ?? null,
-    loading: authLoading || queryLoading,
-    error: queryError ? (queryError instanceof Error ? queryError.message : "Failed to fetch user") : null,
+    currentUser,
+    loading: isLoading,
+    error,
     isAdmin,
     isSupervisor,
     isSupervisorOrAdmin,

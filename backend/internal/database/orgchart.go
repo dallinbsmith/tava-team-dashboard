@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
+	"github.com/smith-dallin/manager-dashboard/internal/repository"
 )
 
 // Column lists for consistent SELECT statements
@@ -187,7 +188,7 @@ func (r *OrgChartRepository) DeleteDraft(ctx context.Context, id int64) error {
 }
 
 // AddOrUpdateChange adds or updates a change in a draft
-func (r *OrgChartRepository) AddOrUpdateChange(ctx context.Context, draftID int64, req *models.AddDraftChangeRequest, userRepo *UserRepository) (*models.DraftChange, error) {
+func (r *OrgChartRepository) AddOrUpdateChange(ctx context.Context, draftID int64, req *models.AddDraftChangeRequest, userRepo repository.UserRepository) (*models.DraftChange, error) {
 	// First, get the current user data to store original values
 	user, err := userRepo.GetByID(ctx, req.UserID)
 	if err != nil {

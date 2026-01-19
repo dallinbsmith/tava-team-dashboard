@@ -915,3 +915,35 @@ type TimeOffImpact struct {
 	RemainingDays    int     `json:"remaining_days"`
 	ImpactPercent    float64 `json:"impact_percent"`
 }
+
+// ============================================================================
+// Jira OAuth Types
+// ============================================================================
+
+// JiraOAuthTokens holds OAuth tokens for user Jira integration
+type JiraOAuthTokens struct {
+	AccessToken  string
+	RefreshToken string
+	ExpiresAt    time.Time
+	CloudID      string
+	SiteURL      string
+}
+
+// OrgJiraSettings represents organization-wide Jira OAuth settings
+type OrgJiraSettings struct {
+	ID                  int64     `json:"id"`
+	OAuthAccessToken    string    `json:"-"` // Never expose
+	OAuthRefreshToken   string    `json:"-"` // Never expose
+	OAuthTokenExpiresAt time.Time `json:"-"` // Never expose
+	CloudID             string    `json:"cloud_id"`
+	SiteURL             string    `json:"site_url"`
+	SiteName            *string   `json:"site_name,omitempty"`
+	ConfiguredByID      int64     `json:"configured_by_id"`
+	CreatedAt           time.Time `json:"created_at"`
+	UpdatedAt           time.Time `json:"updated_at"`
+}
+
+// IsTokenExpired checks if the OAuth token is expired (with 5 min buffer)
+func (s *OrgJiraSettings) IsTokenExpired() bool {
+	return time.Now().Add(5 * time.Minute).After(s.OAuthTokenExpiresAt)
+}

@@ -3,16 +3,16 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/smith-dallin/manager-dashboard/internal/database"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
+	"github.com/smith-dallin/manager-dashboard/internal/repository"
 )
 
 type TimeOffHandlers struct {
-	timeOffRepo *database.TimeOffRepository
-	userRepo    *database.UserRepository
+	timeOffRepo repository.TimeOffRepository
+	userRepo    repository.UserRepository
 }
 
-func NewTimeOffHandlers(timeOffRepo *database.TimeOffRepository, userRepo *database.UserRepository) *TimeOffHandlers {
+func NewTimeOffHandlers(timeOffRepo repository.TimeOffRepository, userRepo repository.UserRepository) *TimeOffHandlers {
 	return &TimeOffHandlers{
 		timeOffRepo: timeOffRepo,
 		userRepo:    userRepo,

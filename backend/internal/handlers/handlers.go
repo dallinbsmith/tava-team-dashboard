@@ -7,22 +7,25 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/smith-dallin/manager-dashboard/internal/database"
 	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
+	"github.com/smith-dallin/manager-dashboard/internal/repository"
+	"github.com/smith-dallin/manager-dashboard/internal/services"
 )
 
 // Handlers handles user-related HTTP requests
 type Handlers struct {
-	userRepo  *database.UserRepository
-	squadRepo *database.SquadRepository
+	userRepo    repository.UserRepository
+	squadRepo   repository.SquadRepository
+	userService *services.UserService
 }
 
 // New creates a new user handlers instance
-func New(userRepo *database.UserRepository, squadRepo *database.SquadRepository) *Handlers {
+func New(userRepo repository.UserRepository, squadRepo repository.SquadRepository) *Handlers {
 	return &Handlers{
-		userRepo:  userRepo,
-		squadRepo: squadRepo,
+		userRepo:    userRepo,
+		squadRepo:   squadRepo,
+		userService: services.NewUserService(userRepo, squadRepo),
 	}
 }
 
@@ -32,15 +35,15 @@ func (h *Handlers) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Load squads for the user
-	squads, err := h.squadRepo.GetByUserID(r.Context(), user.ID)
+	// Load user with squads using service
+	userWithSquads, err := h.userService.GetByID(r.Context(), user.ID)
 	if err != nil {
-		log.Printf("Error loading squads for user %d: %v", user.ID, err)
-		squads = []models.Squad{}
+		log.Printf("Error loading user %d: %v", user.ID, err)
+		respondError(w, http.StatusInternalServerError, "Failed to load user")
+		return
 	}
-	user.Squads = squads
 
-	respondJSON(w, http.StatusOK, user)
+	respondJSON(w, http.StatusOK, userWithSquads)
 }
 
 func (h *Handlers) GetEmployees(w http.ResponseWriter, r *http.Request) {
@@ -49,74 +52,23 @@ func (h *Handlers) GetEmployees(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var employees []models.User
-	var err error
-
-	if user.Role == models.RoleAdmin {
-		// Admins see all users
-		employees, err = h.userRepo.GetAll(r.Context())
-		if err != nil {
-			log.Printf("Error fetching all users for admin %d: %v", user.ID, err)
-			respondError(w, http.StatusInternalServerError, "Failed to fetch employees")
-			return
-		}
-	} else if user.Role == models.RoleSupervisor {
-		// Supervisor gets their direct reports (employees and other supervisors)
-		employees, err = h.userRepo.GetDirectReportsBySupervisorID(r.Context(), user.ID)
-		if err != nil {
-			log.Printf("Error fetching direct reports for supervisor %d: %v", user.ID, err)
-			respondError(w, http.StatusInternalServerError, "Failed to fetch employees")
-			return
-		}
-	} else {
-		// Employees can only see themselves
-		employees = []models.User{*user}
-	}
-
-	// Load squads for all employees
-	if len(employees) > 0 {
-		userIDs := make([]int64, len(employees))
-		for i, emp := range employees {
-			userIDs[i] = emp.ID
-		}
-		squadsMap, err := h.squadRepo.GetByUserIDs(r.Context(), userIDs)
-		if err != nil {
-			log.Printf("Error loading squads for employees: %v", err)
-		} else {
-			for i := range employees {
-				if squads, ok := squadsMap[employees[i].ID]; ok {
-					employees[i].Squads = squads
-				}
-			}
-		}
+	// Use service to get employees with squads loaded based on role
+	employees, err := h.userService.GetEmployeesForUser(r.Context(), user)
+	if err != nil {
+		log.Printf("Error fetching employees for user %d: %v", user.ID, err)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch employees")
+		return
 	}
 
 	respondJSON(w, http.StatusOK, employees)
 }
 
 func (h *Handlers) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.userRepo.GetAll(r.Context())
+	// Use service to get all users with squads loaded
+	users, err := h.userService.GetAll(r.Context())
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to fetch users")
 		return
-	}
-
-	// Load squads for all users
-	if len(users) > 0 {
-		userIDs := make([]int64, len(users))
-		for i, u := range users {
-			userIDs[i] = u.ID
-		}
-		squadsMap, err := h.squadRepo.GetByUserIDs(r.Context(), userIDs)
-		if err != nil {
-			log.Printf("Error loading squads for users: %v", err)
-		} else {
-			for i := range users {
-				if squads, ok := squadsMap[users[i].ID]; ok {
-					users[i].Squads = squads
-				}
-			}
-		}
 	}
 
 	respondJSON(w, http.StatusOK, users)
@@ -140,7 +92,8 @@ func (h *Handlers) GetUserByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userRepo.GetByID(r.Context(), id)
+	// Use service to get user with squads loaded
+	user, err := h.userService.GetByID(r.Context(), id)
 	if err != nil {
 		respondError(w, http.StatusNotFound, "User not found")
 		return
@@ -151,14 +104,6 @@ func (h *Handlers) GetUserByID(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusForbidden, "Forbidden")
 		return
 	}
-
-	// Load squads for the user
-	squads, err := h.squadRepo.GetByUserID(r.Context(), user.ID)
-	if err != nil {
-		log.Printf("Error loading squads for user %d: %v", user.ID, err)
-		squads = []models.Squad{}
-	}
-	user.Squads = squads
 
 	respondJSON(w, http.StatusOK, user)
 }
@@ -231,29 +176,13 @@ func (h *Handlers) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.userRepo.Update(r.Context(), id, &req)
+	// Use service to update user and squads
+	user, err := h.userService.Update(r.Context(), id, &req)
 	if err != nil {
+		log.Printf("Error updating user %d: %v", id, err)
 		respondError(w, http.StatusInternalServerError, "Failed to update user")
 		return
 	}
-
-	// Update squads if squad_ids was provided in the request
-	if req.SquadIDs != nil {
-		if err := h.squadRepo.SetUserSquads(r.Context(), id, req.SquadIDs); err != nil {
-			log.Printf("Error updating squads for user %d: %v", id, err)
-			respondError(w, http.StatusInternalServerError, "Failed to update user squads")
-			return
-		}
-	}
-
-	// Load squads for the user before returning
-	squads, err := h.squadRepo.GetByUserID(r.Context(), id)
-	if err != nil {
-		log.Printf("Error loading squads for user %d: %v", id, err)
-		// Don't fail the request, just return empty squads
-		squads = []models.Squad{}
-	}
-	user.Squads = squads
 
 	respondJSON(w, http.StatusOK, user)
 }

@@ -7,19 +7,19 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/smith-dallin/manager-dashboard/internal/database"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
+	"github.com/smith-dallin/manager-dashboard/internal/repository"
 	"github.com/smith-dallin/manager-dashboard/internal/services"
 )
 
 // AvatarHandlers handles avatar-related HTTP requests
 type AvatarHandlers struct {
-	userRepo      *database.UserRepository
+	userRepo      repository.UserRepository
 	avatarService *services.AvatarService
 }
 
 // NewAvatarHandlers creates a new avatar handlers instance
-func NewAvatarHandlers(userRepo *database.UserRepository, avatarService *services.AvatarService) *AvatarHandlers {
+func NewAvatarHandlers(userRepo repository.UserRepository, avatarService *services.AvatarService) *AvatarHandlers {
 	return &AvatarHandlers{
 		userRepo:      userRepo,
 		avatarService: avatarService,

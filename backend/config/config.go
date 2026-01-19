@@ -34,6 +34,19 @@ type Config struct {
 	JiraClientID     string
 	JiraClientSecret string
 	JiraCallbackURL  string // e.g., http://localhost:3000/api/jira/callback
+
+	// Server Configuration
+	RateLimitRPS       float64 // Requests per second for rate limiting
+	RateLimitBurst     int     // Burst size for rate limiting
+	MaxRequestSizeMB   int     // Maximum request body size in MB
+	ReadTimeout        int     // Server read timeout in seconds
+	WriteTimeout       int     // Server write timeout in seconds
+	IdleTimeout        int     // Server idle timeout in seconds
+	ShutdownTimeout    int     // Graceful shutdown timeout in seconds
+
+	// Logging Configuration
+	LogLevel  string // debug, info, warn, error
+	LogFormat string // json, text
 }
 
 // IsProduction returns true if running in production mode
@@ -84,6 +97,19 @@ func Load() (*Config, error) {
 		JiraClientID:     os.Getenv("JIRA_CLIENT_ID"),
 		JiraClientSecret: os.Getenv("JIRA_CLIENT_SECRET"),
 		JiraCallbackURL:  getEnv("JIRA_CALLBACK_URL", "http://localhost:3000/api/jira/callback"),
+
+		// Server Configuration
+		RateLimitRPS:     getEnvFloat("RATE_LIMIT_RPS", 100),
+		RateLimitBurst:   getEnvInt("RATE_LIMIT_BURST", 200),
+		MaxRequestSizeMB: getEnvInt("MAX_REQUEST_SIZE_MB", 10),
+		ReadTimeout:      getEnvInt("READ_TIMEOUT_SECS", 30),
+		WriteTimeout:     getEnvInt("WRITE_TIMEOUT_SECS", 30),
+		IdleTimeout:      getEnvInt("IDLE_TIMEOUT_SECS", 120),
+		ShutdownTimeout:  getEnvInt("SHUTDOWN_TIMEOUT_SECS", 30),
+
+		// Logging Configuration
+		LogLevel:  getEnv("LOG_LEVEL", "info"),
+		LogFormat: getEnv("LOG_FORMAT", "text"),
 	}
 
 	// Validate required configuration
@@ -134,4 +160,34 @@ func getEnv(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+func getEnvInt(key string, fallback int) int {
+	if value := os.Getenv(key); value != "" {
+		if intVal, err := parseInt(value); err == nil {
+			return intVal
+		}
+	}
+	return fallback
+}
+
+func getEnvFloat(key string, fallback float64) float64 {
+	if value := os.Getenv(key); value != "" {
+		if floatVal, err := parseFloat(value); err == nil {
+			return floatVal
+		}
+	}
+	return fallback
+}
+
+func parseInt(s string) (int, error) {
+	var n int
+	_, err := fmt.Sscanf(s, "%d", &n)
+	return n, err
+}
+
+func parseFloat(s string) (float64, error) {
+	var f float64
+	_, err := fmt.Sscanf(s, "%f", &f)
+	return f, err
 }

@@ -980,7 +980,7 @@ export function OrgChartPageClient({
   const handleCreateDraft = async (name: string) => {
     try {
       setActionLoading(true);
-      const draft = await createOrgChartDraft(undefined, { name });
+      const draft = await createOrgChartDraft({ name });
       setDrafts([draft, ...drafts]);
       setCurrentDraft(draft);
     } catch (e) {
@@ -1000,7 +1000,7 @@ export function OrgChartPageClient({
 
     try {
       setActionLoading(true);
-      const fullDraft = await getOrgChartDraft(undefined, draft.id);
+      const fullDraft = await getOrgChartDraft(draft.id);
       setCurrentDraft(fullDraft);
     } catch (e) {
       console.error("Failed to load draft:", e);
@@ -1029,13 +1029,13 @@ export function OrgChartPageClient({
       setActionLoading(true);
 
       if (type === "delete") {
-        await deleteOrgChartDraft(undefined, id);
+        await deleteOrgChartDraft(id);
         setDrafts(drafts.filter((d) => d.id !== id));
         if (currentDraft?.id === id) {
           setCurrentDraft(null);
         }
       } else if (type === "publish") {
-        await publishDraft(undefined, id);
+        await publishDraft(id);
         // Refresh data
         const [treeResult, draftsList] = await Promise.all([
           getOrgTree(),
@@ -1065,11 +1065,11 @@ export function OrgChartPageClient({
 
     try {
       setActionLoading(true);
-      await addDraftChange(undefined, currentDraft.id, {
+      await addDraftChange(currentDraft.id, {
         user_id: userId,
         new_supervisor_id: newSupervisorId,
       });
-      const updatedDraft = await getOrgChartDraft(undefined, currentDraft.id);
+      const updatedDraft = await getOrgChartDraft(currentDraft.id);
       setCurrentDraft(updatedDraft);
     } catch (e) {
       console.error("Failed to add change:", e);
@@ -1085,8 +1085,8 @@ export function OrgChartPageClient({
 
     try {
       setActionLoading(true);
-      await removeDraftChange(undefined, currentDraft.id, userId);
-      const updatedDraft = await getOrgChartDraft(undefined, currentDraft.id);
+      await removeDraftChange(currentDraft.id, userId);
+      const updatedDraft = await getOrgChartDraft(currentDraft.id);
       setCurrentDraft(updatedDraft);
     } catch (e) {
       console.error("Failed to remove change:", e);
@@ -1109,13 +1109,13 @@ export function OrgChartPageClient({
 
     try {
       setActionLoading(true);
-      await addDraftChange(undefined, currentDraft.id, {
+      await addDraftChange(currentDraft.id, {
         user_id: userId,
         new_department: newDepartment || undefined,
         new_squad_ids: squadIds,
         new_role: newRole,
       });
-      const updatedDraft = await getOrgChartDraft(undefined, currentDraft.id);
+      const updatedDraft = await getOrgChartDraft(currentDraft.id);
       setCurrentDraft(updatedDraft);
       await refetchSquads();
       if (newDepartment && !availableDepartments.includes(newDepartment)) {

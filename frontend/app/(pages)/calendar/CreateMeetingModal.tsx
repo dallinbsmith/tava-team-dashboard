@@ -4,7 +4,8 @@ import { useState } from "react";
 import { CreateMeetingRequest, RecurrenceType } from "@/shared/types";
 import { createMeeting } from "@/lib/api";
 import { useOrganization } from "@/providers";
-import { X, Loader2 } from "lucide-react";
+import { BaseModal } from "@/components";
+import { Loader2 } from "lucide-react";
 import { format, addHours, addDays, setHours, setMinutes, startOfHour } from "date-fns";
 
 interface CreateMeetingModalProps {
@@ -122,30 +123,19 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-30" onClick={handleClose} />
-
-        <div className="relative bg-theme-surface w-full max-w-lg shadow-xl border border-theme-border rounded-lg max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border sticky top-0 bg-theme-surface">
-            <h2 className="text-lg font-semibold text-theme-text">Create Meeting</h2>
-            <button
-              onClick={handleClose}
-              className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {allUsersLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Create Meeting"
+      maxWidth="max-w-lg"
+    >
+      {allUsersLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 bg-red-900/30 border border-red-500/30 text-red-400 text-sm rounded">
                   {error}
@@ -317,10 +307,8 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
                   Create Meeting
                 </button>
               </div>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
+        </form>
+      )}
+    </BaseModal>
   );
 }

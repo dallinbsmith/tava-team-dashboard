@@ -3,16 +3,16 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/smith-dallin/manager-dashboard/internal/database"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
+	"github.com/smith-dallin/manager-dashboard/internal/repository"
 )
 
 type OrgChartHandlers struct {
-	orgChartRepo *database.OrgChartRepository
-	userRepo     *database.UserRepository
+	orgChartRepo repository.OrgChartRepository
+	userRepo     repository.UserRepository
 }
 
-func NewOrgChartHandlers(orgChartRepo *database.OrgChartRepository, userRepo *database.UserRepository) *OrgChartHandlers {
+func NewOrgChartHandlers(orgChartRepo repository.OrgChartRepository, userRepo repository.UserRepository) *OrgChartHandlers {
 	return &OrgChartHandlers{
 		orgChartRepo: orgChartRepo,
 		userRepo:     userRepo,

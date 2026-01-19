@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { User, TimeOffType, TIME_OFF_TYPE_LABELS, CreateTimeOffRequest } from "@/shared/types";
+import { TimeOffType, TIME_OFF_TYPE_LABELS, CreateTimeOffRequest } from "@/shared/types";
 import { createTimeOffRequest } from "@/lib/api";
 import { useCurrentUser, useOrganization } from "@/providers";
-import { X, Loader2 } from "lucide-react";
+import { BaseModal } from "@/components";
+import { Loader2 } from "lucide-react";
 import { format, addDays } from "date-fns";
 
 interface CreateTimeOffForEmployeeModalProps {
@@ -119,43 +120,28 @@ export default function CreateTimeOffForEmployeeModal({
     }
   };
 
-  if (!isOpen) return null;
-
-  const selectedUser = users.find((u) => u.id === selectedUserId);
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-30" onClick={handleClose} />
-
-        <div className="relative bg-theme-surface w-full max-w-md shadow-xl border border-theme-border rounded-lg">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border">
-            <h2 className="text-lg font-semibold text-theme-text">
-              Create Time Off for Employee
-            </h2>
-            <button
-              onClick={handleClose}
-              className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {allUsersLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-            </div>
-          ) : users.length === 0 ? (
-            <div className="p-6 text-center text-theme-text-muted">
-              <p>No employees available.</p>
-              <p className="text-sm mt-2">
-                {isSupervisor && !isAdmin
-                  ? "You don't have any direct reports."
-                  : "No employees found in the system."}
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Create Time Off for Employee"
+      maxWidth="max-w-md"
+    >
+      {allUsersLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+        </div>
+      ) : users.length === 0 ? (
+        <div className="p-6 text-center text-theme-text-muted">
+          <p>No employees available.</p>
+          <p className="text-sm mt-2">
+            {isSupervisor && !isAdmin
+              ? "You don't have any direct reports."
+              : "No employees found in the system."}
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
                 <div className="p-3 bg-red-900/30 border border-red-500/30 text-red-400 text-sm rounded">
                   {error}
@@ -292,10 +278,8 @@ export default function CreateTimeOffForEmployeeModal({
                   {autoApprove ? "Create & Approve" : "Create Request"}
                 </button>
               </div>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
+        </form>
+      )}
+    </BaseModal>
   );
 }

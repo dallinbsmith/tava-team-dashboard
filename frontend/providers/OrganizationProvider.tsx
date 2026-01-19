@@ -1,9 +1,13 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useMemo, useCallback } from "react";
+import { createContext, useContext, ReactNode, useMemo } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { getEmployees, getAllUsers, getSquads, createSquad } from "@/lib/api";
+import {
+  useEmployeesQuery,
+  useAllUsersQuery,
+  useSquadsQuery,
+  useDerivedDepartments,
+} from "@/hooks";
 import { User, Squad } from "@/shared/types";
 
 interface OrganizationContextType {
@@ -34,79 +38,30 @@ const OrganizationContext = createContext<OrganizationContextType | undefined>(u
 
 export function OrganizationProvider({ children }: { children: ReactNode }) {
   const { user: auth0User, isLoading: authLoading } = useUser();
-  const queryClient = useQueryClient();
   const isAuthenticated = !!auth0User && !authLoading;
 
-  // Employees query
+  // Use custom hooks with centralized query keys
   const {
-    data: employees = [],
+    employees,
     isLoading: employeesLoading,
-  } = useQuery({
-    queryKey: ["employees"],
-    queryFn: () => getEmployees(),
-    enabled: isAuthenticated,
-    staleTime: 5 * 60 * 1000,
-  });
+    refetch: refetchEmployees,
+  } = useEmployeesQuery({ enabled: isAuthenticated });
 
-  // All users query
   const {
-    data: allUsers = [],
+    allUsers,
     isLoading: allUsersLoading,
-  } = useQuery({
-    queryKey: ["allUsers"],
-    queryFn: () => getAllUsers(),
-    enabled: isAuthenticated,
-    staleTime: 5 * 60 * 1000,
-  });
+    refetch: refetchAllUsers,
+  } = useAllUsersQuery({ enabled: isAuthenticated });
 
-  // Squads query
   const {
-    data: squads = [],
+    squads,
     isLoading: squadsLoading,
-  } = useQuery({
-    queryKey: ["squads"],
-    queryFn: () => getSquads(),
-    enabled: isAuthenticated,
-    staleTime: 5 * 60 * 1000,
-  });
+    refetch: refetchSquads,
+    addSquad,
+  } = useSquadsQuery({ enabled: isAuthenticated });
 
-  // Add squad mutation
-  const addSquadMutation = useMutation({
-    mutationFn: (name: string) => createSquad(name),
-    onSuccess: (newSquad) => {
-      // Optimistically update the cache
-      queryClient.setQueryData<Squad[]>(["squads"], (old) =>
-        old ? [...old, newSquad] : [newSquad]
-      );
-    },
-  });
-
-  const addSquad = useCallback(async (name: string): Promise<Squad> => {
-    return addSquadMutation.mutateAsync(name);
-  }, [addSquadMutation]);
-
-  const refetchEmployees = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ["employees"] });
-  }, [queryClient]);
-
-  const refetchAllUsers = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-  }, [queryClient]);
-
-  const refetchSquads = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: ["squads"] });
-  }, [queryClient]);
-
-  // Derive departments from users
-  const departments = useMemo(() => {
-    const deptSet = new Set<string>();
-    [...employees, ...allUsers].forEach(user => {
-      if (user.department) {
-        deptSet.add(user.department);
-      }
-    });
-    return Array.from(deptSet).sort();
-  }, [employees, allUsers]);
+  // Derive departments from users using custom hook
+  const departments = useDerivedDepartments(employees, allUsers);
 
   const loading = authLoading || employeesLoading || allUsersLoading || squadsLoading;
 

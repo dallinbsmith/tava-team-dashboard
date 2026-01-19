@@ -97,50 +97,48 @@ async function apiDelete(
 }
 
 // ============================================================================
-// Backward-compatible functions that accept accessToken but ignore it
-// These can be gradually migrated to not require the accessToken parameter
+// User & Organization APIs
 // ============================================================================
 
-export async function getCurrentUser(accessToken?: string): Promise<User> {
+export async function getCurrentUser(): Promise<User> {
   return apiGet<User>("/me", "Failed to fetch current user");
 }
 
-export async function getEmployees(accessToken?: string): Promise<User[]> {
+export async function getEmployees(): Promise<User[]> {
   return apiGet<User[]>("/employees", "Failed to fetch employees");
 }
 
-export async function getUserById(accessToken: string | undefined, id: number): Promise<User> {
+export async function getUserById(id: number): Promise<User> {
   return apiGet<User>(`/users/${id}`, "Failed to fetch user");
 }
 
-export async function getSupervisors(accessToken?: string): Promise<User[]> {
+export async function getSupervisors(): Promise<User[]> {
   return apiGet<User[]>("/supervisors", "Failed to fetch supervisors");
 }
 
-export async function getSquads(accessToken?: string): Promise<Squad[]> {
+export async function getSquads(): Promise<Squad[]> {
   return apiGet<Squad[]>("/squads", "Failed to fetch squads");
 }
 
-export async function createSquad(name: string, accessToken?: string): Promise<Squad> {
+export async function createSquad(name: string): Promise<Squad> {
   return apiMutate<Squad>("/squads", "POST", "Failed to create squad", { name });
 }
 
-export async function deleteSquad(id: number, accessToken?: string): Promise<void> {
+export async function deleteSquad(id: number): Promise<void> {
   return apiDelete(`/squads/${id}`, "Failed to delete squad");
 }
 
-export async function getDepartments(accessToken?: string): Promise<string[]> {
+export async function getDepartments(): Promise<string[]> {
   return apiGet<string[]>("/departments", "Failed to fetch departments");
 }
 
-export async function deleteDepartment(name: string, accessToken?: string): Promise<void> {
+export async function deleteDepartment(name: string): Promise<void> {
   return apiDelete(`/departments/${encodeURIComponent(name)}`, "Failed to delete department");
 }
 
 export async function updateUser(
   userId: number,
-  data: UpdateUserRequest,
-  accessToken?: string
+  data: UpdateUserRequest
 ): Promise<User> {
   return apiMutate<User>(
     `/users/${userId}`,
@@ -150,12 +148,11 @@ export async function updateUser(
   );
 }
 
-export async function getAllUsers(accessToken?: string): Promise<User[]> {
+export async function getAllUsers(): Promise<User[]> {
   return apiGet<User[]>("/users", "Failed to fetch users");
 }
 
 export async function uploadAvatar(
-  accessToken: string | undefined,
   userId: number,
   imageDataUrl: string
 ): Promise<User> {
@@ -169,12 +166,11 @@ export async function uploadAvatar(
 
 // Invitation APIs (admin only)
 
-export async function getInvitations(accessToken?: string): Promise<Invitation[]> {
+export async function getInvitations(): Promise<Invitation[]> {
   return apiGet<Invitation[]>("/invitations", "Failed to fetch invitations");
 }
 
 export async function createInvitation(
-  accessToken: string | undefined,
   data: CreateInvitationRequest
 ): Promise<Invitation> {
   return apiMutate<Invitation>(
@@ -185,7 +181,7 @@ export async function createInvitation(
   );
 }
 
-export async function revokeInvitation(accessToken: string | undefined, id: number): Promise<void> {
+export async function revokeInvitation(id: number): Promise<void> {
   return apiDelete(`/invitations/${id}`, "Failed to revoke invitation");
 }
 
@@ -241,19 +237,16 @@ export async function acceptInvitation(
 
 // Jira Integration APIs
 
-export async function getJiraSettings(accessToken?: string): Promise<JiraSettings> {
+export async function getJiraSettings(): Promise<JiraSettings> {
   return apiGet<JiraSettings>("/jira/settings", "Failed to fetch Jira settings");
 }
 
 // Disconnect organization-wide Jira (admin only)
-export async function disconnectJira(accessToken?: string): Promise<void> {
+export async function disconnectJira(): Promise<void> {
   return apiDelete("/jira/disconnect", "Failed to disconnect Jira");
 }
 
-export async function getMyJiraTasks(
-  accessToken?: string,
-  maxResults: number = 50
-): Promise<JiraIssue[]> {
+export async function getMyJiraTasks(maxResults: number = 50): Promise<JiraIssue[]> {
   return apiGet<JiraIssue[]>(
     `/jira/tasks?max=${maxResults}`,
     "Failed to fetch Jira tasks"
@@ -261,7 +254,6 @@ export async function getMyJiraTasks(
 }
 
 export async function getUserJiraTasks(
-  accessToken: string | undefined,
   userId: number,
   maxResults: number = 50
 ): Promise<JiraIssue[]> {
@@ -271,22 +263,18 @@ export async function getUserJiraTasks(
   );
 }
 
-export async function getTeamJiraTasks(
-  accessToken?: string,
-  maxPerUser: number = 20
-): Promise<TeamTask[]> {
+export async function getTeamJiraTasks(maxPerUser: number = 20): Promise<TeamTask[]> {
   return apiGet<TeamTask[]>(
     `/jira/tasks/team?max_per_user=${maxPerUser}`,
     "Failed to fetch team Jira tasks"
   );
 }
 
-export async function getJiraProjects(accessToken?: string): Promise<JiraProject[]> {
+export async function getJiraProjects(): Promise<JiraProject[]> {
   return apiGet<JiraProject[]>("/jira/projects", "Failed to fetch Jira projects");
 }
 
 export async function getProjectJiraTasks(
-  accessToken: string | undefined,
   projectKey: string,
   maxResults: number = 50
 ): Promise<JiraIssue[]> {
@@ -296,10 +284,7 @@ export async function getProjectJiraTasks(
   );
 }
 
-export async function getJiraEpics(
-  accessToken?: string,
-  maxResults: number = 100
-): Promise<JiraIssue[]> {
+export async function getJiraEpics(maxResults: number = 100): Promise<JiraIssue[]> {
   return apiGet<JiraIssue[]>(
     `/jira/epics?max=${maxResults}`,
     "Failed to fetch Jira epics"
@@ -308,7 +293,7 @@ export async function getJiraEpics(
 
 // Jira OAuth APIs
 
-export async function getJiraOAuthAuthorizeURL(accessToken?: string): Promise<JiraOAuthAuthorizeResponse> {
+export async function getJiraOAuthAuthorizeURL(): Promise<JiraOAuthAuthorizeResponse> {
   return apiGet<JiraOAuthAuthorizeResponse>(
     "/jira/oauth/authorize",
     "Failed to get Jira OAuth authorization URL"
@@ -317,11 +302,11 @@ export async function getJiraOAuthAuthorizeURL(accessToken?: string): Promise<Ji
 
 // Jira User Mapping APIs (admin only)
 
-export async function getJiraUsers(accessToken?: string): Promise<JiraUserWithMapping[]> {
+export async function getJiraUsers(): Promise<JiraUserWithMapping[]> {
   return apiGet<JiraUserWithMapping[]>("/jira/users", "Failed to fetch Jira users");
 }
 
-export async function autoMatchJiraUsers(accessToken?: string): Promise<AutoMatchResult> {
+export async function autoMatchJiraUsers(): Promise<AutoMatchResult> {
   return apiMutate<AutoMatchResult>(
     "/jira/users/auto-match",
     "POST",
@@ -330,7 +315,6 @@ export async function autoMatchJiraUsers(accessToken?: string): Promise<AutoMatc
 }
 
 export async function updateUserJiraMapping(
-  accessToken: string | undefined,
   userId: number,
   jiraAccountId: string | null
 ): Promise<void> {
@@ -345,12 +329,11 @@ export async function updateUserJiraMapping(
 
 // Org Chart APIs (supervisor only)
 
-export async function getOrgChartDrafts(accessToken?: string): Promise<OrgChartDraft[]> {
+export async function getOrgChartDrafts(): Promise<OrgChartDraft[]> {
   return apiGet<OrgChartDraft[]>("/orgchart/drafts", "Failed to fetch org chart drafts");
 }
 
 export async function createOrgChartDraft(
-  accessToken: string | undefined,
   data: CreateDraftRequest
 ): Promise<OrgChartDraft> {
   return apiMutate<OrgChartDraft>(
@@ -361,12 +344,11 @@ export async function createOrgChartDraft(
   );
 }
 
-export async function getOrgChartDraft(accessToken: string | undefined, id: number): Promise<OrgChartDraft> {
+export async function getOrgChartDraft(id: number): Promise<OrgChartDraft> {
   return apiGet<OrgChartDraft>(`/orgchart/drafts/${id}`, "Failed to fetch draft");
 }
 
 export async function updateOrgChartDraft(
-  accessToken: string | undefined,
   id: number,
   data: UpdateDraftRequest
 ): Promise<OrgChartDraft> {
@@ -378,12 +360,11 @@ export async function updateOrgChartDraft(
   );
 }
 
-export async function deleteOrgChartDraft(accessToken: string | undefined, id: number): Promise<void> {
+export async function deleteOrgChartDraft(id: number): Promise<void> {
   return apiDelete(`/orgchart/drafts/${id}`, "Failed to delete draft");
 }
 
 export async function addDraftChange(
-  accessToken: string | undefined,
   draftId: number,
   change: AddDraftChangeRequest
 ): Promise<DraftChange> {
@@ -396,7 +377,6 @@ export async function addDraftChange(
 }
 
 export async function removeDraftChange(
-  accessToken: string | undefined,
   draftId: number,
   userId: number
 ): Promise<void> {
@@ -406,7 +386,7 @@ export async function removeDraftChange(
   );
 }
 
-export async function publishDraft(accessToken: string | undefined, draftId: number): Promise<void> {
+export async function publishDraft(draftId: number): Promise<void> {
   const response = await fetchWithProxy(
     `/orgchart/drafts/${draftId}/publish`,
     { method: "POST" }
@@ -418,7 +398,7 @@ export async function publishDraft(accessToken: string | undefined, draftId: num
 }
 
 // Returns a single OrgTreeNode for supervisors, or array of OrgTreeNode for admins
-export async function getOrgTree(accessToken?: string): Promise<OrgTreeNode | OrgTreeNode[]> {
+export async function getOrgTree(): Promise<OrgTreeNode | OrgTreeNode[]> {
   return apiGet<OrgTreeNode | OrgTreeNode[]>("/orgchart/tree", "Failed to fetch org tree");
 }
 
@@ -426,8 +406,7 @@ export async function getOrgTree(accessToken?: string): Promise<OrgTreeNode | Or
 
 export async function getCalendarEvents(
   start: Date,
-  end: Date,
-  accessToken?: string
+  end: Date
 ): Promise<CalendarEvent[]> {
   const startStr = start.toISOString();
   const endStr = end.toISOString();
@@ -442,8 +421,7 @@ export async function getCalendarEvents(
 // Get full calendar events response including metadata (jira_connected, counts, etc.)
 export async function getCalendarEventsWithMetadata(
   start: Date,
-  end: Date,
-  accessToken?: string
+  end: Date
 ): Promise<CalendarEventsResponse> {
   const startStr = start.toISOString();
   const endStr = end.toISOString();
@@ -455,10 +433,7 @@ export async function getCalendarEventsWithMetadata(
 
 // Task APIs
 
-export async function createTask(
-  data: CreateTaskRequest,
-  accessToken?: string
-): Promise<Task> {
+export async function createTask(data: CreateTaskRequest): Promise<Task> {
   return apiMutate<Task>(
     "/calendar/tasks",
     "POST",
@@ -467,14 +442,13 @@ export async function createTask(
   );
 }
 
-export async function getTask(id: number, accessToken?: string): Promise<Task> {
+export async function getTask(id: number): Promise<Task> {
   return apiGet<Task>(`/calendar/tasks/${id}`, "Failed to fetch task");
 }
 
 export async function updateTask(
   id: number,
-  data: UpdateTaskRequest,
-  accessToken?: string
+  data: UpdateTaskRequest
 ): Promise<Task> {
   return apiMutate<Task>(
     `/calendar/tasks/${id}`,
@@ -484,16 +458,13 @@ export async function updateTask(
   );
 }
 
-export async function deleteTask(id: number, accessToken?: string): Promise<void> {
+export async function deleteTask(id: number): Promise<void> {
   return apiDelete(`/calendar/tasks/${id}`, "Failed to delete task");
 }
 
 // Meeting APIs
 
-export async function createMeeting(
-  data: CreateMeetingRequest,
-  accessToken?: string
-): Promise<Meeting> {
+export async function createMeeting(data: CreateMeetingRequest): Promise<Meeting> {
   return apiMutate<Meeting>(
     "/calendar/meetings",
     "POST",
@@ -502,14 +473,13 @@ export async function createMeeting(
   );
 }
 
-export async function getMeeting(id: number, accessToken?: string): Promise<Meeting> {
+export async function getMeeting(id: number): Promise<Meeting> {
   return apiGet<Meeting>(`/calendar/meetings/${id}`, "Failed to fetch meeting");
 }
 
 export async function updateMeeting(
   id: number,
-  data: UpdateMeetingRequest,
-  accessToken?: string
+  data: UpdateMeetingRequest
 ): Promise<Meeting> {
   return apiMutate<Meeting>(
     `/calendar/meetings/${id}`,
@@ -519,14 +489,13 @@ export async function updateMeeting(
   );
 }
 
-export async function deleteMeeting(id: number, accessToken?: string): Promise<void> {
+export async function deleteMeeting(id: number): Promise<void> {
   return apiDelete(`/calendar/meetings/${id}`, "Failed to delete meeting");
 }
 
 export async function respondToMeeting(
   meetingId: number,
-  response: ResponseStatus,
-  accessToken?: string
+  response: ResponseStatus
 ): Promise<void> {
   const res = await fetchWithProxy(`/calendar/meetings/${meetingId}/respond`, {
     method: "POST",
@@ -540,8 +509,7 @@ export async function respondToMeeting(
 // Time Off APIs
 
 export async function createTimeOffRequest(
-  data: CreateTimeOffRequest,
-  accessToken?: string
+  data: CreateTimeOffRequest
 ): Promise<TimeOffRequest> {
   return apiMutate<TimeOffRequest>(
     "/time-off",
@@ -552,8 +520,7 @@ export async function createTimeOffRequest(
 }
 
 export async function getMyTimeOffRequests(
-  status?: TimeOffStatus,
-  accessToken?: string
+  status?: TimeOffStatus
 ): Promise<TimeOffRequest[]> {
   const params = status ? `?status=${status}` : "";
   return apiGet<TimeOffRequest[]>(
@@ -562,26 +529,18 @@ export async function getMyTimeOffRequests(
   );
 }
 
-export async function getTimeOffRequest(
-  id: number,
-  accessToken?: string
-): Promise<TimeOffRequest> {
+export async function getTimeOffRequest(id: number): Promise<TimeOffRequest> {
   return apiGet<TimeOffRequest>(
     `/time-off/${id}`,
     "Failed to fetch time off request"
   );
 }
 
-export async function cancelTimeOffRequest(
-  id: number,
-  accessToken?: string
-): Promise<void> {
+export async function cancelTimeOffRequest(id: number): Promise<void> {
   return apiDelete(`/time-off/${id}`, "Failed to cancel time off request");
 }
 
-export async function getPendingTimeOffRequests(
-  accessToken?: string
-): Promise<TimeOffRequest[]> {
+export async function getPendingTimeOffRequests(): Promise<TimeOffRequest[]> {
   return apiGet<TimeOffRequest[]>(
     "/time-off/pending",
     "Failed to fetch pending time off requests"
@@ -590,8 +549,7 @@ export async function getPendingTimeOffRequests(
 
 export async function reviewTimeOffRequest(
   id: number,
-  review: ReviewTimeOffRequest,
-  accessToken?: string
+  review: ReviewTimeOffRequest
 ): Promise<TimeOffRequest> {
   return apiMutate<TimeOffRequest>(
     `/time-off/${id}/review`,
@@ -601,9 +559,7 @@ export async function reviewTimeOffRequest(
   );
 }
 
-export async function getTeamTimeOff(
-  accessToken?: string
-): Promise<TimeOffRequest[]> {
+export async function getTeamTimeOff(): Promise<TimeOffRequest[]> {
   return apiGet<TimeOffRequest[]>(
     "/time-off/team",
     "Failed to fetch team time off"

@@ -15,27 +15,27 @@ import (
 	"github.com/smith-dallin/manager-dashboard/internal/jira"
 	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
+	"github.com/smith-dallin/manager-dashboard/internal/oauth"
+	"github.com/smith-dallin/manager-dashboard/internal/repository"
 )
 
 type JiraHandlers struct {
-	userRepo     *database.UserRepository
-	orgJiraRepo  *database.OrgJiraRepository
-	timeOffRepo  *database.TimeOffRepository
+	userRepo     repository.UserRepository
+	orgJiraRepo  repository.OrgJiraRepository
+	timeOffRepo  repository.TimeOffRepository
 	oauthService *jira.OAuthService
+	stateStore   oauth.StateStore
 	frontendURL  string
-	// Simple in-memory state store for OAuth (in production, use Redis or DB)
-	oauthStates   map[string]int64 // state -> userID
-	oauthStatesMu sync.RWMutex
 }
 
-func NewJiraHandlers(userRepo *database.UserRepository, orgJiraRepo *database.OrgJiraRepository, timeOffRepo *database.TimeOffRepository, oauthService *jira.OAuthService, frontendURL string) *JiraHandlers {
+func NewJiraHandlers(userRepo repository.UserRepository, orgJiraRepo repository.OrgJiraRepository, timeOffRepo repository.TimeOffRepository, oauthService *jira.OAuthService, stateStore oauth.StateStore, frontendURL string) *JiraHandlers {
 	return &JiraHandlers{
 		userRepo:     userRepo,
 		orgJiraRepo:  orgJiraRepo,
 		timeOffRepo:  timeOffRepo,
 		oauthService: oauthService,
+		stateStore:   stateStore,
 		frontendURL:  frontendURL,
-		oauthStates:  make(map[string]int64),
 	}
 }
 
@@ -136,17 +136,12 @@ func (h *JiraHandlers) GetOAuthAuthorizeURL(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Generate state parameter
-	state, err := jira.GenerateState()
+	// Create state in the state store
+	state, err := h.stateStore.Create(r.Context(), currentUser.ID)
 	if err != nil {
 		http.Error(w, "Failed to generate state", http.StatusInternalServerError)
 		return
 	}
-
-	// Store state -> userID mapping
-	h.oauthStatesMu.Lock()
-	h.oauthStates[state] = currentUser.ID
-	h.oauthStatesMu.Unlock()
 
 	// Get authorization URL
 	authURL := h.oauthService.GetAuthorizationURL(state)
@@ -182,16 +177,14 @@ func (h *JiraHandlers) HandleOAuthCallback(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Validate state and get userID
-	h.oauthStatesMu.Lock()
-	userID, ok := h.oauthStates[state]
-	if ok {
-		delete(h.oauthStates, state)
-	}
-	h.oauthStatesMu.Unlock()
-
-	if !ok {
-		redirectWithError("invalid_state")
+	// Validate state and get userID from state store
+	userID, err := h.stateStore.Validate(r.Context(), state)
+	if err != nil {
+		if err == oauth.ErrStateNotFound || err == oauth.ErrStateExpired {
+			redirectWithError("invalid_state")
+		} else {
+			redirectWithError("state_validation_failed")
+		}
 		return
 	}
 
@@ -223,7 +216,7 @@ func (h *JiraHandlers) HandleOAuthCallback(w http.ResponseWriter, r *http.Reques
 	resource := resources[0]
 
 	// Save tokens to org-wide settings
-	orgSettings := &database.OrgJiraSettings{
+	orgSettings := &models.OrgJiraSettings{
 		OAuthAccessToken:    tokenResp.AccessToken,
 		OAuthRefreshToken:   tokenResp.RefreshToken,
 		OAuthTokenExpiresAt: jira.CalculateExpiry(tokenResp.ExpiresIn),

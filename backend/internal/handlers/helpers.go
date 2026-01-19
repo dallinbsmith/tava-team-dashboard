@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/smith-dallin/manager-dashboard/internal/apperrors"
 	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 )
@@ -63,5 +64,32 @@ func validateRequest(w http.ResponseWriter, v Validator) bool {
 
 // respondError sends an error response with the given status code
 func respondError(w http.ResponseWriter, status int, message string) {
-	http.Error(w, message, status)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"error":   message,
+		"status":  status,
+	})
+}
+
+// respondAppError sends an error response based on an AppError
+func respondAppError(w http.ResponseWriter, err error) {
+	status := apperrors.GetHTTPStatus(err)
+	message := apperrors.GetUserMessage(err)
+
+	response := map[string]interface{}{
+		"error":  message,
+		"status": status,
+	}
+
+	// Include field information for validation errors
+	if apperrors.IsValidation(err) {
+		if appErr, ok := err.(*apperrors.AppError); ok && appErr.Field != "" {
+			response["field"] = appErr.Field
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(response)
 }

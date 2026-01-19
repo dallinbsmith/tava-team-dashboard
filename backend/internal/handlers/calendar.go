@@ -5,21 +5,21 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/smith-dallin/manager-dashboard/internal/database"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
+	"github.com/smith-dallin/manager-dashboard/internal/repository"
 	"github.com/smith-dallin/manager-dashboard/internal/services"
 )
 
 type CalendarHandlers struct {
 	bffService  *services.CalendarBFFService
-	taskRepo    *database.TaskRepository
-	meetingRepo *database.MeetingRepository
+	taskRepo    repository.TaskRepository
+	meetingRepo repository.MeetingRepository
 }
 
 func NewCalendarHandlers(
 	bffService *services.CalendarBFFService,
-	taskRepo *database.TaskRepository,
-	meetingRepo *database.MeetingRepository,
+	taskRepo repository.TaskRepository,
+	meetingRepo repository.MeetingRepository,
 ) *CalendarHandlers {
 	return &CalendarHandlers{
 		bffService:  bffService,

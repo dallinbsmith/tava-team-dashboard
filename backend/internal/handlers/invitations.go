@@ -6,17 +6,17 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/smith-dallin/manager-dashboard/internal/database"
 	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
+	"github.com/smith-dallin/manager-dashboard/internal/repository"
 )
 
 type InvitationHandlers struct {
-	invitationRepo *database.InvitationRepository
-	userRepo       *database.UserRepository
+	invitationRepo repository.InvitationRepository
+	userRepo       repository.UserRepository
 }
 
-func NewInvitationHandlers(invitationRepo *database.InvitationRepository, userRepo *database.UserRepository) *InvitationHandlers {
+func NewInvitationHandlers(invitationRepo repository.InvitationRepository, userRepo repository.UserRepository) *InvitationHandlers {
 	return &InvitationHandlers{
 		invitationRepo: invitationRepo,
 		userRepo:       userRepo,

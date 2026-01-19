@@ -78,7 +78,7 @@ export default function InvitationsPage() {
     setError(null);
 
     try {
-      const invitation = await createInvitation(undefined, newInvitation);
+      const invitation = await createInvitation(newInvitation);
       setCreatedInvitation(invitation);
       setInvitations([invitation, ...invitations]);
       setNewInvitation({ email: "", role: "supervisor", department: "", squad_ids: [] });
@@ -93,7 +93,7 @@ export default function InvitationsPage() {
     if (!confirm("Are you sure you want to revoke this invitation?")) return;
 
     try {
-      await revokeInvitation(undefined, id);
+      await revokeInvitation(id);
       setInvitations(
         invitations.map((inv) =>
           inv.id === id ? { ...inv, status: "revoked" as const } : inv

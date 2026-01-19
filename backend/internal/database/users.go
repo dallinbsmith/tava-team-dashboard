@@ -268,17 +268,8 @@ func (r *UserRepository) ClearJiraSettings(ctx context.Context, id int64) error 
 	return nil
 }
 
-// JiraOAuthTokens represents the OAuth tokens for Jira
-type JiraOAuthTokens struct {
-	AccessToken  string
-	RefreshToken string
-	ExpiresAt    time.Time
-	CloudID      string
-	SiteURL      string
-}
-
 // SaveJiraOAuthTokens saves OAuth tokens for a user
-func (r *UserRepository) SaveJiraOAuthTokens(ctx context.Context, id int64, tokens *JiraOAuthTokens) error {
+func (r *UserRepository) SaveJiraOAuthTokens(ctx context.Context, id int64, tokens *models.JiraOAuthTokens) error {
 	query := `
 		UPDATE users SET
 			jira_oauth_access_token = $2,

@@ -75,15 +75,16 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
+	// Run migrations first
+	if err := database.RunMigrations(cfg.DatabaseURL); err != nil {
+		log.Fatalf("Failed to run migrations: %v", err)
+	}
+
 	pool, err := database.Connect(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer pool.Close()
-
-	if err := database.RunMigrations(pool); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
-	}
 
 	ctx := context.Background()
 	rand.Seed(time.Now().UnixNano())

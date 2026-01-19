@@ -232,12 +232,9 @@ function toUser(employee: GraphQLEmployee): User {
 }
 
 // API functions using GraphQL
-// Note: accessToken parameters are kept for backward compatibility but ignored.
 // The proxy handles token management server-side.
 
-export async function getEmployeesGraphQL(
-  accessToken?: string
-): Promise<User[]> {
+export async function getEmployeesGraphQL(): Promise<User[]> {
   const client = createProxyGraphQLClient();
   const data = await client.request<{ employees: GraphQLEmployee[] }>(
     GET_EMPLOYEES
@@ -245,10 +242,7 @@ export async function getEmployeesGraphQL(
   return data.employees.map(toUser);
 }
 
-export async function getEmployeeGraphQL(
-  accessToken: string | undefined,
-  id: number
-): Promise<User> {
+export async function getEmployeeGraphQL(id: number): Promise<User> {
   const client = createProxyGraphQLClient();
   const data = await client.request<{ employee: GraphQLEmployee }>(
     GET_EMPLOYEE,
@@ -257,9 +251,7 @@ export async function getEmployeeGraphQL(
   return toUser(data.employee);
 }
 
-export async function getCurrentUserGraphQL(
-  accessToken?: string
-): Promise<User> {
+export async function getCurrentUserGraphQL(): Promise<User> {
   const client = createProxyGraphQLClient();
   const data = await client.request<{ me: GraphQLEmployee }>(GET_ME);
   return toUser(data.me);
@@ -277,7 +269,6 @@ export interface CreateEmployeeInput {
 }
 
 export async function createEmployeeGraphQL(
-  accessToken: string | undefined,
   input: CreateEmployeeInput
 ): Promise<User> {
   const client = createProxyGraphQLClient();
@@ -298,7 +289,6 @@ export interface UpdateEmployeeInput {
 }
 
 export async function updateEmployeeGraphQL(
-  accessToken: string | undefined,
   id: number,
   input: UpdateEmployeeInput
 ): Promise<User> {
@@ -310,10 +300,7 @@ export async function updateEmployeeGraphQL(
   return toUser(data.updateEmployee);
 }
 
-export async function deleteEmployeeGraphQL(
-  accessToken: string | undefined,
-  id: number
-): Promise<boolean> {
+export async function deleteEmployeeGraphQL(id: number): Promise<boolean> {
   const client = createProxyGraphQLClient();
   const data = await client.request<{ deleteEmployee: boolean }>(
     DELETE_EMPLOYEE,

@@ -137,7 +137,7 @@ export function SettingsPageClient({
 
   const handleUpdateMapping = async (userId: number, jiraAccountId: string | null) => {
     try {
-      await updateUserJiraMapping(undefined, userId, jiraAccountId);
+      await updateUserJiraMapping(userId, jiraAccountId);
       await fetchJiraUsers();
       setSuccess("Mapping updated");
       setTimeout(() => setSuccess(null), 2000);

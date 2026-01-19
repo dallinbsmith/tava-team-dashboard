@@ -40,7 +40,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
         setSettings(jiraSettings);
 
         if (jiraSettings.org_configured) {
-          const issues = await getMyJiraTasks(undefined, compact ? 5 : 20);
+          const issues = await getMyJiraTasks(compact ? 5 : 20);
           setTasks(issues);
         }
       }

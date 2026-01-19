@@ -7,26 +7,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/smith-dallin/manager-dashboard/internal/models"
 )
-
-// OrgJiraSettings represents the organization-wide Jira configuration
-type OrgJiraSettings struct {
-	ID                  int64     `json:"id"`
-	OAuthAccessToken    string    `json:"-"` // Never expose
-	OAuthRefreshToken   string    `json:"-"` // Never expose
-	OAuthTokenExpiresAt time.Time `json:"-"` // Never expose
-	CloudID             string    `json:"cloud_id"`
-	SiteURL             string    `json:"site_url"`
-	SiteName            *string   `json:"site_name,omitempty"`
-	ConfiguredByID      int64     `json:"configured_by_id"`
-	CreatedAt           time.Time `json:"created_at"`
-	UpdatedAt           time.Time `json:"updated_at"`
-}
-
-// IsTokenExpired checks if the OAuth token is expired (with 5 min buffer)
-func (s *OrgJiraSettings) IsTokenExpired() bool {
-	return time.Now().Add(5 * time.Minute).After(s.OAuthTokenExpiresAt)
-}
 
 // OrgJiraRepository handles organization-wide Jira settings
 type OrgJiraRepository struct {
@@ -39,7 +21,7 @@ func NewOrgJiraRepository(pool *pgxpool.Pool) *OrgJiraRepository {
 }
 
 // Get returns the organization Jira settings (there's only one)
-func (r *OrgJiraRepository) Get(ctx context.Context) (*OrgJiraSettings, error) {
+func (r *OrgJiraRepository) Get(ctx context.Context) (*models.OrgJiraSettings, error) {
 	query := `
 		SELECT id, oauth_access_token, oauth_refresh_token, oauth_token_expires_at,
 			cloud_id, site_url, site_name, configured_by_id, created_at, updated_at
@@ -48,7 +30,7 @@ func (r *OrgJiraRepository) Get(ctx context.Context) (*OrgJiraSettings, error) {
 		LIMIT 1
 	`
 
-	var settings OrgJiraSettings
+	var settings models.OrgJiraSettings
 	err := r.pool.QueryRow(ctx, query).Scan(
 		&settings.ID,
 		&settings.OAuthAccessToken,
@@ -73,7 +55,7 @@ func (r *OrgJiraRepository) Get(ctx context.Context) (*OrgJiraSettings, error) {
 }
 
 // Save creates or updates the organization Jira settings
-func (r *OrgJiraRepository) Save(ctx context.Context, settings *OrgJiraSettings) error {
+func (r *OrgJiraRepository) Save(ctx context.Context, settings *models.OrgJiraSettings) error {
 	// Delete any existing settings (we only want one)
 	_, err := r.pool.Exec(ctx, "DELETE FROM org_jira_settings")
 	if err != nil {

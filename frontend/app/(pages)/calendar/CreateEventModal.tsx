@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CreateTaskRequest } from "@/shared/types";
 import { createTask } from "@/lib/api";
 import { useCurrentUser } from "@/providers";
-import { X, Loader2 } from "lucide-react";
+import { BaseModal, InputField, TextareaField, Button, FormError } from "@/components";
 import { format, addDays } from "date-fns";
 
 interface CreateEventModalProps {
@@ -91,121 +91,72 @@ export default function CreateEventModal({ isOpen, onClose, onCreated }: CreateE
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black bg-opacity-30" onClick={handleClose} />
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Create Event"
+      maxWidth="max-w-md"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <FormError error={error} />
 
-        <div className="relative bg-theme-surface w-full max-w-md shadow-xl border border-theme-border rounded-lg">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border">
-            <h2 className="text-lg font-semibold text-theme-text">Create Event</h2>
-            <button
-              onClick={handleClose}
-              className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+        <InputField
+          label="Title"
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Event title"
+          autoFocus
+        />
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {error && (
-              <div className="p-3 bg-red-900/30 border border-red-500/30 text-red-400 text-sm rounded">
-                {error}
-              </div>
-            )}
+        <TextareaField
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+          placeholder="Optional description"
+        />
 
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-theme-text mb-1">
-                Title *
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Event title"
-                autoFocus
-              />
-            </div>
+        <InputField
+          label="Date"
+          required
+          type="date"
+          value={eventDate}
+          onChange={(e) => setEventDate(e.target.value)}
+          min={format(new Date(), "yyyy-MM-dd")}
+        />
 
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-theme-text mb-1">
-                Description
-              </label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={2}
-                className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Optional description"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="eventDate" className="block text-sm font-medium text-theme-text mb-1">
-                Date *
-              </label>
-              <input
-                type="date"
-                id="eventDate"
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-                min={format(new Date(), "yyyy-MM-dd")}
-                className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isAllDay}
-                  onChange={(e) => setIsAllDay(e.target.checked)}
-                  className="w-4 h-4 text-primary-600 border-theme-border bg-theme-elevated focus:ring-primary-500 rounded"
-                />
-                <span className="text-sm font-medium text-theme-text">All day event</span>
-              </label>
-            </div>
-
-            {!isAllDay && (
-              <div>
-                <label htmlFor="eventTime" className="block text-sm font-medium text-theme-text mb-1">
-                  Time
-                </label>
-                <input
-                  type="time"
-                  id="eventTime"
-                  value={eventTime}
-                  onChange={(e) => setEventTime(e.target.value)}
-                  className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-            )}
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-theme-border">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="px-4 py-2 text-sm font-medium text-theme-text bg-theme-elevated border border-theme-border rounded hover:bg-theme-surface transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded transition-colors flex items-center gap-2"
-              >
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Create Event
-              </button>
-            </div>
-          </form>
+        <div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isAllDay}
+              onChange={(e) => setIsAllDay(e.target.checked)}
+              className="w-4 h-4 text-primary-600 border-theme-border bg-theme-elevated focus:ring-primary-500 rounded"
+            />
+            <span className="text-sm font-medium text-theme-text">All day event</span>
+          </label>
         </div>
-      </div>
-    </div>
+
+        {!isAllDay && (
+          <InputField
+            label="Time"
+            type="time"
+            value={eventTime}
+            onChange={(e) => setEventTime(e.target.value)}
+          />
+        )}
+
+        <div className="flex justify-end gap-3 pt-4 border-t border-theme-border">
+          <Button type="button" variant="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="primary" loading={loading}>
+            Create Event
+          </Button>
+        </div>
+      </form>
+    </BaseModal>
   );
 }

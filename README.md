@@ -215,7 +215,9 @@ You should see:
 
 ```
 ├── backend/                    # Go API server
-│   ├── cmd/server/            # Entry point (main.go)
+│   ├── cmd/
+│   │   ├── server/            # Entry point (main.go)
+│   │   └── seed/              # Database seeding utility
 │   ├── config/                # Environment configuration
 │   └── internal/
 │       ├── app/               # Application setup and routing
@@ -223,21 +225,64 @@ You should see:
 │       ├── database/          # PostgreSQL connection & repositories
 │       │   └── migrations/    # SQL migration files (golang-migrate)
 │       ├── handlers/          # REST API handlers
+│       ├── logger/            # Structured logging with slog
 │       ├── middleware/        # Auth0 JWT validation, logging, rate limiting
-│       ├── services/          # Business logic layer
-│       └── models/            # User/Employee data models
+│       ├── models/            # User/Employee data models
+│       ├── oauth/             # OAuth state management
+│       ├── repository/        # Repository interfaces for testing
+│       │   └── mocks/         # Mock implementations
+│       └── services/          # Business logic layer
+│
 ├── frontend/                   # Next.js application
-│   ├── app/
-│   │   ├── api/auth/[auth0]/ # Auth0 route handlers
-│   │   ├── dashboard/        # Manager dashboard (SSR)
-│   │   ├── employee/[id]/    # Employee detail view
-│   │   └── login/            # Login page
-│   ├── components/           # Reusable React components
-│   ├── lib/                  # API client utilities
-│   └── types/                # TypeScript type definitions
+│   ├── app/                   # Next.js App Router
+│   │   ├── (pages)/           # Page routes
+│   │   │   └── (dashboard)/   # Dashboard layout group
+│   │   │       ├── calendar/  # Calendar page (co-located)
+│   │   │       │   ├── page.tsx
+│   │   │       │   ├── components/
+│   │   │       │   ├── types.ts
+│   │   │       │   ├── api.ts
+│   │   │       │   └── hooks.ts
+│   │   │       ├── time-off/  # Time off page (co-located)
+│   │   │       ├── orgchart/  # Org chart page (co-located)
+│   │   │       └── settings/  # Settings page
+│   │   └── api/               # API routes (Auth0, proxy)
+│   │
+│   ├── shared/                # Shared code across pages
+│   │   ├── types/             # Shared TypeScript types (User, Squad, etc.)
+│   │   └── common/            # Shared UI components (Avatar, Pagination, etc.)
+│   │
+│   ├── components/            # Global UI components (BaseModal, Button, etc.)
+│   ├── hooks/                 # Global React hooks
+│   ├── lib/                   # API client utilities
+│   └── providers/             # React context providers
+│
 ├── docker-compose.yml         # PostgreSQL container config
 └── README.md
 ```
+
+### Frontend Architecture
+
+The frontend follows a **co-located architecture** where each page folder contains everything it needs:
+
+```
+app/(pages)/(dashboard)/time-off/
+├── page.tsx            # Next.js page component
+├── components/         # Page-specific React components
+│   ├── TimeOffRequestForm.tsx
+│   ├── TimeOffRequestList.tsx
+│   └── ...
+├── types.ts            # TypeScript types for this page
+├── api.ts              # API functions (fetch calls)
+├── hooks.ts            # React Query hooks for data fetching
+└── index.ts            # Barrel export for clean imports
+```
+
+**Benefits:**
+- **Co-location**: Page, components, types, API, and hooks all live together
+- **Clear boundaries**: Each page folder is self-contained
+- **Easy navigation**: Find everything related to a feature in one place
+- **Shared code**: Common types and components live in `shared/`
 
 ---
 

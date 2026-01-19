@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import { User, Role } from "@/shared/types";
+import { User, Role } from "@/shared/types/user";
 
 export type SortField = "name" | "email" | "department" | "date_started";
 export type SortOrder = "asc" | "desc";

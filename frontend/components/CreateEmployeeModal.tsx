@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BaseModal } from "./BaseModal";
 import { createEmployeeGraphQL, CreateEmployeeInput } from "@/lib/graphql";
 import { parseErrorMessage, parseSquadErrorMessage } from "@/lib/errors";
-import { User, Squad } from "@/shared/types";
+import { User, Squad } from "@/shared/types/user";
 import { CheckCircle, ChevronDown, X, Plus, Building2, Users, User as UserIcon, Shield } from "lucide-react";
 
 interface CreateEmployeeModalProps {

@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Invitation, CreateInvitationRequest } from "@/shared/types";
+import { Invitation, CreateInvitationRequest } from "./types";
 import { getInvitations, createInvitation, revokeInvitation } from "@/lib/api";
-import { useCurrentUser, useOrganization } from "@/providers";
+import { useCurrentUser } from "@/providers/CurrentUserProvider";
+import { useOrganization } from "@/providers/OrganizationProvider";
 import { parseErrorMessage, parseSquadErrorMessage } from "@/lib/errors";
 import {
   Mail,
@@ -237,8 +238,8 @@ export default function InvitationsPage() {
                     <div className="flex items-center gap-2 mt-1">
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${invitation.role === "admin"
-                            ? "bg-purple-900/40 text-purple-300 border-purple-500/30"
-                            : "bg-blue-900/40 text-blue-300 border-blue-500/30"
+                          ? "bg-purple-900/40 text-purple-300 border-purple-500/30"
+                          : "bg-blue-900/40 text-blue-300 border-blue-500/30"
                           }`}
                       >
                         {invitation.role === "admin" ? (
@@ -440,14 +441,14 @@ export default function InvitationsPage() {
                             type="button"
                             onClick={() => toggleSquad(squad.id)}
                             className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-theme-elevated ${(newInvitation.squad_ids || []).includes(squad.id)
-                                ? "bg-primary-900/20"
-                                : ""
+                              ? "bg-primary-900/20"
+                              : ""
                               }`}
                           >
                             <div
                               className={`w-4 h-4 border flex items-center justify-center ${(newInvitation.squad_ids || []).includes(squad.id)
-                                  ? "border-primary-500 bg-primary-500"
-                                  : "border-theme-border"
+                                ? "border-primary-500 bg-primary-500"
+                                : "border-theme-border"
                                 }`}
                             >
                               {(newInvitation.squad_ids || []).includes(squad.id) && (

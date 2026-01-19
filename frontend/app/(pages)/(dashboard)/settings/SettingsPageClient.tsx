@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { JiraSettings, JiraUserWithMapping, User } from "@/shared/types";
+import { User } from "@/shared/types/user";
+import { JiraSettings, JiraUserWithMapping } from "@/app/(pages)/jira/types";
 import {
   disconnectJira,
   getJiraOAuthAuthorizeURL,
@@ -10,7 +11,8 @@ import {
   autoMatchJiraUsers,
   updateUserJiraMapping,
 } from "@/lib/api";
-import { ConfirmationModal, Avatar } from "@/shared/common";
+import ConfirmationModal from "@/shared/common/ConfirmationModal";
+import Avatar from "@/shared/common/Avatar";
 import {
   Settings,
   CheckCircle,

@@ -2,17 +2,16 @@
 
 import { useState, useCallback } from "react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
-import { TimeOffRequest, User } from "@/shared/types";
+import { User } from "@/shared/types/user";
+import { TimeOffRequest } from "./types";
 import {
   getMyTimeOffRequests,
   getPendingTimeOffRequests,
   cancelTimeOffRequest,
 } from "@/lib/api";
-import {
-  TimeOffRequestForm,
-  TimeOffRequestList,
-  TimeOffReviewModal,
-} from "@/app/(pages)/time-off";
+import TimeOffRequestForm from "./components/TimeOffRequestForm";
+import TimeOffRequestList from "./components/TimeOffRequestList";
+import TimeOffReviewModal from "./components/TimeOffReviewModal";
 import { Calendar, Plus, Clock, RefreshCw } from "lucide-react";
 
 const timeOffStatuses = ["pending", "approved", "rejected", "cancelled"] as const;

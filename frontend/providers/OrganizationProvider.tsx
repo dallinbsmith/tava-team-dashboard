@@ -8,7 +8,7 @@ import {
   useSquadsQuery,
   useDerivedDepartments,
 } from "@/hooks";
-import { User, Squad } from "@/shared/types";
+import { User, Squad } from "@/shared/types/user";
 
 interface OrganizationContextType {
   // Employees (direct reports for supervisors, all for admins)

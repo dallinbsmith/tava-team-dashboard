@@ -6,7 +6,7 @@ import {
   getDepartmentsServer,
 } from "@/lib/server-api";
 import { OrgChartPageClient } from "./OrgChartPageClient";
-import { OrgTreeNode } from "@/shared/types";
+import { OrgTreeNode } from "./types";
 
 export default async function OrgChartPage() {
   const currentUser = await getCurrentUserServer();

@@ -12,13 +12,14 @@ import {
   publishDraft,
   getDepartments,
 } from "@/lib/api";
-import { useOrganization } from "@/providers";
-import ManageSquadsModal from "@/app/(pages)/org-chart/ManageSquadsModal";
-import ManageDepartmentsModal from "@/app/(pages)/org-chart/ManageDepartmentsModal";
-import DraftManager from "@/app/(pages)/org-chart/DraftManager";
+import { useOrganization } from "@/providers/OrganizationProvider";
+import ManageSquadsModal from "./components/ManageSquadsModal";
+import ManageDepartmentsModal from "./components/ManageDepartmentsModal";
+import DraftManager from "./components/DraftManager";
 import { parseErrorMessage } from "@/lib/errors";
-import { User, OrgTreeNode, OrgChartDraft, DraftChange, Squad } from "@/shared/types";
-import { Avatar } from "@/shared/common";
+import { User, Squad } from "@/shared/types/user";
+import { OrgTreeNode, OrgChartDraft, DraftChange } from "./types";
+import Avatar from "@/shared/common/Avatar";
 import {
   DndContext,
   DragOverlay,

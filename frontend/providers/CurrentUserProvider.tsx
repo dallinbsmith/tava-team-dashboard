@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode } from "react";
 import { useCurrentUserQuery } from "@/hooks";
-import { User } from "@/shared/types";
+import { User } from "@/shared/types/user";
 
 interface CurrentUserContextType {
   currentUser: User | null;

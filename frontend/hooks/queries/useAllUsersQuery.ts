@@ -3,7 +3,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { useCallback, useMemo } from "react";
 import { getAllUsers, getDepartments } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
-import { User } from "@/shared/types";
+import { User } from "@/shared/types/user";
 
 export interface UseAllUsersQueryOptions {
   /** Override the default stale time (5 minutes) */

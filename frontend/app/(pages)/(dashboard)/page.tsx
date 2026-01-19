@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useCurrentUser, useOrganization } from "@/providers";
-import { EmployeeList } from "@/app/(pages)/org-chart/employees";
-import { JiraTasks, TeamJiraTasks } from "@/app/(pages)/jira";
-import { CalendarWidget, CreateTaskModal, CreateMeetingModal, CreateEventModal, RequestTimeOffModal, CreateTimeOffForEmployeeModal } from "@/app/(pages)/calendar";
+import { useCurrentUser } from "@/providers/CurrentUserProvider";
+import { useOrganization } from "@/providers/OrganizationProvider";
+import EmployeeList from "./orgchart/components/EmployeeList";
+import JiraTasks from "@/app/(pages)/jira/components/JiraTasks";
+import TeamJiraTasks from "@/app/(pages)/jira/components/TeamJiraTasks";
+import CalendarWidget from "./calendar/components/CalendarWidget";
+import CreateTaskModal from "./calendar/components/CreateTaskModal";
+import CreateMeetingModal from "./calendar/components/CreateMeetingModal";
+import CreateEventModal from "./calendar/components/CreateEventModal";
+import RequestTimeOffModal from "./calendar/components/RequestTimeOffModal";
+import CreateTimeOffForEmployeeModal from "./calendar/components/CreateTimeOffForEmployeeModal";
 import { CreateEmployeeModal } from "@/components";
 import DashboardStats from "./dashboard-stats/DashboardStats";
 import { UserPlus } from "lucide-react";

@@ -1,5 +1,5 @@
 import { GraphQLClient, gql } from "graphql-request";
-import { User } from "@/shared/types";
+import { User } from "@/shared/types/user";
 
 // GraphQL uses the server-side proxy which handles token management
 // This keeps access tokens secure and never exposes them to client JavaScript

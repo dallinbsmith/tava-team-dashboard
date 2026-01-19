@@ -1,9 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Calendar, CreateTaskModal, CreateMeetingModal, CreateEventModal, RequestTimeOffModal, CreateTimeOffForEmployeeModal } from "@/app/(pages)/calendar";
-import { CalendarEvent } from "@/shared/types";
-import { useCurrentUser } from "@/providers";
+import Calendar from "./components/Calendar";
+import CreateTaskModal from "./components/CreateTaskModal";
+import CreateMeetingModal from "./components/CreateMeetingModal";
+import CreateEventModal from "./components/CreateEventModal";
+import RequestTimeOffModal from "./components/RequestTimeOffModal";
+import CreateTimeOffForEmployeeModal from "./components/CreateTimeOffForEmployeeModal";
+import { CalendarEvent } from "./types";
+import { useCurrentUser } from "@/providers/CurrentUserProvider";
 
 type ModalType = "task" | "event" | "meeting" | "timeOff" | "timeOffForEmployee" | null;
 

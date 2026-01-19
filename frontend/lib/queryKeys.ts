@@ -1,71 +1,38 @@
 /**
- * Query Key Factory
- *
- * Centralized query key management for React Query.
- * This prevents key mismatches and makes cache invalidation predictable.
- *
- * Pattern: Each entity has a base key and can have nested keys for specific queries.
- * Example: queryKeys.users.all() -> ['users']
- *          queryKeys.users.detail(1) -> ['users', 1]
+ * Query Key Factory for React Query
+ * Pattern: queryKeys.users.all() -> ['users'], queryKeys.users.detail(1) -> ['users', 1]
  */
 
+// Helpers to reduce boilerplate
+const entity = <T extends string>(name: T) => ({
+  all: () => [name] as const,
+  detail: (id: number) => [name, id] as const,
+});
+
+const listOnly = <T extends string>(name: T) => ({
+  all: () => [name] as const,
+});
+
 export const queryKeys = {
-  // User/Employee queries
-  users: {
-    all: () => ["users"] as const,
-    detail: (id: number) => ["users", id] as const,
-    current: () => ["currentUser"] as const,
-  },
+  users: { ...entity("users"), current: () => ["currentUser"] as const },
+  employees: entity("employees"),
+  allUsers: listOnly("allUsers"),
+  supervisors: listOnly("supervisors"),
+  squads: entity("squads"),
+  departments: listOnly("departments"),
+  tasks: entity("tasks"),
+  meetings: entity("meetings"),
 
-  employees: {
-    all: () => ["employees"] as const,
-    detail: (id: number) => ["employees", id] as const,
-  },
-
-  allUsers: {
-    all: () => ["allUsers"] as const,
-  },
-
-  supervisors: {
-    all: () => ["supervisors"] as const,
-  },
-
-  // Organization
-  squads: {
-    all: () => ["squads"] as const,
-    detail: (id: number) => ["squads", id] as const,
-  },
-
-  departments: {
-    all: () => ["departments"] as const,
-  },
-
-  // Invitations
   invitations: {
-    all: () => ["invitations"] as const,
-    detail: (id: number) => ["invitations", id] as const,
+    ...entity("invitations"),
     validate: (token: string) => ["invitations", "validate", token] as const,
   },
 
-  // Calendar
   calendar: {
-    events: (start: Date, end: Date) =>
-      ["calendar", "events", start.toISOString(), end.toISOString()] as const,
-    eventsWithMetadata: (start: Date, end: Date) =>
-      ["calendar", "eventsWithMetadata", start.toISOString(), end.toISOString()] as const,
+    events: (start: Date, end: Date) => ["calendar", "events", start.toISOString(), end.toISOString()] as const,
+    eventsWithMetadata: (start: Date, end: Date) => ["calendar", "eventsWithMetadata", start.toISOString(), end.toISOString()] as const,
   },
 
-  tasks: {
-    all: () => ["tasks"] as const,
-    detail: (id: number) => ["tasks", id] as const,
-  },
-
-  meetings: {
-    all: () => ["meetings"] as const,
-    detail: (id: number) => ["meetings", id] as const,
-  },
-
-  // Time Off
   timeOff: {
     my: (status?: string) => ["timeOff", "my", status ?? "all"] as const,
     pending: () => ["timeOff", "pending"] as const,
@@ -73,30 +40,21 @@ export const queryKeys = {
     detail: (id: number) => ["timeOff", id] as const,
   },
 
-  // Jira
   jira: {
     settings: () => ["jira", "settings"] as const,
-    myTasks: (maxResults?: number) => ["jira", "tasks", "my", maxResults ?? 50] as const,
-    userTasks: (userId: number, maxResults?: number) =>
-      ["jira", "tasks", "user", userId, maxResults ?? 50] as const,
-    teamTasks: (maxPerUser?: number) =>
-      ["jira", "tasks", "team", maxPerUser ?? 20] as const,
-    projects: () => ["jira", "projects"] as const,
-    projectTasks: (projectKey: string, maxResults?: number) =>
-      ["jira", "projects", projectKey, "tasks", maxResults ?? 50] as const,
-    epics: (maxResults?: number) => ["jira", "epics", maxResults ?? 100] as const,
     users: () => ["jira", "users"] as const,
+    projects: () => ["jira", "projects"] as const,
+    myTasks: (max = 50) => ["jira", "tasks", "my", max] as const,
+    userTasks: (userId: number, max = 50) => ["jira", "tasks", "user", userId, max] as const,
+    teamTasks: (maxPerUser = 20) => ["jira", "tasks", "team", maxPerUser] as const,
+    projectTasks: (projectKey: string, max = 50) => ["jira", "projects", projectKey, "tasks", max] as const,
+    epics: (max = 100) => ["jira", "epics", max] as const,
   },
 
-  // Org Chart
   orgChart: {
     tree: () => ["orgChart", "tree"] as const,
-    drafts: {
-      all: () => ["orgChart", "drafts"] as const,
-      detail: (id: number) => ["orgChart", "drafts", id] as const,
-    },
+    drafts: { ...entity("orgChart/drafts"), all: () => ["orgChart", "drafts"] as const },
   },
 } as const;
 
-// Type helper for extracting query key types
 export type QueryKeys = typeof queryKeys;

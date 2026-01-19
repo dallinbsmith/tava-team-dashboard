@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User } from "@/shared/types";
-import { EmployeeHeader, EditEmployeeModal } from "@/app/(pages)/org-chart/employees";
+import { User } from "@/shared/types/user";
+import EmployeeHeader from "../../orgchart/components/EmployeeHeader";
+import EditEmployeeModal from "../../orgchart/components/EditEmployeeModal";
 import {
   ArrowLeft,
   Mail,

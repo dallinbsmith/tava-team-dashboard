@@ -7,7 +7,7 @@ import {
   Calendar,
   UsersRound,
 } from "lucide-react";
-import { User } from "@/shared/types";
+import { User } from "@/shared/types/user";
 import { getDepartmentBgColor } from "@/lib/department-colors";
 
 interface DashboardStatsProps {

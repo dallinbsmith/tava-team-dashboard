@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { useCurrentUser } from "@/providers";
-import { Sidebar } from "@/shared/common";
+import { useCurrentUser } from "@/providers/CurrentUserProvider";
+import Sidebar from "@/shared/common/Sidebar";
 import { Menu } from "lucide-react";
 
 export default function DashboardLayout({

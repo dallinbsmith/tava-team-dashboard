@@ -3,7 +3,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { useCallback } from "react";
 import { getSquads, createSquad, deleteSquad } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
-import { Squad } from "@/shared/types";
+import { Squad } from "@/shared/types/user";
 
 export interface UseSquadsQueryOptions {
   /** Override the default stale time (5 minutes) */

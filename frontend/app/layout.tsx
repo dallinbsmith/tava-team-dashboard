@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
 import { UserProvider } from "@auth0/nextjs-auth0/client";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { QueryProvider, CurrentUserProvider, OrganizationProvider } from "@/providers";
+import { QueryProvider } from "@/providers/QueryProvider";
+import { CurrentUserProvider } from "@/providers/CurrentUserProvider";
+import { OrganizationProvider } from "@/providers/OrganizationProvider";
+import { manrope } from "@/lib/fonts";
 import "@/shared/globals.css";
-
-// Primary font - Manrope Light 300
-const manrope = Manrope({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-manrope",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Manager Dashboard",

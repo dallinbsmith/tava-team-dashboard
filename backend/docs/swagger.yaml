@@ -1,0 +1,832 @@
+basePath: /api
+definitions:
+  github_com_smith-dallin_manager-dashboard_internal_models.CreateInvitationRequest:
+    properties:
+      department:
+        type: string
+      email:
+        type: string
+      role:
+        $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Role'
+      squad_ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  github_com_smith-dallin_manager-dashboard_internal_models.CreateUserRequest:
+    properties:
+      avatar_url:
+        type: string
+      department:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      role:
+        $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Role'
+      squad_ids:
+        items:
+          type: integer
+        type: array
+      supervisor_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  github_com_smith-dallin_manager-dashboard_internal_models.Invitation:
+    properties:
+      accepted_at:
+        type: string
+      created_at:
+        type: string
+      department:
+        type: string
+      email:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: integer
+      invited_by:
+        $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.User'
+      invited_by_id:
+        type: integer
+      role:
+        $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Role'
+      squad_ids:
+        items:
+          type: integer
+        type: array
+      status:
+        $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.InvitationStatus'
+      token:
+        description: Only shown to admin who created it
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_smith-dallin_manager-dashboard_internal_models.InvitationStatus:
+    enum:
+    - pending
+    - accepted
+    - expired
+    - revoked
+    type: string
+    x-enum-varnames:
+    - InvitationStatusPending
+    - InvitationStatusAccepted
+    - InvitationStatusExpired
+    - InvitationStatusRevoked
+  github_com_smith-dallin_manager-dashboard_internal_models.Role:
+    enum:
+    - admin
+    - supervisor
+    - employee
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleSupervisor
+    - RoleEmployee
+  github_com_smith-dallin_manager-dashboard_internal_models.Squad:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  github_com_smith-dallin_manager-dashboard_internal_models.UpdateUserRequest:
+    properties:
+      avatar_url:
+        type: string
+      department:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      role:
+        $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Role'
+      squad_ids:
+        items:
+          type: integer
+        type: array
+      supervisor_id:
+        type: integer
+      title:
+        type: string
+    type: object
+  github_com_smith-dallin_manager-dashboard_internal_models.User:
+    properties:
+      auth0_id:
+        type: string
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      date_started:
+        type: string
+      department:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      jira_account_id:
+        description: Jira account matching (for org-wide Jira connection)
+        type: string
+      jira_cloud_id:
+        type: string
+      jira_domain:
+        description: Jira integration fields (legacy API token auth)
+        type: string
+      jira_email:
+        type: string
+      jira_site_url:
+        type: string
+      last_name:
+        type: string
+      role:
+        $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Role'
+      squads:
+        items:
+          $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Squad'
+        type: array
+      supervisor_id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: REST API for the Manager Dashboard application. Provides endpoints
+    for user management, team organization, time-off requests, Jira integration, and
+    calendar management.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Manager Dashboard API
+  version: "1.0"
+paths:
+  /employees:
+    get:
+      consumes:
+      - application/json
+      description: 'Returns employees based on user role: admins see all, supervisors
+        see direct reports, employees see themselves'
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of employees
+          schema:
+            items:
+              $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.User'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get employees
+      tags:
+      - Users
+  /invitations:
+    get:
+      consumes:
+      - application/json
+      description: Returns all invitations with pagination support. Admin only.
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of invitations
+          schema:
+            items:
+              $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Invitation'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all invitations
+      tags:
+      - Invitations
+    post:
+      consumes:
+      - application/json
+      description: Creates a new invitation to onboard a user. Admin only.
+      parameters:
+      - description: Invitation request
+        in: body
+        name: invitation
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.CreateInvitationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created invitation
+          schema:
+            $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Invitation'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: User or invitation already exists
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new invitation
+      tags:
+      - Invitations
+  /invitations/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Revokes a pending invitation. Admin only.
+      parameters:
+      - description: Invitation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Invitation revoked
+        "400":
+          description: Invalid invitation ID or already processed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Revoke an invitation
+      tags:
+      - Invitations
+    get:
+      consumes:
+      - application/json
+      description: Returns a single invitation by ID. Admin only.
+      parameters:
+      - description: Invitation ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation details
+          schema:
+            $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Invitation'
+        "400":
+          description: Invalid invitation ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden - admin access required
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Invitation not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get invitation by ID
+      tags:
+      - Invitations
+  /invitations/accept/{token}:
+    post:
+      consumes:
+      - application/json
+      description: Accepts an invitation and creates the user account. Called after
+        Auth0 signup.
+      parameters:
+      - description: Invitation token
+        in: path
+        name: token
+        required: true
+        type: string
+      - description: User details
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            auth0_id:
+              type: string
+            first_name:
+              type: string
+            last_name:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Created user
+          schema:
+            $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.User'
+        "400":
+          description: Invalid request or expired token
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Accept an invitation
+      tags:
+      - Invitations
+  /invitations/validate/{token}:
+    get:
+      consumes:
+      - application/json
+      description: Validates an invitation token and returns invitation details. Public
+        endpoint.
+      parameters:
+      - description: Invitation token
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Invitation validation result
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Token is required
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Invalid invitation token
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Validate an invitation token
+      tags:
+      - Invitations
+  /me:
+    get:
+      consumes:
+      - application/json
+      description: Returns the authenticated user's profile with their squads
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile
+          schema:
+            $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.User'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - Users
+  /squads:
+    get:
+      consumes:
+      - application/json
+      description: Returns all squads/teams in the organization
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of squads
+          schema:
+            items:
+              $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Squad'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all squads
+      tags:
+      - Squads
+    post:
+      consumes:
+      - application/json
+      description: Creates a new squad/team. Only admins and supervisors can create
+        squads.
+      parameters:
+      - description: Squad creation request
+        in: body
+        name: squad
+        required: true
+        schema:
+          properties:
+            name:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created squad
+          schema:
+            $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.Squad'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new squad
+      tags:
+      - Squads
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Returns all users in the system with their squads
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Items per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of users
+          schema:
+            items:
+              $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.User'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user. Only supervisors can create users, and they
+        will be assigned as the supervisor.
+      parameters:
+      - description: User creation request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created user
+          schema:
+            $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.User'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new user
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a user. Supervisors can only delete their own direct reports.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: User deleted
+        "400":
+          description: Invalid user ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a user
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Returns a specific user by their ID. Employees can only view themselves,
+        supervisors can view their direct reports.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User profile
+          schema:
+            $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.User'
+        "400":
+          description: Invalid user ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Updates a user's profile. Employees can update themselves (limited
+        fields), supervisors can update their direct reports.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User update request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated user
+          schema:
+            $ref: '#/definitions/github_com_smith-dallin_manager-dashboard_internal_models.User'
+        "400":
+          description: Invalid request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: User not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update a user
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
+tags:
+- description: User management operations
+  name: Users
+- description: Invitation management for onboarding new users
+  name: Invitations
+- description: Time-off request management
+  name: Time Off
+- description: Jira integration endpoints
+  name: Jira
+- description: Calendar, tasks, and meetings management
+  name: Calendar
+- description: Organization chart and draft management
+  name: Org Chart
+- description: Team/squad management
+  name: Squads
+- description: Health check and monitoring endpoints
+  name: Health

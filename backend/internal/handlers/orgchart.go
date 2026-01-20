@@ -160,7 +160,7 @@ func (h *OrgChartHandlers) DeleteDraft(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.orgChartRepo.DeleteDraft(r.Context(), id); err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondError(w, http.StatusBadRequest, "Failed to delete draft")
 		return
 	}
 
@@ -248,7 +248,7 @@ func (h *OrgChartHandlers) RemoveChange(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := h.orgChartRepo.RemoveChange(r.Context(), draftID, userID); err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondError(w, http.StatusBadRequest, "Failed to remove change from draft")
 		return
 	}
 
@@ -280,7 +280,7 @@ func (h *OrgChartHandlers) PublishDraft(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := h.orgChartRepo.PublishDraft(r.Context(), id); err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondError(w, http.StatusBadRequest, "Failed to publish draft")
 		return
 	}
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"runtime"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -13,6 +14,8 @@ import (
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	httpSwagger "github.com/swaggo/http-swagger"
 	"github.com/smith-dallin/manager-dashboard/config"
 	"github.com/smith-dallin/manager-dashboard/internal/auth0"
 	"github.com/smith-dallin/manager-dashboard/internal/database"
@@ -66,6 +69,9 @@ type App struct {
 
 	// GraphQL
 	graphServer *handler.Server
+
+	// Metrics
+	metrics *middleware.Metrics
 }
 
 // New creates a new App with all dependencies initialized
@@ -111,7 +117,21 @@ func (a *App) initDatabase() error {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 
-	pool, err := database.Connect(a.Config.DatabaseURL)
+	// Create query tracer for slow query logging
+	slowThreshold := time.Duration(a.Config.DBSlowQueryThresholdMS) * time.Millisecond
+	tracer := database.NewQueryTracer(a.Logger, slowThreshold)
+
+	// Create pool configuration from app config
+	poolCfg := &database.PoolConfig{
+		MaxConns:          int32(a.Config.DBMaxConns),
+		MinConns:          int32(a.Config.DBMinConns),
+		MaxConnLifetime:   time.Duration(a.Config.DBMaxConnLifetime) * time.Second,
+		MaxConnIdleTime:   time.Duration(a.Config.DBMaxConnIdleTime) * time.Second,
+		HealthCheckPeriod: time.Duration(a.Config.DBHealthCheckPeriod) * time.Second,
+		Tracer:            tracer,
+	}
+
+	pool, err := database.Connect(a.Config.DatabaseURL, poolCfg)
 	if err != nil {
 		return err
 	}
@@ -123,7 +143,7 @@ func (a *App) initDatabase() error {
 func (a *App) initRepositories() error {
 	a.userRepo = database.NewUserRepository(a.DB)
 	a.squadRepo = database.NewSquadRepository(a.DB)
-	a.invitationRepo = database.NewInvitationRepository(a.DB)
+	a.invitationRepo = database.NewInvitationRepositoryWithConfig(a.DB, a.Config.InvitationExpiryDays)
 	a.orgJiraRepo = database.NewOrgJiraRepository(a.DB)
 	a.orgChartRepo = database.NewOrgChartRepository(a.DB, a.squadRepo)
 	a.timeOffRepo = database.NewTimeOffRepository(a.DB)
@@ -160,15 +180,19 @@ func (a *App) initServices() error {
 
 	// Initialize OAuth state store
 	// Use database-backed store in production for horizontal scaling
+	oauthStateTTL := time.Duration(a.Config.OAuthStateTTLMinutes) * time.Minute
+	if oauthStateTTL <= 0 {
+		oauthStateTTL = 10 * time.Minute
+	}
 	if a.Config.IsProduction() {
-		dbStore, err := oauth.NewDatabaseStateStore(a.DB, 10*time.Minute)
+		dbStore, err := oauth.NewDatabaseStateStore(a.DB, oauthStateTTL)
 		if err != nil {
 			return fmt.Errorf("failed to initialize OAuth state store: %w", err)
 		}
 		a.oauthStateStore = dbStore
 		a.Logger.Info("Using database-backed OAuth state store")
 	} else {
-		a.oauthStateStore = oauth.NewMemoryStateStore(10 * time.Minute)
+		a.oauthStateStore = oauth.NewMemoryStateStore(oauthStateTTL)
 		a.Logger.Info("Using in-memory OAuth state store (development mode)")
 	}
 
@@ -181,7 +205,7 @@ func (a *App) initServices() error {
 }
 
 func (a *App) initAuth() error {
-	authMiddleware, err := middleware.NewAuthMiddleware(a.Config.Auth0Domain, a.Config.Auth0Audience, a.userRepo)
+	authMiddleware, err := middleware.NewAuthMiddleware(a.Config.Auth0Domain, a.Config.Auth0Audience, a.userRepo, a.Config.JWKSCacheTTLMinutes)
 	if err != nil {
 		return err
 	}
@@ -200,9 +224,9 @@ func (a *App) initAuth() error {
 
 func (a *App) initHandlers() error {
 	a.handlers = handlers.New(a.userRepo, a.squadRepo)
-	a.avatarHandlers = handlers.NewAvatarHandlers(a.userRepo, a.avatarService)
+	a.avatarHandlers = handlers.NewAvatarHandlersWithConfig(a.userRepo, a.avatarService, a.Config.AvatarMaxSizeMB)
 	a.invitationHandlers = handlers.NewInvitationHandlers(a.invitationRepo, a.userRepo)
-	a.jiraHandlers = handlers.NewJiraHandlers(a.userRepo, a.orgJiraRepo, a.timeOffRepo, a.jiraOAuthService, a.oauthStateStore, a.Config.FrontendURL)
+	a.jiraHandlers = handlers.NewJiraHandlersWithConfig(a.userRepo, a.orgJiraRepo, a.timeOffRepo, a.jiraOAuthService, a.oauthStateStore, a.Config.FrontendURL, a.Config.JiraMaxUsersPagination)
 	a.orgChartHandlers = handlers.NewOrgChartHandlers(a.orgChartRepo, a.userRepo)
 	a.timeOffHandlers = handlers.NewTimeOffHandlers(a.timeOffRepo, a.userRepo)
 	a.calendarHandlers = handlers.NewCalendarHandlers(a.calendarBFFService, a.taskRepo, a.meetingRepo)
@@ -219,10 +243,18 @@ func (a *App) initRouter() {
 	r := chi.NewRouter()
 
 	// Create rate limiter using config values
-	rateLimiter := middleware.NewRateLimiter(rate.Limit(a.Config.RateLimitRPS), a.Config.RateLimitBurst)
+	rateLimiter := middleware.NewRateLimiterWithConfig(rate.Limit(a.Config.RateLimitRPS), a.Config.RateLimitBurst, middleware.RateLimiterConfig{
+		MaxVisitors:            a.Config.RateLimiterMaxVisitors,
+		CleanupIntervalMinutes: a.Config.RateLimiterCleanupIntervalMinutes,
+		VisitorTimeoutMinutes:  a.Config.RateLimiterVisitorTimeoutMinutes,
+	})
+
+	// Create metrics collector
+	a.metrics = middleware.NewMetrics("manager_dashboard")
 
 	// Global middleware
 	r.Use(chimiddleware.RequestID)
+	r.Use(a.metrics.Middleware) // Prometheus metrics
 	r.Use(middleware.RequestLogger(a.Logger))
 	r.Use(middleware.RecoveryLogger(a.Logger))
 	r.Use(middleware.SecurityHeaders)
@@ -237,8 +269,16 @@ func (a *App) initRouter() {
 		MaxAge:           300,
 	}))
 
-	// Health check and probes
+	// Health check, probes, and metrics
 	a.registerHealthRoutes(r)
+
+	// Swagger documentation (only in development mode)
+	if !a.Config.IsProduction() {
+		r.Get("/swagger/*", httpSwagger.Handler(
+			httpSwagger.URL("/swagger/doc.json"),
+		))
+		a.Logger.Info("Swagger documentation available at /swagger/index.html")
+	}
 
 	// GraphQL routes
 	a.registerGraphQLRoutes(r)
@@ -254,7 +294,7 @@ func (a *App) initRouter() {
 }
 
 func (a *App) registerHealthRoutes(r chi.Router) {
-	// Health check with database connectivity verification
+	// Basic health check (for load balancers)
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 		defer cancel()
@@ -275,11 +315,54 @@ func (a *App) registerHealthRoutes(r chi.Router) {
 		})
 	})
 
+	// Detailed health check (for monitoring)
+	r.Get("/health/detailed", func(w http.ResponseWriter, rq *http.Request) {
+		ctx, cancel := context.WithTimeout(rq.Context(), 5*time.Second)
+		defer cancel()
+
+		response := a.buildDetailedHealthResponse(ctx)
+
+		w.Header().Set("Content-Type", "application/json")
+		if response.Status != "healthy" {
+			w.WriteHeader(http.StatusServiceUnavailable)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+		json.NewEncoder(w).Encode(response)
+	})
+
+	// Readiness probe (for Kubernetes - checks if ready to serve traffic)
+	r.Get("/ready", func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+
+		// Check database connectivity
+		if err := a.DB.Ping(ctx); err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte("NOT READY: database unavailable"))
+			return
+		}
+
+		// Check if we have available connections
+		stats := a.DB.Stat()
+		if stats.AcquiredConns() >= stats.MaxConns() {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte("NOT READY: connection pool exhausted"))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("READY"))
+	})
+
 	// Liveness probe (simple check that server is running)
 	r.Get("/live", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
+
+	// Prometheus metrics endpoint
+	r.Handle("/metrics", promhttp.Handler())
 }
 
 func (a *App) registerGraphQLRoutes(r chi.Router) {
@@ -450,4 +533,98 @@ func (a *App) Shutdown(ctx context.Context) error {
 
 	a.Logger.Info("Server exited gracefully")
 	return nil
+}
+
+// DetailedHealthResponse contains comprehensive health information
+type DetailedHealthResponse struct {
+	Status      string                 `json:"status"`
+	Timestamp   string                 `json:"timestamp"`
+	Version     string                 `json:"version,omitempty"`
+	Environment string                 `json:"environment"`
+	Checks      map[string]HealthCheck `json:"checks"`
+	System      SystemInfo             `json:"system"`
+}
+
+// HealthCheck represents an individual health check result
+type HealthCheck struct {
+	Status  string         `json:"status"`
+	Latency string         `json:"latency,omitempty"`
+	Details map[string]any `json:"details,omitempty"`
+}
+
+// SystemInfo contains runtime system information
+type SystemInfo struct {
+	GoVersion    string `json:"go_version"`
+	NumGoroutine int    `json:"num_goroutine"`
+	NumCPU       int    `json:"num_cpu"`
+	MemoryAlloc  uint64 `json:"memory_alloc_bytes"`
+	MemorySys    uint64 `json:"memory_sys_bytes"`
+	Uptime       string `json:"uptime,omitempty"`
+}
+
+var startTime = time.Now()
+
+// buildDetailedHealthResponse builds the comprehensive health response
+func (a *App) buildDetailedHealthResponse(ctx context.Context) DetailedHealthResponse {
+	response := DetailedHealthResponse{
+		Status:      "healthy",
+		Timestamp:   time.Now().UTC().Format(time.RFC3339),
+		Environment: a.Config.Environment,
+		Checks:      make(map[string]HealthCheck),
+	}
+
+	// Database health check
+	dbCheck := a.checkDatabase(ctx)
+	response.Checks["database"] = dbCheck
+	if dbCheck.Status != "healthy" {
+		response.Status = "unhealthy"
+	}
+
+	// System info
+	var memStats runtime.MemStats
+	runtime.ReadMemStats(&memStats)
+
+	response.System = SystemInfo{
+		GoVersion:    runtime.Version(),
+		NumGoroutine: runtime.NumGoroutine(),
+		NumCPU:       runtime.NumCPU(),
+		MemoryAlloc:  memStats.Alloc,
+		MemorySys:    memStats.Sys,
+		Uptime:       time.Since(startTime).Round(time.Second).String(),
+	}
+
+	return response
+}
+
+// checkDatabase performs a database health check
+func (a *App) checkDatabase(ctx context.Context) HealthCheck {
+	start := time.Now()
+	err := a.DB.Ping(ctx)
+	latency := time.Since(start)
+
+	if err != nil {
+		return HealthCheck{
+			Status:  "unhealthy",
+			Latency: latency.String(),
+			Details: map[string]any{
+				"error": "connection failed",
+			},
+		}
+	}
+
+	// Get pool statistics
+	stats := a.DB.Stat()
+
+	return HealthCheck{
+		Status:  "healthy",
+		Latency: latency.String(),
+		Details: map[string]any{
+			"total_conns":      stats.TotalConns(),
+			"acquired_conns":   stats.AcquiredConns(),
+			"idle_conns":       stats.IdleConns(),
+			"max_conns":        stats.MaxConns(),
+			"empty_acquire":    stats.EmptyAcquireCount(),
+			"canceled_acquire": stats.CanceledAcquireCount(),
+		},
+	}
 }

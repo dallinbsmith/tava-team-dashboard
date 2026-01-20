@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -16,13 +17,23 @@ import (
 type AvatarHandlers struct {
 	userRepo      repository.UserRepository
 	avatarService *services.AvatarService
+	maxSizeMB     int
 }
 
 // NewAvatarHandlers creates a new avatar handlers instance
 func NewAvatarHandlers(userRepo repository.UserRepository, avatarService *services.AvatarService) *AvatarHandlers {
+	return NewAvatarHandlersWithConfig(userRepo, avatarService, 5) // Default 5MB
+}
+
+// NewAvatarHandlersWithConfig creates a new avatar handlers instance with custom max size
+func NewAvatarHandlersWithConfig(userRepo repository.UserRepository, avatarService *services.AvatarService, maxSizeMB int) *AvatarHandlers {
+	if maxSizeMB <= 0 {
+		maxSizeMB = 5
+	}
 	return &AvatarHandlers{
 		userRepo:      userRepo,
 		avatarService: avatarService,
+		maxSizeMB:     maxSizeMB,
 	}
 }
 
@@ -65,9 +76,10 @@ func (h *AvatarHandlers) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse multipart form (max 5MB)
-	if err := r.ParseMultipartForm(5 << 20); err != nil {
-		respondError(w, http.StatusBadRequest, "File too large (max 5MB)")
+	// Parse multipart form with configurable max size
+	maxBytes := int64(h.maxSizeMB) << 20
+	if err := r.ParseMultipartForm(maxBytes); err != nil {
+		respondError(w, http.StatusBadRequest, fmt.Sprintf("File too large (max %dMB)", h.maxSizeMB))
 		return
 	}
 
@@ -93,8 +105,8 @@ func (h *AvatarHandlers) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate size
-	if len(fileBytes) > 5<<20 {
-		respondError(w, http.StatusBadRequest, "Image too large (max 5MB)")
+	if len(fileBytes) > int(maxBytes) {
+		respondError(w, http.StatusBadRequest, fmt.Sprintf("Image too large (max %dMB)", h.maxSizeMB))
 		return
 	}
 
@@ -150,7 +162,7 @@ func (h *AvatarHandlers) UploadAvatarBase64(w http.ResponseWriter, r *http.Reque
 	// Parse and validate the base64 image using the avatar service
 	img, err := h.avatarService.ParseBase64Image(req.Image)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondError(w, http.StatusBadRequest, "Invalid image format: please upload a valid JPEG, PNG, GIF, or WebP image")
 		return
 	}
 

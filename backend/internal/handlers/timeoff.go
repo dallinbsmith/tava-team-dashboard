@@ -167,7 +167,7 @@ func (h *TimeOffHandlers) Cancel(w http.ResponseWriter, r *http.Request) {
 
 	err = h.timeOffRepo.Cancel(r.Context(), id, currentUser.ID)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondError(w, http.StatusBadRequest, "Failed to cancel time off request")
 		return
 	}
 
@@ -205,6 +205,14 @@ func (h *TimeOffHandlers) GetPending(w http.ResponseWriter, r *http.Request) {
 
 	if requests == nil {
 		requests = []models.TimeOffRequest{}
+	}
+
+	// Support optional pagination
+	if shouldPaginate(r) {
+		p := parsePagination(r)
+		paginated, total := paginateSlice(requests, p)
+		respondPaginated(w, paginated, total, p)
+		return
 	}
 
 	respondJSON(w, http.StatusOK, requests)
@@ -261,7 +269,7 @@ func (h *TimeOffHandlers) Review(w http.ResponseWriter, r *http.Request) {
 
 	err = h.timeOffRepo.Review(r.Context(), id, currentUser.ID, &req)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
+		respondError(w, http.StatusBadRequest, "Failed to review time off request")
 		return
 	}
 
@@ -302,6 +310,14 @@ func (h *TimeOffHandlers) GetTeamTimeOff(w http.ResponseWriter, r *http.Request)
 
 	if requests == nil {
 		requests = []models.TimeOffRequest{}
+	}
+
+	// Support optional pagination
+	if shouldPaginate(r) {
+		p := parsePagination(r)
+		paginated, total := paginateSlice(requests, p)
+		respondPaginated(w, paginated, total, p)
+		return
 	}
 
 	respondJSON(w, http.StatusOK, requests)

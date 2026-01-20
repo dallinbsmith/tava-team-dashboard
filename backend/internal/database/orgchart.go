@@ -394,9 +394,9 @@ func (r *OrgChartRepository) PublishDraft(ctx context.Context, draftID int64) er
 			return fmt.Errorf("failed to apply change for user %d: %w", c.userID, err)
 		}
 
-		// Apply squad changes via SquadRepository
+		// Apply squad changes within the same transaction
 		if c.newSquadIDs != nil {
-			if err := r.squadRepo.SetUserSquads(ctx, c.userID, c.newSquadIDs); err != nil {
+			if err := r.squadRepo.SetUserSquadsWithTx(ctx, tx, c.userID, c.newSquadIDs); err != nil {
 				return fmt.Errorf("failed to apply squad change for user %d: %w", c.userID, err)
 			}
 		}

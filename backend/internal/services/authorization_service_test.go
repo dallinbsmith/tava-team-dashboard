@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"testing"
 
 	"github.com/smith-dallin/manager-dashboard/internal/apperrors"
@@ -97,7 +98,7 @@ func TestAuthorizationService_CanViewUser(t *testing.T) {
 			tt.setupMocks(userRepo)
 
 			svc := NewAuthorizationService(userRepo)
-			err := svc.CanViewUser(tt.currentUser, tt.targetUserID)
+			err := svc.CanViewUser(context.Background(), tt.currentUser, tt.targetUserID)
 
 			if tt.wantErr {
 				if err == nil {
@@ -184,7 +185,7 @@ func TestAuthorizationService_CanUpdateUser(t *testing.T) {
 			tt.setupMocks(userRepo)
 
 			svc := NewAuthorizationService(userRepo)
-			err := svc.CanUpdateUser(tt.currentUser, tt.targetUserID)
+			err := svc.CanUpdateUser(context.Background(), tt.currentUser, tt.targetUserID)
 
 			if tt.wantErr && err == nil {
 				t.Errorf("CanUpdateUser() expected error, got nil")
@@ -262,7 +263,7 @@ func TestAuthorizationService_CanDeleteUser(t *testing.T) {
 			tt.setupMocks(userRepo)
 
 			svc := NewAuthorizationService(userRepo)
-			err := svc.CanDeleteUser(tt.currentUser, tt.targetUserID)
+			err := svc.CanDeleteUser(context.Background(), tt.currentUser, tt.targetUserID)
 
 			if tt.wantErr && err == nil {
 				t.Errorf("CanDeleteUser() expected error, got nil")
@@ -493,7 +494,7 @@ func TestAuthorizationService_CanReviewTimeOffRequest(t *testing.T) {
 			tt.setupMocks(userRepo)
 
 			svc := NewAuthorizationService(userRepo)
-			err := svc.CanReviewTimeOffRequest(tt.currentUser, tt.requestingUserID)
+			err := svc.CanReviewTimeOffRequest(context.Background(), tt.currentUser, tt.requestingUserID)
 
 			if tt.wantErr && err == nil {
 				t.Errorf("CanReviewTimeOffRequest() expected error, got nil")

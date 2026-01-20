@@ -26,9 +26,52 @@ const (
 	ErrorTypeServiceUnavailable
 )
 
+// ErrorCode represents a machine-readable error code
+type ErrorCode string
+
+// Standard error codes for consistent API responses
+const (
+	// Authentication errors
+	CodeAuthRequired    ErrorCode = "AUTH_REQUIRED"
+	CodeInvalidToken    ErrorCode = "INVALID_TOKEN"
+	CodeTokenExpired    ErrorCode = "TOKEN_EXPIRED"
+
+	// Authorization errors
+	CodeForbidden          ErrorCode = "FORBIDDEN"
+	CodeAdminRequired      ErrorCode = "ADMIN_REQUIRED"
+	CodeSupervisorRequired ErrorCode = "SUPERVISOR_REQUIRED"
+	CodeNotOwner           ErrorCode = "NOT_OWNER"
+
+	// Resource errors
+	CodeNotFound      ErrorCode = "NOT_FOUND"
+	CodeAlreadyExists ErrorCode = "ALREADY_EXISTS"
+	CodeConflict      ErrorCode = "CONFLICT"
+
+	// Validation errors
+	CodeValidationFailed ErrorCode = "VALIDATION_FAILED"
+	CodeInvalidInput     ErrorCode = "INVALID_INPUT"
+	CodeMissingField     ErrorCode = "MISSING_FIELD"
+	CodeInvalidFormat    ErrorCode = "INVALID_FORMAT"
+	CodeInvalidEmail     ErrorCode = "INVALID_EMAIL"
+	CodeInvalidRole      ErrorCode = "INVALID_ROLE"
+
+	// Rate limiting
+	CodeRateLimitExceeded ErrorCode = "RATE_LIMIT_EXCEEDED"
+
+	// External service errors
+	CodeServiceUnavailable ErrorCode = "SERVICE_UNAVAILABLE"
+	CodeJiraError          ErrorCode = "JIRA_ERROR"
+	CodeAuth0Error         ErrorCode = "AUTH0_ERROR"
+
+	// Internal errors
+	CodeInternalError ErrorCode = "INTERNAL_ERROR"
+	CodeDatabaseError ErrorCode = "DATABASE_ERROR"
+)
+
 // AppError is the standard application error type
 type AppError struct {
 	Type    ErrorType // Error category
+	Code    ErrorCode // Machine-readable error code
 	Message string    // User-facing message
 	Err     error     // Internal error (not exposed to users)
 	Field   string    // Optional field name for validation errors
@@ -75,6 +118,16 @@ func (e *AppError) HTTPStatus() int {
 func NewValidationError(message string) *AppError {
 	return &AppError{
 		Type:    ErrorTypeValidation,
+		Code:    CodeValidationFailed,
+		Message: message,
+	}
+}
+
+// NewValidationErrorWithCode creates a validation error with a specific code
+func NewValidationErrorWithCode(code ErrorCode, message string) *AppError {
+	return &AppError{
+		Type:    ErrorTypeValidation,
+		Code:    code,
 		Message: message,
 	}
 }
@@ -83,6 +136,7 @@ func NewValidationError(message string) *AppError {
 func NewValidationErrorWithField(field, message string) *AppError {
 	return &AppError{
 		Type:    ErrorTypeValidation,
+		Code:    CodeMissingField,
 		Message: message,
 		Field:   field,
 	}
@@ -92,6 +146,7 @@ func NewValidationErrorWithField(field, message string) *AppError {
 func NewNotFoundError(resource string) *AppError {
 	return &AppError{
 		Type:    ErrorTypeNotFound,
+		Code:    CodeNotFound,
 		Message: fmt.Sprintf("%s not found", resource),
 	}
 }
@@ -103,6 +158,19 @@ func NewUnauthorizedError(message string) *AppError {
 	}
 	return &AppError{
 		Type:    ErrorTypeUnauthorized,
+		Code:    CodeAuthRequired,
+		Message: message,
+	}
+}
+
+// NewUnauthorizedErrorWithCode creates an unauthorized error with a specific code
+func NewUnauthorizedErrorWithCode(code ErrorCode, message string) *AppError {
+	if message == "" {
+		message = "Unauthorized"
+	}
+	return &AppError{
+		Type:    ErrorTypeUnauthorized,
+		Code:    code,
 		Message: message,
 	}
 }
@@ -114,6 +182,19 @@ func NewForbiddenError(message string) *AppError {
 	}
 	return &AppError{
 		Type:    ErrorTypeForbidden,
+		Code:    CodeForbidden,
+		Message: message,
+	}
+}
+
+// NewForbiddenErrorWithCode creates a forbidden error with a specific code
+func NewForbiddenErrorWithCode(code ErrorCode, message string) *AppError {
+	if message == "" {
+		message = "Forbidden"
+	}
+	return &AppError{
+		Type:    ErrorTypeForbidden,
+		Code:    code,
 		Message: message,
 	}
 }
@@ -122,7 +203,17 @@ func NewForbiddenError(message string) *AppError {
 func NewConflictError(message string) *AppError {
 	return &AppError{
 		Type:    ErrorTypeConflict,
+		Code:    CodeConflict,
 		Message: message,
+	}
+}
+
+// NewAlreadyExistsError creates an already exists error
+func NewAlreadyExistsError(resource string) *AppError {
+	return &AppError{
+		Type:    ErrorTypeConflict,
+		Code:    CodeAlreadyExists,
+		Message: fmt.Sprintf("%s already exists", resource),
 	}
 }
 
@@ -130,6 +221,17 @@ func NewConflictError(message string) *AppError {
 func NewInternalError(message string, err error) *AppError {
 	return &AppError{
 		Type:    ErrorTypeInternal,
+		Code:    CodeInternalError,
+		Message: message,
+		Err:     err,
+	}
+}
+
+// NewDatabaseError creates a database error
+func NewDatabaseError(message string, err error) *AppError {
+	return &AppError{
+		Type:    ErrorTypeInternal,
+		Code:    CodeDatabaseError,
 		Message: message,
 		Err:     err,
 	}
@@ -139,7 +241,27 @@ func NewInternalError(message string, err error) *AppError {
 func NewServiceUnavailableError(service string) *AppError {
 	return &AppError{
 		Type:    ErrorTypeServiceUnavailable,
+		Code:    CodeServiceUnavailable,
 		Message: fmt.Sprintf("%s is not available", service),
+	}
+}
+
+// NewJiraError creates a Jira service error
+func NewJiraError(message string, err error) *AppError {
+	return &AppError{
+		Type:    ErrorTypeServiceUnavailable,
+		Code:    CodeJiraError,
+		Message: message,
+		Err:     err,
+	}
+}
+
+// NewRateLimitError creates a rate limit error
+func NewRateLimitError() *AppError {
+	return &AppError{
+		Type:    ErrorTypeValidation, // Use validation since 429 is client-side handling
+		Code:    CodeRateLimitExceeded,
+		Message: "Too many requests, please try again later",
 	}
 }
 
@@ -149,11 +271,12 @@ func Wrap(err error, message string) *AppError {
 		return nil
 	}
 
-	// If it's already an AppError, preserve the type
+	// If it's already an AppError, preserve the type and code
 	var appErr *AppError
 	if errors.As(err, &appErr) {
 		return &AppError{
 			Type:    appErr.Type,
+			Code:    appErr.Code,
 			Message: message,
 			Err:     err,
 			Field:   appErr.Field,
@@ -163,6 +286,7 @@ func Wrap(err error, message string) *AppError {
 	// Default to internal error for unknown errors
 	return &AppError{
 		Type:    ErrorTypeInternal,
+		Code:    CodeInternalError,
 		Message: message,
 		Err:     err,
 	}
@@ -222,4 +346,38 @@ func GetUserMessage(err error) string {
 		return appErr.Message
 	}
 	return "An internal error occurred"
+}
+
+// GetErrorCode returns the error code for any error
+// Returns CodeInternalError for non-AppError types
+func GetErrorCode(err error) ErrorCode {
+	var appErr *AppError
+	if errors.As(err, &appErr) {
+		if appErr.Code != "" {
+			return appErr.Code
+		}
+		// Return default code based on type if not set
+		return defaultCodeForType(appErr.Type)
+	}
+	return CodeInternalError
+}
+
+// defaultCodeForType returns the default error code for an error type
+func defaultCodeForType(t ErrorType) ErrorCode {
+	switch t {
+	case ErrorTypeValidation:
+		return CodeValidationFailed
+	case ErrorTypeNotFound:
+		return CodeNotFound
+	case ErrorTypeUnauthorized:
+		return CodeAuthRequired
+	case ErrorTypeForbidden:
+		return CodeForbidden
+	case ErrorTypeConflict:
+		return CodeConflict
+	case ErrorTypeServiceUnavailable:
+		return CodeServiceUnavailable
+	default:
+		return CodeInternalError
+	}
 }

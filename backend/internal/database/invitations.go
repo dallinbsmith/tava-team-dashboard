@@ -21,11 +21,22 @@ const (
 )
 
 type InvitationRepository struct {
-	pool *pgxpool.Pool
+	pool       *pgxpool.Pool
+	expiryDays int
 }
 
+// NewInvitationRepository creates a new invitation repository
+// expiryDays specifies how many days until an invitation expires (default: 7)
 func NewInvitationRepository(pool *pgxpool.Pool) *InvitationRepository {
-	return &InvitationRepository{pool: pool}
+	return &InvitationRepository{pool: pool, expiryDays: 7}
+}
+
+// NewInvitationRepositoryWithConfig creates a new invitation repository with custom expiry
+func NewInvitationRepositoryWithConfig(pool *pgxpool.Pool, expiryDays int) *InvitationRepository {
+	if expiryDays <= 0 {
+		expiryDays = 7
+	}
+	return &InvitationRepository{pool: pool, expiryDays: expiryDays}
 }
 
 // scanInvitation scans a row into an Invitation struct
@@ -61,8 +72,8 @@ func (r *InvitationRepository) Create(ctx context.Context, req *models.CreateInv
 		return nil, fmt.Errorf("failed to generate token: %w", err)
 	}
 
-	// Invitations expire in 7 days
-	expiresAt := time.Now().Add(7 * 24 * time.Hour)
+	// Use configurable expiry days
+	expiresAt := time.Now().Add(time.Duration(r.expiryDays) * 24 * time.Hour)
 
 	// Handle optional department
 	var department *string

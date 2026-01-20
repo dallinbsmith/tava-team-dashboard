@@ -39,7 +39,7 @@ func main() {
 		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	pool, err := database.Connect(cfg.DatabaseURL)
+	pool, err := database.Connect(cfg.DatabaseURL, nil) // Use default pool config for CLI
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}

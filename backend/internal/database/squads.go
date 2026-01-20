@@ -141,8 +141,25 @@ func (r *SquadRepository) SetUserSquads(ctx context.Context, userID int64, squad
 	}
 	defer tx.Rollback(ctx)
 
+	if err := r.setUserSquadsWithExecutor(ctx, tx, userID, squadIDs); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+	return nil
+}
+
+// SetUserSquadsWithTx sets the squads for a user within an existing transaction
+func (r *SquadRepository) SetUserSquadsWithTx(ctx context.Context, tx pgx.Tx, userID int64, squadIDs []int64) error {
+	return r.setUserSquadsWithExecutor(ctx, tx, userID, squadIDs)
+}
+
+// setUserSquadsWithExecutor is the internal implementation that works with any executor
+func (r *SquadRepository) setUserSquadsWithExecutor(ctx context.Context, tx pgx.Tx, userID int64, squadIDs []int64) error {
 	// Delete existing squad memberships
-	_, err = tx.Exec(ctx, `DELETE FROM user_squads WHERE user_id = $1`, userID)
+	_, err := tx.Exec(ctx, `DELETE FROM user_squads WHERE user_id = $1`, userID)
 	if err != nil {
 		return fmt.Errorf("failed to delete existing squad memberships: %w", err)
 	}
@@ -162,10 +179,6 @@ func (r *SquadRepository) SetUserSquads(ctx context.Context, userID int64, squad
 			}
 		}
 		br.Close()
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 	return nil
 }

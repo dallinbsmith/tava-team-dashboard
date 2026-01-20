@@ -47,6 +47,31 @@ type Config struct {
 	// Logging Configuration
 	LogLevel  string // debug, info, warn, error
 	LogFormat string // json, text
+
+	// Database Pool Configuration
+	DBMaxConns             int // Maximum number of connections in pool
+	DBMinConns             int // Minimum number of idle connections
+	DBMaxConnLifetime      int // Maximum connection lifetime in seconds
+	DBMaxConnIdleTime      int // Maximum idle time before closing in seconds
+	DBHealthCheckPeriod    int // Health check interval in seconds
+	DBSlowQueryThresholdMS int // Threshold in milliseconds for logging slow queries
+
+	// Application Configuration
+	AvatarMaxSizeMB      int // Maximum avatar upload size in MB
+	InvitationExpiryDays int // Number of days until an invitation expires
+	CacheTTLSeconds      int // Default cache TTL in seconds
+
+	// Security Configuration
+	JWKSCacheTTLMinutes              int // JWKS cache TTL in minutes
+	RateLimiterCleanupIntervalMinutes int // Rate limiter cleanup interval in minutes
+	RateLimiterVisitorTimeoutMinutes  int // Rate limiter visitor timeout in minutes
+	RateLimiterMaxVisitors           int // Maximum number of tracked visitors
+
+	// OAuth Configuration
+	OAuthStateTTLMinutes int // OAuth state store TTL in minutes
+
+	// Jira Configuration
+	JiraMaxUsersPagination int // Maximum users to fetch in Jira pagination
 }
 
 // IsProduction returns true if running in production mode
@@ -110,6 +135,31 @@ func Load() (*Config, error) {
 		// Logging Configuration
 		LogLevel:  getEnv("LOG_LEVEL", "info"),
 		LogFormat: getEnv("LOG_FORMAT", "text"),
+
+		// Database Pool Configuration
+		DBMaxConns:             getEnvInt("DB_MAX_CONNS", 25),
+		DBMinConns:             getEnvInt("DB_MIN_CONNS", 5),
+		DBMaxConnLifetime:      getEnvInt("DB_MAX_CONN_LIFETIME_SECS", 3600),  // 1 hour
+		DBMaxConnIdleTime:      getEnvInt("DB_MAX_CONN_IDLE_TIME_SECS", 1800), // 30 minutes
+		DBHealthCheckPeriod:    getEnvInt("DB_HEALTH_CHECK_PERIOD_SECS", 60),  // 1 minute
+		DBSlowQueryThresholdMS: getEnvInt("DB_SLOW_QUERY_THRESHOLD_MS", 100),  // 100ms
+
+		// Application Configuration
+		AvatarMaxSizeMB:      getEnvInt("AVATAR_MAX_SIZE_MB", 5),       // 5MB default
+		InvitationExpiryDays: getEnvInt("INVITATION_EXPIRY_DAYS", 7),  // 7 days default
+		CacheTTLSeconds:      getEnvInt("CACHE_TTL_SECONDS", 300),     // 5 minutes default
+
+		// Security Configuration
+		JWKSCacheTTLMinutes:               getEnvInt("JWKS_CACHE_TTL_MINUTES", 5),               // 5 minutes default
+		RateLimiterCleanupIntervalMinutes: getEnvInt("RATE_LIMITER_CLEANUP_INTERVAL_MINUTES", 1), // 1 minute default
+		RateLimiterVisitorTimeoutMinutes:  getEnvInt("RATE_LIMITER_VISITOR_TIMEOUT_MINUTES", 3),  // 3 minutes default
+		RateLimiterMaxVisitors:            getEnvInt("RATE_LIMITER_MAX_VISITORS", 10000),         // 10000 default
+
+		// OAuth Configuration
+		OAuthStateTTLMinutes: getEnvInt("OAUTH_STATE_TTL_MINUTES", 10), // 10 minutes default
+
+		// Jira Configuration
+		JiraMaxUsersPagination: getEnvInt("JIRA_MAX_USERS_PAGINATION", 1000), // 1000 default
 	}
 
 	// Validate required configuration

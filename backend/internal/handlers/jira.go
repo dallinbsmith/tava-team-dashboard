@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,29 +12,38 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/smith-dallin/manager-dashboard/internal/database"
 	"github.com/smith-dallin/manager-dashboard/internal/jira"
-	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 	"github.com/smith-dallin/manager-dashboard/internal/oauth"
 	"github.com/smith-dallin/manager-dashboard/internal/repository"
 )
 
 type JiraHandlers struct {
-	userRepo     repository.UserRepository
-	orgJiraRepo  repository.OrgJiraRepository
-	timeOffRepo  repository.TimeOffRepository
-	oauthService *jira.OAuthService
-	stateStore   oauth.StateStore
-	frontendURL  string
+	userRepo            repository.UserRepository
+	orgJiraRepo         repository.OrgJiraRepository
+	timeOffRepo         repository.TimeOffRepository
+	oauthService        *jira.OAuthService
+	stateStore          oauth.StateStore
+	frontendURL         string
+	maxUsersPagination  int
 }
 
 func NewJiraHandlers(userRepo repository.UserRepository, orgJiraRepo repository.OrgJiraRepository, timeOffRepo repository.TimeOffRepository, oauthService *jira.OAuthService, stateStore oauth.StateStore, frontendURL string) *JiraHandlers {
+	return NewJiraHandlersWithConfig(userRepo, orgJiraRepo, timeOffRepo, oauthService, stateStore, frontendURL, 1000)
+}
+
+// NewJiraHandlersWithConfig creates Jira handlers with custom configuration
+func NewJiraHandlersWithConfig(userRepo repository.UserRepository, orgJiraRepo repository.OrgJiraRepository, timeOffRepo repository.TimeOffRepository, oauthService *jira.OAuthService, stateStore oauth.StateStore, frontendURL string, maxUsersPagination int) *JiraHandlers {
+	if maxUsersPagination <= 0 {
+		maxUsersPagination = 1000
+	}
 	return &JiraHandlers{
-		userRepo:     userRepo,
-		orgJiraRepo:  orgJiraRepo,
-		timeOffRepo:  timeOffRepo,
-		oauthService: oauthService,
-		stateStore:   stateStore,
-		frontendURL:  frontendURL,
+		userRepo:           userRepo,
+		orgJiraRepo:        orgJiraRepo,
+		timeOffRepo:        timeOffRepo,
+		oauthService:       oauthService,
+		stateStore:         stateStore,
+		frontendURL:        frontendURL,
+		maxUsersPagination: maxUsersPagination,
 	}
 }
 
@@ -85,16 +93,15 @@ func (h *JiraHandlers) getJiraClient(ctx context.Context) (*jira.Client, error) 
 // GetJiraSettings returns the organization-wide Jira settings
 // Available to all authenticated users to check connection status
 func (h *JiraHandlers) GetJiraSettings(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
+	currentUser := requireAuth(w, r)
 	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	// Check org-wide Jira settings first
 	orgSettings, err := h.orgJiraRepo.Get(r.Context())
 	if err != nil {
-		http.Error(w, "Failed to get Jira settings", http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to get Jira settings")
 		return
 	}
 
@@ -119,27 +126,20 @@ func (h *JiraHandlers) GetJiraSettings(w http.ResponseWriter, r *http.Request) {
 // GetOAuthAuthorizeURL returns the URL to redirect the user to for Jira OAuth authorization
 // Only admins can configure the organization-wide Jira connection
 func (h *JiraHandlers) GetOAuthAuthorizeURL(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
+	currentUser := requireAdmin(w, r)
 	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only admins can configure org-wide Jira
-	if !currentUser.IsAdmin() {
-		http.Error(w, "Only admins can configure Jira integration", http.StatusForbidden)
 		return
 	}
 
 	if h.oauthService == nil {
-		http.Error(w, "Jira OAuth is not configured", http.StatusServiceUnavailable)
+		respondError(w, http.StatusServiceUnavailable, "Jira OAuth is not configured")
 		return
 	}
 
 	// Create state in the state store
 	state, err := h.stateStore.Create(r.Context(), currentUser.ID)
 	if err != nil {
-		http.Error(w, "Failed to generate state", http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to generate state")
 		return
 	}
 
@@ -238,39 +238,31 @@ func (h *JiraHandlers) HandleOAuthCallback(w http.ResponseWriter, r *http.Reques
 // UpdateJiraSettings updates the current user's Jira credentials
 // Only supervisors and admins can access Jira features
 func (h *JiraHandlers) UpdateJiraSettings(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
+	currentUser := requireJiraAccess(w, r)
 	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only supervisors and admins can access Jira features
-	if !currentUser.IsSupervisorOrAdmin() {
-		http.Error(w, "Jira integration is only available for supervisors and admins", http.StatusForbidden)
 		return
 	}
 
 	var req models.UpdateJiraSettingsRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 
 	if err := req.Validate(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondError(w, http.StatusBadRequest, "Invalid Jira settings: please check all fields are filled correctly")
 		return
 	}
 
 	// Test the credentials before saving
 	client := jira.NewClient(req.JiraDomain, req.JiraEmail, req.JiraAPIToken)
 	if err := client.TestConnection(); err != nil {
-		http.Error(w, "Invalid Jira credentials: "+err.Error(), http.StatusBadRequest)
+		respondError(w, http.StatusBadRequest, "Invalid Jira credentials: unable to connect to Jira")
 		return
 	}
 
 	// Save the credentials
 	if err := h.userRepo.UpdateJiraSettings(r.Context(), currentUser.ID, &req); err != nil {
-		http.Error(w, "Failed to save Jira settings", http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to save Jira settings")
 		return
 	}
 
@@ -285,20 +277,13 @@ func (h *JiraHandlers) UpdateJiraSettings(w http.ResponseWriter, r *http.Request
 // DeleteJiraSettings removes the current user's Jira credentials
 // Only supervisors and admins can access Jira features
 func (h *JiraHandlers) DeleteJiraSettings(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
+	currentUser := requireJiraAccess(w, r)
 	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only supervisors and admins can access Jira features
-	if !currentUser.IsSupervisorOrAdmin() {
-		http.Error(w, "Jira integration is only available for supervisors and admins", http.StatusForbidden)
 		return
 	}
 
 	if err := h.userRepo.ClearJiraSettings(r.Context(), currentUser.ID); err != nil {
-		http.Error(w, "Failed to clear Jira settings", http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to clear Jira settings")
 		return
 	}
 
@@ -315,15 +300,8 @@ type JiraIssueWithTimeOff struct {
 // Uses org-wide Jira connection and the user's jira_account_id mapping
 // Only supervisors and admins can access Jira features
 func (h *JiraHandlers) GetMyTasks(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
+	currentUser := requireJiraAccess(w, r)
 	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only supervisors and admins can access Jira features
-	if !currentUser.IsSupervisorOrAdmin() {
-		http.Error(w, "Jira integration is only available for supervisors and admins", http.StatusForbidden)
 		return
 	}
 
@@ -345,14 +323,14 @@ func (h *JiraHandlers) GetMyTasks(w http.ResponseWriter, r *http.Request) {
 	// Get Jira client with automatic token refresh
 	client, err := h.getJiraClient(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to connect to Jira")
 		return
 	}
 
 	// Fetch issues by the user's Jira account ID
 	issues, err := client.GetIssuesByAccountID(*currentUser.JiraAccountID, maxResults)
 	if err != nil {
-		http.Error(w, "Failed to fetch Jira issues: "+err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch Jira issues")
 		return
 	}
 
@@ -383,21 +361,13 @@ func (h *JiraHandlers) GetMyTasks(w http.ResponseWriter, r *http.Request) {
 // Uses org-wide Jira connection
 // Only supervisors and admins can access Jira features
 func (h *JiraHandlers) GetProjectTasks(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
-	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only supervisors and admins can access Jira features
-	if !currentUser.IsSupervisorOrAdmin() {
-		http.Error(w, "Jira integration is only available for supervisors and admins", http.StatusForbidden)
+	if requireJiraAccess(w, r) == nil {
 		return
 	}
 
 	projectKey := chi.URLParam(r, "projectKey")
 	if projectKey == "" {
-		http.Error(w, "Project key is required", http.StatusBadRequest)
+		respondError(w, http.StatusBadRequest, "Project key is required")
 		return
 	}
 
@@ -412,13 +382,13 @@ func (h *JiraHandlers) GetProjectTasks(w http.ResponseWriter, r *http.Request) {
 	// Get Jira client with automatic token refresh
 	client, err := h.getJiraClient(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to connect to Jira")
 		return
 	}
 
 	issues, err := client.GetIssuesByProject(projectKey, maxResults)
 	if err != nil {
-		http.Error(w, "Failed to fetch Jira issues: "+err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch Jira issues")
 		return
 	}
 
@@ -428,28 +398,20 @@ func (h *JiraHandlers) GetProjectTasks(w http.ResponseWriter, r *http.Request) {
 // GetProjects returns all Jira projects accessible via org-wide connection
 // Only supervisors and admins can access Jira features
 func (h *JiraHandlers) GetProjects(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
-	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only supervisors and admins can access Jira features
-	if !currentUser.IsSupervisorOrAdmin() {
-		http.Error(w, "Jira integration is only available for supervisors and admins", http.StatusForbidden)
+	if requireJiraAccess(w, r) == nil {
 		return
 	}
 
 	// Get Jira client with automatic token refresh
 	client, err := h.getJiraClient(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to connect to Jira")
 		return
 	}
 
 	projects, err := client.GetProjects()
 	if err != nil {
-		http.Error(w, "Failed to fetch Jira projects: "+err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch Jira projects")
 		return
 	}
 
@@ -459,22 +421,14 @@ func (h *JiraHandlers) GetProjects(w http.ResponseWriter, r *http.Request) {
 // GetEpics returns all unresolved Jira epics via org-wide connection
 // Only supervisors and admins can access Jira features
 func (h *JiraHandlers) GetEpics(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
-	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only supervisors and admins can access Jira features
-	if !currentUser.IsSupervisorOrAdmin() {
-		http.Error(w, "Jira integration is only available for supervisors and admins", http.StatusForbidden)
+	if requireJiraAccess(w, r) == nil {
 		return
 	}
 
 	// Get Jira client with automatic token refresh
 	client, err := h.getJiraClient(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to connect to Jira")
 		return
 	}
 
@@ -488,7 +442,7 @@ func (h *JiraHandlers) GetEpics(w http.ResponseWriter, r *http.Request) {
 
 	epics, err := client.GetEpics(maxResults)
 	if err != nil {
-		http.Error(w, "Failed to fetch Jira epics: "+err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch Jira epics")
 		return
 	}
 
@@ -498,41 +452,33 @@ func (h *JiraHandlers) GetEpics(w http.ResponseWriter, r *http.Request) {
 // GetUserTasks returns Jira issues for a specific user using org-wide Jira connection
 // Uses the user's jira_account_id to query issues assigned to them
 func (h *JiraHandlers) GetUserTasks(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
+	currentUser := requireJiraAccess(w, r)
 	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// Only supervisors and admins can view other users' tasks
-	if !currentUser.IsSupervisorOrAdmin() {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
-	userIDStr := chi.URLParam(r, "userId")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	userID, err := parseIDParam(r, "userId")
 	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		respondError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 
 	// Get target user
 	targetUser, err := h.userRepo.GetByID(r.Context(), userID)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+		respondError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
 	// Check if current user can manage target user
 	if !currentUser.CanManage(targetUser) {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		respondError(w, http.StatusForbidden, "You don't have permission to view this user's tasks")
 		return
 	}
 
 	// Check if user has a Jira account ID mapped
 	if targetUser.JiraAccountID == nil || *targetUser.JiraAccountID == "" {
-		http.Error(w, "User is not linked to a Jira account", http.StatusBadRequest)
+		respondError(w, http.StatusBadRequest, "User is not linked to a Jira account")
 		return
 	}
 
@@ -547,14 +493,14 @@ func (h *JiraHandlers) GetUserTasks(w http.ResponseWriter, r *http.Request) {
 	// Get Jira client with automatic token refresh
 	client, err := h.getJiraClient(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to connect to Jira")
 		return
 	}
 
 	// Fetch issues by the user's Jira account ID
 	issues, err := client.GetIssuesByAccountID(*targetUser.JiraAccountID, maxResults)
 	if err != nil {
-		http.Error(w, "Failed to fetch Jira issues: "+err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch Jira issues")
 		return
 	}
 
@@ -590,36 +536,28 @@ type JiraUserWithMapping struct {
 
 // GetJiraUsers returns all Jira users for mapping to employees (admin only)
 func (h *JiraHandlers) GetJiraUsers(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
-	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only admins can fetch Jira users for mapping
-	if !currentUser.IsAdmin() {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+	if requireAdmin(w, r) == nil {
 		return
 	}
 
 	// Get Jira client with automatic token refresh
 	client, err := h.getJiraClient(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to connect to Jira")
 		return
 	}
 
-	// Fetch all Jira users
-	jiraUsers, err := client.GetAllUsers(1000)
+	// Fetch all Jira users with configurable pagination limit
+	jiraUsers, err := client.GetAllUsers(h.maxUsersPagination)
 	if err != nil {
-		http.Error(w, "Failed to fetch Jira users: "+err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch Jira users")
 		return
 	}
 
 	// Fetch all employees to find mappings
 	employees, err := h.userRepo.GetAll(r.Context())
 	if err != nil {
-		http.Error(w, "Failed to fetch employees", http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch employees")
 		return
 	}
 
@@ -646,36 +584,28 @@ func (h *JiraHandlers) GetJiraUsers(w http.ResponseWriter, r *http.Request) {
 
 // AutoMatchJiraUsers attempts to match Jira users to employees by email (admin only)
 func (h *JiraHandlers) AutoMatchJiraUsers(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
-	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only admins can perform auto-matching
-	if !currentUser.IsAdmin() {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+	if requireAdmin(w, r) == nil {
 		return
 	}
 
 	// Get Jira client with automatic token refresh
 	client, err := h.getJiraClient(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to connect to Jira")
 		return
 	}
 
-	// Fetch all Jira users
-	jiraUsers, err := client.GetAllUsers(1000)
+	// Fetch all Jira users with configurable pagination limit
+	jiraUsers, err := client.GetAllUsers(h.maxUsersPagination)
 	if err != nil {
-		http.Error(w, "Failed to fetch Jira users: "+err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch Jira users")
 		return
 	}
 
 	// Get all employees
 	employees, err := h.userRepo.GetAll(r.Context())
 	if err != nil {
-		http.Error(w, "Failed to get employees", http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch employees")
 		return
 	}
 
@@ -713,36 +643,26 @@ func (h *JiraHandlers) AutoMatchJiraUsers(w http.ResponseWriter, r *http.Request
 
 // UpdateUserJiraMapping manually sets a user's Jira account ID (admin only)
 func (h *JiraHandlers) UpdateUserJiraMapping(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
-	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	if requireAdmin(w, r) == nil {
 		return
 	}
 
-	// Only admins can update Jira mappings
-	if !currentUser.IsAdmin() {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
-	userIDStr := chi.URLParam(r, "userId")
-	userID, err := strconv.ParseInt(userIDStr, 10, 64)
+	userID, err := parseIDParam(r, "userId")
 	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		respondError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 
 	var req struct {
 		JiraAccountID *string `json:"jira_account_id"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	if !decodeJSON(w, r, &req) {
 		return
 	}
 
 	// Update the user's Jira account ID
 	if err := h.userRepo.UpdateJiraAccountID(r.Context(), userID, req.JiraAccountID); err != nil {
-		http.Error(w, "Failed to update Jira mapping", http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to update Jira mapping")
 		return
 	}
 
@@ -753,20 +673,12 @@ func (h *JiraHandlers) UpdateUserJiraMapping(w http.ResponseWriter, r *http.Requ
 
 // DisconnectJira removes the organization-wide Jira connection (admin only)
 func (h *JiraHandlers) DisconnectJira(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
-	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only admins can disconnect Jira
-	if !currentUser.IsAdmin() {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+	if requireAdmin(w, r) == nil {
 		return
 	}
 
 	if err := h.orgJiraRepo.Delete(r.Context()); err != nil {
-		http.Error(w, "Failed to disconnect Jira", http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to disconnect Jira")
 		return
 	}
 
@@ -792,15 +704,8 @@ type TeamTask struct {
 // GetTeamTasks returns Jira issues for all of a supervisor's direct reports
 // Only supervisors and admins can access this endpoint
 func (h *JiraHandlers) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
-	currentUser := middleware.GetUserFromContext(r.Context())
+	currentUser := requireJiraAccess(w, r)
 	if currentUser == nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	// Only supervisors and admins can view team tasks
-	if !currentUser.IsSupervisorOrAdmin() {
-		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
@@ -816,7 +721,7 @@ func (h *JiraHandlers) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Printf("Error fetching direct reports for user %d: %v", currentUser.ID, err)
-		http.Error(w, "Failed to fetch direct reports", http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to fetch direct reports")
 		return
 	}
 
@@ -844,7 +749,7 @@ func (h *JiraHandlers) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
 	// Get Jira client with automatic token refresh
 	client, err := h.getJiraClient(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		respondError(w, http.StatusInternalServerError, "Failed to connect to Jira")
 		return
 	}
 

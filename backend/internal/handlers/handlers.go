@@ -7,10 +7,19 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/smith-dallin/manager-dashboard/internal/cache"
 	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 	"github.com/smith-dallin/manager-dashboard/internal/repository"
 	"github.com/smith-dallin/manager-dashboard/internal/services"
+)
+
+// Cache key prefixes
+const (
+	cacheKeyAllUsers     = "users:all"
+	cacheKeySupervisors  = "users:supervisors"
+	cacheKeyAllSquads    = "squads:all"
+	cacheKeyEmployees    = "users:employees:"
 )
 
 // Handlers handles user-related HTTP requests
@@ -18,6 +27,7 @@ type Handlers struct {
 	userRepo    repository.UserRepository
 	squadRepo   repository.SquadRepository
 	userService *services.UserService
+	cache       *cache.Cache
 }
 
 // New creates a new user handlers instance
@@ -29,6 +39,45 @@ func New(userRepo repository.UserRepository, squadRepo repository.SquadRepositor
 	}
 }
 
+// NewWithCache creates a new user handlers instance with caching support
+func NewWithCache(userRepo repository.UserRepository, squadRepo repository.SquadRepository, c *cache.Cache) *Handlers {
+	return &Handlers{
+		userRepo:    userRepo,
+		squadRepo:   squadRepo,
+		userService: services.NewUserService(userRepo, squadRepo),
+		cache:       c,
+	}
+}
+
+// InvalidateUserCache clears user-related cache entries
+func (h *Handlers) InvalidateUserCache() {
+	if h.cache == nil {
+		return
+	}
+	h.cache.Delete(cacheKeyAllUsers)
+	h.cache.Delete(cacheKeySupervisors)
+	h.cache.DeletePrefix(cacheKeyEmployees)
+}
+
+// InvalidateSquadCache clears squad-related cache entries
+func (h *Handlers) InvalidateSquadCache() {
+	if h.cache == nil {
+		return
+	}
+	h.cache.Delete(cacheKeyAllSquads)
+}
+
+// GetCurrentUser godoc
+// @Summary Get current user
+// @Description Returns the authenticated user's profile with their squads
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} models.User "User profile"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /me [get]
 func (h *Handlers) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := requireAuth(w, r)
 	if user == nil {
@@ -46,6 +95,19 @@ func (h *Handlers) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, userWithSquads)
 }
 
+// GetEmployees godoc
+// @Summary Get employees
+// @Description Returns employees based on user role: admins see all, supervisors see direct reports, employees see themselves
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number" default(1)
+// @Param per_page query int false "Items per page" default(50)
+// @Success 200 {array} models.User "List of employees"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /employees [get]
 func (h *Handlers) GetEmployees(w http.ResponseWriter, r *http.Request) {
 	user := requireAuth(w, r)
 	if user == nil {
@@ -60,20 +122,79 @@ func (h *Handlers) GetEmployees(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Support optional pagination
+	if shouldPaginate(r) {
+		p := parsePagination(r)
+		paginated, total := paginateSlice(employees, p)
+		respondPaginated(w, paginated, total, p)
+		return
+	}
+
 	respondJSON(w, http.StatusOK, employees)
 }
 
+// GetAllUsers godoc
+// @Summary Get all users
+// @Description Returns all users in the system with their squads
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number" default(1)
+// @Param per_page query int false "Items per page" default(50)
+// @Success 200 {array} models.User "List of users"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /users [get]
 func (h *Handlers) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	// Use service to get all users with squads loaded
-	users, err := h.userService.GetAll(r.Context())
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to fetch users")
+	var users []models.User
+	var err error
+
+	// Try cache first
+	if h.cache != nil {
+		if cached, found := h.cache.Get(cacheKeyAllUsers); found {
+			users = cached.([]models.User)
+		}
+	}
+
+	// Fetch from database if not cached
+	if users == nil {
+		users, err = h.userService.GetAll(r.Context())
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, "Failed to fetch users")
+			return
+		}
+		// Cache the result
+		if h.cache != nil {
+			h.cache.Set(cacheKeyAllUsers, users)
+		}
+	}
+
+	// Support optional pagination
+	if shouldPaginate(r) {
+		p := parsePagination(r)
+		paginated, total := paginateSlice(users, p)
+		respondPaginated(w, paginated, total, p)
 		return
 	}
 
 	respondJSON(w, http.StatusOK, users)
 }
 
+// GetUserByID godoc
+// @Summary Get user by ID
+// @Description Returns a specific user by their ID. Employees can only view themselves, supervisors can view their direct reports.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 200 {object} models.User "User profile"
+// @Failure 400 {object} map[string]interface{} "Invalid user ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 404 {object} map[string]interface{} "User not found"
+// @Router /users/{id} [get]
 func (h *Handlers) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	id, err := parseIDParam(r, "id")
 	if err != nil {
@@ -108,6 +229,20 @@ func (h *Handlers) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, user)
 }
 
+// CreateUser godoc
+// @Summary Create a new user
+// @Description Creates a new user. Only supervisors can create users, and they will be assigned as the supervisor.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param user body models.CreateUserRequest true "User creation request"
+// @Success 201 {object} models.User "Created user"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /users [post]
 func (h *Handlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 	currentUser := middleware.GetUserFromContext(r.Context())
 	if currentUser == nil || currentUser.Role != models.RoleSupervisor {
@@ -134,6 +269,22 @@ func (h *Handlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusCreated, user)
 }
 
+// UpdateUser godoc
+// @Summary Update a user
+// @Description Updates a user's profile. Employees can update themselves (limited fields), supervisors can update their direct reports.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Param user body models.UpdateUserRequest true "User update request"
+// @Success 200 {object} models.User "Updated user"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 404 {object} map[string]interface{} "User not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /users/{id} [put]
 func (h *Handlers) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	id, err := parseIDParam(r, "id")
 	if err != nil {
@@ -184,9 +335,27 @@ func (h *Handlers) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Invalidate user cache on successful update
+	h.InvalidateUserCache()
+
 	respondJSON(w, http.StatusOK, user)
 }
 
+// DeleteUser godoc
+// @Summary Delete a user
+// @Description Deletes a user. Supervisors can only delete their own direct reports.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 204 "User deleted"
+// @Failure 400 {object} map[string]interface{} "Invalid user ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 404 {object} map[string]interface{} "User not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /users/{id} [delete]
 func (h *Handlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id, err := parseIDParam(r, "id")
 	if err != nil {
@@ -217,29 +386,109 @@ func (h *Handlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Invalidate user cache on successful delete
+	h.InvalidateUserCache()
+
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *Handlers) GetSupervisors(w http.ResponseWriter, r *http.Request) {
-	supervisors, err := h.userRepo.GetAllSupervisors(r.Context())
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to fetch supervisors")
+	var supervisors []models.User
+	var err error
+
+	// Try cache first
+	if h.cache != nil {
+		if cached, found := h.cache.Get(cacheKeySupervisors); found {
+			supervisors = cached.([]models.User)
+		}
+	}
+
+	// Fetch from database if not cached
+	if supervisors == nil {
+		supervisors, err = h.userRepo.GetAllSupervisors(r.Context())
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, "Failed to fetch supervisors")
+			return
+		}
+		// Cache the result
+		if h.cache != nil {
+			h.cache.Set(cacheKeySupervisors, supervisors)
+		}
+	}
+
+	// Support optional pagination
+	if shouldPaginate(r) {
+		p := parsePagination(r)
+		paginated, total := paginateSlice(supervisors, p)
+		respondPaginated(w, paginated, total, p)
 		return
 	}
 
 	respondJSON(w, http.StatusOK, supervisors)
 }
 
+// GetSquads godoc
+// @Summary Get all squads
+// @Description Returns all squads/teams in the organization
+// @Tags Squads
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param page query int false "Page number" default(1)
+// @Param per_page query int false "Items per page" default(50)
+// @Success 200 {array} models.Squad "List of squads"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /squads [get]
 func (h *Handlers) GetSquads(w http.ResponseWriter, r *http.Request) {
-	squads, err := h.squadRepo.GetAll(r.Context())
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to fetch squads")
+	var squads []models.Squad
+	var err error
+
+	// Try cache first
+	if h.cache != nil {
+		if cached, found := h.cache.Get(cacheKeyAllSquads); found {
+			squads = cached.([]models.Squad)
+		}
+	}
+
+	// Fetch from database if not cached
+	if squads == nil {
+		squads, err = h.squadRepo.GetAll(r.Context())
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, "Failed to fetch squads")
+			return
+		}
+		// Cache the result
+		if h.cache != nil {
+			h.cache.Set(cacheKeyAllSquads, squads)
+		}
+	}
+
+	// Support optional pagination
+	if shouldPaginate(r) {
+		p := parsePagination(r)
+		paginated, total := paginateSlice(squads, p)
+		respondPaginated(w, paginated, total, p)
 		return
 	}
 
 	respondJSON(w, http.StatusOK, squads)
 }
 
+// CreateSquad godoc
+// @Summary Create a new squad
+// @Description Creates a new squad/team. Only admins and supervisors can create squads.
+// @Tags Squads
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param squad body object{name=string} true "Squad creation request"
+// @Success 201 {object} models.Squad "Created squad"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /squads [post]
 func (h *Handlers) CreateSquad(w http.ResponseWriter, r *http.Request) {
 	currentUser := requireAuth(w, r)
 	if currentUser == nil {
@@ -274,6 +523,9 @@ func (h *Handlers) CreateSquad(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusInternalServerError, "Failed to create squad")
 		return
 	}
+
+	// Invalidate squad cache on successful create
+	h.InvalidateSquadCache()
 
 	respondJSON(w, http.StatusCreated, squad)
 }
@@ -312,6 +564,9 @@ func (h *Handlers) DeleteSquad(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusInternalServerError, "Failed to delete squad")
 		return
 	}
+
+	// Invalidate squad cache on successful delete
+	h.InvalidateSquadCache()
 
 	respondJSON(w, http.StatusOK, map[string]string{"message": "Squad deleted successfully"})
 }

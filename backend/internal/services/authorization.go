@@ -21,7 +21,7 @@ func NewAuthorizationService(userRepo repository.UserRepository) *AuthorizationS
 }
 
 // CanViewUser checks if the current user can view another user's details
-func (s *AuthorizationService) CanViewUser(currentUser *models.User, targetUserID int64) error {
+func (s *AuthorizationService) CanViewUser(ctx context.Context, currentUser *models.User, targetUserID int64) error {
 	// Admin can view anyone
 	if currentUser.IsAdmin() {
 		return nil
@@ -34,7 +34,7 @@ func (s *AuthorizationService) CanViewUser(currentUser *models.User, targetUserI
 
 	// Supervisors can view their direct reports
 	if currentUser.IsSupervisor() {
-		targetUser, err := s.userRepo.GetByID(context.Background(), targetUserID)
+		targetUser, err := s.userRepo.GetByID(ctx, targetUserID)
 		if err != nil {
 			return apperrors.NewInternalError("failed to get user", err)
 		}
@@ -50,7 +50,7 @@ func (s *AuthorizationService) CanViewUser(currentUser *models.User, targetUserI
 }
 
 // CanUpdateUser checks if the current user can update another user
-func (s *AuthorizationService) CanUpdateUser(currentUser *models.User, targetUserID int64) error {
+func (s *AuthorizationService) CanUpdateUser(ctx context.Context, currentUser *models.User, targetUserID int64) error {
 	// Admin can update anyone
 	if currentUser.IsAdmin() {
 		return nil
@@ -63,7 +63,7 @@ func (s *AuthorizationService) CanUpdateUser(currentUser *models.User, targetUse
 
 	// Supervisors can update their direct reports
 	if currentUser.IsSupervisor() {
-		targetUser, err := s.userRepo.GetByID(context.Background(), targetUserID)
+		targetUser, err := s.userRepo.GetByID(ctx, targetUserID)
 		if err != nil {
 			return apperrors.NewInternalError("failed to get user", err)
 		}
@@ -79,7 +79,7 @@ func (s *AuthorizationService) CanUpdateUser(currentUser *models.User, targetUse
 }
 
 // CanDeleteUser checks if the current user can delete another user
-func (s *AuthorizationService) CanDeleteUser(currentUser *models.User, targetUserID int64) error {
+func (s *AuthorizationService) CanDeleteUser(ctx context.Context, currentUser *models.User, targetUserID int64) error {
 	// Admin can delete anyone except themselves
 	if currentUser.IsAdmin() {
 		if currentUser.ID == targetUserID {
@@ -90,7 +90,7 @@ func (s *AuthorizationService) CanDeleteUser(currentUser *models.User, targetUse
 
 	// Supervisors can delete their direct reports
 	if currentUser.IsSupervisor() {
-		targetUser, err := s.userRepo.GetByID(context.Background(), targetUserID)
+		targetUser, err := s.userRepo.GetByID(ctx, targetUserID)
 		if err != nil {
 			return apperrors.NewInternalError("failed to get user", err)
 		}
@@ -160,7 +160,7 @@ func (s *AuthorizationService) CanViewTimeOffRequest(currentUser *models.User, r
 }
 
 // CanReviewTimeOffRequest checks if the current user can review a time-off request
-func (s *AuthorizationService) CanReviewTimeOffRequest(currentUser *models.User, requestingUserID int64) error {
+func (s *AuthorizationService) CanReviewTimeOffRequest(ctx context.Context, currentUser *models.User, requestingUserID int64) error {
 	// Only supervisors and admins can review
 	if !currentUser.IsSupervisorOrAdmin() {
 		return apperrors.NewForbiddenError("Only supervisors and admins can review time-off requests")
@@ -172,7 +172,7 @@ func (s *AuthorizationService) CanReviewTimeOffRequest(currentUser *models.User,
 	}
 
 	// Supervisor can only review their direct reports
-	requestingUser, err := s.userRepo.GetByID(context.Background(), requestingUserID)
+	requestingUser, err := s.userRepo.GetByID(ctx, requestingUserID)
 	if err != nil {
 		return apperrors.NewInternalError("failed to get user", err)
 	}
@@ -188,7 +188,7 @@ func (s *AuthorizationService) CanReviewTimeOffRequest(currentUser *models.User,
 }
 
 // CanCreateTimeOffForOther checks if the current user can create time-off for another user
-func (s *AuthorizationService) CanCreateTimeOffForOther(currentUser *models.User, targetUserID int64) error {
+func (s *AuthorizationService) CanCreateTimeOffForOther(ctx context.Context, currentUser *models.User, targetUserID int64) error {
 	// Only supervisors and admins can create for others
 	if !currentUser.IsSupervisorOrAdmin() {
 		return apperrors.NewForbiddenError("Only supervisors and admins can create time off for others")
@@ -200,7 +200,7 @@ func (s *AuthorizationService) CanCreateTimeOffForOther(currentUser *models.User
 	}
 
 	// Supervisor can only create for their direct reports
-	targetUser, err := s.userRepo.GetByID(context.Background(), targetUserID)
+	targetUser, err := s.userRepo.GetByID(ctx, targetUserID)
 	if err != nil {
 		return apperrors.NewInternalError("failed to get user", err)
 	}

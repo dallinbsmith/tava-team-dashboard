@@ -11,7 +11,45 @@ import (
 	"github.com/smith-dallin/manager-dashboard/config"
 	"github.com/smith-dallin/manager-dashboard/internal/app"
 	"github.com/smith-dallin/manager-dashboard/internal/logger"
+
+	_ "github.com/smith-dallin/manager-dashboard/docs" // swagger docs
 )
+
+// @title Manager Dashboard API
+// @version 1.0
+// @description REST API for the Manager Dashboard application. Provides endpoints for user management, team organization, time-off requests, Jira integration, and calendar management.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.email support@example.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
+
+// @tag.name Users
+// @tag.description User management operations
+// @tag.name Invitations
+// @tag.description Invitation management for onboarding new users
+// @tag.name Time Off
+// @tag.description Time-off request management
+// @tag.name Jira
+// @tag.description Jira integration endpoints
+// @tag.name Calendar
+// @tag.description Calendar, tasks, and meetings management
+// @tag.name Org Chart
+// @tag.description Organization chart and draft management
+// @tag.name Squads
+// @tag.description Team/squad management
+// @tag.name Health
+// @tag.description Health check and monitoring endpoints
 
 func main() {
 	cfg, err := config.Load()

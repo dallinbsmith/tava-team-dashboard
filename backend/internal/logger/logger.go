@@ -243,3 +243,115 @@ func Warn(msg string, args ...any) {
 func Error(msg string, args ...any) {
 	defaultLogger.Error(msg, args...)
 }
+
+// AuditAction represents the type of auditable action
+type AuditAction string
+
+// Standard audit actions
+const (
+	AuditActionCreate  AuditAction = "create"
+	AuditActionUpdate  AuditAction = "update"
+	AuditActionDelete  AuditAction = "delete"
+	AuditActionLogin   AuditAction = "login"
+	AuditActionLogout  AuditAction = "logout"
+	AuditActionApprove AuditAction = "approve"
+	AuditActionReject  AuditAction = "reject"
+	AuditActionRevoke  AuditAction = "revoke"
+	AuditActionConnect AuditAction = "connect"
+	AuditActionPublish AuditAction = "publish"
+)
+
+// AuditResult represents the result of an auditable action
+type AuditResult string
+
+const (
+	AuditResultSuccess AuditResult = "success"
+	AuditResultFailure AuditResult = "failure"
+	AuditResultDenied  AuditResult = "denied"
+)
+
+// AuditEvent represents a single audit log entry
+type AuditEvent struct {
+	Action      AuditAction // The action being performed
+	Resource    string      // The type of resource (e.g., "user", "invitation", "time_off")
+	ResourceID  string      // The ID of the resource
+	ActorID     int64       // The user performing the action
+	ActorEmail  string      // The email of the user performing the action
+	TargetID    *int64      // Optional: The target user ID (for actions affecting other users)
+	Result      AuditResult // The result of the action
+	Reason      string      // Optional: Reason for the action (e.g., denial reason)
+	IPAddress   string      // The IP address of the actor
+	UserAgent   string      // The user agent of the actor
+	Details     map[string]any // Additional details about the action
+}
+
+// Audit logs an audit event with standardized fields
+func (l *Logger) Audit(ctx context.Context, event AuditEvent) {
+	args := []any{
+		"audit", true,
+		"action", string(event.Action),
+		"resource", event.Resource,
+		"resource_id", event.ResourceID,
+		"actor_id", event.ActorID,
+		"actor_email", event.ActorEmail,
+		"result", string(event.Result),
+	}
+
+	if event.TargetID != nil {
+		args = append(args, "target_id", *event.TargetID)
+	}
+	if event.Reason != "" {
+		args = append(args, "reason", event.Reason)
+	}
+	if event.IPAddress != "" {
+		args = append(args, "ip_address", event.IPAddress)
+	}
+	if event.UserAgent != "" {
+		args = append(args, "user_agent", event.UserAgent)
+	}
+
+	// Add any additional details
+	for k, v := range event.Details {
+		args = append(args, k, v)
+	}
+
+	l.WithContext(ctx).Info("AUDIT", args...)
+}
+
+// AuditSuccess logs a successful audit event
+func (l *Logger) AuditSuccess(ctx context.Context, action AuditAction, resource string, resourceID string, actorID int64, actorEmail string) {
+	l.Audit(ctx, AuditEvent{
+		Action:     action,
+		Resource:   resource,
+		ResourceID: resourceID,
+		ActorID:    actorID,
+		ActorEmail: actorEmail,
+		Result:     AuditResultSuccess,
+	})
+}
+
+// AuditFailure logs a failed audit event
+func (l *Logger) AuditFailure(ctx context.Context, action AuditAction, resource string, resourceID string, actorID int64, actorEmail string, reason string) {
+	l.Audit(ctx, AuditEvent{
+		Action:     action,
+		Resource:   resource,
+		ResourceID: resourceID,
+		ActorID:    actorID,
+		ActorEmail: actorEmail,
+		Result:     AuditResultFailure,
+		Reason:     reason,
+	})
+}
+
+// AuditDenied logs an access denied audit event
+func (l *Logger) AuditDenied(ctx context.Context, action AuditAction, resource string, resourceID string, actorID int64, actorEmail string, reason string) {
+	l.Audit(ctx, AuditEvent{
+		Action:     action,
+		Resource:   resource,
+		ResourceID: resourceID,
+		ActorID:    actorID,
+		ActorEmail: actorEmail,
+		Result:     AuditResultDenied,
+		Reason:     reason,
+	})
+}

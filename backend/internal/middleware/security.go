@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -26,12 +27,15 @@ func SecurityHeaders(next http.Handler) http.Handler {
 	})
 }
 
-// RateLimiter provides per-IP rate limiting
+// RateLimiter provides per-IP rate limiting with memory bounds
 type RateLimiter struct {
-	visitors map[string]*visitor
-	mu       sync.Mutex
-	rate     rate.Limit
-	burst    int
+	visitors       map[string]*visitor
+	mu             sync.Mutex
+	rate           rate.Limit
+	burst          int
+	maxVisitors    int // Maximum number of tracked visitors to prevent memory exhaustion
+	cleanupMinutes int // Cleanup interval in minutes
+	timeoutMinutes int // Visitor timeout in minutes
 }
 
 type visitor struct {
@@ -41,14 +45,49 @@ type visitor struct {
 
 // NewRateLimiter creates a new rate limiter
 // rate is requests per second, burst is max burst size
+// maxVisitors limits memory usage (default 10000 if 0)
 func NewRateLimiter(r rate.Limit, burst int) *RateLimiter {
-	rl := &RateLimiter{
-		visitors: make(map[string]*visitor),
-		rate:     r,
-		burst:    burst,
+	return NewRateLimiterWithMax(r, burst, 10000)
+}
+
+// RateLimiterConfig holds configuration for the rate limiter
+type RateLimiterConfig struct {
+	MaxVisitors            int // Maximum tracked visitors (default 10000)
+	CleanupIntervalMinutes int // Cleanup interval in minutes (default 1)
+	VisitorTimeoutMinutes  int // Visitor timeout in minutes (default 3)
+}
+
+// NewRateLimiterWithMax creates a rate limiter with custom max visitors
+func NewRateLimiterWithMax(r rate.Limit, burst int, maxVisitors int) *RateLimiter {
+	return NewRateLimiterWithConfig(r, burst, RateLimiterConfig{
+		MaxVisitors:            maxVisitors,
+		CleanupIntervalMinutes: 1,
+		VisitorTimeoutMinutes:  3,
+	})
+}
+
+// NewRateLimiterWithConfig creates a rate limiter with full configuration
+func NewRateLimiterWithConfig(r rate.Limit, burst int, cfg RateLimiterConfig) *RateLimiter {
+	if cfg.MaxVisitors <= 0 {
+		cfg.MaxVisitors = 10000
+	}
+	if cfg.CleanupIntervalMinutes <= 0 {
+		cfg.CleanupIntervalMinutes = 1
+	}
+	if cfg.VisitorTimeoutMinutes <= 0 {
+		cfg.VisitorTimeoutMinutes = 3
 	}
 
-	// Clean up old visitors every minute
+	rl := &RateLimiter{
+		visitors:       make(map[string]*visitor),
+		rate:           r,
+		burst:          burst,
+		maxVisitors:    cfg.MaxVisitors,
+		cleanupMinutes: cfg.CleanupIntervalMinutes,
+		timeoutMinutes: cfg.VisitorTimeoutMinutes,
+	}
+
+	// Clean up old visitors at configured interval
 	go rl.cleanupVisitors()
 
 	return rl
@@ -60,6 +99,11 @@ func (rl *RateLimiter) getVisitor(ip string) *rate.Limiter {
 
 	v, exists := rl.visitors[ip]
 	if !exists {
+		// Check if we've hit the max visitors limit
+		if len(rl.visitors) >= rl.maxVisitors {
+			// Evict the oldest visitor (simple LRU)
+			rl.evictOldestLocked()
+		}
 		limiter := rate.NewLimiter(rl.rate, rl.burst)
 		rl.visitors[ip] = &visitor{limiter, time.Now()}
 		return limiter
@@ -69,12 +113,35 @@ func (rl *RateLimiter) getVisitor(ip string) *rate.Limiter {
 	return v.limiter
 }
 
+// evictOldestLocked removes the oldest visitor from the map
+// Must be called with mutex held
+func (rl *RateLimiter) evictOldestLocked() {
+	var oldestIP string
+	var oldestTime time.Time
+	first := true
+
+	for ip, v := range rl.visitors {
+		if first || v.lastSeen.Before(oldestTime) {
+			oldestIP = ip
+			oldestTime = v.lastSeen
+			first = false
+		}
+	}
+
+	if oldestIP != "" {
+		delete(rl.visitors, oldestIP)
+	}
+}
+
 func (rl *RateLimiter) cleanupVisitors() {
+	cleanupInterval := time.Duration(rl.cleanupMinutes) * time.Minute
+	visitorTimeout := time.Duration(rl.timeoutMinutes) * time.Minute
+
 	for {
-		time.Sleep(time.Minute)
+		time.Sleep(cleanupInterval)
 		rl.mu.Lock()
 		for ip, v := range rl.visitors {
-			if time.Since(v.lastSeen) > 3*time.Minute {
+			if time.Since(v.lastSeen) > visitorTimeout {
 				delete(rl.visitors, ip)
 			}
 		}
@@ -101,15 +168,21 @@ func (rl *RateLimiter) Limit(next http.Handler) http.Handler {
 // getIP extracts the real client IP from the request
 func getIP(r *http.Request) string {
 	// Check X-Forwarded-For header first (for proxies/load balancers)
+	// X-Forwarded-For can contain multiple IPs: "client, proxy1, proxy2"
+	// We take only the first (leftmost) IP which is the original client
 	forwarded := r.Header.Get("X-Forwarded-For")
 	if forwarded != "" {
-		return forwarded
+		// Split by comma and take the first IP, trimming whitespace
+		if idx := strings.Index(forwarded, ","); idx != -1 {
+			return strings.TrimSpace(forwarded[:idx])
+		}
+		return strings.TrimSpace(forwarded)
 	}
 
 	// Check X-Real-IP header
 	realIP := r.Header.Get("X-Real-IP")
 	if realIP != "" {
-		return realIP
+		return strings.TrimSpace(realIP)
 	}
 
 	return r.RemoteAddr
@@ -124,3 +197,104 @@ func RequestSizeLimiter(maxBytes int64) func(http.Handler) http.Handler {
 		})
 	}
 }
+
+// EndpointRateLimit defines rate limiting for a specific endpoint pattern
+type EndpointRateLimit struct {
+	PathPrefix string     // URL path prefix to match (e.g., "/api/invitations")
+	Method     string     // HTTP method (empty string matches all methods)
+	RPS        rate.Limit // Requests per second
+	Burst      int        // Burst size
+}
+
+// EndpointRateLimiter provides endpoint-specific rate limiting
+type EndpointRateLimiter struct {
+	defaultLimiter *RateLimiter
+	endpointLimits []endpointLimitEntry
+	cfg            RateLimiterConfig
+}
+
+type endpointLimitEntry struct {
+	pathPrefix string
+	method     string
+	limiter    *RateLimiter
+}
+
+// NewEndpointRateLimiter creates an endpoint-specific rate limiter
+// defaultRPS and defaultBurst are used for endpoints without specific limits
+func NewEndpointRateLimiter(defaultRPS rate.Limit, defaultBurst int, cfg RateLimiterConfig, limits []EndpointRateLimit) *EndpointRateLimiter {
+	erl := &EndpointRateLimiter{
+		defaultLimiter: NewRateLimiterWithConfig(defaultRPS, defaultBurst, cfg),
+		endpointLimits: make([]endpointLimitEntry, 0, len(limits)),
+		cfg:            cfg,
+	}
+
+	for _, limit := range limits {
+		erl.endpointLimits = append(erl.endpointLimits, endpointLimitEntry{
+			pathPrefix: limit.PathPrefix,
+			method:     limit.Method,
+			limiter:    NewRateLimiterWithConfig(limit.RPS, limit.Burst, cfg),
+		})
+	}
+
+	return erl
+}
+
+// getLimiterForRequest returns the appropriate rate limiter for the request
+func (erl *EndpointRateLimiter) getLimiterForRequest(r *http.Request) *RateLimiter {
+	path := r.URL.Path
+	method := r.Method
+
+	// Check endpoint-specific limits (first match wins)
+	for _, entry := range erl.endpointLimits {
+		if strings.HasPrefix(path, entry.pathPrefix) {
+			if entry.method == "" || entry.method == method {
+				return entry.limiter
+			}
+		}
+	}
+
+	return erl.defaultLimiter
+}
+
+// Limit is middleware that applies endpoint-specific rate limits
+func (erl *EndpointRateLimiter) Limit(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		limiter := erl.getLimiterForRequest(r)
+		ip := getIP(r)
+		ipLimiter := limiter.getVisitor(ip)
+
+		if !ipLimiter.Allow() {
+			w.Header().Set("Retry-After", "1")
+			http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Common endpoint rate limit presets
+var (
+	// SensitiveEndpointLimits provides stricter limits for sensitive endpoints
+	SensitiveEndpointLimits = []EndpointRateLimit{
+		// Invitations - very sensitive, limit to 10 requests/minute
+		{PathPrefix: "/api/invitations", Method: "POST", RPS: rate.Limit(10.0 / 60.0), Burst: 3},
+		{PathPrefix: "/api/invitations", Method: "DELETE", RPS: rate.Limit(10.0 / 60.0), Burst: 3},
+
+		// User management - sensitive operations
+		{PathPrefix: "/api/users", Method: "POST", RPS: rate.Limit(20.0 / 60.0), Burst: 5},
+		{PathPrefix: "/api/users", Method: "DELETE", RPS: rate.Limit(10.0 / 60.0), Burst: 3},
+
+		// Avatar uploads - resource intensive
+		{PathPrefix: "/api/users/", Method: "POST", RPS: rate.Limit(5.0 / 60.0), Burst: 2},
+
+		// Org chart publishes - very sensitive
+		{PathPrefix: "/api/orgchart/drafts/", Method: "POST", RPS: rate.Limit(5.0 / 60.0), Burst: 2},
+
+		// Time-off reviews - moderate sensitivity
+		{PathPrefix: "/api/time-off/", Method: "PUT", RPS: rate.Limit(30.0 / 60.0), Burst: 10},
+
+		// Jira operations - external API, be conservative
+		{PathPrefix: "/api/jira/", Method: "", RPS: rate.Limit(30.0 / 60.0), Burst: 10},
+	}
+)

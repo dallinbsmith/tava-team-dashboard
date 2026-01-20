@@ -36,13 +36,18 @@ type AuthMiddleware struct {
 	userRepository *database.UserRepository
 }
 
-func NewAuthMiddleware(domain, audience string, userRepo *database.UserRepository) (*AuthMiddleware, error) {
+func NewAuthMiddleware(domain, audience string, userRepo *database.UserRepository, jwksCacheTTLMinutes int) (*AuthMiddleware, error) {
 	issuerURL, err := url.Parse("https://" + domain + "/")
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse issuer URL: %w", err)
 	}
 
-	provider := jwks.NewCachingProvider(issuerURL, 5*time.Minute)
+	// Use configurable JWKS cache TTL (default 5 minutes if not specified)
+	jwksCacheTTL := time.Duration(jwksCacheTTLMinutes) * time.Minute
+	if jwksCacheTTL <= 0 {
+		jwksCacheTTL = 5 * time.Minute
+	}
+	provider := jwks.NewCachingProvider(issuerURL, jwksCacheTTL)
 
 	jwtValidator, err := validator.New(
 		provider.KeyFunc,

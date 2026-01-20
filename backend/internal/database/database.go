@@ -15,18 +15,50 @@ import (
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
-func Connect(databaseURL string) (*pgxpool.Pool, error) {
+// PoolConfig contains database connection pool configuration
+type PoolConfig struct {
+	MaxConns          int32
+	MinConns          int32
+	MaxConnLifetime   time.Duration
+	MaxConnIdleTime   time.Duration
+	HealthCheckPeriod time.Duration
+	Tracer            *QueryTracer // Optional query tracer for logging
+}
+
+// DefaultPoolConfig returns sensible defaults for connection pooling
+func DefaultPoolConfig() PoolConfig {
+	return PoolConfig{
+		MaxConns:          25,
+		MinConns:          5,
+		MaxConnLifetime:   1 * time.Hour,
+		MaxConnIdleTime:   30 * time.Minute,
+		HealthCheckPeriod: 1 * time.Minute,
+	}
+}
+
+func Connect(databaseURL string, poolCfg *PoolConfig) (*pgxpool.Pool, error) {
 	config, err := pgxpool.ParseConfig(databaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse database URL: %w", err)
 	}
 
-	// Configure connection pool for production
-	config.MaxConns = 25                      // Maximum connections
-	config.MinConns = 5                       // Minimum idle connections
-	config.MaxConnLifetime = 1 * time.Hour    // Max lifetime of a connection
-	config.MaxConnIdleTime = 30 * time.Minute // Max idle time before closing
-	config.HealthCheckPeriod = 1 * time.Minute
+	// Use provided config or defaults
+	cfg := DefaultPoolConfig()
+	if poolCfg != nil {
+		cfg = *poolCfg
+	}
+
+	// Configure connection pool
+	config.MaxConns = cfg.MaxConns
+	config.MinConns = cfg.MinConns
+	config.MaxConnLifetime = cfg.MaxConnLifetime
+	config.MaxConnIdleTime = cfg.MaxConnIdleTime
+	config.HealthCheckPeriod = cfg.HealthCheckPeriod
+
+	// Add query tracer if provided
+	if cfg.Tracer != nil {
+		config.ConnConfig.Tracer = cfg.Tracer
+	}
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {

@@ -50,7 +50,9 @@ export interface UseEmployeeListResult {
 
 export const ITEMS_PER_PAGE_OPTIONS = [6, 12, 24, 48];
 
-export function useEmployeeList(employees: User[]): UseEmployeeListResult {
+export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
+  // Ensure employees is always an array
+  const employees = employeesInput || [];
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | Role>("all");

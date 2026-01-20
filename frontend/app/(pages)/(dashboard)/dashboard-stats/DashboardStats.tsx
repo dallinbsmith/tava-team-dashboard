@@ -43,7 +43,9 @@ interface SquadStat {
   segments: DepartmentSegment[];
 }
 
-export default function DashboardStats({ employees }: DashboardStatsProps) {
+export default function DashboardStats({ employees: employeesInput }: DashboardStatsProps) {
+  // Ensure employees is always an array
+  const employees = employeesInput || [];
   const [animate, setAnimate] = useState(false);
   const [hoveredSquad, setHoveredSquad] = useState<string | null>(null);
   const [squadPage, setSquadPage] = useState(1);

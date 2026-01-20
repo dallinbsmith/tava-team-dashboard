@@ -7,24 +7,7 @@ import {
   AutoMatchResult,
   TeamTask,
 } from "./types";
-
-const API_BASE_URL = "/api/proxy";
-
-async function fetchWithProxy(path: string, options: RequestInit = {}): Promise<Response> {
-  return fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: { ...options.headers, "Content-Type": "application/json" },
-    credentials: "same-origin",
-  });
-}
-
-async function handleResponse<T>(response: Response, errorMessage: string): Promise<T> {
-  if (!response.ok) {
-    const error = await response.text().catch(() => "");
-    throw new Error(error || errorMessage);
-  }
-  return response.json();
-}
+import { fetchWithProxy, handleResponse } from "@/lib/api";
 
 // Settings
 export async function getJiraSettings(): Promise<JiraSettings> {

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { Auth0Provider } from "@auth0/nextjs-auth0";
 import "./globals.css";
 
 // Primary font - Manrope Light 300
@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={manrope.variable}>
       <body className="font-sans antialiased font-light">
-        <UserProvider>{children}</UserProvider>
+        <Auth0Provider>{children}</Auth0Provider>
       </body>
     </html>
   );

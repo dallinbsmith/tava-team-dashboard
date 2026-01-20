@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { User } from "@/shared/types/user";
+import { useImpersonation } from "@/providers/ImpersonationProvider";
 import EmployeeHeader from "../../orgchart/components/EmployeeHeader";
 import EditEmployeeModal from "../../orgchart/components/EditEmployeeModal";
 import {
@@ -13,6 +14,7 @@ import {
   Calendar,
   Shield,
   Users,
+  Eye,
 } from "lucide-react";
 import { getDepartmentTextColor } from "@/lib/department-colors";
 
@@ -25,6 +27,15 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
   const router = useRouter();
   const [employee, setEmployee] = useState(initialEmployee);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { startImpersonation, isImpersonating } = useImpersonation();
+
+  // Admin can impersonate any user except themselves
+  const canImpersonate = currentUser?.role === "admin" && currentUser?.id !== employee.id && !isImpersonating;
+
+  const handleImpersonate = () => {
+    startImpersonation(employee);
+    router.push("/");
+  };
 
   const formattedDate = employee?.date_started
     ? new Date(employee.date_started).toLocaleDateString("en-US", {
@@ -43,13 +54,25 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
 
   return (
     <div className="max-w-4xl">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-2 text-theme-text-muted hover:text-theme-text mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Dashboard
-      </Link>
+      <div className="flex items-center justify-between mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-theme-text-muted hover:text-theme-text transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Link>
+
+        {canImpersonate && (
+          <button
+            onClick={handleImpersonate}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+          >
+            <Eye className="w-4 h-4" />
+            Impersonate User
+          </button>
+        )}
+      </div>
 
       <div className="bg-theme-surface border border-theme-border overflow-hidden">
         <EmployeeHeader

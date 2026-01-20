@@ -10,8 +10,9 @@ import (
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 )
 
-const taskColumns = `id, title, description, status, due_date, created_by_id, assignment_type,
-	assigned_user_id, assigned_squad_id, assigned_department, created_at, updated_at`
+const taskColumns = `id, title, description, status, due_date, start_time, end_time, all_day,
+	created_by_id, assignment_type, assigned_user_id, assigned_squad_id, assigned_department,
+	created_at, updated_at`
 
 type TaskRepository struct {
 	pool *pgxpool.Pool
@@ -26,6 +27,7 @@ func scanTask(row pgx.Row) (*models.Task, error) {
 	var task models.Task
 	err := row.Scan(
 		&task.ID, &task.Title, &task.Description, &task.Status, &task.DueDate,
+		&task.StartTime, &task.EndTime, &task.AllDay,
 		&task.CreatedByID, &task.AssignmentType, &task.AssignedUserID,
 		&task.AssignedSquadID, &task.AssignedDepartment,
 		&task.CreatedAt, &task.UpdatedAt,
@@ -43,6 +45,7 @@ func scanTasks(rows pgx.Rows) ([]models.Task, error) {
 		var task models.Task
 		err := rows.Scan(
 			&task.ID, &task.Title, &task.Description, &task.Status, &task.DueDate,
+			&task.StartTime, &task.EndTime, &task.AllDay,
 			&task.CreatedByID, &task.AssignmentType, &task.AssignedUserID,
 			&task.AssignedSquadID, &task.AssignedDepartment,
 			&task.CreatedAt, &task.UpdatedAt,
@@ -57,15 +60,21 @@ func scanTasks(rows pgx.Rows) ([]models.Task, error) {
 
 // Create creates a new task
 func (r *TaskRepository) Create(ctx context.Context, req *models.CreateTaskRequest, createdByID int64) (*models.Task, error) {
+	// Default all_day to true if not specified
+	allDay := true
+	if req.AllDay != nil {
+		allDay = *req.AllDay
+	}
+
 	query := `
-		INSERT INTO tasks (title, description, due_date, created_by_id, assignment_type,
-			assigned_user_id, assigned_squad_id, assigned_department)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO tasks (title, description, due_date, start_time, end_time, all_day,
+			created_by_id, assignment_type, assigned_user_id, assigned_squad_id, assigned_department)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING ` + taskColumns
 
 	task, err := scanTask(r.pool.QueryRow(ctx, query,
-		req.Title, req.Description, req.DueDate, createdByID, req.AssignmentType,
-		req.AssignedUserID, req.AssignedSquadID, req.AssignedDepartment,
+		req.Title, req.Description, req.DueDate, req.StartTime, req.EndTime, allDay,
+		createdByID, req.AssignmentType, req.AssignedUserID, req.AssignedSquadID, req.AssignedDepartment,
 	))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create task: %w", err)
@@ -91,10 +100,13 @@ func (r *TaskRepository) Update(ctx context.Context, id int64, req *models.Updat
 			description = COALESCE($3, description),
 			status = COALESCE($4, status),
 			due_date = COALESCE($5, due_date),
-			assignment_type = COALESCE($6, assignment_type),
-			assigned_user_id = COALESCE($7, assigned_user_id),
-			assigned_squad_id = COALESCE($8, assigned_squad_id),
-			assigned_department = COALESCE($9, assigned_department),
+			start_time = COALESCE($6, start_time),
+			end_time = COALESCE($7, end_time),
+			all_day = COALESCE($8, all_day),
+			assignment_type = COALESCE($9, assignment_type),
+			assigned_user_id = COALESCE($10, assigned_user_id),
+			assigned_squad_id = COALESCE($11, assigned_squad_id),
+			assigned_department = COALESCE($12, assigned_department),
 			updated_at = NOW()
 		WHERE id = $1
 		RETURNING ` + taskColumns
@@ -112,6 +124,7 @@ func (r *TaskRepository) Update(ctx context.Context, id int64, req *models.Updat
 
 	task, err := scanTask(r.pool.QueryRow(ctx, query,
 		id, req.Title, req.Description, status, req.DueDate,
+		req.StartTime, req.EndTime, req.AllDay,
 		assignmentType, req.AssignedUserID, req.AssignedSquadID, req.AssignedDepartment,
 	))
 	if err != nil {

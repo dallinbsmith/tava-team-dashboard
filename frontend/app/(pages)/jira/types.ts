@@ -42,6 +42,11 @@ export interface JiraProject {
   name: string;
 }
 
+export interface JiraEpicLink {
+  key: string;
+  summary: string;
+}
+
 export interface JiraSprint {
   id: number;
   name: string;
@@ -59,6 +64,7 @@ export interface JiraIssue {
   assignee?: JiraUser;
   reporter?: JiraUser;
   project: JiraProject;
+  epic?: JiraEpicLink;
   created: string;
   updated: string;
   start_date?: string;

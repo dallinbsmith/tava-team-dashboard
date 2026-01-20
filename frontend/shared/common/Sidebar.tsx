@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Avatar from "./Avatar";
-import { LayoutDashboard, LogOut, Mail, Settings, GitBranch, Calendar, Palmtree, Menu, X } from "lucide-react";
+import { LayoutDashboard, LogOut, Mail, Settings, GitBranch, Calendar, Palmtree, Menu, X, Users } from "lucide-react";
 
 interface SidebarProps {
   user: {
-    name?: string;
+    firstName?: string;
+    lastName?: string;
     email?: string;
-    picture?: string;
     s3AvatarUrl?: string;
   };
   role?: string;
@@ -117,35 +117,51 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
               </li>
             )}
 
-            {(role === "supervisor" || role === "admin") && (
-              <li>
-                <Link
-                  href="/orgchart"
-                  onClick={onToggle}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/orgchart"
-                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
-                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
-                    }`}
-                >
-                  <GitBranch className="w-5 h-5" />
-                  Org Chart
-                </Link>
-              </li>
-            )}
-
             <li>
               <Link
-                href="/settings"
+                href="/orgchart"
                 onClick={onToggle}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/settings"
+                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/orgchart"
                   ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
                   : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
                   }`}
               >
-                <Settings className="w-5 h-5" />
-                Settings
+                <GitBranch className="w-5 h-5" />
+                Org Chart
               </Link>
             </li>
+
+            {(role === "supervisor" || role === "admin") && (
+              <li>
+                <Link
+                  href="/teams"
+                  onClick={onToggle}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/teams"
+                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
+                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
+                    }`}
+                >
+                  <Users className="w-5 h-5" />
+                  Teams
+                </Link>
+              </li>
+            )}
+
+            {(role === "supervisor" || role === "admin") && (
+              <li>
+                <Link
+                  href="/settings"
+                  onClick={onToggle}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/settings"
+                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
+                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
+                    }`}
+                >
+                  <Settings className="w-5 h-5" />
+                  Settings
+                </Link>
+              </li>
+            )}
           </ul>
         </nav>
 
@@ -154,24 +170,27 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
           <div className="flex items-center gap-3 px-4 py-3 mb-2">
             <Avatar
               s3AvatarUrl={user.s3AvatarUrl}
-              auth0AvatarUrl={user.picture}
-              firstName={user.name?.split(" ")[0] || "U"}
-              lastName={user.name?.split(" ").slice(1).join(" ") || "ser"}
+              firstName={user.firstName || "U"}
+              lastName={user.lastName || "ser"}
               size="md"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-theme-text truncate">{user.name}</p>
+              <p className="text-sm font-medium text-theme-text truncate">
+                {user.firstName && user.lastName
+                  ? `${user.firstName} ${user.lastName}`
+                  : user.email}
+              </p>
               <p className="text-xs text-theme-text-muted capitalize">{role}</p>
             </div>
           </div>
 
-          <Link
-            href="/api/auth/logout"
+          <a
+            href="/auth/logout"
             className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text transition-colors w-full"
           >
             <LogOut className="w-5 h-5" />
             Sign out
-          </Link>
+          </a>
         </div>
       </aside>
     </>

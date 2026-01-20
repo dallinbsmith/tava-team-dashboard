@@ -115,7 +115,7 @@ export default function AvatarUpload({
   return (
     <div className="relative group">
       <div
-        className={`relative w-24 h-24 overflow-hidden border-4 shadow-lg transition-all duration-200 ${
+        className={`relative w-24 h-24 rounded-full overflow-hidden border-4 shadow-lg transition-all duration-200 ${
           isDragging
             ? "border-primary-400 scale-105"
             : canEdit
@@ -175,7 +175,7 @@ export default function AvatarUpload({
 
       {/* Edit hint */}
       {canEdit && !isUploading && (
-        <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white shadow-md flex items-center justify-center border border-gray-200">
+        <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center border border-gray-200">
           <Upload className="w-4 h-4 text-gray-600" />
         </div>
       )}
@@ -193,7 +193,7 @@ export default function AvatarUpload({
       {/* Drag indicator */}
       {isDragging && canEdit && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-28 h-28 border-2 border-dashed border-primary-400 animate-pulse" />
+          <div className="w-28 h-28 rounded-full border-2 border-dashed border-primary-400 animate-pulse" />
         </div>
       )}
     </div>

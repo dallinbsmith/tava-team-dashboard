@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import Image from "next/image";
 
 type AvatarSize = "xs" | "sm" | "md" | "lg" | "xl";
@@ -23,7 +23,7 @@ const sizeClasses: Record<AvatarSize, { container: string; text: string; pixels:
   xl: { container: "w-24 h-24", text: "text-3xl", pixels: 96 },
 };
 
-export default function Avatar({
+const Avatar = memo(function Avatar({
   s3AvatarUrl,
   auth0AvatarUrl,
   jiraAvatarUrl,
@@ -79,9 +79,11 @@ export default function Avatar({
         alt={`${firstName} ${lastName}`}
         width={pixels}
         height={pixels}
-        className="object-cover w-full h-full"
+        className="object-cover w-full h-full rounded-full"
         onError={handleImageError}
       />
     </div>
   );
-}
+});
+
+export default Avatar;

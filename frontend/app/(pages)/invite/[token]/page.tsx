@@ -209,7 +209,7 @@ export default function InvitePage() {
                         </div>
 
                         <Link
-                            href={`/api/auth/login?returnTo=/invite/${token}`}
+                            href={`/auth/login?returnTo=/invite/${token}`}
                             className="flex items-center justify-center gap-2 w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 transition-colors"
                         >
                             <LogIn className="w-5 h-5" />
@@ -219,7 +219,7 @@ export default function InvitePage() {
                         <p className="text-center text-sm text-gray-500 mt-4">
                             Already have an account?{" "}
                             <Link
-                                href={`/api/auth/login?returnTo=/invite/${token}`}
+                                href={`/auth/login?returnTo=/invite/${token}`}
                                 className="text-primary-600 hover:underline"
                             >
                                 Sign in

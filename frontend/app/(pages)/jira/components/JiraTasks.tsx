@@ -1,11 +1,25 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { JiraIssue, JiraSettings } from "../types";
-import { getMyJiraTasks, getJiraSettings } from "../api";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
+import { JiraIssue, JiraSettings, TeamTask } from "../types";
+import { getMyJiraTasks, getTeamJiraTasks, getJiraSettings } from "../api";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
+import { useOrganization } from "@/providers/OrganizationProvider";
+import Avatar from "@/shared/common/Avatar";
+import {
+  getStatusColor,
+  getPriorityColor,
+  DueDateDisplay,
+} from "@/lib/jira-utils";
+import { JIRA_LIMITS } from "@/lib/constants";
 import TimeOffIndicator from "@/app/(pages)/(dashboard)/time-off/components/TimeOffIndicator";
+import {
+  FilterDropdown,
+  FilterSection,
+  SearchableFilterList,
+} from "@/components";
 import {
   CheckSquare,
   ExternalLink,
@@ -13,19 +27,219 @@ import {
   AlertCircle,
   Settings,
   RefreshCw,
+  LayoutGrid,
+  List,
+  User,
+  Users,
+  Building2,
+  UsersRound,
 } from "lucide-react";
 
 interface JiraTasksProps {
   compact?: boolean;
 }
 
+const viewModes = ["grid", "list"] as const;
+
+// Source filter can be: my tasks, all team, specific department, or specific squad
+type SourceFilter =
+  | { type: "my" }
+  | { type: "team" }
+  | { type: "department"; value: string }
+  | { type: "squad"; value: number };
+
+// Unified task type for display
+interface DisplayTask {
+  id: string;
+  key: string;
+  summary: string;
+  status: string;
+  priority?: string;
+  due_date?: string;
+  url: string;
+  project: { key: string; name: string };
+  epic?: { key: string; summary: string };
+  time_off_impact?: any;
+  employee?: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    avatar_url?: string;
+  };
+}
+
 export default function JiraTasks({ compact = false }: JiraTasksProps) {
-  const { isSupervisorOrAdmin, loading: userLoading } = useCurrentUser();
-  const [tasks, setTasks] = useState<JiraIssue[]>([]);
+  const { currentUser, loading: userLoading } = useCurrentUser();
+  const { departments, squads, allUsers } = useOrganization();
+  const [myTasks, setMyTasks] = useState<JiraIssue[]>([]);
+  const [teamTasks, setTeamTasks] = useState<TeamTask[]>([]);
   const [settings, setSettings] = useState<JiraSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Filter state
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>({ type: "my" });
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [epicFilter, setEpicFilter] = useState("all");
+  const [individualFilter, setIndividualFilter] = useState("all");
+
+  // Expanded sections for filter accordion
+  const [expandedSections, setExpandedSections] = useState({
+    source: true,
+    status: false,
+    epic: false,
+    individual: false,
+  });
+
+  // URL-synced view mode state
+  const [viewMode, setViewMode] = useQueryState(
+    "myView",
+    parseAsStringLiteral(viewModes).withDefault("list")
+  );
+
+  // Convert tasks to unified display format based on source filter
+  const displayTasks: DisplayTask[] = useMemo(() => {
+    if (sourceFilter.type === "my") {
+      return myTasks.map((task) => ({
+        id: task.id,
+        key: task.key,
+        summary: task.summary,
+        status: task.status,
+        priority: task.priority,
+        due_date: task.due_date,
+        url: task.url,
+        project: task.project,
+        epic: task.epic,
+        time_off_impact: task.time_off_impact,
+      }));
+    } else {
+      // For team, department, or squad - start with all team tasks
+      let filteredTeamTasks = teamTasks;
+
+      // Filter by department if selected
+      if (sourceFilter.type === "department") {
+        filteredTeamTasks = teamTasks.filter(
+          (task) => task.employee?.department === sourceFilter.value
+        );
+      }
+
+      // Filter by squad if selected
+      if (sourceFilter.type === "squad") {
+        // Find user IDs that belong to this squad
+        const squadUserIds = new Set(
+          allUsers
+            .filter((user) => user.squads?.some((s) => s.id === sourceFilter.value))
+            .map((user) => user.id)
+        );
+        filteredTeamTasks = teamTasks.filter(
+          (task) => task.employee && squadUserIds.has(task.employee.id)
+        );
+      }
+
+      return filteredTeamTasks.map((task) => ({
+        id: task.id,
+        key: task.key,
+        summary: task.summary,
+        status: task.status,
+        priority: task.priority,
+        due_date: task.due_date,
+        url: task.url,
+        project: task.project,
+        epic: task.epic,
+        time_off_impact: task.time_off_impact,
+        employee: task.employee,
+      }));
+    }
+  }, [sourceFilter, myTasks, teamTasks, allUsers]);
+
+  // Extract unique statuses, epics, and individuals from tasks
+  const { statuses, epics, individuals } = useMemo(() => {
+    const statusSet = new Set<string>();
+    const epicMap = new Map<string, { key: string; summary: string }>();
+    const individualMap = new Map<number, { id: number; name: string }>();
+
+    displayTasks.forEach((task) => {
+      if (task.status) {
+        statusSet.add(task.status);
+      }
+      if (task.epic?.key) {
+        epicMap.set(task.epic.key, {
+          key: task.epic.key,
+          summary: task.epic.summary,
+        });
+      }
+      if (task.employee) {
+        individualMap.set(task.employee.id, {
+          id: task.employee.id,
+          name: `${task.employee.first_name} ${task.employee.last_name}`,
+        });
+      }
+    });
+
+    return {
+      statuses: Array.from(statusSet).sort(),
+      epics: Array.from(epicMap.values()).sort((a, b) => a.summary.localeCompare(b.summary)),
+      individuals: Array.from(individualMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
+    };
+  }, [displayTasks]);
+
+  // Filter tasks based on current filters
+  const filteredTasks = useMemo(() => {
+    return displayTasks.filter((task) => {
+      // Status filter
+      if (statusFilter !== "all" && task.status !== statusFilter) {
+        return false;
+      }
+
+      // Epic filter
+      if (epicFilter !== "all") {
+        if (epicFilter === "no-epic") {
+          // Show tasks without an epic
+          if (task.epic) {
+            return false;
+          }
+        } else if (task.epic?.key !== epicFilter) {
+          return false;
+        }
+      }
+
+      // Individual filter (only applies to non-"my" sources)
+      if (sourceFilter.type !== "my" && individualFilter !== "all") {
+        if (task.employee?.id.toString() !== individualFilter) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [displayTasks, statusFilter, epicFilter, sourceFilter, individualFilter]);
+
+  // Calculate active filter count (include source if not default "my")
+  const activeFilterCount = [
+    sourceFilter.type !== "my" ? 1 : 0,
+    statusFilter !== "all" ? 1 : 0,
+    epicFilter !== "all" ? 1 : 0,
+    sourceFilter.type !== "my" && individualFilter !== "all" ? 1 : 0,
+  ].reduce((a, b) => a + b, 0);
+
+  const clearAllFilters = () => {
+    setSourceFilter({ type: "my" });
+    setStatusFilter("all");
+    setEpicFilter("all");
+    setIndividualFilter("all");
+  };
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const handleSourceChange = (newSource: SourceFilter) => {
+    setSourceFilter(newSource);
+    // Reset individual filter when switching sources
+    setIndividualFilter("all");
+  };
 
   const fetchTasks = useCallback(async (showRefresh = false) => {
     if (showRefresh) {
@@ -34,15 +248,17 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
     setError(null);
 
     try {
-      // Only fetch Jira settings if user is supervisor or admin
-      if (isSupervisorOrAdmin) {
-        const jiraSettings = await getJiraSettings();
-        setSettings(jiraSettings);
+      const jiraSettings = await getJiraSettings();
+      setSettings(jiraSettings);
 
-        if (jiraSettings.org_configured) {
-          const issues = await getMyJiraTasks(compact ? 5 : 20);
-          setTasks(issues);
-        }
+      if (jiraSettings.org_configured) {
+        // Fetch both my tasks and team tasks
+        const [myIssues, teamIssues] = await Promise.all([
+          getMyJiraTasks(compact ? JIRA_LIMITS.TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT),
+          getTeamJiraTasks(compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT),
+        ]);
+        setMyTasks(myIssues);
+        setTeamTasks(teamIssues);
       }
     } catch (e) {
       console.error("Failed to fetch Jira tasks:", e);
@@ -63,7 +279,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [isSupervisorOrAdmin, compact]);
+  }, [compact]);
 
   useEffect(() => {
     if (!userLoading) {
@@ -71,57 +287,13 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
     }
   }, [userLoading, fetchTasks]);
 
-  const getStatusColor = (status: string) => {
-    const statusLower = status.toLowerCase();
-    switch (true) {
-      case statusLower.includes("done") || statusLower.includes("complete"):
-        return "bg-green-900/40 text-green-300";
-      case statusLower.includes("progress") || statusLower.includes("review"):
-        return "bg-blue-900/40 text-blue-300";
-      case statusLower.includes("todo") || statusLower.includes("backlog"):
-        return "bg-gray-700/40 text-gray-300";
-      default:
-        return "bg-yellow-900/40 text-yellow-300";
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    const priorityLower = priority.toLowerCase();
-    switch (true) {
-      case priorityLower.includes("highest") || priorityLower.includes("critical"):
-        return "text-red-600";
-      case priorityLower.includes("high"):
-        return "text-orange-600";
-      case priorityLower.includes("medium"):
-        return "text-yellow-600";
-      default:
-        return "text-gray-500";
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    switch (true) {
-      case diffDays < 0:
-        return <span className="text-red-600">Overdue by {Math.abs(diffDays)} days</span>;
-      case diffDays === 0:
-        return <span className="text-orange-600">Due today</span>;
-      case diffDays === 1:
-        return <span className="text-orange-600">Due tomorrow</span>;
-      case diffDays <= 7:
-        return <span className="text-yellow-600">Due in {diffDays} days</span>;
-      default:
-        return <span className="text-gray-600">{date.toLocaleDateString()}</span>;
-    }
-  };
-
   if (userLoading || loading) {
     return (
-      <div className="bg-theme-surface border border-theme-border p-6">
+      <div className="bg-theme-surface border border-theme-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-theme-border flex items-center gap-3">
+          <CheckSquare className="w-5 h-5 text-theme-text-muted" />
+          <h2 className="text-lg font-semibold text-theme-text">Jira Tasks</h2>
+        </div>
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin h-8 w-8 border-b-2 border-primary-500"></div>
         </div>
@@ -129,56 +301,267 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
     );
   }
 
-  // Only show Jira tasks for supervisors and admins
-  if (!isSupervisorOrAdmin) {
-    return null;
-  }
-
   // Not configured - show setup prompt
   if (!settings?.org_configured) {
     return (
-      <div className="bg-theme-surface border border-theme-border p-6">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="bg-theme-surface border border-theme-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-theme-border flex items-center gap-3">
           <CheckSquare className="w-5 h-5 text-theme-text-muted" />
           <h2 className="text-lg font-semibold text-theme-text">Jira Tasks</h2>
         </div>
-        <div className="text-center py-6">
+        <div className="text-center py-8">
           <div className="w-12 h-12 bg-theme-elevated flex items-center justify-center mx-auto mb-4">
             <Settings className="w-6 h-6 text-theme-text-muted" />
           </div>
-          <p className="text-theme-text-muted mb-4">Connect your Jira account to see your tasks here</p>
-          <Link
-            href="/settings"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            Connect Jira
-          </Link>
+          <p className="text-theme-text-muted mb-4">Jira is not configured for your organization</p>
+          <p className="text-sm text-theme-text-muted">Contact your administrator to set up Jira integration</p>
         </div>
       </div>
     );
   }
 
+  const totalTasks = sourceFilter.type === "my" ? myTasks.length : displayTasks.length;
+
   return (
-    <div className="bg-theme-surface border border-theme-border overflow-hidden">
+    <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col">
       <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CheckSquare className="w-5 h-5 text-primary-500" />
-          <h2 className="text-lg font-semibold text-theme-text">My Jira Tasks</h2>
-          {tasks.length > 0 && (
+          <h2 className="text-lg font-semibold text-theme-text">Jira Tasks</h2>
+          {filteredTasks.length > 0 && (
             <span className="px-2 py-0.5 text-xs font-medium bg-primary-900/50 text-primary-300">
-              {tasks.length}
+              {filteredTasks.length}{activeFilterCount > 0 && ` / ${totalTasks}`}
             </span>
           )}
         </div>
-        <button
-          onClick={() => fetchTasks(true)}
-          disabled={refreshing}
-          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated transition-colors disabled:opacity-50"
-          title="Refresh tasks"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Filter Button */}
+          <FilterDropdown
+            isOpen={filterOpen}
+            onToggle={() => setFilterOpen(!filterOpen)}
+            onClose={() => setFilterOpen(false)}
+            activeFilterCount={activeFilterCount}
+            onClearAll={clearAllFilters}
+          >
+            {/* Source Section */}
+            <FilterSection
+              title="Source"
+              isExpanded={expandedSections.source}
+              onToggle={() => toggleSection("source")}
+            >
+              <div className="space-y-1 max-h-64 overflow-y-auto">
+                {/* My Tasks */}
+                <button
+                  onClick={() => handleSourceChange({ type: "my" })}
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                    sourceFilter.type === "my"
+                      ? "bg-primary-500/20 text-primary-300"
+                      : "text-theme-text-muted hover:bg-theme-elevated"
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span>My Tasks</span>
+                  {sourceFilter.type === "my" && (
+                    <span className="ml-auto text-primary-400">✓</span>
+                  )}
+                </button>
+
+                {/* All Team Tasks */}
+                <button
+                  onClick={() => handleSourceChange({ type: "team" })}
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                    sourceFilter.type === "team"
+                      ? "bg-primary-500/20 text-primary-300"
+                      : "text-theme-text-muted hover:bg-theme-elevated"
+                  }`}
+                >
+                  <Users className="w-4 h-4" />
+                  <span>All Team Tasks</span>
+                  {sourceFilter.type === "team" && (
+                    <span className="ml-auto text-primary-400">✓</span>
+                  )}
+                </button>
+
+                {/* Departments */}
+                {departments.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 text-xs font-medium text-theme-text-subtle uppercase tracking-wide border-t border-theme-border mt-2 pt-2">
+                      Departments
+                    </div>
+                    {departments.map((dept) => (
+                      <button
+                        key={dept}
+                        onClick={() => handleSourceChange({ type: "department", value: dept })}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                          sourceFilter.type === "department" && sourceFilter.value === dept
+                            ? "bg-primary-500/20 text-primary-300"
+                            : "text-theme-text-muted hover:bg-theme-elevated"
+                        }`}
+                      >
+                        <Building2 className="w-4 h-4" />
+                        <span className="truncate">{dept}</span>
+                        {sourceFilter.type === "department" && sourceFilter.value === dept && (
+                          <span className="ml-auto text-primary-400 flex-shrink-0">✓</span>
+                        )}
+                      </button>
+                    ))}
+                  </>
+                )}
+
+                {/* Squads */}
+                {squads.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 text-xs font-medium text-theme-text-subtle uppercase tracking-wide border-t border-theme-border mt-2 pt-2">
+                      Squads
+                    </div>
+                    {squads.map((squad) => (
+                      <button
+                        key={squad.id}
+                        onClick={() => handleSourceChange({ type: "squad", value: squad.id })}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                          sourceFilter.type === "squad" && sourceFilter.value === squad.id
+                            ? "bg-primary-500/20 text-primary-300"
+                            : "text-theme-text-muted hover:bg-theme-elevated"
+                        }`}
+                      >
+                        <UsersRound className="w-4 h-4" />
+                        <span className="truncate">{squad.name}</span>
+                        {sourceFilter.type === "squad" && sourceFilter.value === squad.id && (
+                          <span className="ml-auto text-primary-400 flex-shrink-0">✓</span>
+                        )}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+            </FilterSection>
+
+            {/* Status Section */}
+            <FilterSection
+              title="Status"
+              isExpanded={expandedSections.status}
+              onToggle={() => toggleSection("status")}
+            >
+              <SearchableFilterList
+                items={statuses}
+                selectedValue={statusFilter}
+                onChange={setStatusFilter}
+                placeholder="Search statuses"
+              />
+            </FilterSection>
+
+            {/* Epic Section */}
+            <FilterSection
+              title="Epic"
+              isExpanded={expandedSections.epic}
+              onToggle={() => toggleSection("epic")}
+            >
+              <div className="space-y-1">
+                <button
+                  onClick={() => setEpicFilter("all")}
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                    epicFilter === "all"
+                      ? "bg-primary-500/20 text-primary-300"
+                      : "text-theme-text-muted hover:bg-theme-elevated"
+                  }`}
+                >
+                  <span>All Epics</span>
+                  {epicFilter === "all" && (
+                    <span className="ml-auto text-primary-400">✓</span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setEpicFilter("no-epic")}
+                  className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                    epicFilter === "no-epic"
+                      ? "bg-primary-500/20 text-primary-300"
+                      : "text-theme-text-muted hover:bg-theme-elevated"
+                  }`}
+                >
+                  <span>No Epic</span>
+                  {epicFilter === "no-epic" && (
+                    <span className="ml-auto text-primary-400">✓</span>
+                  )}
+                </button>
+                {epics.map((epic) => (
+                  <button
+                    key={epic.key}
+                    onClick={() => setEpicFilter(epic.key)}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                      epicFilter === epic.key
+                        ? "bg-primary-500/20 text-primary-300"
+                        : "text-theme-text-muted hover:bg-theme-elevated"
+                    }`}
+                  >
+                    <span className="truncate">{epic.summary}</span>
+                    {epicFilter === epic.key && (
+                      <span className="ml-auto text-primary-400 flex-shrink-0">✓</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </FilterSection>
+
+            {/* Individual Section - only show for non-my sources */}
+            {sourceFilter.type !== "my" && individuals.length > 0 && (
+              <FilterSection
+                title="Individual"
+                isExpanded={expandedSections.individual}
+                onToggle={() => toggleSection("individual")}
+              >
+                <SearchableFilterList
+                  items={individuals.map((i) => i.name)}
+                  selectedValue={
+                    individualFilter === "all"
+                      ? "all"
+                      : individuals.find((i) => i.id.toString() === individualFilter)?.name || "all"
+                  }
+                  onChange={(name) => {
+                    if (name === "all") {
+                      setIndividualFilter("all");
+                    } else {
+                      const individual = individuals.find((i) => i.name === name);
+                      setIndividualFilter(individual?.id.toString() || "all");
+                    }
+                  }}
+                  placeholder="Search people"
+                />
+              </FilterSection>
+            )}
+          </FilterDropdown>
+
+          {/* View Mode Toggle */}
+          <div className="flex border border-theme-border overflow-hidden bg-theme-elevated">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2 transition-colors ${viewMode === "grid"
+                ? "bg-primary-500 text-white"
+                : "text-theme-text-muted hover:bg-theme-surface"
+                }`}
+              title="Grid view"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 border-l border-theme-border transition-colors ${viewMode === "list"
+                ? "bg-primary-500 text-white"
+                : "text-theme-text-muted hover:bg-theme-surface"
+                }`}
+              title="List view"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+          <button
+            onClick={() => fetchTasks(true)}
+            disabled={refreshing}
+            className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated transition-colors disabled:opacity-50"
+            title="Refresh tasks"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -206,63 +589,155 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
         </div>
       )}
 
-      {tasks.length === 0 ? (
-        <div className="px-6 py-8 text-center text-theme-text-muted">
+      {filteredTasks.length === 0 ? (
+        <div className="flex-1 px-6 py-8 text-center text-theme-text-muted">
           <CheckSquare className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
-          <p>No tasks assigned to you</p>
-          <p className="text-sm mt-1">Tasks assigned to you in Jira will appear here</p>
+          {activeFilterCount > 0 ? (
+            <>
+              <p>No tasks match your filters</p>
+              <button
+                onClick={clearAllFilters}
+                className="text-sm mt-2 text-primary-400 hover:text-primary-300 transition-colors"
+              >
+                Clear all filters
+              </button>
+            </>
+          ) : (
+            <>
+              <p>
+                {sourceFilter.type === "my"
+                  ? "No tasks assigned to you"
+                  : sourceFilter.type === "team"
+                    ? "No tasks found for your team"
+                    : sourceFilter.type === "department"
+                      ? `No tasks found for ${sourceFilter.value} department`
+                      : `No tasks found for this squad`}
+              </p>
+              <p className="text-sm mt-1">
+                {sourceFilter.type === "my"
+                  ? "Tasks assigned to you in Jira will appear here"
+                  : "Tasks assigned to members in Jira will appear here"}
+              </p>
+            </>
+          )}
         </div>
-      ) : (
-        <div className="divide-y divide-theme-border">
-          {tasks.map((task) => (
+      ) : viewMode === "grid" ? (
+        /* Grid View */
+        <div className="flex-1 p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredTasks.map((task) => (
             <a
               key={task.id}
               href={task.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="block px-6 py-4 hover:bg-theme-elevated transition-colors"
+              className="block p-4 bg-theme-elevated border border-theme-border hover:border-primary-500/50 hover:shadow-lg transition-all group"
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-mono text-primary-400">{task.key}</span>
-                    <span
-                      className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(
-                        task.status
-                      )}`}
-                    >
-                      {task.status}
-                    </span>
-                    {task.priority && (
-                      <span className={`text-xs ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
-                      </span>
-                    )}
-                    {task.time_off_impact && (
-                      <TimeOffIndicator impact={task.time_off_impact} compact />
-                    )}
-                  </div>
-                  <h3 className="font-medium text-theme-text truncate">{task.summary}</h3>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-theme-text-muted">
-                    <span className="flex items-center gap-1">
-                      <span className="font-medium">{task.project.key}</span>
-                    </span>
-                    {task.due_date && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {formatDate(task.due_date)}
-                      </span>
-                    )}
-                  </div>
+              {/* Employee info for team tasks */}
+              {task.employee && (
+                <div className="flex items-center gap-2 mb-3">
+                  <Avatar
+                    s3AvatarUrl={task.employee.avatar_url}
+                    firstName={task.employee.first_name}
+                    lastName={task.employee.last_name}
+                    size="sm"
+                    className="rounded-full"
+                  />
+                  <span className="text-sm font-medium text-theme-text">
+                    {task.employee.first_name} {task.employee.last_name}
+                  </span>
                 </div>
-                <ExternalLink className="w-4 h-4 text-theme-text-muted flex-shrink-0 mt-1" />
+              )}
+
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-mono text-primary-400">{task.key}</span>
+                <span
+                  className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
+                >
+                  {task.status}
+                </span>
+                {task.priority && (
+                  <span className={`text-xs ${getPriorityColor(task.priority)}`}>
+                    {task.priority}
+                  </span>
+                )}
+                {task.time_off_impact && (
+                  <TimeOffIndicator impact={task.time_off_impact} compact />
+                )}
               </div>
+
+              <h3 className="font-medium text-theme-text text-sm line-clamp-2 mb-3 group-hover:text-primary-400 transition-colors">
+                {task.summary}
+              </h3>
+
+              <div className="flex items-center justify-between text-xs text-theme-text-muted pt-3 border-t border-theme-border">
+                <span className="font-medium">{task.project.name}</span>
+                {task.due_date && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    <DueDateDisplay dueDate={task.due_date} />
+                  </span>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        /* List View */
+        <div className="flex-1 divide-y divide-theme-border">
+          {filteredTasks.map((task) => (
+            <a
+              key={task.id}
+              href={task.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-2 hover:bg-theme-elevated transition-colors"
+            >
+              {/* Employee avatar for team tasks */}
+              {task.employee && (
+                <Avatar
+                  s3AvatarUrl={task.employee.avatar_url}
+                  firstName={task.employee.first_name}
+                  lastName={task.employee.last_name}
+                  size="sm"
+                  className="rounded-full flex-shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                {/* Employee name for team tasks */}
+                {task.employee && (
+                  <span className="text-xs text-theme-text-muted whitespace-nowrap">
+                    {task.employee.first_name[0]}. {task.employee.last_name}
+                  </span>
+                )}
+                <span className="text-xs font-mono text-primary-400">{task.key}</span>
+                <span className="text-sm text-theme-text truncate flex-1">{task.summary}</span>
+                <span
+                  className={`px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ${getStatusColor(task.status)}`}
+                >
+                  {task.status}
+                </span>
+                {task.priority && (
+                  <span className={`text-xs whitespace-nowrap ${getPriorityColor(task.priority)}`}>
+                    {task.priority}
+                  </span>
+                )}
+                {task.time_off_impact && (
+                  <TimeOffIndicator impact={task.time_off_impact} compact />
+                )}
+                {task.due_date && (
+                  <span className="flex items-center gap-1 text-xs text-theme-text-muted whitespace-nowrap">
+                    <Clock className="w-3 h-3" />
+                    <DueDateDisplay dueDate={task.due_date} />
+                  </span>
+                )}
+              </div>
+              <ExternalLink className="w-3.5 h-3.5 text-theme-text-muted flex-shrink-0" />
             </a>
           ))}
         </div>
       )}
 
-      {compact && tasks.length > 0 && settings?.jira_site_url && (
+      {compact && filteredTasks.length > 0 && settings?.jira_site_url && (
         <div className="px-6 py-3 bg-theme-elevated border-t border-theme-border">
           <a
             href={settings.jira_site_url}

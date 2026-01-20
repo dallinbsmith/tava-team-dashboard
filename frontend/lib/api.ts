@@ -17,6 +17,18 @@ export async function fetchWithProxy(path: string, options: RequestInit = {}): P
   });
 }
 
+/**
+ * Generic response handler for API calls
+ * Throws an error with the response text or fallback message if not ok
+ */
+export async function handleResponse<T>(response: Response, errorMessage: string): Promise<T> {
+  if (!response.ok) {
+    const error = await response.text().catch(() => "");
+    throw new Error(error || errorMessage);
+  }
+  return response.json();
+}
+
 /** @deprecated Use fetchWithProxy instead */
 export const fetchWithAuth = (_path: string, _token: string, options: RequestInit = {}) => fetchWithProxy(_path, options);
 

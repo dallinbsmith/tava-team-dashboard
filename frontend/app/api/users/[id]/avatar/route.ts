@@ -1,4 +1,4 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/lib/auth0";
 import { NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -10,7 +10,8 @@ export async function POST(
   const { id } = await params;
 
   try {
-    const { accessToken } = await getAccessToken();
+    const result = await auth0.getAccessToken();
+    const accessToken = result?.token;
 
     if (!accessToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

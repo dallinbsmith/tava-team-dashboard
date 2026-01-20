@@ -3,6 +3,21 @@ export { BaseModal, ConfirmModal } from "./BaseModal";
 export type { BaseModalProps, ConfirmModalProps } from "./BaseModal";
 export { CreateEmployeeModal } from "./CreateEmployeeModal";
 
+// Filter Components
+export {
+  FilterSection,
+  FilterCheckbox,
+  FilterDropdown,
+  SearchableFilterList,
+} from "./filters";
+
+export type {
+  FilterSectionProps,
+  FilterCheckboxProps,
+  FilterDropdownProps,
+  SearchableFilterListProps,
+} from "./filters";
+
 // UI Components
 export {
   // Form

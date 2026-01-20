@@ -218,16 +218,16 @@ export default function Calendar({
     return {
       style: {
         backgroundColor,
-        borderLeft: `3px solid ${borderColor}`,
+        borderLeft: `2px solid ${borderColor}`,
         borderTop: "none",
         borderRight: "none",
         borderBottom: "none",
-        borderRadius: "4px",
+        borderRadius: "3px",
         color: "white",
-        fontSize: compact ? "11px" : "12px",
-        padding: compact ? "2px 6px" : "4px 8px",
+        fontSize: compact ? "10px" : "11px",
+        padding: compact ? "1px 4px" : "2px 6px",
         fontWeight: 500,
-        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.2)",
+        lineHeight: "1.3",
       },
     };
   }, [compact]);
@@ -376,7 +376,7 @@ export default function Calendar({
         </div>
       )}
 
-      <div className={`p-6 ${compact ? "h-[450px]" : "h-[750px]"}`}>
+      <div className={`p-6 ${compact ? "h-[450px]" : "h-[800px]"}`}>
         <style jsx global>{`
           /* Dark theme for react-big-calendar */
           .rbc-calendar {
@@ -384,9 +384,9 @@ export default function Calendar({
           }
 
           .rbc-header {
-            padding: 12px 8px;
+            padding: 8px 4px;
             font-weight: 600;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: rgb(var(--text-muted));
@@ -407,6 +407,7 @@ export default function Calendar({
 
           .rbc-month-row {
             border-bottom: 1px solid rgb(var(--border-base)) !important;
+            min-height: 100px;
           }
 
           .rbc-month-row:last-child {
@@ -435,9 +436,9 @@ export default function Calendar({
           }
 
           .rbc-date-cell {
-            padding: 8px;
+            padding: 4px 6px;
             text-align: right;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             color: rgb(var(--text-base));
           }
 
@@ -455,7 +456,11 @@ export default function Calendar({
           }
 
           .rbc-row-segment {
-            padding: 2px 4px;
+            padding: 1px 2px;
+          }
+
+          .rbc-row-content {
+            z-index: 4;
           }
 
           .rbc-event {
@@ -482,14 +487,14 @@ export default function Calendar({
           .rbc-show-more {
             color: rgb(var(--color-primary-400));
             font-weight: 600;
-            font-size: 0.75rem;
-            padding: 4px 8px;
+            font-size: 0.65rem;
+            padding: 2px 4px;
             background: transparent;
           }
 
           .rbc-show-more:hover {
             background: rgb(var(--bg-elevated));
-            border-radius: 4px;
+            border-radius: 3px;
           }
 
           /* Time view styles */

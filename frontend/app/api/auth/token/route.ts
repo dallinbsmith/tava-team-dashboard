@@ -1,4 +1,4 @@
-import { getAccessToken, getSession } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/lib/auth0";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -32,26 +32,25 @@ export async function GET(request: NextRequest) {
     }
 
     // Get the session to check if user is authenticated
-    const session = await getSession();
+    const session = await auth0.getSession();
     if (!session) {
       return NextResponse.json({ accessToken: null }, { status: 401 });
     }
 
     // Get access token with refresh if needed
-    // Auth0 SDK handles refresh token rotation automatically via HTTP-only cookies
-    const { accessToken } = await getAccessToken();
+    const result = await auth0.getAccessToken();
 
-    if (!accessToken) {
+    if (!result?.token) {
       return NextResponse.json({ accessToken: null }, { status: 401 });
     }
 
-    // Calculate expiry - Auth0 v3 doesn't expose this directly,
-    // so we use a conservative 1 hour default
-    // The actual token may be valid longer, but we'll refresh proactively
-    const expiresIn = 3600; // 1 hour in seconds
+    // Calculate expiry from the token result or use default
+    const expiresIn = result.expiresAt
+      ? Math.floor((result.expiresAt * 1000 - Date.now()) / 1000)
+      : 3600;
 
     return NextResponse.json({
-      accessToken,
+      accessToken: result.token,
       expiresIn,
     });
   } catch {

@@ -1,4 +1,4 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/lib/auth0";
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
@@ -11,8 +11,8 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 export async function POST(request: NextRequest) {
   try {
     // Get access token server-side (from Auth0 session cookies)
-    const tokenResult = await getAccessToken();
-    const accessToken = tokenResult.accessToken;
+    const result = await auth0.getAccessToken();
+    const accessToken = result?.token;
 
     if (!accessToken) {
       return NextResponse.json(

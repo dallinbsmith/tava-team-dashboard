@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useCallback } from "react";
 import { AlertTriangle, X } from "lucide-react";
 
 export interface ConfirmationModalProps {
@@ -30,6 +31,70 @@ export default function ConfirmationModal({
   iconUrl,
   zIndexClass = "z-50",
 }: ConfirmationModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Handle Escape key
+  useEffect(() => {
+    if (!isOpen || loading) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, loading, onClose]);
+
+  // Focus trap and auto-focus
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Auto-focus the cancel button when modal opens
+    cancelButtonRef.current?.focus();
+
+    // Store the element that was focused before the modal opened
+    const previouslyFocused = document.activeElement as HTMLElement;
+
+    return () => {
+      // Restore focus when modal closes
+      previouslyFocused?.focus?.();
+    };
+  }, [isOpen]);
+
+  // Handle Tab key for focus trap
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key !== "Tab" || !modalRef.current) return;
+
+      const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (focusableElements.length === 0) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (event.shiftKey) {
+        // Shift + Tab: if on first element, go to last
+        if (document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        // Tab: if on last element, go to first
+        if (document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    },
+    []
+  );
+
   if (!isOpen) return null;
 
   const variantStyles = {
@@ -53,38 +118,52 @@ export default function ConfirmationModal({
   const styles = variantStyles[variant];
 
   return (
-    <div className={`fixed inset-0 ${zIndexClass} flex items-center justify-center`}>
+    <div
+      className={`fixed inset-0 ${zIndexClass} flex items-center justify-center`}
+      role="presentation"
+    >
       <div
         className="absolute inset-0 bg-black/50"
         onClick={loading ? undefined : onClose}
+        aria-hidden="true"
       />
-      <div className="relative bg-theme-surface border border-theme-border w-full max-w-md mx-4">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirmation-modal-title"
+        aria-describedby="confirmation-modal-description"
+        onKeyDown={handleKeyDown}
+        className="relative bg-theme-surface border border-theme-border w-full max-w-md mx-4"
+      >
         <div className="flex items-center justify-between p-4 border-b border-theme-border">
           <div className="flex items-center gap-3">
             {iconUrl ? (
               <img src={iconUrl} alt="" className="w-10 h-10 object-contain" />
             ) : (
-              <div className={`w-10 h-10 ${styles.iconBg} flex items-center justify-center`}>
+              <div className={`w-10 h-10 ${styles.iconBg} flex items-center justify-center`} aria-hidden="true">
                 <AlertTriangle className={`w-5 h-5 ${styles.icon}`} />
               </div>
             )}
-            <h2 className="text-lg font-semibold text-theme-text">{title}</h2>
+            <h2 id="confirmation-modal-title" className="text-lg font-semibold text-theme-text">{title}</h2>
           </div>
           <button
             onClick={onClose}
             disabled={loading}
             className="p-1 text-theme-text-muted hover:text-theme-text transition-colors disabled:opacity-50"
+            aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-6">
-          <p className="text-theme-text-muted">{message}</p>
+          <p id="confirmation-modal-description" className="text-theme-text-muted">{message}</p>
         </div>
 
         <div className="flex justify-end gap-3 p-4 border-t border-theme-border">
           <button
+            ref={cancelButtonRef}
             type="button"
             onClick={onClose}
             disabled={loading}

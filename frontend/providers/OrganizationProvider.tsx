@@ -87,10 +87,28 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Default context for when hook is used outside provider (e.g., during HMR)
+const defaultOrganizationContext: OrganizationContextType = {
+  employees: [],
+  employeesLoading: true,
+  refetchEmployees: async () => {},
+  allUsers: [],
+  allUsersLoading: true,
+  refetchAllUsers: async () => {},
+  squads: [],
+  squadsLoading: true,
+  refetchSquads: async () => {},
+  addSquad: async () => ({ id: 0, name: "", members: [] }),
+  departments: [],
+  loading: true,
+};
+
 export function useOrganization() {
   const context = useContext(OrganizationContext);
+  // Return default context during HMR or when used outside provider
+  // This prevents crashes during hot reload
   if (context === undefined) {
-    throw new Error("useOrganization must be used within an OrganizationProvider");
+    return defaultOrganizationContext;
   }
   return context;
 }

@@ -1,4 +1,4 @@
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "./auth0";
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
@@ -15,8 +15,8 @@ const jsonError = (error: string, status: number, details?: string) =>
 async function getToken(requireAuth: boolean): Promise<string | null | "error"> {
   if (!requireAuth) return null;
   try {
-    const { accessToken } = await getAccessToken();
-    return accessToken ?? "error";
+    const result = await auth0.getAccessToken();
+    return result?.token ?? "error";
   } catch (e) {
     console.error("Failed to get access token:", e);
     return "error";

@@ -5,7 +5,6 @@ import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import EmployeeList from "./orgchart/components/EmployeeList";
 import JiraTasks from "@/app/(pages)/jira/components/JiraTasks";
-import TeamJiraTasks from "@/app/(pages)/jira/components/TeamJiraTasks";
 import CalendarWidget from "./calendar/components/CalendarWidget";
 import CreateTaskModal from "./calendar/components/CreateTaskModal";
 import CreateMeetingModal from "./calendar/components/CreateMeetingModal";
@@ -19,8 +18,11 @@ import { UserPlus } from "lucide-react";
 type ModalType = "createEmployee" | "task" | "event" | "meeting" | "timeOff" | "timeOffForEmployee" | null;
 
 export default function DashboardPage() {
-  const { currentUser, loading: userLoading, error: userError, isSupervisorOrAdmin } = useCurrentUser();
+  const { currentUser, loading: userLoading, error: userError } = useCurrentUser();
   const { employees, squads, departments, addSquad, refetchEmployees } = useOrganization();
+
+  // Check if the effective current user (including when impersonating) is supervisor or admin
+  const effectiveIsSupervisorOrAdmin = currentUser?.role === "supervisor" || currentUser?.role === "admin";
 
   // Unified modal state
   const [activeModal, setActiveModal] = useState<ModalType>(null);
@@ -70,7 +72,7 @@ export default function DashboardPage() {
                 : "View your profile and information"}
           </p>
         </div>
-        {isSupervisorOrAdmin && (
+        {effectiveIsSupervisorOrAdmin && (
           <button
             onClick={() => setActiveModal("createEmployee")}
             className="inline-flex items-center px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 transition-colors"
@@ -81,18 +83,8 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {isSupervisorOrAdmin && (
-        <div className="mb-8">
-          <DashboardStats employees={employees} />
-        </div>
-      )}
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {isSupervisorOrAdmin ? (
-          <TeamJiraTasks compact />
-        ) : (
-          <JiraTasks compact />
-        )}
+        <JiraTasks compact />
         <CalendarWidget
           key={calendarRefreshKey}
           onCreateTask={() => setActiveModal("task")}
@@ -100,21 +92,25 @@ export default function DashboardPage() {
           onCreateMeeting={() => setActiveModal("meeting")}
           onRequestTimeOff={() => setActiveModal("timeOff")}
           onCreateTimeOffForEmployee={
-            isSupervisorOrAdmin
+            effectiveIsSupervisorOrAdmin
               ? () => setActiveModal("timeOffForEmployee")
               : undefined
           }
         />
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-6 mb-8">
         <div className="bg-theme-surface border border-theme-border p-6">
           <h2 className="text-lg font-semibold text-theme-text mb-6">
-            {isSupervisorOrAdmin ? "Direct Reports" : "My Profile"}
+            {effectiveIsSupervisorOrAdmin ? "Direct Reports" : "My Profile"}
           </h2>
           <EmployeeList employees={employees} />
         </div>
       </div>
+
+      {effectiveIsSupervisorOrAdmin && (
+        <DashboardStats employees={employees} />
+      )}
 
       {/* Modals */}
       <CreateEmployeeModal

@@ -148,8 +148,8 @@ export default function CalendarWidget({
 
   if (loading) {
     return (
-      <div className="bg-theme-surface border border-theme-border p-6">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="bg-theme-surface border border-theme-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-theme-border flex items-center gap-3">
           <CalendarIcon className="w-5 h-5 text-theme-text-muted" />
           <h2 className="text-lg font-semibold text-theme-text">Upcoming Events</h2>
         </div>
@@ -161,7 +161,7 @@ export default function CalendarWidget({
   }
 
   return (
-    <div className="bg-theme-surface border border-theme-border overflow-hidden">
+    <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col">
       <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CalendarIcon className="w-5 h-5 text-primary-500" />
@@ -255,42 +255,38 @@ export default function CalendarWidget({
       )}
 
       {events.length === 0 ? (
-        <div className="px-6 py-8 text-center text-theme-text-muted">
+        <div className="flex-1 px-6 py-8 text-center text-theme-text-muted">
           <CalendarIcon className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
           <p>No upcoming events</p>
           <p className="text-sm mt-1 text-theme-text-subtle">Events for the next 7 days will appear here</p>
         </div>
       ) : (
-        <div className="divide-y divide-theme-border">
+        <div className="flex-1 divide-y divide-theme-border">
           {events.map((event) => (
             <div
               key={event.id}
-              className={`px-6 py-4 border-l-4 ${getEventBgColor(event.type)}`}
+              className={`flex items-center gap-3 px-4 py-2 border-l-2 ${getEventBgColor(event.type)}`}
             >
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  {getEventIcon(event.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-theme-text truncate">{event.title}</h3>
-                    {event.url && (
-                      <a
-                        href={event.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-theme-text-muted hover:text-theme-text"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-1 text-sm">
-                    <Clock className="w-3 h-3 text-theme-text-subtle" />
-                    {formatEventDate(event.start, event.all_day)}
-                  </div>
-                </div>
+              <div className="flex-shrink-0">
+                {getEventIcon(event.type)}
               </div>
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <h3 className="text-sm font-medium text-theme-text truncate">{event.title}</h3>
+                <span className="text-xs text-theme-text-muted whitespace-nowrap flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {formatEventDate(event.start, event.all_day)}
+                </span>
+              </div>
+              {event.url && (
+                <a
+                  href={event.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-theme-text-muted hover:text-theme-text flex-shrink-0"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
             </div>
           ))}
         </div>

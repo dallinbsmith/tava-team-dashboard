@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { UserProvider } from "@auth0/nextjs-auth0/client";
+import { Auth0Provider } from "@auth0/nextjs-auth0";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { ImpersonationProvider } from "@/providers/ImpersonationProvider";
 import { CurrentUserProvider } from "@/providers/CurrentUserProvider";
 import { OrganizationProvider } from "@/providers/OrganizationProvider";
 import { manrope } from "@/lib/fonts";
@@ -20,17 +21,19 @@ export default function RootLayout({
   return (
     <html lang="en" className={manrope.variable}>
       <body className="font-sans antialiased font-light">
-        <UserProvider>
+        <Auth0Provider>
           <QueryProvider>
             <NuqsAdapter>
-              <CurrentUserProvider>
-                <OrganizationProvider>
-                  {children}
-                </OrganizationProvider>
-              </CurrentUserProvider>
+              <ImpersonationProvider>
+                <CurrentUserProvider>
+                  <OrganizationProvider>
+                    {children}
+                  </OrganizationProvider>
+                </CurrentUserProvider>
+              </ImpersonationProvider>
             </NuqsAdapter>
           </QueryProvider>
-        </UserProvider>
+        </Auth0Provider>
       </body>
     </html>
   );

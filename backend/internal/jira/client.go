@@ -143,7 +143,7 @@ func (c *Client) searchIssues(jql string, maxResults int) ([]models.JiraIssue, e
 	reqBody := map[string]interface{}{
 		"jql":        jql,
 		"maxResults": maxResults,
-		"fields":     []string{"summary", "description", "status", "priority", "issuetype", "assignee", "reporter", "project", "created", "updated", "duedate", "labels", "customfield_10015"},
+		"fields":     []string{"summary", "description", "status", "priority", "issuetype", "assignee", "reporter", "project", "parent", "created", "updated", "duedate", "labels", "customfield_10015"},
 	}
 
 	bodyBytes, err := json.Marshal(reqBody)
@@ -220,7 +220,8 @@ func (c *Client) GetProjects() ([]models.JiraProject, error) {
 
 // GetIssuesByAccountID returns issues assigned to a specific Jira account
 func (c *Client) GetIssuesByAccountID(accountID string, maxResults int) ([]models.JiraIssue, error) {
-	jql := fmt.Sprintf("assignee = %s AND resolution = Unresolved ORDER BY updated DESC", accountID)
+	// Use accountId() function for Jira Cloud compatibility and proper quoting
+	jql := fmt.Sprintf("assignee = accountId(\"%s\") AND resolution = Unresolved ORDER BY updated DESC", accountID)
 	return c.searchIssues(jql, maxResults)
 }
 
@@ -380,6 +381,14 @@ func (c *Client) convertIssues(issues []jiraIssue) []models.JiraIssue {
 				result[i].DueDate = &t
 			}
 		}
+
+		// Parent/Epic link (only for non-epic issues that have a parent)
+		if issue.Fields.Parent != nil && issue.Fields.Parent.Key != "" {
+			result[i].Epic = &models.JiraEpicLink{
+				Key:     issue.Fields.Parent.Key,
+				Summary: issue.Fields.Parent.Fields.Summary,
+			}
+		}
 	}
 
 	return result
@@ -491,6 +500,7 @@ type jiraFields struct {
 	Assignee    *jiraUser       `json:"assignee"`
 	Reporter    *jiraUser       `json:"reporter"`
 	Project     jiraProject     `json:"project"`
+	Parent      *jiraParent     `json:"parent"`
 	Created     JiraTime        `json:"created"`
 	Updated     JiraTime        `json:"updated"`
 	// StartDate maps to customfield_10015, which is the default "Start date" field ID
@@ -500,6 +510,16 @@ type jiraFields struct {
 	StartDate   string          `json:"customfield_10015"`
 	DueDate     string          `json:"duedate"`
 	Labels      []string        `json:"labels"`
+}
+
+type jiraParent struct {
+	Key    string           `json:"key"`
+	Fields jiraParentFields `json:"fields"`
+}
+
+type jiraParentFields struct {
+	Summary   string        `json:"summary"`
+	IssueType jiraIssueType `json:"issuetype"`
 }
 
 type jiraStatus struct {

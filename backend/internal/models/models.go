@@ -334,12 +334,19 @@ type JiraIssue struct {
 	Assignee    *JiraUser         `json:"assignee,omitempty"`
 	Reporter    *JiraUser         `json:"reporter,omitempty"`
 	Project     JiraProject       `json:"project"`
+	Epic        *JiraEpicLink     `json:"epic,omitempty"`
 	Created     time.Time         `json:"created"`
 	Updated     time.Time         `json:"updated"`
 	StartDate   *time.Time        `json:"start_date,omitempty"`
 	DueDate     *time.Time        `json:"due_date,omitempty"`
 	Labels      []string          `json:"labels,omitempty"`
 	URL         string            `json:"url"`
+}
+
+// JiraEpicLink represents a link to a parent epic
+type JiraEpicLink struct {
+	Key     string `json:"key"`
+	Summary string `json:"summary"`
 }
 
 // JiraUser represents a Jira user
@@ -545,13 +552,16 @@ var ValidResponseStatuses = map[ResponseStatus]bool{
 	ResponseStatusTentative: true,
 }
 
-// Task represents a calendar task
+// Task represents a calendar task or event
 type Task struct {
 	ID                 int64          `json:"id"`
 	Title              string         `json:"title"`
 	Description        *string        `json:"description,omitempty"`
 	Status             TaskStatus     `json:"status"`
 	DueDate            time.Time      `json:"due_date"`
+	StartTime          *time.Time     `json:"start_time,omitempty"`
+	EndTime            *time.Time     `json:"end_time,omitempty"`
+	AllDay             bool           `json:"all_day"`
 	CreatedByID        int64          `json:"created_by_id"`
 	CreatedBy          *User          `json:"created_by,omitempty"`
 	AssignmentType     AssignmentType `json:"assignment_type"`
@@ -564,11 +574,14 @@ type Task struct {
 	UpdatedAt          time.Time      `json:"updated_at"`
 }
 
-// CreateTaskRequest represents a request to create a task
+// CreateTaskRequest represents a request to create a task or event
 type CreateTaskRequest struct {
 	Title              string         `json:"title"`
 	Description        *string        `json:"description,omitempty"`
 	DueDate            time.Time      `json:"due_date"`
+	StartTime          *time.Time     `json:"start_time,omitempty"`
+	EndTime            *time.Time     `json:"end_time,omitempty"`
+	AllDay             *bool          `json:"all_day,omitempty"`
 	AssignmentType     AssignmentType `json:"assignment_type"`
 	AssignedUserID     *int64         `json:"assigned_user_id,omitempty"`
 	AssignedSquadID    *int64         `json:"assigned_squad_id,omitempty"`
@@ -608,12 +621,15 @@ func (r *CreateTaskRequest) Validate() error {
 	return nil
 }
 
-// UpdateTaskRequest represents a request to update a task
+// UpdateTaskRequest represents a request to update a task or event
 type UpdateTaskRequest struct {
 	Title              *string         `json:"title,omitempty"`
 	Description        *string         `json:"description,omitempty"`
 	Status             *TaskStatus     `json:"status,omitempty"`
 	DueDate            *time.Time      `json:"due_date,omitempty"`
+	StartTime          *time.Time      `json:"start_time,omitempty"`
+	EndTime            *time.Time      `json:"end_time,omitempty"`
+	AllDay             *bool           `json:"all_day,omitempty"`
 	AssignmentType     *AssignmentType `json:"assignment_type,omitempty"`
 	AssignedUserID     *int64          `json:"assigned_user_id,omitempty"`
 	AssignedSquadID    *int64          `json:"assigned_squad_id,omitempty"`

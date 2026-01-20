@@ -14,6 +14,9 @@ export interface Task {
   description?: string;
   status: TaskStatus;
   due_date: string;
+  start_time?: string;
+  end_time?: string;
+  all_day: boolean;
   created_by_id: number;
   assignment_type: AssignmentType;
   assigned_user_id?: number;
@@ -69,6 +72,9 @@ export interface CreateTaskRequest {
   title: string;
   description?: string;
   due_date: string;
+  start_time?: string;
+  end_time?: string;
+  all_day?: boolean;
   assignment_type: AssignmentType;
   assigned_user_id?: number;
   assigned_squad_id?: number;
@@ -80,6 +86,9 @@ export interface UpdateTaskRequest {
   description?: string;
   status?: TaskStatus;
   due_date?: string;
+  start_time?: string;
+  end_time?: string;
+  all_day?: boolean;
   assignment_type?: AssignmentType;
   assigned_user_id?: number;
   assigned_squad_id?: number;

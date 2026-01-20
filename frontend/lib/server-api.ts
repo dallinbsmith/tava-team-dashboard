@@ -1,5 +1,5 @@
 import "server-only";
-import { getAccessToken } from "@auth0/nextjs-auth0";
+import { auth0 } from "./auth0";
 import { User, Squad } from "@/shared/types/user";
 import { TimeOffRequest } from "@/app/(pages)/(dashboard)/time-off/types";
 import { JiraSettings, JiraUserWithMapping } from "@/app/(pages)/jira/types";
@@ -9,7 +9,8 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 
 /** Server-side fetch with Auth0 token. Use in Server Components. */
 async function get<T>(path: string): Promise<T> {
-  const { accessToken } = await getAccessToken();
+  const result = await auth0.getAccessToken();
+  const accessToken = result?.token;
   if (!accessToken) throw new Error("Unauthorized");
 
   const res = await fetch(`${BACKEND_URL}/api${path}`, {

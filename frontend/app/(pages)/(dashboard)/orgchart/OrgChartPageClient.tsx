@@ -896,7 +896,7 @@ interface OrgChartPageClientProps {
   initialSquads: Squad[];
   initialDepartments: string[];
   currentUser: User;
-  isSupervisorOrAdmin: boolean;
+  canEdit: boolean;
 }
 
 export function OrgChartPageClient({
@@ -905,7 +905,7 @@ export function OrgChartPageClient({
   initialSquads,
   initialDepartments,
   currentUser,
-  isSupervisorOrAdmin,
+  canEdit,
 }: OrgChartPageClientProps) {
   const { refetchSquads } = useOrganization();
 
@@ -1162,17 +1162,7 @@ export function OrgChartPageClient({
     );
   }
 
-  if (!isSupervisorOrAdmin) {
-    return (
-      <div className="bg-amber-900/30 border border-amber-500/30 p-4 rounded">
-        <p className="text-amber-400">
-          Access denied. Only supervisors and admins can access the org chart.
-        </p>
-      </div>
-    );
-  }
-
-  const isDraftMode = currentDraft !== null;
+  const isDraftMode = canEdit && currentDraft !== null;
 
   return (
     <DndContext
@@ -1186,34 +1176,42 @@ export function OrgChartPageClient({
             <div>
               <h1 className="text-2xl font-bold text-theme-text">Organization Chart</h1>
               <p className="text-theme-text-muted mt-1">
-                {isDraftMode
-                  ? `Editing "${currentDraft.name}" - Drag employees to reassign them to different supervisors.`
-                  : "Create or select a draft to start planning organizational changes."}
+                {!canEdit
+                  ? "View the organization structure."
+                  : isDraftMode
+                    ? `Editing "${currentDraft.name}" - Drag employees to reassign them to different supervisors.`
+                    : "Create or select a draft to start planning organizational changes."}
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowManageDepartmentsModal(true)}
-                className="flex items-center gap-2 px-4 py-2 border border-theme-border text-theme-text rounded-full text-sm font-medium hover:bg-theme-elevated transition-all"
-              >
-                <Building2 className="w-4 h-4" />
-                Manage Departments
-              </button>
-              <button
-                onClick={() => setShowManageSquadsModal(true)}
-                className="flex items-center gap-2 px-4 py-2 border border-theme-border text-theme-text rounded-full text-sm font-medium hover:bg-theme-elevated transition-all"
-              >
-                <Users className="w-4 h-4" />
-                Manage Squads
-              </button>
-            </div>
+            {canEdit && (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowManageDepartmentsModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 border border-theme-border text-theme-text rounded-full text-sm font-medium hover:bg-theme-elevated transition-all"
+                >
+                  <Building2 className="w-4 h-4" />
+                  Manage Departments
+                </button>
+                <button
+                  onClick={() => setShowManageSquadsModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 border border-theme-border text-theme-text rounded-full text-sm font-medium hover:bg-theme-elevated transition-all"
+                >
+                  <Users className="w-4 h-4" />
+                  Manage Squads
+                </button>
+              </div>
+            )}
           </div>
         </div>
         {!isDraftMode && orgTrees.length > 0 && (
           <div className="my-4 p-3 bg-blue-900/30 border border-blue-500/30 text-sm text-blue-300 rounded flex items-center gap-2">
             <Eye className="w-4 h-4 flex-shrink-0" />
             <span>
-              <strong>View Only Mode:</strong> Create or select a draft from the sidebar to enable drag-and-drop editing.
+              {canEdit ? (
+                <><strong>View Only Mode:</strong> Create or select a draft from the sidebar to enable drag-and-drop editing.</>
+              ) : (
+                <><strong>View Only:</strong> You can view the organization structure but cannot make changes.</>
+              )}
             </span>
           </div>
         )}
@@ -1221,7 +1219,7 @@ export function OrgChartPageClient({
         <div className="grid grid-cols-12 gap-6 h-[calc(100vh-220px)]">
           {/* Org Tree */}
           <div
-            className={`col-span-8 p-4 overflow-y-auto rounded transition-all ${isDraftMode
+            className={`${canEdit ? "col-span-8" : "col-span-12"} p-4 overflow-y-auto rounded transition-all ${isDraftMode
               ? "border-2 border-purple-500/50 ring-2 ring-purple-500/20"
               : "bg-theme-surface border border-theme-border"
               }`}
@@ -1265,26 +1263,28 @@ export function OrgChartPageClient({
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="col-span-4 space-y-4 overflow-y-auto">
-            <DraftManager
-              drafts={drafts}
-              currentDraft={currentDraft}
-              setCurrentDraft={setCurrentDraft}
-              onSelectDraft={handleSelectDraft}
-              onCreateDraft={handleCreateDraft}
-              onDeleteDraft={handleDeleteDraft}
-              onPublish={handlePublish}
-              isLoading={actionLoading}
-            />
-
-            {currentDraft && (
-              <ChangesSummary
-                changes={currentDraft.changes || []}
-                onRemoveChange={handleRemoveChange}
+          {/* Sidebar - only show for users who can edit */}
+          {canEdit && (
+            <div className="col-span-4 space-y-4 overflow-y-auto">
+              <DraftManager
+                drafts={drafts}
+                currentDraft={currentDraft}
+                setCurrentDraft={setCurrentDraft}
+                onSelectDraft={handleSelectDraft}
+                onCreateDraft={handleCreateDraft}
+                onDeleteDraft={handleDeleteDraft}
+                onPublish={handlePublish}
+                isLoading={actionLoading}
               />
-            )}
-          </div>
+
+              {currentDraft && (
+                <ChangesSummary
+                  changes={currentDraft.changes || []}
+                  onRemoveChange={handleRemoveChange}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
 

@@ -7,8 +7,15 @@ import { TeamTask, JiraSettings } from "../types";
 import { getTeamJiraTasks, getJiraSettings } from "../api";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import Avatar from "@/shared/common/Avatar";
-import GroupedSection from "@/shared/common/GroupedSection";
+import { getStatusColor, DueDateDisplay } from "@/lib/jira-utils";
+import { JIRA_LIMITS } from "@/lib/constants";
 import TimeOffIndicator from "@/app/(pages)/(dashboard)/time-off/components/TimeOffIndicator";
+import {
+  FilterDropdown,
+  FilterSection,
+  FilterCheckbox,
+  SearchableFilterList,
+} from "@/components";
 import {
   Users,
   ExternalLink,
@@ -18,14 +25,13 @@ import {
   RefreshCw,
   LayoutGrid,
   List,
-  Zap,
 } from "lucide-react";
 
 interface TeamJiraTasksProps {
   compact?: boolean;
 }
 
-const viewModes = ["grid", "list", "sprint"] as const;
+const viewModes = ["grid", "list"] as const;
 
 export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
   const { isSupervisorOrAdmin, loading: userLoading } = useCurrentUser();
@@ -35,30 +41,87 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Filter state
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sprintFilter, setSprintFilter] = useState("all");
+  const [epicFilter, setEpicFilter] = useState(false);
+  const [individualFilter, setIndividualFilter] = useState("all");
+
+  // Expanded sections for filter accordion
+  const [expandedSections, setExpandedSections] = useState({
+    sprint: true,
+    epic: false,
+    individual: false,
+  });
+
   // URL-synced view mode state
   const [viewMode, setViewMode] = useQueryState(
     "teamView",
     parseAsStringLiteral(viewModes).withDefault("list")
   );
 
-  // Group tasks by sprint for sprint view
-  const tasksBySprint = useMemo(() => {
-    const grouped: Record<string, typeof tasks> = {};
+  // Extract unique sprints and individuals from tasks
+  const { sprints, individuals } = useMemo(() => {
+    const sprintSet = new Set<string>();
+    const individualMap = new Map<number, { id: number; name: string }>();
+
     tasks.forEach((task) => {
-      const sprintName = task.sprint?.name || "No Sprint";
-      if (!grouped[sprintName]) {
-        grouped[sprintName] = [];
+      if (task.sprint?.name) {
+        sprintSet.add(task.sprint.name);
       }
-      grouped[sprintName].push(task);
+      if (task.employee) {
+        individualMap.set(task.employee.id, {
+          id: task.employee.id,
+          name: `${task.employee.first_name} ${task.employee.last_name}`,
+        });
+      }
     });
-    // Sort sprints alphabetically, but put "No Sprint" last
-    const sortedKeys = Object.keys(grouped).sort((a, b) => {
-      if (a === "No Sprint") return 1;
-      if (b === "No Sprint") return -1;
-      return a.localeCompare(b);
-    });
-    return sortedKeys.map((sprint) => ({ sprint, tasks: grouped[sprint] }));
+
+    return {
+      sprints: Array.from(sprintSet).sort(),
+      individuals: Array.from(individualMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
+    };
   }, [tasks]);
+
+  // Filter tasks based on current filters
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      // Sprint filter
+      if (sprintFilter !== "all") {
+        const taskSprint = task.sprint?.name || "No Sprint";
+        if (taskSprint !== sprintFilter) return false;
+      }
+
+      // Epic filter (only show epics)
+      if (epicFilter && task.issue_type !== "Epic") {
+        return false;
+      }
+
+      // Individual filter
+      if (individualFilter !== "all") {
+        if (task.employee.id.toString() !== individualFilter) return false;
+      }
+
+      return true;
+    });
+  }, [tasks, sprintFilter, epicFilter, individualFilter]);
+
+  // Calculate active filter count
+  const activeFilterCount = [
+    sprintFilter !== "all" ? 1 : 0,
+    epicFilter ? 1 : 0,
+    individualFilter !== "all" ? 1 : 0,
+  ].reduce((a, b) => a + b, 0);
+
+  const clearAllFilters = () => {
+    setSprintFilter("all");
+    setEpicFilter(false);
+    setIndividualFilter("all");
+  };
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
 
   const fetchTasks = useCallback(async (showRefresh = false) => {
     if (showRefresh) {
@@ -72,7 +135,7 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
         setSettings(jiraSettings);
 
         if (jiraSettings.org_configured) {
-          const issues = await getTeamJiraTasks(compact ? 5 : 20);
+          const issues = await getTeamJiraTasks(compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT);
           setTasks(issues);
         }
       }
@@ -91,43 +154,13 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
     }
   }, [userLoading, fetchTasks]);
 
-  const getStatusColor = (status: string) => {
-    const statusLower = status.toLowerCase();
-    switch (true) {
-      case statusLower.includes("done") || statusLower.includes("complete"):
-        return "bg-green-900/40 text-green-300";
-      case statusLower.includes("progress") || statusLower.includes("review"):
-        return "bg-blue-900/40 text-blue-300";
-      case statusLower.includes("todo") || statusLower.includes("backlog"):
-        return "bg-gray-700/40 text-gray-300";
-      default:
-        return "bg-yellow-900/40 text-yellow-300";
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    switch (true) {
-      case diffDays < 0:
-        return <span className="text-red-600">Overdue by {Math.abs(diffDays)} days</span>;
-      case diffDays === 0:
-        return <span className="text-orange-600">Due today</span>;
-      case diffDays === 1:
-        return <span className="text-orange-600">Due tomorrow</span>;
-      case diffDays <= 7:
-        return <span className="text-yellow-600">Due in {diffDays} days</span>;
-      default:
-        return <span className="text-gray-600">{date.toLocaleDateString()}</span>;
-    }
-  };
-
   if (userLoading || loading) {
     return (
-      <div className="bg-theme-surface border border-theme-border p-6">
+      <div className="bg-theme-surface border border-theme-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-theme-border flex items-center gap-3">
+          <Users className="w-5 h-5 text-theme-text-muted" />
+          <h2 className="text-lg font-semibold text-theme-text">Team Tasks</h2>
+        </div>
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin h-8 w-8 border-b-2 border-primary-500"></div>
         </div>
@@ -143,12 +176,12 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
   // Not configured - show setup prompt
   if (!settings?.org_configured) {
     return (
-      <div className="bg-theme-surface border border-theme-border p-6">
-        <div className="flex items-center gap-3 mb-4">
+      <div className="bg-theme-surface border border-theme-border overflow-hidden">
+        <div className="px-6 py-4 border-b border-theme-border flex items-center gap-3">
           <Users className="w-5 h-5 text-theme-text-muted" />
           <h2 className="text-lg font-semibold text-theme-text">Team Tasks</h2>
         </div>
-        <div className="text-center py-6">
+        <div className="text-center py-8">
           <div className="w-12 h-12 bg-theme-elevated flex items-center justify-center mx-auto mb-4">
             <Settings className="w-6 h-6 text-theme-text-muted" />
           </div>
@@ -166,18 +199,79 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
   }
 
   return (
-    <div className="bg-theme-surface border border-theme-border overflow-hidden">
+    <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col">
       <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Users className="w-5 h-5 text-primary-500" />
           <h2 className="text-lg font-semibold text-theme-text">Team Tasks</h2>
-          {tasks.length > 0 && (
+          {filteredTasks.length > 0 && (
             <span className="px-2 py-0.5 text-xs font-medium bg-primary-900/50 text-primary-300">
-              {tasks.length}
+              {filteredTasks.length}{activeFilterCount > 0 && ` / ${tasks.length}`}
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
+          {/* Filter Button */}
+          <FilterDropdown
+            isOpen={filterOpen}
+            onToggle={() => setFilterOpen(!filterOpen)}
+            onClose={() => setFilterOpen(false)}
+            activeFilterCount={activeFilterCount}
+            onClearAll={clearAllFilters}
+          >
+            {/* Sprint Section */}
+            <FilterSection
+              title="Sprint"
+              isExpanded={expandedSections.sprint}
+              onToggle={() => toggleSection("sprint")}
+            >
+              <SearchableFilterList
+                items={["No Sprint", ...sprints]}
+                selectedValue={sprintFilter}
+                onChange={setSprintFilter}
+                placeholder="Search sprints"
+              />
+            </FilterSection>
+
+            {/* Epic Section */}
+            <FilterSection
+              title="Epic"
+              isExpanded={expandedSections.epic}
+              onToggle={() => toggleSection("epic")}
+            >
+              <FilterCheckbox
+                label="Show only Epics"
+                checked={epicFilter}
+                onChange={setEpicFilter}
+              />
+            </FilterSection>
+
+            {/* Individual Section */}
+            <FilterSection
+              title="Individual"
+              isExpanded={expandedSections.individual}
+              onToggle={() => toggleSection("individual")}
+            >
+              <SearchableFilterList
+                items={individuals.map((i) => i.name)}
+                selectedValue={
+                  individualFilter === "all"
+                    ? "all"
+                    : individuals.find((i) => i.id.toString() === individualFilter)?.name || "all"
+                }
+                onChange={(name) => {
+                  if (name === "all") {
+                    setIndividualFilter("all");
+                  } else {
+                    const individual = individuals.find((i) => i.name === name);
+                    setIndividualFilter(individual?.id.toString() || "all");
+                  }
+                }}
+                placeholder="Search people"
+              />
+            </FilterSection>
+          </FilterDropdown>
+
           {/* View Mode Toggle */}
           <div className="flex border border-theme-border overflow-hidden bg-theme-elevated">
             <button
@@ -200,16 +294,6 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
             >
               <List className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setViewMode("sprint")}
-              className={`p-2 border-l border-theme-border transition-colors ${viewMode === "sprint"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
-              title="Sprint view"
-            >
-              <Zap className="w-4 h-4" />
-            </button>
           </div>
           <button
             onClick={() => fetchTasks(true)}
@@ -231,16 +315,30 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
         </div>
       )}
 
-      {tasks.length === 0 ? (
-        <div className="px-6 py-8 text-center text-theme-text-muted">
+      {filteredTasks.length === 0 ? (
+        <div className="flex-1 px-6 py-8 text-center text-theme-text-muted">
           <Users className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
-          <p>No tasks found for your team</p>
-          <p className="text-sm mt-1">Tasks assigned to your direct reports in Jira will appear here</p>
+          {activeFilterCount > 0 ? (
+            <>
+              <p>No tasks match your filters</p>
+              <button
+                onClick={clearAllFilters}
+                className="text-sm mt-2 text-primary-400 hover:text-primary-300 transition-colors"
+              >
+                Clear all filters
+              </button>
+            </>
+          ) : (
+            <>
+              <p>No tasks found for your team</p>
+              <p className="text-sm mt-1">Tasks assigned to your direct reports in Jira will appear here</p>
+            </>
+          )}
         </div>
       ) : viewMode === "grid" ? (
         /* Grid View */
-        <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tasks.map((task) => (
+        <div className="flex-1 p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredTasks.map((task) => (
             <a
               key={task.id}
               href={task.url}
@@ -285,143 +383,67 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
                 {task.due_date && (
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
-                    {formatDate(task.due_date)}
+                    <DueDateDisplay dueDate={task.due_date} />
                   </span>
                 )}
               </div>
             </a>
           ))}
         </div>
-      ) : viewMode === "sprint" ? (
-        /* Sprint View */
-        <div className="divide-y divide-theme-border">
-          {tasksBySprint.map(({ sprint, tasks: sprintTasks }) => (
-            <GroupedSection
-              key={sprint}
-              title={sprint}
-              count={sprintTasks.length}
-              icon={Zap}
-            >
-              {sprintTasks.map((task) => (
-                <a
-                  key={task.id}
-                  href={task.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block px-6 py-3 hover:bg-theme-elevated/50 transition-colors"
-                >
-                  <div className="flex items-start gap-3">
-                    <Avatar
-                      s3AvatarUrl={task.employee.avatar_url}
-                      firstName={task.employee.first_name}
-                      lastName={task.employee.last_name}
-                      size="sm"
-                      className="rounded-full flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium text-theme-text">
-                          {task.employee.first_name} {task.employee.last_name}
-                        </span>
-                        <span className="text-xs font-mono text-primary-400">{task.key}</span>
-                        <span
-                          className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
-                        >
-                          {task.status}
-                        </span>
-                        {task.time_off_impact && (
-                          <TimeOffIndicator impact={task.time_off_impact} compact />
-                        )}
-                      </div>
-                      <h4 className="text-sm text-theme-text truncate">{task.summary}</h4>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-theme-text-muted">
-                        <span>{task.project.name}</span>
-                        {task.due_date && (
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {formatDate(task.due_date)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <ExternalLink className="w-4 h-4 text-theme-text-muted flex-shrink-0" />
-                  </div>
-                </a>
-              ))}
-            </GroupedSection>
-          ))}
-        </div>
       ) : (
         /* List View */
-        <div className="divide-y divide-theme-border">
-          {tasks.map((task) => (
+        <div className="flex-1 divide-y divide-theme-border">
+          {filteredTasks.map((task) => (
             <a
               key={task.id}
               href={task.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="block px-6 py-4 hover:bg-theme-elevated transition-colors"
+              className="flex items-center gap-3 px-4 py-2 hover:bg-theme-elevated transition-colors"
             >
-              <div className="flex items-start gap-4">
-                {/* Employee Avatar */}
-                <div className="flex-shrink-0">
-                  <Avatar
-                    s3AvatarUrl={task.employee.avatar_url}
-                    firstName={task.employee.first_name}
-                    lastName={task.employee.last_name}
-                    size="md"
-                    className="rounded-full"
-                  />
-                </div>
-
-                {/* Task Details */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium text-theme-text">
-                      {task.employee.first_name} {task.employee.last_name}
-                    </span>
-                    <span className="text-sm font-mono text-primary-400">{task.key}</span>
-                    <span
-                      className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
-                    >
-                      {task.status}
-                    </span>
-                    {task.time_off_impact && (
-                      <TimeOffIndicator impact={task.time_off_impact} compact />
-                    )}
-                  </div>
-                  <h3 className="font-medium text-theme-text truncate">{task.summary}</h3>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-theme-text-muted">
-                    <span className="font-medium">{task.project.name}</span>
-                    {task.due_date && (
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {formatDate(task.due_date)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <ExternalLink className="w-4 h-4 text-theme-text-muted flex-shrink-0 mt-1" />
+              <Avatar
+                s3AvatarUrl={task.employee.avatar_url}
+                firstName={task.employee.first_name}
+                lastName={task.employee.last_name}
+                size="sm"
+                className="rounded-full flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <span className="text-xs text-theme-text-muted whitespace-nowrap">
+                  {task.employee.first_name[0]}. {task.employee.last_name}
+                </span>
+                <span className="text-xs font-mono text-primary-400">{task.key}</span>
+                <span className="text-sm text-theme-text truncate flex-1">{task.summary}</span>
+                <span
+                  className={`px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ${getStatusColor(task.status)}`}
+                >
+                  {task.status}
+                </span>
+                {task.time_off_impact && (
+                  <TimeOffIndicator impact={task.time_off_impact} compact />
+                )}
+                {task.due_date && (
+                  <span className="flex items-center gap-1 text-xs text-theme-text-muted whitespace-nowrap">
+                    <Clock className="w-3 h-3" />
+                    <DueDateDisplay dueDate={task.due_date} />
+                  </span>
+                )}
               </div>
+              <ExternalLink className="w-3.5 h-3.5 text-theme-text-muted flex-shrink-0" />
             </a>
           ))}
         </div>
       )}
 
-      {compact && tasks.length > 0 && settings?.jira_site_url && (
-        <div className="px-6 py-3 bg-theme-elevated border-t border-theme-border">
-          <a
-            href={settings.jira_site_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm text-primary-400 hover:underline flex items-center gap-1"
-          >
-            View all in Jira
-            <ExternalLink className="w-3 h-3" />
-          </a>
-        </div>
-      )}
+      <div className="px-6 py-3 bg-theme-elevated border-t border-theme-border">
+        <Link
+          href="/jira"
+          className="text-sm text-primary-400 hover:underline flex items-center gap-1"
+        >
+          View all team tasks
+          <Users className="w-3 h-3" />
+        </Link>
+      </div>
     </div>
   );
 }

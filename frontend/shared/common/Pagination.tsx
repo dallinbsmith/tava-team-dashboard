@@ -17,26 +17,26 @@ export default function Pagination({
 
   return (
     <div className="flex items-center justify-between py-3">
-      <div className="text-sm text-gray-500">
-        <span className="font-medium text-gray-300">{currentPage}</span> / {totalPages}
+      <div className="text-sm text-theme-text-muted">
+        <span className="font-medium text-theme-text">{currentPage}</span> / {totalPages}
       </div>
       <div className="flex items-center gap-2">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="p-1.5 rounded-md hover:bg-gray-50 text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-text-muted hover:text-theme-text disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           title="Previous"
         >
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
-        <div className="h-4 w-px bg-gray-200 mx-1" />
+        <div className="h-4 w-px bg-theme-border mx-1" />
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="p-1.5 rounded-md hover:bg-gray-50 text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent transition-all"
+          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-text-muted hover:text-theme-text disabled:opacity-30 disabled:hover:bg-transparent transition-all"
           title="Next"
         >
-          <ChevronRight className="w-4 h-4 text-gray-600" />
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     </div>

@@ -1,32 +1,5 @@
 import { TimeOffRequest, TimeOffStatus, CreateTimeOffRequest, ReviewTimeOffRequest } from "./types";
-
-const API_BASE_URL = "/api/proxy";
-
-async function fetchWithProxy(
-  path: string,
-  options: RequestInit = {}
-): Promise<Response> {
-  const url = `${API_BASE_URL}${path}`;
-  return fetch(url, {
-    ...options,
-    headers: {
-      ...options.headers,
-      "Content-Type": "application/json",
-    },
-    credentials: "same-origin",
-  });
-}
-
-async function handleResponse<T>(
-  response: Response,
-  errorMessage: string
-): Promise<T> {
-  if (!response.ok) {
-    const error = await response.text().catch(() => "");
-    throw new Error(error || errorMessage);
-  }
-  return response.json();
-}
+import { fetchWithProxy, handleResponse } from "@/lib/api";
 
 export async function createTimeOffRequest(
   data: CreateTimeOffRequest

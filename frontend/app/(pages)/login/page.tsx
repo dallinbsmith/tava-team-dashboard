@@ -43,7 +43,7 @@ export default function LoginPage() {
           </div>
 
           <Link
-            href="/api/auth/login"
+            href="/auth/login"
             className="flex items-center justify-center gap-2 w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 transition-colors"
           >
             <LogIn className="w-5 h-5" />

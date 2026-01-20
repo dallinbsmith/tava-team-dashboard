@@ -306,7 +306,9 @@ func (r *MeetingRepository) RespondToMeeting(ctx context.Context, meetingID int6
 // GetByDateRange retrieves meetings within a date range for a user (as creator or attendee)
 func (r *MeetingRepository) GetByDateRange(ctx context.Context, userID int64, start, end time.Time) ([]models.Meeting, error) {
 	query := `
-		SELECT DISTINCT m.` + meetingColumns + `
+		SELECT DISTINCT m.id, m.title, m.description, m.start_time, m.end_time, m.created_by_id,
+			m.recurrence_type, m.recurrence_interval, m.recurrence_end_date, m.recurrence_days_of_week,
+			m.recurrence_day_of_month, m.parent_meeting_id, m.created_at, m.updated_at
 		FROM meetings m
 		LEFT JOIN meeting_attendees a ON m.id = a.meeting_id
 		WHERE m.start_time >= $1 AND m.start_time <= $2

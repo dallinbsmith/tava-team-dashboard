@@ -78,7 +78,7 @@ export default function DashboardStats({ employees }: DashboardStatsProps) {
 
         // Fetch Jira tasks
         const tasks = await getMyJiraTasks(JIRA_LIMITS.TASKS_DEFAULT);
-        const tasksDue = tasks.filter((task: JiraIssue) => {
+        const tasksDue = (tasks || []).filter((task: JiraIssue) => {
           if (!task.due_date) return false;
           const dueDate = new Date(task.due_date);
           return dueDate >= startOfWeek && dueDate <= endOfWeek;
@@ -90,14 +90,14 @@ export default function DashboardStats({ employees }: DashboardStatsProps) {
         endDate.setDate(endDate.getDate() + 30);
         const events = await getCalendarEvents(now, endDate);
         // Count meetings and events (excluding tasks and time_off)
-        const upcomingCount = events.filter(
+        const upcomingCount = (events || []).filter(
           (event: CalendarEvent) => event.type === "meeting"
         ).length;
         setUpcomingEvents(upcomingCount);
 
         // Fetch pending time off requests
         const timeOffRequests = await getPendingTimeOffRequests();
-        setPendingTimeOff(timeOffRequests);
+        setPendingTimeOff(timeOffRequests || []);
       } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
         setFetchError(

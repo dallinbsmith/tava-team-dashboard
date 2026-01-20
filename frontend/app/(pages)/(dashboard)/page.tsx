@@ -19,7 +19,11 @@ type ModalType = "createEmployee" | "task" | "event" | "meeting" | "timeOff" | "
 
 export default function DashboardPage() {
   const { currentUser, loading: userLoading, error: userError } = useCurrentUser();
-  const { employees, squads, departments, addSquad, refetchEmployees } = useOrganization();
+  const { employees: employeesInput, squads: squadsInput, departments: departmentsInput, addSquad, refetchEmployees } = useOrganization();
+  // Ensure organization data is always arrays
+  const employees = employeesInput || [];
+  const squads = squadsInput || [];
+  const departments = departmentsInput || [];
 
   // Check if the effective current user (including when impersonating) is supervisor or admin
   const effectiveIsSupervisorOrAdmin = currentUser?.role === "supervisor" || currentUser?.role === "admin";

@@ -70,7 +70,11 @@ interface DisplayTask {
 
 export default function JiraTasks({ compact = false }: JiraTasksProps) {
   const { currentUser, loading: userLoading } = useCurrentUser();
-  const { departments, squads, allUsers } = useOrganization();
+  const { departments: departmentsInput, squads: squadsInput, allUsers: allUsersInput } = useOrganization();
+  // Ensure organization data is always arrays
+  const allUsers = allUsersInput || [];
+  const departments = departmentsInput || [];
+  const squads = squadsInput || [];
   const [myTasks, setMyTasks] = useState<JiraIssue[]>([]);
   const [teamTasks, setTeamTasks] = useState<TeamTask[]>([]);
   const [settings, setSettings] = useState<JiraSettings | null>(null);

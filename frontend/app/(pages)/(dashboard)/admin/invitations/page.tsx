@@ -198,7 +198,7 @@ export default function InvitationsPage() {
     <>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-theme-text">Invitations</h1>
+          <h1 className="text-2xl font-bold text-theme-text">Invitations TEST DEPLOY</h1>
           <p className="text-theme-text-muted mt-1">
             Invite new supervisors and admins to join the platform
           </p>

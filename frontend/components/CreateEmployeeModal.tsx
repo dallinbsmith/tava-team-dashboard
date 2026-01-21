@@ -5,7 +5,7 @@ import { BaseModal } from "./BaseModal";
 import { createEmployeeGraphQL, CreateEmployeeInput } from "@/lib/graphql";
 import { parseErrorMessage, parseSquadErrorMessage } from "@/lib/errors";
 import { User, Squad } from "@/shared/types/user";
-import { CheckCircle, ChevronDown, X, Plus, Building2, Users, User as UserIcon, Shield } from "lucide-react";
+import { CheckCircle, ChevronDown, X, Plus, Building2, Users, User as UserIcon, Shield, Calendar } from "lucide-react";
 
 interface CreateEmployeeModalProps {
   isOpen: boolean;
@@ -35,6 +35,7 @@ export function CreateEmployeeModal({
     role: "employee",
     department: "",
     squad_ids: [],
+    date_started: "",
   });
 
   // Squad dropdown state
@@ -54,6 +55,7 @@ export function CreateEmployeeModal({
       role: "employee",
       department: "",
       squad_ids: [],
+      date_started: "",
     });
     setSquadDropdownOpen(false);
     setNewSquadName("");
@@ -209,6 +211,22 @@ export function CreateEmployeeModal({
           </div>
         </div>
 
+        {/* Start Date */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-theme-text mb-1">
+            <Calendar className="w-4 h-4 inline mr-1" />
+            Start Date
+          </label>
+          <input
+            type="date"
+            value={newEmployee.date_started || ""}
+            onChange={(e) =>
+              setNewEmployee({ ...newEmployee, date_started: e.target.value })
+            }
+            className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+        </div>
+
         {/* Department Dropdown */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-theme-text mb-1">
@@ -225,7 +243,7 @@ export function CreateEmployeeModal({
                 {newEmployee.department || "Select department..."}
               </span>
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${departmentDropdownOpen ? "rotate-180" : ""}`}
+                className={`w-4 h-4 ml-2 shrink-0 transition-transform ${departmentDropdownOpen ? "rotate-180" : ""}`}
               />
             </button>
 
@@ -328,7 +346,7 @@ export function CreateEmployeeModal({
                   : `${getSelectedSquads().length} squad(s) selected`}
               </span>
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${squadDropdownOpen ? "rotate-180" : ""}`}
+                className={`w-4 h-4 ml-2 shrink-0 transition-transform ${squadDropdownOpen ? "rotate-180" : ""}`}
               />
             </button>
 

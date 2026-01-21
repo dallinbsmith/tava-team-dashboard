@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import {
   CheckSquare,
@@ -216,17 +215,6 @@ export default function TeamTasksWidget({
           +{activeTasks.length - (viewMode === "grid" ? 6 : 8)} more tasks
         </div>
       )}
-
-      {/* Footer */}
-      <div className="px-6 py-3 bg-theme-elevated border-t border-theme-border mt-auto">
-        <Link
-          href="/jira"
-          className="text-sm text-primary-400 hover:underline flex items-center gap-1"
-        >
-          View all tasks
-          <CheckSquare className="w-3 h-3" />
-        </Link>
-      </div>
     </div>
   );
 }

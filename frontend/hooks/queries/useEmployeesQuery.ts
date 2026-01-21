@@ -39,10 +39,13 @@ export interface UseEmployeesQueryResult {
  * return <EmployeeList employees={employees} />;
  * ```
  */
+// 5 minutes in milliseconds
+const DEFAULT_STALE_TIME = 5 * 60 * 1000;
+
 export function useEmployeesQuery(
   options: UseEmployeesQueryOptions = {}
 ): UseEmployeesQueryResult {
-  const { staleTime = 5 * 60 * 1000 } = options;
+  const { staleTime = DEFAULT_STALE_TIME } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
 
@@ -113,7 +116,7 @@ export interface UseEmployeeQueryResult {
 export function useEmployeeQuery(
   options: UseEmployeeQueryOptions
 ): UseEmployeeQueryResult {
-  const { id, staleTime = 5 * 60 * 1000, enabled = true } = options;
+  const { id, staleTime = DEFAULT_STALE_TIME, enabled = true } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
 
   const isAuthenticated = !!auth0User && !authLoading;

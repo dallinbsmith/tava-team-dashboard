@@ -196,6 +196,45 @@ func (r *TimeOffRepository) GetPendingForSupervisor(ctx context.Context, supervi
 	return requests, nil
 }
 
+// GetAllApproved retrieves all approved time off requests (for admins viewing team time off)
+func (r *TimeOffRepository) GetAllApproved(ctx context.Context) ([]models.TimeOffRequest, error) {
+	rows, err := r.db.Query(ctx, `
+		SELECT
+			t.id, t.user_id, t.start_date, t.end_date, t.request_type, t.reason, t.status,
+			t.reviewer_id, t.reviewer_notes, t.reviewed_at, t.created_at, t.updated_at,
+			u.id, u.email, u.first_name, u.last_name, u.role, u.title, u.department, u.avatar_url
+		FROM time_off_requests t
+		JOIN users u ON t.user_id = u.id
+		WHERE t.status = 'approved'
+		AND t.end_date >= CURRENT_DATE
+		ORDER BY t.start_date ASC
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all approved time off requests: %w", err)
+	}
+	defer rows.Close()
+
+	var requests []models.TimeOffRequest
+	for rows.Next() {
+		var timeOff models.TimeOffRequest
+		var user models.User
+		err := rows.Scan(
+			&timeOff.ID, &timeOff.UserID, &timeOff.StartDate, &timeOff.EndDate,
+			&timeOff.RequestType, &timeOff.Reason, &timeOff.Status,
+			&timeOff.ReviewerID, &timeOff.ReviewerNotes, &timeOff.ReviewedAt,
+			&timeOff.CreatedAt, &timeOff.UpdatedAt,
+			&user.ID, &user.Email, &user.FirstName, &user.LastName, &user.Role, &user.Title, &user.Department, &user.AvatarURL,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan time off request: %w", err)
+		}
+		timeOff.User = &user
+		requests = append(requests, timeOff)
+	}
+
+	return requests, nil
+}
+
 // GetAllPending retrieves all pending time off requests (for admins)
 func (r *TimeOffRepository) GetAllPending(ctx context.Context) ([]models.TimeOffRequest, error) {
 	rows, err := r.db.Query(ctx, `
@@ -414,6 +453,131 @@ func (r *TimeOffRepository) GetApprovedFutureTimeOffByUser(ctx context.Context, 
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan time off request: %w", err)
 		}
+		requests = append(requests, timeOff)
+	}
+
+	return requests, nil
+}
+
+// GetVisibleRequests returns time off requests visible to the user based on their role:
+// - Employees: only their own requests
+// - Supervisors: their own + their direct reports' requests
+// - Admins: their own + all users' requests (could be filtered to direct reports if preferred)
+func (r *TimeOffRepository) GetVisibleRequests(ctx context.Context, user *models.User, statusFilter *models.TimeOffStatus) ([]models.TimeOffRequest, error) {
+	var query string
+	var args []interface{}
+
+	// Build status filter clause
+	statusClause := ""
+	if statusFilter != nil {
+		statusClause = " AND t.status = $2"
+	}
+
+	if user.Role == models.RoleEmployee {
+		// Employees see only their own
+		if statusFilter != nil {
+			query = `
+				SELECT
+					t.id, t.user_id, t.start_date, t.end_date, t.request_type, t.reason, t.status,
+					t.reviewer_id, t.reviewer_notes, t.reviewed_at, t.created_at, t.updated_at,
+					u.id, u.email, u.first_name, u.last_name, u.role, u.title, u.department, u.avatar_url
+				FROM time_off_requests t
+				JOIN users u ON t.user_id = u.id
+				WHERE t.user_id = $1` + statusClause + `
+				ORDER BY t.start_date DESC
+			`
+			args = []interface{}{user.ID, *statusFilter}
+		} else {
+			query = `
+				SELECT
+					t.id, t.user_id, t.start_date, t.end_date, t.request_type, t.reason, t.status,
+					t.reviewer_id, t.reviewer_notes, t.reviewed_at, t.created_at, t.updated_at,
+					u.id, u.email, u.first_name, u.last_name, u.role, u.title, u.department, u.avatar_url
+				FROM time_off_requests t
+				JOIN users u ON t.user_id = u.id
+				WHERE t.user_id = $1
+				ORDER BY t.start_date DESC
+			`
+			args = []interface{}{user.ID}
+		}
+	} else if user.Role == models.RoleSupervisor {
+		// Supervisors see their own + direct reports
+		if statusFilter != nil {
+			query = `
+				SELECT
+					t.id, t.user_id, t.start_date, t.end_date, t.request_type, t.reason, t.status,
+					t.reviewer_id, t.reviewer_notes, t.reviewed_at, t.created_at, t.updated_at,
+					u.id, u.email, u.first_name, u.last_name, u.role, u.title, u.department, u.avatar_url
+				FROM time_off_requests t
+				JOIN users u ON t.user_id = u.id
+				WHERE (t.user_id = $1 OR u.supervisor_id = $1)` + statusClause + `
+				ORDER BY t.start_date DESC
+			`
+			args = []interface{}{user.ID, *statusFilter}
+		} else {
+			query = `
+				SELECT
+					t.id, t.user_id, t.start_date, t.end_date, t.request_type, t.reason, t.status,
+					t.reviewer_id, t.reviewer_notes, t.reviewed_at, t.created_at, t.updated_at,
+					u.id, u.email, u.first_name, u.last_name, u.role, u.title, u.department, u.avatar_url
+				FROM time_off_requests t
+				JOIN users u ON t.user_id = u.id
+				WHERE (t.user_id = $1 OR u.supervisor_id = $1)
+				ORDER BY t.start_date DESC
+			`
+			args = []interface{}{user.ID}
+		}
+	} else {
+		// Admins see their own + direct reports (same as supervisor for now)
+		if statusFilter != nil {
+			query = `
+				SELECT
+					t.id, t.user_id, t.start_date, t.end_date, t.request_type, t.reason, t.status,
+					t.reviewer_id, t.reviewer_notes, t.reviewed_at, t.created_at, t.updated_at,
+					u.id, u.email, u.first_name, u.last_name, u.role, u.title, u.department, u.avatar_url
+				FROM time_off_requests t
+				JOIN users u ON t.user_id = u.id
+				WHERE (t.user_id = $1 OR u.supervisor_id = $1)` + statusClause + `
+				ORDER BY t.start_date DESC
+			`
+			args = []interface{}{user.ID, *statusFilter}
+		} else {
+			query = `
+				SELECT
+					t.id, t.user_id, t.start_date, t.end_date, t.request_type, t.reason, t.status,
+					t.reviewer_id, t.reviewer_notes, t.reviewed_at, t.created_at, t.updated_at,
+					u.id, u.email, u.first_name, u.last_name, u.role, u.title, u.department, u.avatar_url
+				FROM time_off_requests t
+				JOIN users u ON t.user_id = u.id
+				WHERE (t.user_id = $1 OR u.supervisor_id = $1)
+				ORDER BY t.start_date DESC
+			`
+			args = []interface{}{user.ID}
+		}
+	}
+
+	rows, err := r.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get visible time off requests: %w", err)
+	}
+	defer rows.Close()
+
+	var requests []models.TimeOffRequest
+	for rows.Next() {
+		var timeOff models.TimeOffRequest
+		var reqUser models.User
+		err := rows.Scan(
+			&timeOff.ID, &timeOff.UserID, &timeOff.StartDate, &timeOff.EndDate,
+			&timeOff.RequestType, &timeOff.Reason, &timeOff.Status,
+			&timeOff.ReviewerID, &timeOff.ReviewerNotes, &timeOff.ReviewedAt,
+			&timeOff.CreatedAt, &timeOff.UpdatedAt,
+			&reqUser.ID, &reqUser.Email, &reqUser.FirstName, &reqUser.LastName,
+			&reqUser.Role, &reqUser.Title, &reqUser.Department, &reqUser.AvatarURL,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan time off request: %w", err)
+		}
+		timeOff.User = &reqUser
 		requests = append(requests, timeOff)
 	}
 

@@ -392,6 +392,79 @@ func (h *Handlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// DeactivateUser godoc
+// @Summary Deactivate a user
+// @Description Deactivates a user (soft delete). Admins can deactivate anyone except themselves. Supervisors can deactivate their direct reports.
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "User ID"
+// @Success 204 "User deactivated"
+// @Failure 400 {object} map[string]interface{} "Invalid user ID or cannot deactivate yourself"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 404 {object} map[string]interface{} "User not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /users/{id}/deactivate [post]
+func (h *Handlers) DeactivateUser(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDParam(r, "id")
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	currentUser := requireAuth(w, r)
+	if currentUser == nil {
+		return
+	}
+
+	// Only admins and supervisors can deactivate users
+	if currentUser.Role == models.RoleEmployee {
+		respondError(w, http.StatusForbidden, "Forbidden")
+		return
+	}
+
+	// Cannot deactivate yourself
+	if currentUser.ID == id {
+		respondError(w, http.StatusBadRequest, "Cannot deactivate yourself")
+		return
+	}
+
+	// Get the target user
+	targetUser, err := h.userRepo.GetByID(r.Context(), id)
+	if err != nil {
+		respondError(w, http.StatusNotFound, "User not found")
+		return
+	}
+
+	// Check if user is already inactive
+	if !targetUser.IsActive {
+		respondError(w, http.StatusBadRequest, "User is already inactive")
+		return
+	}
+
+	// Supervisors can only deactivate their direct reports
+	if currentUser.Role == models.RoleSupervisor {
+		if targetUser.SupervisorID == nil || *targetUser.SupervisorID != currentUser.ID {
+			respondError(w, http.StatusForbidden, "Forbidden: Can only deactivate your own direct reports")
+			return
+		}
+	}
+
+	// Deactivate the user (this also cleans up tasks, time-off, etc.)
+	if err := h.userRepo.Deactivate(r.Context(), id); err != nil {
+		log.Printf("Error deactivating user %d: %v", id, err)
+		respondError(w, http.StatusInternalServerError, "Failed to deactivate user")
+		return
+	}
+
+	// Invalidate user cache on successful deactivation
+	h.InvalidateUserCache()
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (h *Handlers) GetSupervisors(w http.ResponseWriter, r *http.Request) {
 	var supervisors []models.User
 	var err error

@@ -8,18 +8,21 @@ import (
 	"github.com/smith-dallin/manager-dashboard/internal/logger"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 	"github.com/smith-dallin/manager-dashboard/internal/repository"
+	"github.com/smith-dallin/manager-dashboard/internal/services"
 )
 
 type InvitationHandlers struct {
 	invitationRepo repository.InvitationRepository
 	userRepo       repository.UserRepository
+	emailService   *services.EmailService
 	logger         *logger.Logger
 }
 
-func NewInvitationHandlers(invitationRepo repository.InvitationRepository, userRepo repository.UserRepository) *InvitationHandlers {
+func NewInvitationHandlers(invitationRepo repository.InvitationRepository, userRepo repository.UserRepository, emailService *services.EmailService) *InvitationHandlers {
 	return &InvitationHandlers{
 		invitationRepo: invitationRepo,
 		userRepo:       userRepo,
+		emailService:   emailService,
 		logger:         logger.Default().WithComponent("invitations"),
 	}
 }
@@ -100,6 +103,25 @@ func (h *InvitationHandlers) CreateInvitation(w http.ResponseWriter, r *http.Req
 			"invitee_role":  req.Role,
 		},
 	})
+
+	// Send invitation email asynchronously (don't block API response)
+	if h.emailService != nil {
+		inviterName := fmt.Sprintf("%s %s", currentUser.FirstName, currentUser.LastName)
+		go func() {
+			if err := h.emailService.SendInvitation(r.Context(), req.Email, invitation.Token, string(req.Role), inviterName); err != nil {
+				h.logger.Error("Failed to send invitation email",
+					"email", req.Email,
+					"invitation_id", invitation.ID,
+					"error", err,
+				)
+			} else {
+				h.logger.Info("Invitation email sent",
+					"email", req.Email,
+					"invitation_id", invitation.ID,
+				)
+			}
+		}()
+	}
 
 	respondJSON(w, http.StatusCreated, invitation)
 }

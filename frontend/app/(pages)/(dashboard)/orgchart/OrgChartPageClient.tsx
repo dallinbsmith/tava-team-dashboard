@@ -139,18 +139,11 @@ function DraggableEmployeeCard({
   isDraftMode: boolean;
   onEditClick?: (user: User) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `employee-${node.user.id}`,
     data: { user: node.user },
     disabled: !isDraftMode,
   });
-
-  const style = transform
-    ? {
-      transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      zIndex: isDragging ? 1000 : undefined,
-    }
-    : undefined;
 
   const hasChange = !!pendingChange;
 
@@ -165,14 +158,13 @@ function DraggableEmployeeCard({
   return (
     <div
       ref={setNodeRef}
-      style={style}
       onClick={handleClick}
       className={`flex items-center gap-3 p-3 bg-theme-surface border transition-all ${hasChange
         ? "border-purple-400 ring-2 ring-purple-500/30"
         : isDraftMode
           ? "border-theme-border hover:border-primary-400 hover:shadow-sm cursor-pointer"
           : "border-theme-border"
-        } ${isDragging || isBeingDragged ? "opacity-50 shadow-lg" : ""}`}
+        } ${isDragging || isBeingDragged ? "opacity-50" : ""}`}
     >
       {/* Drag handle - only show in draft mode */}
       {isDraftMode &&
@@ -208,108 +200,26 @@ function DraggableEmployeeCard({
           <span>
             {node.user.title || node.user.role.charAt(0).toUpperCase() + node.user.role.slice(1)}
           </span>
-          {/* Department display with before/after */}
-          {(() => {
-            const originalDept = (node.user as any).originalDepartment as string | undefined;
-            const currentDept = node.user.department || "";
-            const hasDeptChange = originalDept !== undefined && originalDept !== currentDept;
-
-            if (hasDeptChange) {
-              return (
-                <>
-                  <span> - </span>
-                  {originalDept && (
-                    <span className="text-red-400 line-through">{originalDept}</span>
-                  )}
-                  {originalDept && currentDept && <span className="mx-1">→</span>}
-                  {currentDept && (
-                    <span className="text-green-400">{currentDept}</span>
-                  )}
-                  {!originalDept && currentDept && (
-                    <span className="text-green-400">+ {currentDept}</span>
-                  )}
-                </>
-              );
-            }
-
-            // No change - show department normally
-            if (currentDept) {
-              return (
-                <>
-                  <span> - </span>
-                  <span>{currentDept}</span>
-                </>
-              );
-            }
-
-            return null;
-          })()}
+          {node.user.department && (
+            <>
+              <span> - </span>
+              <span>{node.user.department}</span>
+            </>
+          )}
         </div>
-        {/* Squad display - show before/after when there are pending changes */}
-        {(() => {
-          const originalSquads = (node.user as any).originalSquads as Squad[] | undefined;
-          const currentSquads = node.user.squads || [];
-          const hasSquadChange = originalSquads !== undefined;
-
-          if (hasSquadChange) {
-            // Show both original (strikethrough) and new squads
-            const originalIds = new Set(originalSquads?.map(s => s.id) || []);
-            const currentIds = new Set(currentSquads.map(s => s.id));
-            const removedSquads = originalSquads?.filter(s => !currentIds.has(s.id)) || [];
-            const addedSquads = currentSquads.filter(s => !originalIds.has(s.id));
-            const unchangedSquads = currentSquads.filter(s => originalIds.has(s.id));
-
-            return (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {/* Removed squads - strikethrough red */}
-                {removedSquads.map(squad => (
-                  <span
-                    key={`removed-${squad.id}`}
-                    className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-red-900/30 text-red-400 border border-red-500/30 rounded line-through"
-                  >
-                    {squad.name}
-                  </span>
-                ))}
-                {/* Unchanged squads - normal style */}
-                {unchangedSquads.map(squad => (
-                  <span
-                    key={squad.id}
-                    className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border rounded"
-                  >
-                    {squad.name}
-                  </span>
-                ))}
-                {/* Added squads - green highlight */}
-                {addedSquads.map(squad => (
-                  <span
-                    key={`added-${squad.id}`}
-                    className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-green-900/30 text-green-400 border border-green-500/30 rounded"
-                  >
-                    + {squad.name}
-                  </span>
-                ))}
-              </div>
-            );
-          }
-
-          // No change - show squads normally
-          if (currentSquads.length > 0) {
-            return (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {currentSquads.map(squad => (
-                  <span
-                    key={squad.id}
-                    className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border rounded"
-                  >
-                    {squad.name}
-                  </span>
-                ))}
-              </div>
-            );
-          }
-
-          return null;
-        })()}
+        {/* Squad display - simple list, detailed changes shown in Pending Changes panel */}
+        {node.user.squads && node.user.squads.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {node.user.squads.map(squad => (
+              <span
+                key={squad.id}
+                className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border rounded"
+              >
+                {squad.name}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Pending change indicator */}
@@ -500,82 +410,6 @@ function DragOverlayCard({ user }: { user: User }) {
             ))}
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-// Changes summary component
-function ChangesSummary({
-  changes,
-  onRemoveChange,
-}: {
-  changes: DraftChange[];
-  onRemoveChange: (userId: number) => void;
-}) {
-  if (changes.length === 0) {
-    return (
-      <div className="bg-theme-surface border border-theme-border p-4 rounded">
-        <h3 className="font-semibold text-theme-text mb-2">Pending Changes</h3>
-        <p className="text-sm text-theme-text-muted">
-          No changes yet. Drag employees to reorganize.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-theme-surface border border-theme-border p-4 rounded">
-      <h3 className="font-semibold text-theme-text mb-3">
-        Pending Changes ({changes.length})
-      </h3>
-      <div className="space-y-3">
-        {changes.map((change) => (
-          <div
-            key={change.id}
-            className="p-3 bg-purple-900/30 border border-purple-500/30 text-sm rounded"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-medium text-theme-text">
-                {change.user?.first_name} {change.user?.last_name}
-              </span>
-              <button
-                onClick={() => onRemoveChange(change.user_id)}
-                className="p-1 text-theme-text-muted hover:text-red-500"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="space-y-1 text-theme-text-muted">
-              {change.new_supervisor_id !== change.original_supervisor_id && (
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-3 h-3" />
-                  <span>New supervisor assigned</span>
-                </div>
-              )}
-              {change.new_department && change.new_department !== change.original_department && (
-                <div className="flex items-center gap-2">
-                  <span>Dept: {change.original_department || "None"}</span>
-                  <ArrowRight className="w-3 h-3" />
-                  <span>{change.new_department}</span>
-                </div>
-              )}
-              {change.new_role && change.new_role !== change.original_role && (
-                <div className="flex items-center gap-2">
-                  <span>Role: {change.original_role}</span>
-                  <ArrowRight className="w-3 h-3" />
-                  <span>{change.new_role}</span>
-                </div>
-              )}
-              {change.new_squad_ids !== undefined && (
-                <div className="flex items-center gap-2">
-                  <Users className="w-3 h-3" />
-                  <span>Squads changed</span>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -909,15 +743,15 @@ export function OrgChartPageClient({
 }: OrgChartPageClientProps) {
   const { refetchSquads } = useOrganization();
 
-  const [orgTrees, setOrgTrees] = useState<OrgTreeNode[]>(initialOrgTrees);
-  const [drafts, setDrafts] = useState<OrgChartDraft[]>(initialDrafts);
-  const [squads, setSquads] = useState<Squad[]>(initialSquads);
+  const [orgTrees, setOrgTrees] = useState<OrgTreeNode[]>(initialOrgTrees || []);
+  const [drafts, setDrafts] = useState<OrgChartDraft[]>(initialDrafts || []);
+  const [squads, setSquads] = useState<Squad[]>(initialSquads || []);
   const [currentDraft, setCurrentDraft] = useState<OrgChartDraft | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeUser, setActiveUser] = useState<User | null>(null);
   const [editingEmployee, setEditingEmployee] = useState<User | null>(null);
-  const [availableDepartments, setAvailableDepartments] = useState<string[]>(initialDepartments);
+  const [availableDepartments, setAvailableDepartments] = useState<string[]>(initialDepartments || []);
   const [showManageDepartmentsModal, setShowManageDepartmentsModal] = useState(false);
   const [showManageSquadsModal, setShowManageSquadsModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
@@ -1265,7 +1099,7 @@ export function OrgChartPageClient({
 
           {/* Sidebar - only show for users who can edit */}
           {canEdit && (
-            <div className="col-span-4 space-y-4 overflow-y-auto">
+            <div className="col-span-4 overflow-y-auto">
               <DraftManager
                 drafts={drafts}
                 currentDraft={currentDraft}
@@ -1274,15 +1108,19 @@ export function OrgChartPageClient({
                 onCreateDraft={handleCreateDraft}
                 onDeleteDraft={handleDeleteDraft}
                 onPublish={handlePublish}
+                onRemoveChange={handleRemoveChange}
                 isLoading={actionLoading}
+                squads={squads}
+                allUsers={(() => {
+                  const users: User[] = [];
+                  const collectUsers = (node: OrgTreeNode) => {
+                    users.push(node.user);
+                    node.children.forEach(collectUsers);
+                  };
+                  orgTrees.forEach(collectUsers);
+                  return users;
+                })()}
               />
-
-              {currentDraft && (
-                <ChangesSummary
-                  changes={currentDraft.changes || []}
-                  onRemoveChange={handleRemoveChange}
-                />
-              )}
             </div>
           )}
         </div>

@@ -16,6 +16,8 @@ type UserRepository interface {
 	Create(ctx context.Context, req *models.CreateUserRequest, auth0ID string) (*models.User, error)
 	Update(ctx context.Context, id int64, req *models.UpdateUserRequest) (*models.User, error)
 	Delete(ctx context.Context, id int64) error
+	Deactivate(ctx context.Context, id int64) error
+	Reactivate(ctx context.Context, id int64) error
 	GetDirectReportsBySupervisorID(ctx context.Context, supervisorID int64) ([]models.User, error)
 	GetAllSupervisors(ctx context.Context) ([]models.User, error)
 	GetAllDepartments(ctx context.Context) ([]string, error)
@@ -45,6 +47,7 @@ type TimeOffRepository interface {
 	GetByID(ctx context.Context, id int64) (*models.TimeOffRequest, error)
 	GetByIDWithUser(ctx context.Context, id int64) (*models.TimeOffRequest, error)
 	GetByUserID(ctx context.Context, userID int64, status *models.TimeOffStatus) ([]models.TimeOffRequest, error)
+	GetVisibleRequests(ctx context.Context, user *models.User, status *models.TimeOffStatus) ([]models.TimeOffRequest, error)
 	GetPendingForSupervisor(ctx context.Context, supervisorID int64) ([]models.TimeOffRequest, error)
 	GetAllPending(ctx context.Context) ([]models.TimeOffRequest, error)
 	Review(ctx context.Context, id int64, reviewerID int64, req *models.ReviewTimeOffRequestInput) error
@@ -53,6 +56,7 @@ type TimeOffRepository interface {
 	GetApprovedForUsers(ctx context.Context, userIDs []int64, start, end time.Time) ([]models.TimeOffRequest, error)
 	GetTeamTimeOff(ctx context.Context, supervisorID int64) ([]models.TimeOffRequest, error)
 	GetApprovedFutureTimeOffByUser(ctx context.Context, userID int64) ([]models.TimeOffRequest, error)
+	GetAllApproved(ctx context.Context) ([]models.TimeOffRequest, error)
 }
 
 // InvitationRepository defines the interface for invitation data access

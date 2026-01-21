@@ -58,9 +58,18 @@ export async function proxyToBackend(request: NextRequest, options: ProxyOptions
     const headers: HeadersInit = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
+    // Forward impersonation header if present
+    const impersonateHeader = request.headers.get("X-Impersonate-User-Id");
+    if (impersonateHeader) headers["X-Impersonate-User-Id"] = impersonateHeader;
+
     console.log(`Proxy: Fetching ${backendUrl}`);
     const res = await fetch(backendUrl, { method: method || request.method, headers, body: await getBody(request) });
     console.log(`Proxy: Backend responded with status ${res.status}`);
+
+    // Handle 204 No Content responses - return empty response with no body
+    if (res.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
 
     const parsed = await parseResponse(res);
     if (!parsed) return jsonError("Failed to parse backend response", 502);

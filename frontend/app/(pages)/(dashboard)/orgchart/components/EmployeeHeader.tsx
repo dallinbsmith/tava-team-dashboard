@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import AvatarUpload from "./AvatarUpload";
+import { useCurrentUser } from "@/providers/CurrentUserProvider";
+import { useOrganization } from "@/providers/OrganizationProvider";
 
 interface EmployeeHeaderProps {
   employee: {
@@ -16,10 +18,13 @@ interface EmployeeHeaderProps {
   };
   canEdit: boolean;
   onEditClick?: () => void;
+  onAvatarUpdate?: (newAvatarUrl: string) => void;
 }
 
-export default function EmployeeHeader({ employee, canEdit, onEditClick }: EmployeeHeaderProps) {
+export default function EmployeeHeader({ employee, canEdit, onEditClick, onAvatarUpdate }: EmployeeHeaderProps) {
   const router = useRouter();
+  const { currentUser, refetch } = useCurrentUser();
+  const { refetchEmployees, refetchAllUsers } = useOrganization();
   const [avatarUrl, setAvatarUrl] = useState(employee.avatar_url);
 
   const handleAvatarUpload = async (imageDataUrl: string) => {
@@ -37,6 +42,21 @@ export default function EmployeeHeader({ employee, canEdit, onEditClick }: Emplo
 
     const updatedUser = await response.json();
     setAvatarUrl(updatedUser.avatar_url);
+
+    // Notify parent component about the avatar change
+    if (onAvatarUpdate) {
+      onAvatarUpdate(updatedUser.avatar_url);
+    }
+
+    // Refetch all user data to update avatars everywhere
+    await Promise.all([
+      // If uploading own avatar, refetch current user to update sidebar
+      currentUser && currentUser.id === employee.id ? refetch() : Promise.resolve(),
+      // Refetch employee lists to update cards, direct reports, etc.
+      refetchEmployees(),
+      refetchAllUsers(),
+    ]);
+
     router.refresh();
   };
 

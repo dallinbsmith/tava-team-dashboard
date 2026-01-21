@@ -9,10 +9,21 @@ export { getEmployeesGraphQL, getEmployeeGraphQL, getCurrentUserGraphQL, createE
 
 const API_BASE_URL = "/api/proxy";
 
+// Get impersonated user ID from sessionStorage (client-side only)
+function getImpersonationHeader(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const impersonatedUserId = sessionStorage.getItem("impersonation_user_id");
+  return impersonatedUserId ? { "X-Impersonate-User-Id": impersonatedUserId } : {};
+}
+
 export async function fetchWithProxy(path: string, options: RequestInit = {}): Promise<Response> {
   return fetch(`${API_BASE_URL}${path}`, {
     ...options,
-    headers: { ...options.headers, "Content-Type": "application/json" },
+    headers: {
+      ...options.headers,
+      "Content-Type": "application/json",
+      ...getImpersonationHeader(),
+    },
     credentials: "same-origin",
   });
 }
@@ -62,6 +73,7 @@ export const getSupervisors = () => get<User[]>("/supervisors");
 export const getAllUsers = () => get<User[]>("/users");
 export const updateUser = (userId: number, data: UpdateUserRequest) => mutate<User>(`/users/${userId}`, "PUT", data);
 export const uploadAvatar = (userId: number, imageDataUrl: string) => mutate<User>(`/users/${userId}/avatar/base64`, "POST", { image: imageDataUrl });
+export const deactivateUser = (userId: number) => postVoid(`/users/${userId}/deactivate`);
 
 // Squads & Departments
 export const getSquads = () => get<Squad[]>("/squads");

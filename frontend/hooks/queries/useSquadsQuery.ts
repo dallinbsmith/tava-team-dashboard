@@ -3,11 +3,13 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { useCallback } from "react";
 import { getSquads, createSquad, deleteSquad } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
+import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 import { Squad } from "@/shared/types/user";
 
+// 5 minutes in milliseconds
+const DEFAULT_STALE_TIME = 5 * 60 * 1000;
+
 export interface UseSquadsQueryOptions {
-  /** Override the default stale time (5 minutes) */
-  staleTime?: number;
   /** Whether to enable the query (default: true when authenticated) */
   enabled?: boolean;
 }
@@ -21,8 +23,6 @@ export interface UseSquadsQueryResult {
   error: string | null;
   /** Refetch the squads data */
   refetch: () => Promise<void>;
-  /** Invalidate and refetch */
-  invalidate: () => Promise<void>;
   /** Add a new squad */
   addSquad: (name: string) => Promise<Squad>;
   /** Delete a squad */
@@ -33,22 +33,11 @@ export interface UseSquadsQueryResult {
 
 /**
  * Hook for fetching and managing squads.
- * Uses the centralized query key from queryKeys.squads.all()
- *
- * @example
- * ```tsx
- * const { squads, isLoading, addSquad } = useSquadsQuery();
- *
- * const handleCreate = async () => {
- *   const newSquad = await addSquad("Engineering");
- *   console.log("Created squad:", newSquad);
- * };
- * ```
+ * Includes mutations for add/remove with automatic cache invalidation.
  */
 export function useSquadsQuery(
   options: UseSquadsQueryOptions = {}
 ): UseSquadsQueryResult {
-  const { staleTime = 5 * 60 * 1000 } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
 
@@ -63,47 +52,55 @@ export function useSquadsQuery(
     queryKey: queryKeys.squads.all(),
     queryFn: getSquads,
     enabled: options.enabled ?? isAuthenticated,
-    staleTime,
+    staleTime: DEFAULT_STALE_TIME,
   });
 
-  // Add squad mutation with optimistic update
+  // Force refetch all related queries after squad changes
+  const refetchRelatedQueries = useCallback(
+    () => refetchQueries(queryClient, queryKeyGroups.squadRelated()),
+    [queryClient]
+  );
+
+  // Add squad mutation
   const addMutation = useMutation({
     mutationFn: (name: string) => createSquad(name),
-    onSuccess: (newSquad) => {
+    onSuccess: async (newSquad) => {
+      // Immediately update cache
       queryClient.setQueryData<Squad[]>(queryKeys.squads.all(), (old) =>
         old ? [...old, newSquad] : [newSquad]
       );
+      // Force refetch related queries to ensure consistency
+      await refetchRelatedQueries();
     },
   });
 
-  // Delete squad mutation with optimistic update
+  // Delete squad mutation
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteSquad(id),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.squads.all() });
       const previousSquads = queryClient.getQueryData<Squad[]>(queryKeys.squads.all());
+      // Optimistic update
       queryClient.setQueryData<Squad[]>(queryKeys.squads.all(), (old) =>
         old ? old.filter((s) => s.id !== id) : []
       );
       return { previousSquads };
     },
     onError: (_err, _id, context) => {
+      // Rollback on error
       if (context?.previousSquads) {
         queryClient.setQueryData(queryKeys.squads.all(), context.previousSquads);
       }
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.squads.all() });
+    onSuccess: async () => {
+      // Force refetch related queries
+      await refetchRelatedQueries();
     },
   });
 
   const refetch = useCallback(async () => {
     await queryRefetch();
   }, [queryRefetch]);
-
-  const invalidate = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.squads.all() });
-  }, [queryClient]);
 
   const addSquad = useCallback(
     async (name: string): Promise<Squad> => {
@@ -128,7 +125,6 @@ export function useSquadsQuery(
         : "Failed to fetch squads"
       : null,
     refetch,
-    invalidate,
     addSquad,
     removeSquad,
     isMutating: addMutation.isPending || deleteMutation.isPending,

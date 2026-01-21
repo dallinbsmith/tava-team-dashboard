@@ -11,11 +11,16 @@ import CreateMeetingModal from "./calendar/components/CreateMeetingModal";
 import CreateEventModal from "./calendar/components/CreateEventModal";
 import RequestTimeOffModal from "./calendar/components/RequestTimeOffModal";
 import CreateTimeOffForEmployeeModal from "./calendar/components/CreateTimeOffForEmployeeModal";
+import ViewTaskModal from "./calendar/components/ViewTaskModal";
+import ViewMeetingModal from "./calendar/components/ViewMeetingModal";
+import ViewTimeOffModal from "./calendar/components/ViewTimeOffModal";
 import { CreateEmployeeModal } from "@/components";
-import DashboardStats from "./dashboard-stats/DashboardStats";
+import StatsCards from "./dashboard-stats/StatsCards";
+import SquadBreakdown from "./dashboard-stats/SquadBreakdown";
+import TimeOffWidget from "./dashboard-stats/TimeOffWidget";
 import { UserPlus } from "lucide-react";
 
-type ModalType = "createEmployee" | "task" | "event" | "meeting" | "timeOff" | "timeOffForEmployee" | null;
+type ModalType = "createEmployee" | "task" | "event" | "meeting" | "timeOff" | "timeOffForEmployee" | "viewTask" | "viewMeeting" | "viewTimeOff" | null;
 
 export default function DashboardPage() {
   const { currentUser, loading: userLoading, error: userError } = useCurrentUser();
@@ -32,9 +37,32 @@ export default function DashboardPage() {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [calendarRefreshKey, setCalendarRefreshKey] = useState(0);
 
+  // State for viewing specific items
+  const [viewTaskId, setViewTaskId] = useState<number | null>(null);
+  const [viewMeetingId, setViewMeetingId] = useState<number | null>(null);
+  const [viewTimeOffId, setViewTimeOffId] = useState<number | null>(null);
+
   const closeAndRefreshCalendar = useCallback(() => {
     setActiveModal(null);
+    setViewTaskId(null);
+    setViewMeetingId(null);
+    setViewTimeOffId(null);
     setCalendarRefreshKey((prev) => prev + 1);
+  }, []);
+
+  const handleViewTask = useCallback((taskId: number) => {
+    setViewTaskId(taskId);
+    setActiveModal("viewTask");
+  }, []);
+
+  const handleViewMeeting = useCallback((meetingId: number) => {
+    setViewMeetingId(meetingId);
+    setActiveModal("viewMeeting");
+  }, []);
+
+  const handleViewTimeOff = useCallback((timeOffId: number) => {
+    setViewTimeOffId(timeOffId);
+    setActiveModal("viewTimeOff");
   }, []);
 
   const handleEmployeeCreated = useCallback(async () => {
@@ -87,7 +115,32 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid gap-6 mb-6">
+        <div className="bg-theme-surface border border-theme-border p-4 sm:p-6">
+          <h2 className="text-lg font-semibold text-theme-text mb-4 sm:mb-6">
+            {effectiveIsSupervisorOrAdmin ? "Direct Reports" : "My Profile"}
+          </h2>
+          <EmployeeList employees={employees} />
+        </div>
+      </div>
+
+      {/* Row 1: Squad Breakdown, Stats Cards, Time Off Requests */}
+      {effectiveIsSupervisorOrAdmin ? (
+        <div className="grid gap-4 mb-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+          <SquadBreakdown employees={employees} />
+          <StatsCards employees={employees} />
+          <div className="md:col-span-2 xl:col-span-1 h-full">
+            <TimeOffWidget />
+          </div>
+        </div>
+      ) : (
+        <div className="grid gap-6 mb-6">
+          <TimeOffWidget />
+        </div>
+      )}
+
+      {/* Row 2: Jira Tasks, Upcoming Events */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
         <JiraTasks compact />
         <CalendarWidget
           key={calendarRefreshKey}
@@ -100,21 +153,11 @@ export default function DashboardPage() {
               ? () => setActiveModal("timeOffForEmployee")
               : undefined
           }
+          onViewTask={handleViewTask}
+          onViewMeeting={handleViewMeeting}
+          onViewTimeOff={handleViewTimeOff}
         />
       </div>
-
-      <div className="grid gap-6 mb-8">
-        <div className="bg-theme-surface border border-theme-border p-6">
-          <h2 className="text-lg font-semibold text-theme-text mb-6">
-            {effectiveIsSupervisorOrAdmin ? "Direct Reports" : "My Profile"}
-          </h2>
-          <EmployeeList employees={employees} />
-        </div>
-      </div>
-
-      {effectiveIsSupervisorOrAdmin && (
-        <DashboardStats employees={employees} />
-      )}
 
       {/* Modals */}
       <CreateEmployeeModal
@@ -155,6 +198,43 @@ export default function DashboardPage() {
         onClose={() => setActiveModal(null)}
         onCreated={closeAndRefreshCalendar}
       />
+
+      {/* View Modals */}
+      {viewTaskId && (
+        <ViewTaskModal
+          isOpen={activeModal === "viewTask"}
+          onClose={() => {
+            setActiveModal(null);
+            setViewTaskId(null);
+          }}
+          taskId={viewTaskId}
+          onUpdated={closeAndRefreshCalendar}
+        />
+      )}
+
+      {viewMeetingId && (
+        <ViewMeetingModal
+          isOpen={activeModal === "viewMeeting"}
+          onClose={() => {
+            setActiveModal(null);
+            setViewMeetingId(null);
+          }}
+          meetingId={viewMeetingId}
+          onUpdated={closeAndRefreshCalendar}
+        />
+      )}
+
+      {viewTimeOffId && (
+        <ViewTimeOffModal
+          isOpen={activeModal === "viewTimeOff"}
+          onClose={() => {
+            setActiveModal(null);
+            setViewTimeOffId(null);
+          }}
+          timeOffId={viewTimeOffId}
+          onUpdated={closeAndRefreshCalendar}
+        />
+      )}
     </>
   );
 }

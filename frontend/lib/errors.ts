@@ -39,3 +39,26 @@ export const parseSquadErrorMessage = (error: unknown): string =>
     ],
     "Failed to create squad. Please try again."
   );
+
+export const parseInvitationErrorMessage = (error: unknown): string =>
+  matchError(
+    toMessage(error),
+    [
+      { match: ["pending invitation", "already exists"], message: "An invitation has already been sent to this email address." },
+      { match: ["invitation", "already exists"], message: "An invitation has already been sent to this email address." },
+      { match: ["duplicate key", "invitations_email"], message: "An invitation has already been sent to this email address." },
+      { match: ["user", "already exists"], message: "A user with this email address already exists in the system." },
+      { match: ["duplicate key", "users_email"], message: "A user with this email address already exists in the system." },
+      { match: ["email", "already registered"], message: "This email is already registered in the system." },
+      { match: ["invalid email"], message: "Please enter a valid email address." },
+      { match: ["email", "invalid"], message: "Please enter a valid email address." },
+      { match: ["email", "required"], message: "Email address is required." },
+      { match: ["role", "required"], message: "Please select a role for the invitation." },
+      { match: ["role", "invalid"], message: "Please select a valid role (supervisor or admin)." },
+      { match: ["forbidden"], message: "You don't have permission to send invitations." },
+      { match: ["unauthorized"], message: "You don't have permission to send invitations." },
+      { match: ["expired"], message: "This invitation has expired." },
+      { match: ["revoked"], message: "This invitation has been revoked." },
+    ],
+    "Failed to send invitation. Please try again."
+  );

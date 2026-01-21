@@ -36,9 +36,9 @@ export default function TeamsPageClient() {
   // Set default selection when data is loaded
   useEffect(() => {
     if (!orgLoading && !selectedId) {
-      if (selectionType === "squad" && squads.length > 0) {
+      if (selectionType === "squad" && squads?.length > 0) {
         setSelectedId(squads[0].id.toString());
-      } else if (selectionType === "department" && departments.length > 0) {
+      } else if (selectionType === "department" && departments?.length > 0) {
         setSelectedId(departments[0]);
       }
     }

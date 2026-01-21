@@ -25,6 +25,7 @@ import {
   UpdateMeetingRequest,
   ResponseStatus,
 } from "./types";
+import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 
 export const calendarKeys = {
   all: ["calendar"] as const,
@@ -63,8 +64,8 @@ export function useCreateTask() {
 
   return useMutation({
     mutationFn: (data: CreateTaskRequest) => createTask(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: calendarKeys.all });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
 }
@@ -74,9 +75,8 @@ export function useUpdateTask() {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateTaskRequest }) => updateTask(id, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: calendarKeys.task(variables.id) });
-      queryClient.invalidateQueries({ queryKey: calendarKeys.all });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
 }
@@ -86,8 +86,8 @@ export function useDeleteTask() {
 
   return useMutation({
     mutationFn: (id: number) => deleteTask(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: calendarKeys.all });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
 }
@@ -105,8 +105,8 @@ export function useCreateMeeting() {
 
   return useMutation({
     mutationFn: (data: CreateMeetingRequest) => createMeeting(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: calendarKeys.all });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
 }
@@ -116,9 +116,8 @@ export function useUpdateMeeting() {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateMeetingRequest }) => updateMeeting(id, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: calendarKeys.meeting(variables.id) });
-      queryClient.invalidateQueries({ queryKey: calendarKeys.all });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
 }
@@ -128,8 +127,8 @@ export function useDeleteMeeting() {
 
   return useMutation({
     mutationFn: (id: number) => deleteMeeting(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: calendarKeys.all });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
 }
@@ -140,9 +139,8 @@ export function useRespondToMeeting() {
   return useMutation({
     mutationFn: ({ meetingId, response }: { meetingId: number; response: ResponseStatus }) =>
       respondToMeeting(meetingId, response),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: calendarKeys.meeting(variables.meetingId) });
-      queryClient.invalidateQueries({ queryKey: calendarKeys.all });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
 }

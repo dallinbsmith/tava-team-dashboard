@@ -10,6 +10,7 @@ import {
   reviewTimeOffRequest,
 } from "./api";
 import { TimeOffStatus, CreateTimeOffRequest, ReviewTimeOffRequest } from "./types";
+import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 
 // Query keys for this feature
 export const timeOffKeys = {
@@ -48,8 +49,9 @@ export function useCreateTimeOffRequest() {
 
   return useMutation({
     mutationFn: (data: CreateTimeOffRequest) => createTimeOffRequest(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: timeOffKeys.all });
+    onSuccess: async () => {
+      // Force refetch all time-off and calendar queries
+      await refetchQueries(queryClient, queryKeyGroups.timeOffRelated());
     },
   });
 }
@@ -59,8 +61,9 @@ export function useCancelTimeOffRequest() {
 
   return useMutation({
     mutationFn: (id: number) => cancelTimeOffRequest(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: timeOffKeys.all });
+    onSuccess: async () => {
+      // Force refetch all time-off and calendar queries
+      await refetchQueries(queryClient, queryKeyGroups.timeOffRelated());
     },
   });
 }
@@ -71,8 +74,9 @@ export function useReviewTimeOffRequest() {
   return useMutation({
     mutationFn: ({ id, review }: { id: number; review: ReviewTimeOffRequest }) =>
       reviewTimeOffRequest(id, review),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: timeOffKeys.all });
+    onSuccess: async () => {
+      // Force refetch all time-off and calendar queries
+      await refetchQueries(queryClient, queryKeyGroups.timeOffRelated());
     },
   });
 }

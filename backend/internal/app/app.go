@@ -60,6 +60,7 @@ type App struct {
 	// Services
 	avatarService      *services.AvatarService
 	calendarBFFService *services.CalendarBFFService
+	emailService       *services.EmailService
 	jiraOAuthService   *jira.OAuthService
 	oauthStateStore    oauth.StateStore
 
@@ -178,6 +179,14 @@ func (a *App) initServices() error {
 		a.Logger.Info("Jira OAuth not configured - using legacy API token auth only")
 	}
 
+	// Initialize Resend email service (optional)
+	if a.Config.IsResendEnabled() {
+		a.emailService = services.NewEmailService(a.Config)
+		a.Logger.Info("Resend email service initialized")
+	} else {
+		a.Logger.Info("Email service not configured - invitation emails will not be sent")
+	}
+
 	// Initialize OAuth state store
 	// Use database-backed store in production for horizontal scaling
 	oauthStateTTL := time.Duration(a.Config.OAuthStateTTLMinutes) * time.Minute
@@ -225,7 +234,7 @@ func (a *App) initAuth() error {
 func (a *App) initHandlers() error {
 	a.handlers = handlers.New(a.userRepo, a.squadRepo)
 	a.avatarHandlers = handlers.NewAvatarHandlersWithConfig(a.userRepo, a.avatarService, a.Config.AvatarMaxSizeMB)
-	a.invitationHandlers = handlers.NewInvitationHandlers(a.invitationRepo, a.userRepo)
+	a.invitationHandlers = handlers.NewInvitationHandlers(a.invitationRepo, a.userRepo, a.emailService)
 	a.jiraHandlers = handlers.NewJiraHandlersWithConfig(a.userRepo, a.orgJiraRepo, a.timeOffRepo, a.jiraOAuthService, a.oauthStateStore, a.Config.FrontendURL, a.Config.JiraMaxUsersPagination)
 	a.orgChartHandlers = handlers.NewOrgChartHandlers(a.orgChartRepo, a.userRepo)
 	a.timeOffHandlers = handlers.NewTimeOffHandlers(a.timeOffRepo, a.userRepo)
@@ -397,6 +406,7 @@ func (a *App) registerAPIRoutes(r chi.Router) {
 			r.Post("/users", a.handlers.CreateUser)
 			r.Put("/users/{id}", a.handlers.UpdateUser)
 			r.Delete("/users/{id}", a.handlers.DeleteUser)
+			r.Post("/users/{id}/deactivate", a.handlers.DeactivateUser)
 
 			// Supervisors list
 			r.Get("/supervisors", a.handlers.GetSupervisors)

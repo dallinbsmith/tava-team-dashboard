@@ -7,6 +7,7 @@ import {
   revokeInvitation,
 } from "./api";
 import { CreateInvitationRequest } from "./types";
+import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 
 export const invitationKeys = {
   all: ["invitations"] as const,
@@ -25,8 +26,8 @@ export function useCreateInvitation() {
 
   return useMutation({
     mutationFn: (data: CreateInvitationRequest) => createInvitation(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: invitationKeys.all });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.invitations());
     },
   });
 }
@@ -36,8 +37,8 @@ export function useRevokeInvitation() {
 
   return useMutation({
     mutationFn: (id: number) => revokeInvitation(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: invitationKeys.all });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.invitations());
     },
   });
 }

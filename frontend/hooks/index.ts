@@ -27,3 +27,16 @@ export type {
   UseDepartmentsQueryOptions,
   UseDepartmentsQueryResult,
 } from "./queries";
+
+// React Query mutations
+export {
+  useUpdateEmployee,
+  useDeactivateEmployee,
+  useDeleteDepartment,
+} from "./mutations";
+export type {
+  UpdateEmployeeVariables,
+  UseUpdateEmployeeOptions,
+  UseDeactivateEmployeeOptions,
+  UseDeleteDepartmentOptions,
+} from "./mutations";

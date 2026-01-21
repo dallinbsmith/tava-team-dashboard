@@ -69,7 +69,7 @@ interface DisplayTask {
 }
 
 export default function JiraTasks({ compact = false }: JiraTasksProps) {
-  const { currentUser, loading: userLoading } = useCurrentUser();
+  const { currentUser, loading: userLoading, effectiveIsSupervisorOrAdmin } = useCurrentUser();
   const { departments: departmentsInput, squads: squadsInput, allUsers: allUsersInput } = useOrganization();
   // Ensure organization data is always arrays
   const allUsers = allUsersInput || [];
@@ -261,8 +261,8 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
           getMyJiraTasks(compact ? JIRA_LIMITS.TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT),
           getTeamJiraTasks(compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT),
         ]);
-        setMyTasks(myIssues);
-        setTeamTasks(teamIssues);
+        setMyTasks(myIssues || []);
+        setTeamTasks(teamIssues || []);
       }
     } catch (e) {
       console.error("Failed to fetch Jira tasks:", e);
@@ -294,9 +294,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
   if (userLoading || loading) {
     return (
       <div className="bg-theme-surface border border-theme-border overflow-hidden">
-        <div className="px-6 py-4 border-b border-theme-border flex items-center gap-3">
-          <CheckSquare className="w-5 h-5 text-theme-text-muted" />
-          <h2 className="text-lg font-semibold text-theme-text">Jira Tasks</h2>
+        <div className="px-4 py-3 border-b border-theme-border flex items-center gap-2">
+          <CheckSquare className="w-4 h-4 text-primary-500 flex-shrink-0" />
+          <h2 className="text-sm font-semibold text-theme-text">Jira Tasks</h2>
         </div>
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin h-8 w-8 border-b-2 border-primary-500"></div>
@@ -309,16 +309,29 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
   if (!settings?.org_configured) {
     return (
       <div className="bg-theme-surface border border-theme-border overflow-hidden">
-        <div className="px-6 py-4 border-b border-theme-border flex items-center gap-3">
-          <CheckSquare className="w-5 h-5 text-theme-text-muted" />
-          <h2 className="text-lg font-semibold text-theme-text">Jira Tasks</h2>
+        <div className="px-4 py-3 border-b border-theme-border flex items-center gap-2">
+          <CheckSquare className="w-4 h-4 text-primary-500 flex-shrink-0" />
+          <h2 className="text-sm font-semibold text-theme-text">Jira Tasks</h2>
         </div>
-        <div className="text-center py-8">
+        <div className="text-center py-8 px-4">
           <div className="w-12 h-12 bg-theme-elevated flex items-center justify-center mx-auto mb-4">
             <Settings className="w-6 h-6 text-theme-text-muted" />
           </div>
-          <p className="text-theme-text-muted mb-4">Jira is not configured for your organization</p>
-          <p className="text-sm text-theme-text-muted">Contact your administrator to set up Jira integration</p>
+          <p className="text-theme-text-muted mb-2">Jira is not configured for your organization</p>
+          {effectiveIsSupervisorOrAdmin ? (
+            <>
+              <p className="text-sm text-theme-text-muted mb-4">Connect your Jira account to track tasks and issues</p>
+              <Link
+                href="/settings"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+              >
+                <Settings className="w-4 h-4" />
+                Set Up Jira
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm text-theme-text-muted">Contact your administrator to set up Jira integration</p>
+          )}
         </div>
       </div>
     );
@@ -328,12 +341,12 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
 
   return (
     <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col">
-      <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <CheckSquare className="w-5 h-5 text-primary-500" />
-          <h2 className="text-lg font-semibold text-theme-text">Jira Tasks</h2>
+      <div className="px-4 py-3 border-b border-theme-border flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <CheckSquare className="w-4 h-4 text-primary-500 flex-shrink-0" />
+          <h2 className="text-sm font-semibold text-theme-text">Jira Tasks</h2>
           {filteredTasks.length > 0 && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-primary-900/50 text-primary-300">
+            <span className="px-1.5 py-0.5 text-xs font-medium bg-primary-900/50 text-primary-300">
               {filteredTasks.length}{activeFilterCount > 0 && ` / ${totalTasks}`}
             </span>
           )}

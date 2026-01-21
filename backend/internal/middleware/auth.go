@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,8 +19,10 @@ import (
 type contextKey string
 
 const (
-	UserContextKey   contextKey = "user"
-	ClaimsContextKey contextKey = "claims"
+	UserContextKey          contextKey = "user"           // The effective user (impersonated if applicable)
+	RealUserContextKey      contextKey = "real_user"      // The actual authenticated user
+	ClaimsContextKey        contextKey = "claims"
+	ImpersonationContextKey contextKey = "is_impersonating"
 )
 
 type CustomClaims struct {
@@ -115,8 +118,29 @@ func (m *AuthMiddleware) Authenticate(next http.Handler) http.Handler {
 			}
 		}
 
-		ctx := context.WithValue(r.Context(), UserContextKey, user)
+		// Store the real authenticated user
+		ctx := context.WithValue(r.Context(), RealUserContextKey, user)
 		ctx = context.WithValue(ctx, ClaimsContextKey, validatedClaims)
+
+		// Check for impersonation header (admin only)
+		effectiveUser := user
+		isImpersonating := false
+		if impersonateHeader := r.Header.Get("X-Impersonate-User-Id"); impersonateHeader != "" {
+			// Only admins can impersonate
+			if user.Role == models.RoleAdmin {
+				impersonateID, err := strconv.ParseInt(impersonateHeader, 10, 64)
+				if err == nil && impersonateID != user.ID {
+					impersonatedUser, err := m.userRepository.GetByID(r.Context(), impersonateID)
+					if err == nil {
+						effectiveUser = impersonatedUser
+						isImpersonating = true
+					}
+				}
+			}
+		}
+
+		ctx = context.WithValue(ctx, UserContextKey, effectiveUser)
+		ctx = context.WithValue(ctx, ImpersonationContextKey, isImpersonating)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -141,12 +165,28 @@ func (m *AuthMiddleware) RequireRole(role models.Role) func(http.Handler) http.H
 	}
 }
 
+// GetUserFromContext returns the effective user (impersonated if applicable)
 func GetUserFromContext(ctx context.Context) *models.User {
 	user, ok := ctx.Value(UserContextKey).(*models.User)
 	if !ok {
 		return nil
 	}
 	return user
+}
+
+// GetRealUserFromContext returns the actual authenticated user (ignoring impersonation)
+func GetRealUserFromContext(ctx context.Context) *models.User {
+	user, ok := ctx.Value(RealUserContextKey).(*models.User)
+	if !ok {
+		return nil
+	}
+	return user
+}
+
+// IsImpersonating returns true if the current request is using impersonation
+func IsImpersonating(ctx context.Context) bool {
+	isImpersonating, ok := ctx.Value(ImpersonationContextKey).(bool)
+	return ok && isImpersonating
 }
 
 func parseName(name string) (string, string) {

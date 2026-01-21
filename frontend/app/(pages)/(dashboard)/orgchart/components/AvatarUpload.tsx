@@ -173,11 +173,16 @@ export default function AvatarUpload({
         disabled={!canEdit || isUploading}
       />
 
-      {/* Edit hint */}
+      {/* Upload button */}
       {canEdit && !isUploading && (
-        <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center border border-gray-200">
+        <button
+          type="button"
+          onClick={handleClick}
+          className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+          title="Upload image"
+        >
           <Upload className="w-4 h-4 text-gray-600" />
-        </div>
+        </button>
       )}
 
       {/* Error message */}

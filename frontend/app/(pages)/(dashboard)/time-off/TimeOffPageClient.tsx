@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { User } from "@/shared/types/user";
 import { TimeOffRequest } from "./types";
@@ -13,6 +13,7 @@ import TimeOffRequestForm from "./components/TimeOffRequestForm";
 import TimeOffRequestList from "./components/TimeOffRequestList";
 import TimeOffReviewModal from "./components/TimeOffReviewModal";
 import { Calendar, Plus, Clock, RefreshCw } from "lucide-react";
+import { useCurrentUser } from "@/providers/CurrentUserProvider";
 
 const timeOffStatuses = ["pending", "approved", "rejected", "cancelled"] as const;
 
@@ -26,9 +27,15 @@ interface TimeOffPageClientProps {
 export function TimeOffPageClient({
   initialMyRequests,
   initialPendingRequests,
-  currentUser,
-  isSupervisorOrAdmin,
+  currentUser: serverCurrentUser,
+  isSupervisorOrAdmin: serverIsSupervisorOrAdmin,
 }: TimeOffPageClientProps) {
+  // Use effective user from context (respects impersonation)
+  const { currentUser: effectiveUser, effectiveIsSupervisorOrAdmin } = useCurrentUser();
+
+  // Use context values if available, otherwise fall back to server-provided values
+  const isSupervisorOrAdmin = effectiveUser ? effectiveIsSupervisorOrAdmin : serverIsSupervisorOrAdmin;
+
   const [myRequests, setMyRequests] = useState(initialMyRequests);
   const [pendingRequests, setPendingRequests] = useState(initialPendingRequests);
   const [refreshing, setRefreshing] = useState(false);
@@ -54,6 +61,8 @@ export function TimeOffPageClient({
       if (isSupervisorOrAdmin) {
         const pending = await getPendingTimeOffRequests();
         setPendingRequests(pending);
+      } else {
+        setPendingRequests([]);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load time off data");
@@ -61,6 +70,13 @@ export function TimeOffPageClient({
       setRefreshing(false);
     }
   }, [isSupervisorOrAdmin]);
+
+  // Re-fetch data when impersonation changes
+  useEffect(() => {
+    if (effectiveUser) {
+      fetchData();
+    }
+  }, [effectiveUser?.id, fetchData]);
 
   const handleCancel = async (id: number) => {
     setCancellingId(id);
@@ -156,15 +172,19 @@ export function TimeOffPageClient({
       )}
 
       <div>
-        <h2 className="text-lg font-medium text-white mb-4">My Requests</h2>
+        <h2 className="text-lg font-medium text-white mb-4">
+          {isSupervisorOrAdmin ? "Time Off Requests" : "My Requests"}
+        </h2>
         <TimeOffRequestList
           requests={myRequests}
           loading={false}
           onCancel={handleCancel}
+          onReview={isSupervisorOrAdmin ? handleReviewClick : undefined}
           cancellingId={cancellingId}
           filterStatus={filterStatus}
           onFilterChange={setFilterStatus}
-          emptyMessage="You haven't made any time off requests yet"
+          showUser={isSupervisorOrAdmin}
+          emptyMessage={isSupervisorOrAdmin ? "No time off requests" : "You haven't made any time off requests yet"}
         />
       </div>
 

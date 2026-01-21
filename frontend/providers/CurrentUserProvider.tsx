@@ -19,8 +19,10 @@ interface CurrentUserContextType {
   isAdmin: boolean;
   /** Whether the real user is a supervisor */
   isSupervisor: boolean;
-  /** Whether the real user is a supervisor or admin */
+  /** Whether the real user is a supervisor or admin (use for permission checks) */
   isSupervisorOrAdmin: boolean;
+  /** Whether the effective user (respecting impersonation) is a supervisor or admin (use for UI behavior) */
+  effectiveIsSupervisorOrAdmin: boolean;
   /** Whether currently impersonating another user */
   isImpersonating: boolean;
   refetch: () => Promise<void>;
@@ -76,6 +78,9 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
   // Determine the effective current user
   const effectiveUser = isImpersonating && impersonatedUser ? impersonatedUser : realUser;
 
+  // Compute effective user's supervisor/admin status (respects impersonation)
+  const effectiveIsSupervisorOrAdmin = effectiveUser?.role === "admin" || effectiveUser?.role === "supervisor";
+
   const value: CurrentUserContextType = {
     currentUser: effectiveUser,
     realUser,
@@ -84,6 +89,7 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
     isAdmin,
     isSupervisor,
     isSupervisorOrAdmin,
+    effectiveIsSupervisorOrAdmin,
     isImpersonating,
     refetch,
   };
@@ -104,6 +110,7 @@ const defaultCurrentUserContext: CurrentUserContextType = {
   isAdmin: false,
   isSupervisor: false,
   isSupervisorOrAdmin: false,
+  effectiveIsSupervisorOrAdmin: false,
   isImpersonating: false,
   refetch: async () => {},
 };

@@ -105,12 +105,12 @@ export default function EmployeeList({
   // Loading state
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div className="animate-pulse">
-          <div className="h-12 bg-theme-elevated rounded-lg mb-4" />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="h-10 sm:h-12 bg-theme-elevated rounded-lg mb-3 sm:mb-4" />
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-48 bg-theme-elevated rounded-lg" />
+              <div key={i} className="h-40 sm:h-48 bg-theme-elevated rounded-lg" />
             ))}
           </div>
         </div>
@@ -134,16 +134,16 @@ export default function EmployeeList({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Search & Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
 
         {/* Search Input */}
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted" />
           <input
             type="text"
-            placeholder="Search in employees"
+            placeholder="Search employees..."
             value={state.searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-sm border border-theme-border focus:ring-1 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all rounded-full bg-theme-elevated text-theme-text placeholder-theme-text-muted"
@@ -157,52 +157,56 @@ export default function EmployeeList({
             </button>
           )}
         </div>
-        <FilterButton
-          isOpen={state.showFilters}
-          roleFilter={state.roleFilter}
-          departmentFilter={state.departmentFilter}
-          squadFilter={state.squadFilter}
-          departments={departments}
-          squads={squads}
-          onToggle={() => setShowFilters(!state.showFilters)}
-          onClose={() => setShowFilters(false)}
-          onRoleChange={setRoleFilter}
-          onDepartmentChange={setDepartmentFilter}
-          onSquadChange={setSquadFilter}
-          onClearAll={clearFilters}
-        />
-        {/* View Mode Toggle */}
-        <div className="flex border border-theme-border rounded-full overflow-hidden bg-theme-elevated">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`p-2 transition-colors ${state.viewMode === "grid"
-              ? "bg-primary-500 text-white"
-              : "text-theme-text-muted hover:bg-theme-surface"
-              }`}
-            title="Grid"
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={`p-2 border-l border-theme-border transition-colors ${state.viewMode === "list"
-              ? "bg-primary-500 text-white"
-              : "text-theme-text-muted hover:bg-theme-surface"
-              }`}
-            title="List"
-          >
-            <List className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setViewMode("department")}
-            className={`p-2 border-l border-theme-border transition-colors ${state.viewMode === "department"
-              ? "bg-primary-500 text-white"
-              : "text-theme-text-muted hover:bg-theme-surface"
-              }`}
-            title="Department"
-          >
-            <Building2 className="w-4 h-4" />
-          </button>
+
+        {/* Filter and View Toggle - row on mobile */}
+        <div className="flex gap-2 sm:gap-3">
+          <FilterButton
+            isOpen={state.showFilters}
+            roleFilter={state.roleFilter}
+            departmentFilter={state.departmentFilter}
+            squadFilter={state.squadFilter}
+            departments={departments}
+            squads={squads}
+            onToggle={() => setShowFilters(!state.showFilters)}
+            onClose={() => setShowFilters(false)}
+            onRoleChange={setRoleFilter}
+            onDepartmentChange={setDepartmentFilter}
+            onSquadChange={setSquadFilter}
+            onClearAll={clearFilters}
+          />
+          {/* View Mode Toggle */}
+          <div className="flex border border-theme-border rounded-full overflow-hidden bg-theme-elevated">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2 transition-colors ${state.viewMode === "grid"
+                ? "bg-primary-500 text-white"
+                : "text-theme-text-muted hover:bg-theme-surface"
+                }`}
+              title="Grid"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 border-l border-theme-border transition-colors ${state.viewMode === "list"
+                ? "bg-primary-500 text-white"
+                : "text-theme-text-muted hover:bg-theme-surface"
+                }`}
+              title="List"
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("department")}
+              className={`p-2 border-l border-theme-border transition-colors ${state.viewMode === "department"
+                ? "bg-primary-500 text-white"
+                : "text-theme-text-muted hover:bg-theme-surface"
+                }`}
+              title="Department"
+            >
+              <Building2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -238,11 +242,11 @@ export default function EmployeeList({
 
       {/* Results Info */}
       <div className="flex items-center justify-between text-xs text-theme-text-muted px-1">
-        <span>
-          {sortedEmployees.length} {sortedEmployees.length === 1 ? 'employee' : 'employees'} found
+        <span className="truncate">
+          {sortedEmployees.length} {sortedEmployees.length === 1 ? 'employee' : 'employees'}
         </span>
-        <div className="flex items-center gap-2">
-          <span>Show:</span>
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          <span className="hidden sm:inline">Show:</span>
           <select
             value={state.itemsPerPage}
             onChange={(e) => setItemsPerPage(Number(e.target.value))}
@@ -258,7 +262,8 @@ export default function EmployeeList({
       </div>
 
       {/* Content */}
-      {paginatedEmployees.length === 0 ? (
+      {/* Check for empty results based on view mode */}
+      {(state.viewMode === "department" ? allDepartmentsWithEmployees.length === 0 : paginatedEmployees.length === 0) ? (
         <div className="text-center py-12 bg-theme-elevated border border-theme-border rounded-lg">
           <div className="w-12 h-12 bg-theme-surface flex items-center justify-center mx-auto mb-3 rounded-full">
             <Users className="w-6 h-6 text-theme-text-muted" />
@@ -279,7 +284,7 @@ export default function EmployeeList({
       ) : (
         <div className="space-y-4">
           {state.viewMode === "grid" ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {paginatedEmployees.map((employee) => (
                 <EmployeeCard key={employee.id} employee={employee} />
               ))}

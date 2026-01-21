@@ -25,6 +25,8 @@ import {
   OrgTreeNode,
 } from "./types";
 import { Squad } from "@/shared/types/user";
+import { queryKeys } from "@/lib/queryKeys";
+import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 
 export const orgChartKeys = {
   all: ["orgChart"] as const,
@@ -56,8 +58,8 @@ export function useCreateOrgChartDraft() {
 
   return useMutation({
     mutationFn: (data: CreateDraftRequest) => createOrgChartDraft(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.drafts() });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
 }
@@ -67,9 +69,8 @@ export function useUpdateOrgChartDraft() {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateDraftRequest }) => updateOrgChartDraft(id, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.draft(variables.id) });
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.drafts() });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
 }
@@ -79,8 +80,8 @@ export function useDeleteOrgChartDraft() {
 
   return useMutation({
     mutationFn: (id: number) => deleteOrgChartDraft(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.drafts() });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
 }
@@ -91,8 +92,8 @@ export function useAddDraftChange() {
   return useMutation({
     mutationFn: ({ draftId, change }: { draftId: number; change: AddDraftChangeRequest }) =>
       addDraftChange(draftId, change),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.draft(variables.draftId) });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
 }
@@ -103,8 +104,8 @@ export function useRemoveDraftChange() {
   return useMutation({
     mutationFn: ({ draftId, userId }: { draftId: number; userId: number }) =>
       removeDraftChange(draftId, userId),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.draft(variables.draftId) });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
 }
@@ -114,8 +115,9 @@ export function usePublishDraft() {
 
   return useMutation({
     mutationFn: (draftId: number) => publishDraft(draftId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.all });
+    onSuccess: async () => {
+      // Refetch org chart and organization data used across the app
+      await refetchQueries(queryClient, queryKeyGroups.orgChartPublish());
     },
   });
 }
@@ -141,8 +143,8 @@ export function useCreateSquad() {
 
   return useMutation({
     mutationFn: (name: string) => createSquad(name),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.squads() });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.squadRelated());
     },
   });
 }
@@ -152,8 +154,8 @@ export function useDeleteSquad() {
 
   return useMutation({
     mutationFn: (id: number) => deleteSquad(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.squads() });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.squadRelated());
     },
   });
 }
@@ -171,8 +173,8 @@ export function useDeleteDepartment() {
 
   return useMutation({
     mutationFn: (name: string) => deleteDepartment(name),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: orgChartKeys.departments() });
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.departmentRelated());
     },
   });
 }

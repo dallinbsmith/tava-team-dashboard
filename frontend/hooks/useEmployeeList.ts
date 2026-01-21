@@ -104,6 +104,7 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
           .includes(searchQuery.toLowerCase()) ||
         employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         employee.department?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         squadNamesMatch;
 
       const matchesRole = roleFilter === "all" || employee.role === roleFilter;
@@ -150,6 +151,7 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
 
   // Pagination
   const totalPages = Math.ceil(sortedEmployees.length / itemsPerPage);
+
   const paginatedEmployees = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return sortedEmployees.slice(start, start + itemsPerPage);
@@ -200,6 +202,11 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
     setCurrentPage(1);
   }, []);
 
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    setCurrentPage(1);
+  }, []);
+
   return {
     state: {
       searchQuery,
@@ -229,7 +236,7 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
     handleSort,
     setCurrentPage,
     setItemsPerPage: handleItemsPerPageChange,
-    setViewMode,
+    setViewMode: handleViewModeChange,
     clearFilters,
   };
 }

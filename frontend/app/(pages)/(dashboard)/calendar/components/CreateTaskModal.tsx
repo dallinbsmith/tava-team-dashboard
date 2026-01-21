@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CreateTaskRequest, AssignmentType } from "../types";
 import { createTask } from "../api";
 import { useOrganization } from "@/providers/OrganizationProvider";
+import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal } from "@/components";
 import { Loader2 } from "lucide-react";
 import { format, addDays } from "date-fns";
@@ -16,6 +17,7 @@ interface CreateTaskModalProps {
 
 export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTaskModalProps) {
   const { allUsers, squads, departments, allUsersLoading } = useOrganization();
+  const { effectiveIsSupervisorOrAdmin } = useCurrentUser();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -62,15 +64,18 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
       title: title.trim(),
       description: description.trim() || undefined,
       due_date: new Date(dueDate).toISOString(),
-      assignment_type: assignmentType,
+      assignment_type: effectiveIsSupervisorOrAdmin ? assignmentType : "user",
     };
 
-    if (assignmentType === "user" && assignedUserId) {
-      request.assigned_user_id = assignedUserId;
-    } else if (assignmentType === "squad" && assignedSquadId) {
-      request.assigned_squad_id = assignedSquadId;
-    } else if (assignmentType === "department" && assignedDepartment) {
-      request.assigned_department = assignedDepartment;
+    // Only include assignment fields for supervisors/admins
+    if (effectiveIsSupervisorOrAdmin) {
+      if (assignmentType === "user" && assignedUserId) {
+        request.assigned_user_id = assignedUserId;
+      } else if (assignmentType === "squad" && assignedSquadId) {
+        request.assigned_squad_id = assignedSquadId;
+      } else if (assignmentType === "department" && assignedDepartment) {
+        request.assigned_department = assignedDepartment;
+      }
     }
 
     setLoading(true);
@@ -148,71 +153,73 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-theme-text mb-1">
-              Assign To
-            </label>
-            <div className="flex gap-2 mb-3">
-              {(["user", "squad", "department"] as AssignmentType[]).map((type) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setAssignmentType(type)}
-                  className={`px-3 py-1.5 text-sm font-medium transition-colors ${assignmentType === type
-                      ? "bg-primary-600 text-white"
-                      : "bg-theme-elevated text-theme-text-muted border border-theme-border hover:bg-theme-surface"
-                    }`}
+          {effectiveIsSupervisorOrAdmin && (
+            <div>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Assign To
+              </label>
+              <div className="flex gap-2 mb-3">
+                {(["user", "squad", "department"] as AssignmentType[]).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setAssignmentType(type)}
+                    className={`px-3 py-1.5 text-sm font-medium transition-colors ${assignmentType === type
+                        ? "bg-primary-600 text-white"
+                        : "bg-theme-elevated text-theme-text-muted border border-theme-border hover:bg-theme-surface"
+                      }`}
+                  >
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </button>
+                ))}
+              </div>
+
+              {assignmentType === "user" && (
+                <select
+                  value={assignedUserId || ""}
+                  onChange={(e) => setAssignedUserId(e.target.value ? parseInt(e.target.value) : undefined)}
+                  className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </button>
-              ))}
+                  <option value="">Select a user (optional)</option>
+                  {allUsers.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.first_name} {user.last_name} ({user.email})
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {assignmentType === "squad" && (
+                <select
+                  value={assignedSquadId || ""}
+                  onChange={(e) => setAssignedSquadId(e.target.value ? parseInt(e.target.value) : undefined)}
+                  className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                >
+                  <option value="">Select a squad</option>
+                  {squads.map((squad) => (
+                    <option key={squad.id} value={squad.id}>
+                      {squad.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              {assignmentType === "department" && (
+                <select
+                  value={assignedDepartment}
+                  onChange={(e) => setAssignedDepartment(e.target.value)}
+                  className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                >
+                  <option value="">Select a department</option>
+                  {departments.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
-
-            {assignmentType === "user" && (
-              <select
-                value={assignedUserId || ""}
-                onChange={(e) => setAssignedUserId(e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="">Select a user (optional)</option>
-                {allUsers.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.first_name} {user.last_name} ({user.email})
-                  </option>
-                ))}
-              </select>
-            )}
-
-            {assignmentType === "squad" && (
-              <select
-                value={assignedSquadId || ""}
-                onChange={(e) => setAssignedSquadId(e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="">Select a squad</option>
-                {squads.map((squad) => (
-                  <option key={squad.id} value={squad.id}>
-                    {squad.name}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            {assignmentType === "department" && (
-              <select
-                value={assignedDepartment}
-                onChange={(e) => setAssignedDepartment(e.target.value)}
-                className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="">Select a department</option>
-                {departments.map((dept) => (
-                  <option key={dept} value={dept}>
-                    {dept}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-theme-border">
             <button

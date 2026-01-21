@@ -84,7 +84,7 @@ export default function TeamSelector({
   const getSelectedLabel = () => {
     if (!selectedId) return "Select team...";
     if (selectedType === "squad") {
-      const squad = squads.find((s) => s.id.toString() === selectedId);
+      const squad = squads?.find((s) => s.id.toString() === selectedId);
       return squad?.name || "Select team...";
     }
     return selectedId;
@@ -120,7 +120,7 @@ export default function TeamSelector({
           {selectedType === "squad" ? "Squad" : "Dept"}
         </span>
         <ChevronDown
-          className={`w-4 h-4 text-theme-text-muted transition-transform ${
+          className={`w-4 h-4 shrink-0 text-theme-text-muted transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />
@@ -179,10 +179,10 @@ function SelectorDropdown({
   };
 
   // Filter items by search based on active tab
-  const filteredSquads = squads.filter((squad) =>
+  const filteredSquads = (squads || []).filter((squad) =>
     squad.name.toLowerCase().includes(search.toLowerCase())
   );
-  const filteredDepartments = departments.filter((dept) =>
+  const filteredDepartments = (departments || []).filter((dept) =>
     dept.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -213,7 +213,7 @@ function SelectorDropdown({
           <span className={`px-1.5 py-0.5 text-xs rounded-full ${
             activeTab === "squad" ? "bg-primary-500/20 text-primary-300" : "bg-theme-elevated text-theme-text-muted"
           }`}>
-            {squads.length}
+            {squads?.length || 0}
           </span>
         </button>
         <button
@@ -229,7 +229,7 @@ function SelectorDropdown({
           <span className={`px-1.5 py-0.5 text-xs rounded-full ${
             activeTab === "department" ? "bg-purple-500/20 text-purple-300" : "bg-theme-elevated text-theme-text-muted"
           }`}>
-            {departments.length}
+            {departments?.length || 0}
           </span>
         </button>
       </div>

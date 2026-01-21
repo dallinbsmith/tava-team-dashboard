@@ -2,25 +2,51 @@
 
 import { useState, useCallback } from "react";
 import Calendar from "./components/Calendar";
+import { CalendarEvent } from "./types";
 import CreateTaskModal from "./components/CreateTaskModal";
 import CreateMeetingModal from "./components/CreateMeetingModal";
 import CreateEventModal from "./components/CreateEventModal";
 import RequestTimeOffModal from "./components/RequestTimeOffModal";
 import CreateTimeOffForEmployeeModal from "./components/CreateTimeOffForEmployeeModal";
-import { CalendarEvent } from "./types";
+import ViewTaskModal from "./components/ViewTaskModal";
+import ViewMeetingModal from "./components/ViewMeetingModal";
+import ViewTimeOffModal from "./components/ViewTimeOffModal";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 
-type ModalType = "task" | "event" | "meeting" | "timeOff" | "timeOffForEmployee" | null;
+type ModalType = "task" | "event" | "meeting" | "timeOff" | "timeOffForEmployee" | "viewTask" | "viewMeeting" | "viewTimeOff" | null;
 
 export default function CalendarPage() {
-  const { isSupervisorOrAdmin } = useCurrentUser();
+  const { effectiveIsSupervisorOrAdmin } = useCurrentUser();
 
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // State for viewing specific items
+  const [viewTaskId, setViewTaskId] = useState<number | null>(null);
+  const [viewMeetingId, setViewMeetingId] = useState<number | null>(null);
+  const [viewTimeOffId, setViewTimeOffId] = useState<number | null>(null);
+
   const closeAndRefresh = useCallback(() => {
     setActiveModal(null);
+    setViewTaskId(null);
+    setViewMeetingId(null);
+    setViewTimeOffId(null);
     setRefreshKey((prev) => prev + 1);
+  }, []);
+
+  const handleViewTask = useCallback((taskId: number) => {
+    setViewTaskId(taskId);
+    setActiveModal("viewTask");
+  }, []);
+
+  const handleViewMeeting = useCallback((meetingId: number) => {
+    setViewMeetingId(meetingId);
+    setActiveModal("viewMeeting");
+  }, []);
+
+  const handleViewTimeOff = useCallback((timeOffId: number) => {
+    setViewTimeOffId(timeOffId);
+    setActiveModal("viewTimeOff");
   }, []);
 
   const handleEventClick = useCallback((event: CalendarEvent) => {
@@ -45,9 +71,12 @@ export default function CalendarPage() {
         onCreateMeeting={() => setActiveModal("meeting")}
         onRequestTimeOff={() => setActiveModal("timeOff")}
         onCreateTimeOffForEmployee={
-          isSupervisorOrAdmin ? () => setActiveModal("timeOffForEmployee") : undefined
+          effectiveIsSupervisorOrAdmin ? () => setActiveModal("timeOffForEmployee") : undefined
         }
         onEventClick={handleEventClick}
+        onViewTask={handleViewTask}
+        onViewMeeting={handleViewMeeting}
+        onViewTimeOff={handleViewTimeOff}
       />
 
       <CreateTaskModal
@@ -79,6 +108,43 @@ export default function CalendarPage() {
         onClose={() => setActiveModal(null)}
         onCreated={closeAndRefresh}
       />
+
+      {/* View Modals */}
+      {viewTaskId && (
+        <ViewTaskModal
+          isOpen={activeModal === "viewTask"}
+          onClose={() => {
+            setActiveModal(null);
+            setViewTaskId(null);
+          }}
+          taskId={viewTaskId}
+          onUpdated={closeAndRefresh}
+        />
+      )}
+
+      {viewMeetingId && (
+        <ViewMeetingModal
+          isOpen={activeModal === "viewMeeting"}
+          onClose={() => {
+            setActiveModal(null);
+            setViewMeetingId(null);
+          }}
+          meetingId={viewMeetingId}
+          onUpdated={closeAndRefresh}
+        />
+      )}
+
+      {viewTimeOffId && (
+        <ViewTimeOffModal
+          isOpen={activeModal === "viewTimeOff"}
+          onClose={() => {
+            setActiveModal(null);
+            setViewTimeOffId(null);
+          }}
+          timeOffId={viewTimeOffId}
+          onUpdated={closeAndRefresh}
+        />
+      )}
     </div>
   );
 }

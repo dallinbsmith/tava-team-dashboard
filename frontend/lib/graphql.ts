@@ -200,6 +200,7 @@ interface GraphQLEmployee {
   avatar_url: string | null;
   supervisor_id: string | null;
   date_started: string | null;
+  is_active?: boolean;
   created_at: string;
   updated_at: string;
   supervisor?: GraphQLEmployee | null;
@@ -226,6 +227,7 @@ function toUser(employee: GraphQLEmployee): User {
       ? parseInt(employee.supervisor_id, 10)
       : undefined,
     date_started: employee.date_started || undefined,
+    is_active: employee.is_active ?? true, // Default to true for GraphQL (queries filter active users)
     created_at: employee.created_at,
     updated_at: employee.updated_at,
   };
@@ -266,15 +268,30 @@ export interface CreateEmployeeInput {
   avatar_url?: string;
   supervisor_id?: string;
   squad_ids?: number[];
+  date_started?: string;
 }
 
 export async function createEmployeeGraphQL(
   input: CreateEmployeeInput
 ): Promise<User> {
   const client = createProxyGraphQLClient();
+
+  // Clean up input - remove empty strings, keep only truthy optional values
+  const cleanedInput = {
+    email: input.email,
+    first_name: input.first_name,
+    last_name: input.last_name,
+    role: input.role,
+    ...(input.department?.trim() && { department: input.department.trim() }),
+    ...(input.date_started?.trim() && { date_started: input.date_started.trim() }),
+    ...(input.avatar_url?.trim() && { avatar_url: input.avatar_url.trim() }),
+    ...(input.supervisor_id?.trim() && { supervisor_id: input.supervisor_id.trim() }),
+    ...(input.squad_ids?.length && { squad_ids: input.squad_ids.map(String) }),
+  };
+
   const data = await client.request<{ createEmployee: GraphQLEmployee }>(
     CREATE_EMPLOYEE,
-    { input }
+    { input: cleanedInput }
   );
   return toUser(data.createEmployee);
 }

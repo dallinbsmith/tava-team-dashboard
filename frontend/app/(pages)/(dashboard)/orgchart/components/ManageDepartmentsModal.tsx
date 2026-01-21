@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { X, Trash2 } from "lucide-react";
-import { getDepartments, deleteDepartment } from "../api";
 import { parseErrorMessage } from "@/lib/errors";
 import ConfirmationModal from "@/shared/common/ConfirmationModal";
+import { useOrganization } from "@/providers/OrganizationProvider";
+import { useDeleteDepartment } from "@/hooks";
 
 interface ManageDepartmentsModalProps {
   isOpen: boolean;
@@ -17,55 +18,41 @@ export default function ManageDepartmentsModal({
   onClose,
   onDepartmentsChanged,
 }: ManageDepartmentsModalProps) {
-  const [departments, setDepartments] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Use centralized data from OrganizationProvider
+  const { departments, loading } = useOrganization();
+
+  // Mutation hook for deleting departments - handles cache invalidation automatically
+  const deleteDepartmentMutation = useDeleteDepartment();
+
   const [error, setError] = useState<string | null>(null);
-  const [deletingDepartment, setDeletingDepartment] = useState<string | null>(null);
   const [confirmDeleteDepartment, setConfirmDeleteDepartment] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      loadDepartments();
-    }
-  }, [isOpen]);
-
-  const loadDepartments = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getDepartments();
-      setDepartments(data);
-    } catch (err) {
-      setError("Failed to load departments");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDeleteDepartment = (department: string) => {
     setConfirmDeleteDepartment(department);
   };
 
-  const executeDeleteDepartment = async () => {
+  const executeDeleteDepartment = () => {
     if (!confirmDeleteDepartment) return;
 
     const department = confirmDeleteDepartment;
     setConfirmDeleteDepartment(null);
-    setDeletingDepartment(department);
     setError(null);
-    try {
-      await deleteDepartment(department);
-      setDepartments((prev) => prev.filter((d) => d !== department));
-      onDepartmentsChanged();
-    } catch (err) {
-      setError(parseErrorMessage(err));
-    } finally {
-      setDeletingDepartment(null);
-    }
+
+    // Use mutation - cache invalidation happens automatically
+    deleteDepartmentMutation.mutate(department, {
+      onSuccess: () => {
+        onDepartmentsChanged();
+      },
+      onError: (err) => {
+        setError(parseErrorMessage(err));
+      },
+    });
   };
 
   if (!isOpen) return null;
+
+  // Sort departments alphabetically for display
+  const sortedDepartments = [...departments].sort((a, b) => a.localeCompare(b));
 
   return (
     <>
@@ -104,13 +91,13 @@ export default function ManageDepartmentsModal({
               <div className="p-4 text-center text-theme-text-muted">
                 Loading departments...
               </div>
-            ) : departments.length === 0 ? (
+            ) : sortedDepartments.length === 0 ? (
               <div className="p-4 text-center text-theme-text-muted">
                 No departments yet. Assign a department to an employee to create one.
               </div>
             ) : (
               <ul className="divide-y divide-theme-border">
-                {departments.map((department) => (
+                {sortedDepartments.map((department) => (
                   <li
                     key={department}
                     className="flex items-center justify-between p-3 hover:bg-theme-elevated transition-colors"
@@ -118,7 +105,7 @@ export default function ManageDepartmentsModal({
                     <span className="text-theme-text">{department}</span>
                     <button
                       onClick={() => handleDeleteDepartment(department)}
-                      disabled={deletingDepartment === department}
+                      disabled={deleteDepartmentMutation.isPending}
                       className="p-1.5 text-theme-text-muted hover:text-red-400 transition-colors disabled:opacity-50"
                       title="Delete department"
                     >

@@ -14,7 +14,7 @@ import (
 // Note: squad column is deprecated - squads are now loaded via user_squads junction table
 const (
 	userColumns = `id, COALESCE(auth0_id, ''), email, first_name, last_name, role, title, department,
-		avatar_url, supervisor_id, date_started, created_at, updated_at, jira_account_id`
+		avatar_url, supervisor_id, date_started, is_active, created_at, updated_at, jira_account_id`
 	userColumnsWithJira = userColumns + `, jira_domain, jira_email, jira_api_token,
 		jira_oauth_access_token, jira_oauth_refresh_token, jira_oauth_token_expires_at,
 		jira_cloud_id, jira_site_url`
@@ -35,7 +35,7 @@ func scanUser(row pgx.Row) (*models.User, error) {
 	err := row.Scan(
 		&user.ID, &user.Auth0ID, &user.Email, &user.FirstName, &user.LastName,
 		&user.Role, &user.Title, &user.Department, &user.AvatarURL, &user.SupervisorID,
-		&user.DateStarted, &user.CreatedAt, &user.UpdatedAt, &user.JiraAccountID,
+		&user.DateStarted, &user.IsActive, &user.CreatedAt, &user.UpdatedAt, &user.JiraAccountID,
 	)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func scanUserWithJira(row pgx.Row) (*models.User, error) {
 	err := row.Scan(
 		&user.ID, &user.Auth0ID, &user.Email, &user.FirstName, &user.LastName,
 		&user.Role, &user.Title, &user.Department, &user.AvatarURL, &user.SupervisorID,
-		&user.DateStarted, &user.CreatedAt, &user.UpdatedAt, &user.JiraAccountID,
+		&user.DateStarted, &user.IsActive, &user.CreatedAt, &user.UpdatedAt, &user.JiraAccountID,
 		&user.JiraDomain, &user.JiraEmail, &user.JiraAPIToken,
 		&user.JiraOAuthAccessToken, &user.JiraOAuthRefreshToken, &user.JiraOAuthTokenExpires,
 		&user.JiraCloudID, &user.JiraSiteURL,
@@ -70,7 +70,7 @@ func scanUsers(rows pgx.Rows) ([]models.User, error) {
 		err := rows.Scan(
 			&user.ID, &user.Auth0ID, &user.Email, &user.FirstName, &user.LastName,
 			&user.Role, &user.Title, &user.Department, &user.AvatarURL, &user.SupervisorID,
-			&user.DateStarted, &user.CreatedAt, &user.UpdatedAt, &user.JiraAccountID,
+			&user.DateStarted, &user.IsActive, &user.CreatedAt, &user.UpdatedAt, &user.JiraAccountID,
 		)
 		if err != nil {
 			return nil, err
@@ -108,7 +108,7 @@ func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.
 }
 
 func (r *UserRepository) GetDirectReportsBySupervisorID(ctx context.Context, supervisorID int64) ([]models.User, error) {
-	query := `SELECT ` + userColumns + ` FROM users WHERE supervisor_id = $1 ORDER BY last_name, first_name`
+	query := `SELECT ` + userColumns + ` FROM users WHERE supervisor_id = $1 AND is_active = true ORDER BY last_name, first_name`
 	rows, err := r.pool.Query(ctx, query, supervisorID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get direct reports by supervisor ID: %w", err)
@@ -123,7 +123,7 @@ func (r *UserRepository) GetDirectReportsBySupervisorID(ctx context.Context, sup
 }
 
 func (r *UserRepository) GetAllSupervisors(ctx context.Context) ([]models.User, error) {
-	query := `SELECT ` + userColumns + ` FROM users WHERE role = 'supervisor' ORDER BY last_name, first_name`
+	query := `SELECT ` + userColumns + ` FROM users WHERE role = 'supervisor' AND is_active = true ORDER BY last_name, first_name`
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get supervisors: %w", err)
@@ -138,7 +138,7 @@ func (r *UserRepository) GetAllSupervisors(ctx context.Context) ([]models.User, 
 }
 
 func (r *UserRepository) GetAll(ctx context.Context) ([]models.User, error) {
-	query := `SELECT ` + userColumns + ` FROM users ORDER BY role DESC, last_name, first_name`
+	query := `SELECT ` + userColumns + ` FROM users WHERE is_active = true ORDER BY role DESC, last_name, first_name`
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all users: %w", err)
@@ -375,6 +375,66 @@ func (r *UserRepository) ClearDepartment(ctx context.Context, department string)
 	_, err := r.pool.Exec(ctx, query, time.Now(), department)
 	if err != nil {
 		return fmt.Errorf("failed to clear department: %w", err)
+	}
+	return nil
+}
+
+// Deactivate marks a user as inactive and performs cleanup:
+// - Deletes tasks created by the user
+// - Deletes time-off requests created by the user
+// - Unassigns tasks that were assigned to the user
+// - Clears the user's supervisor_id from their direct reports
+func (r *UserRepository) Deactivate(ctx context.Context, userID int64) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	now := time.Now()
+
+	// 1. Delete tasks created by the user
+	_, err = tx.Exec(ctx, `DELETE FROM tasks WHERE created_by_id = $1`, userID)
+	if err != nil {
+		return fmt.Errorf("failed to delete user's tasks: %w", err)
+	}
+
+	// 2. Delete time-off requests created by the user
+	_, err = tx.Exec(ctx, `DELETE FROM time_off_requests WHERE user_id = $1`, userID)
+	if err != nil {
+		return fmt.Errorf("failed to delete user's time-off requests: %w", err)
+	}
+
+	// 3. Unassign tasks that were assigned to the user (set assigned_user_id to NULL)
+	_, err = tx.Exec(ctx, `UPDATE tasks SET assigned_user_id = NULL, updated_at = $1 WHERE assigned_user_id = $2`, now, userID)
+	if err != nil {
+		return fmt.Errorf("failed to unassign tasks from user: %w", err)
+	}
+
+	// 4. Clear supervisor_id for any direct reports
+	_, err = tx.Exec(ctx, `UPDATE users SET supervisor_id = NULL, updated_at = $1 WHERE supervisor_id = $2`, now, userID)
+	if err != nil {
+		return fmt.Errorf("failed to clear supervisor from direct reports: %w", err)
+	}
+
+	// 5. Mark the user as inactive
+	_, err = tx.Exec(ctx, `UPDATE users SET is_active = false, updated_at = $1 WHERE id = $2`, now, userID)
+	if err != nil {
+		return fmt.Errorf("failed to deactivate user: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+// Reactivate marks a user as active again
+func (r *UserRepository) Reactivate(ctx context.Context, userID int64) error {
+	_, err := r.pool.Exec(ctx, `UPDATE users SET is_active = true, updated_at = $1 WHERE id = $2`, time.Now(), userID)
+	if err != nil {
+		return fmt.Errorf("failed to reactivate user: %w", err)
 	}
 	return nil
 }

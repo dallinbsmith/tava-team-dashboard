@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Check, ChevronDown, Settings } from "lucide-react";
-import { User, Role, UpdateUserRequest, Squad } from "@/shared/types/user";
-import { updateUser, getSupervisors } from "@/lib/api";
-import { getSquads } from "../api";
+import { X, Check, ChevronDown, Settings, Calendar } from "lucide-react";
+import { User, UpdateUserRequest } from "@/shared/types/user";
+import { getSupervisors } from "@/lib/api";
 import { parseErrorMessage } from "@/lib/errors";
+import { useOrganization } from "@/providers/OrganizationProvider";
+import { useUpdateEmployee } from "@/hooks";
 import ManageSquadsModal from "./ManageSquadsModal";
 import ManageDepartmentsModal from "./ManageDepartmentsModal";
 
@@ -24,6 +25,12 @@ export default function EditEmployeeModal({
   onClose,
   onSave,
 }: EditEmployeeModalProps) {
+  // Use centralized data from OrganizationProvider
+  const { squads: availableSquads } = useOrganization();
+
+  // Mutation hook for updating employee - handles cache invalidation automatically
+  const updateEmployeeMutation = useUpdateEmployee();
+
   const [formData, setFormData] = useState({
     first_name: employee.first_name,
     last_name: employee.last_name,
@@ -32,113 +39,112 @@ export default function EditEmployeeModal({
     squadIds: employee.squads?.map((s) => s.id) || [],
     role: employee.role,
     supervisor_id: employee.supervisor_id || null,
+    date_started: employee.date_started || "",
   });
   const [supervisors, setSupervisors] = useState<User[]>([]);
-  const [availableSquads, setAvailableSquads] = useState<Squad[]>([]);
   const [squadDropdownOpen, setSquadDropdownOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [manageSquadsOpen, setManageSquadsOpen] = useState(false);
   const [manageDepartmentsOpen, setManageDepartmentsOpen] = useState(false);
+
+  const isLoading = updateEmployeeMutation.isPending;
 
   const isAdmin = currentUser.role === "admin";
   const isSupervisor = currentUser.role === "supervisor";
   const isEditingSelf = currentUser.id === employee.id;
   const canManage = isAdmin || isSupervisor;
 
-  const refreshSquads = () => {
-    getSquads()
-      .then((squads) => {
-        setAvailableSquads(squads);
-        // Remove any selected squads that no longer exist
-        setFormData((prev) => ({
-          ...prev,
-          squadIds: prev.squadIds.filter((id) =>
-            squads.some((s) => s.id === id)
-          ),
-        }));
-      })
-      .catch((err) => console.error("Failed to fetch squads:", err));
-  };
-
   useEffect(() => {
     if (isOpen) {
+      // Filter out any squad IDs that no longer exist
+      const validSquadIds = (employee.squads?.map((s) => s.id) || []).filter(
+        (id) => availableSquads.some((s) => s.id === id)
+      );
+
       setFormData({
         first_name: employee.first_name,
         last_name: employee.last_name,
         title: employee.title || "",
         department: employee.department || "",
-        squadIds: employee.squads?.map((s) => s.id) || [],
+        squadIds: validSquadIds,
         role: employee.role,
         supervisor_id: employee.supervisor_id || null,
+        date_started: employee.date_started ? employee.date_started.split("T")[0] : "",
       });
       setError(null);
       setSquadDropdownOpen(false);
 
-      // Fetch available squads
-      refreshSquads();
-
       if (isAdmin) {
         getSupervisors()
-          .then(setSupervisors)
+          .then((data) => setSupervisors(data || []))
           .catch((err) => console.error("Failed to fetch supervisors:", err));
       }
     }
-  }, [isOpen, employee, isAdmin]);
+  }, [isOpen, employee, isAdmin, availableSquads]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
 
-    try {
-      const updateData: UpdateUserRequest = {};
+    const updateData: UpdateUserRequest = {};
 
-      if (formData.first_name !== employee.first_name) {
-        updateData.first_name = formData.first_name;
-      }
-      if (formData.last_name !== employee.last_name) {
-        updateData.last_name = formData.last_name;
-      }
-      if (formData.title !== (employee.title || "")) {
-        updateData.title = formData.title;
-      }
-      if (formData.department !== (employee.department || "")) {
-        updateData.department = formData.department;
-      }
-
-      // Compare squad IDs
-      const originalSquadIds = employee.squads?.map((s) => s.id).sort() || [];
-      const newSquadIds = [...formData.squadIds].sort();
-      const squadsChanged =
-        originalSquadIds.length !== newSquadIds.length ||
-        !originalSquadIds.every((id, i) => id === newSquadIds[i]);
-      if (squadsChanged) {
-        updateData.squad_ids = formData.squadIds;
-      }
-
-      if (isAdmin && formData.role !== employee.role) {
-        updateData.role = formData.role;
-      }
-      if (isAdmin && formData.supervisor_id !== (employee.supervisor_id || null)) {
-        updateData.supervisor_id = formData.supervisor_id;
-      }
-
-      if (Object.keys(updateData).length === 0) {
-        onClose();
-        return;
-      }
-
-      const updatedEmployee = await updateUser(employee.id, updateData);
-      onSave(updatedEmployee);
-      onClose();
-    } catch (err) {
-      setError(parseErrorMessage(err));
-    } finally {
-      setLoading(false);
+    if (formData.first_name !== employee.first_name) {
+      updateData.first_name = formData.first_name;
     }
+    if (formData.last_name !== employee.last_name) {
+      updateData.last_name = formData.last_name;
+    }
+    if (formData.title !== (employee.title || "")) {
+      updateData.title = formData.title;
+    }
+    if (formData.department !== (employee.department || "")) {
+      updateData.department = formData.department;
+    }
+
+    // Compare squad IDs
+    const originalSquadIds = employee.squads?.map((s) => s.id).sort() || [];
+    const newSquadIds = [...formData.squadIds].sort();
+    const squadsChanged =
+      originalSquadIds.length !== newSquadIds.length ||
+      !originalSquadIds.every((id, i) => id === newSquadIds[i]);
+    if (squadsChanged) {
+      updateData.squad_ids = formData.squadIds;
+    }
+
+    if (isAdmin && formData.role !== employee.role) {
+      updateData.role = formData.role;
+    }
+    if (isAdmin && formData.supervisor_id !== (employee.supervisor_id || null)) {
+      updateData.supervisor_id = formData.supervisor_id;
+    }
+
+    // Check if date_started changed
+    const originalDateStarted = employee.date_started ? employee.date_started.split("T")[0] : "";
+    if (formData.date_started !== originalDateStarted) {
+      updateData.date_started = formData.date_started || null;
+    }
+
+    // No changes - just close
+    if (Object.keys(updateData).length === 0) {
+      onClose();
+      return;
+    }
+
+    // Use mutation - cache invalidation happens automatically
+    updateEmployeeMutation.mutate(
+      { id: employee.id, data: updateData },
+      {
+        onSuccess: (updatedEmployee) => {
+          onSave(updatedEmployee);
+          onClose();
+        },
+        onError: (err) => {
+          setError(parseErrorMessage(err));
+        },
+      }
+    );
   };
 
   const toggleSquad = (squadId: number) => {
@@ -244,6 +250,26 @@ export default function EditEmployeeModal({
             </div>
 
             <div>
+              <label
+                htmlFor="date_started"
+                className="block text-sm font-medium text-theme-text-muted mb-1"
+              >
+                Start Date
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted pointer-events-none" />
+                <input
+                  type="date"
+                  id="date_started"
+                  name="date_started"
+                  value={formData.date_started}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+
+            <div>
               <div className="flex items-center justify-between mb-1">
                 <label
                   htmlFor="department"
@@ -324,7 +350,7 @@ export default function EditEmployeeModal({
                     : `${formData.squadIds.length} squad${formData.squadIds.length !== 1 ? "s" : ""} selected`}
                 </span>
                 <ChevronDown
-                  className={`w-4 h-4 text-theme-text-muted transition-transform ${squadDropdownOpen ? "rotate-180" : ""
+                  className={`w-4 h-4 ml-2 shrink-0 text-theme-text-muted transition-transform ${squadDropdownOpen ? "rotate-180" : ""
                     }`}
                 />
               </button>
@@ -362,15 +388,16 @@ export default function EditEmployeeModal({
               )}
             </div>
 
-            {isAdmin && !isEditingSelf && (
-              <>
-                <div>
-                  <label
-                    htmlFor="role"
-                    className="block text-sm font-medium text-theme-text-muted mb-1"
-                  >
-                    Role
-                  </label>
+            {/* Role field - editable by admins for other users, read-only otherwise */}
+            {!isEditingSelf && (
+              <div>
+                <label
+                  htmlFor="role"
+                  className="block text-sm font-medium text-theme-text-muted mb-1"
+                >
+                  Role
+                </label>
+                {isAdmin ? (
                   <select
                     id="role"
                     name="role"
@@ -382,67 +409,72 @@ export default function EditEmployeeModal({
                     <option value="supervisor">Supervisor</option>
                     <option value="admin">Admin</option>
                   </select>
-                </div>
+                ) : (
+                  <div className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text-muted">
+                    {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
+                  </div>
+                )}
+              </div>
+            )}
 
-                <div>
-                  <label
-                    htmlFor="supervisor_id"
-                    className="block text-sm font-medium text-theme-text-muted mb-1"
-                  >
-                    Supervisor
-                  </label>
-                  <select
-                    id="supervisor_id"
-                    name="supervisor_id"
-                    value={formData.supervisor_id || ""}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="">No Supervisor</option>
-                    {supervisors.map((sup) => (
-                      <option key={sup.id} value={sup.id}>
-                        {sup.first_name} {sup.last_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
+            {/* Supervisor field - only admins can change */}
+            {isAdmin && !isEditingSelf && (
+              <div>
+                <label
+                  htmlFor="supervisor_id"
+                  className="block text-sm font-medium text-theme-text-muted mb-1"
+                >
+                  Supervisor
+                </label>
+                <select
+                  id="supervisor_id"
+                  name="supervisor_id"
+                  value={formData.supervisor_id || ""}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="">No Supervisor</option>
+                  {supervisors.map((sup) => (
+                    <option key={sup.id} value={sup.id}>
+                      {sup.first_name} {sup.last_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
 
             <div className="flex justify-end gap-3 pt-4 border-t border-theme-border">
               <button
                 type="button"
                 onClick={onClose}
-                disabled={loading}
+                disabled={isLoading}
                 className="px-4 py-2 text-sm font-medium text-theme-text-muted hover:text-theme-text transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isLoading}
                 className="px-4 py-2 text-sm font-medium bg-primary-500 text-white hover:bg-primary-600 transition-colors disabled:opacity-50"
               >
-                {loading ? "Saving..." : "Save Changes"}
+                {isLoading ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </form>
         </div>
       </div>
 
-      {/* Management Modals */}
+      {/* Management Modals - mutations handle cache invalidation automatically */}
       <ManageSquadsModal
         isOpen={manageSquadsOpen}
         onClose={() => setManageSquadsOpen(false)}
-        onSquadsChanged={refreshSquads}
+        onSquadsChanged={() => {}}
       />
 
       <ManageDepartmentsModal
         isOpen={manageDepartmentsOpen}
         onClose={() => setManageDepartmentsOpen(false)}
-        onDepartmentsChanged={() => {
-          // Departments don't need refresh as they're typed directly
-        }}
+        onDepartmentsChanged={() => {}}
       />
     </>
   );

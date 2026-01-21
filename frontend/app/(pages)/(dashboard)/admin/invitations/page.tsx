@@ -6,7 +6,8 @@ import { Invitation, CreateInvitationRequest } from "./types";
 import { getInvitations, createInvitation, revokeInvitation } from "@/lib/api";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { useOrganization } from "@/providers/OrganizationProvider";
-import { parseErrorMessage, parseSquadErrorMessage } from "@/lib/errors";
+import { parseInvitationErrorMessage, parseSquadErrorMessage } from "@/lib/errors";
+import ConfirmationModal from "@/shared/common/ConfirmationModal";
 import {
   Mail,
   UserPlus,
@@ -14,7 +15,6 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Copy,
   Shield,
   Users,
   Building2,
@@ -26,7 +26,7 @@ import {
 export default function InvitationsPage() {
   const router = useRouter();
   const { currentUser, loading: userLoading, isAdmin } = useCurrentUser();
-  const { squads, addSquad } = useOrganization();
+  const { squads, addSquad, departments } = useOrganization();
 
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,12 +40,17 @@ export default function InvitationsPage() {
     squad_ids: [],
   });
   const [createdInvitation, setCreatedInvitation] = useState<Invitation | null>(null);
-  const [copiedToken, setCopiedToken] = useState(false);
+
+  // Department selection state
+  const [departmentDropdownOpen, setDepartmentDropdownOpen] = useState(false);
 
   // Squad selection state
   const [squadDropdownOpen, setSquadDropdownOpen] = useState(false);
   const [newSquadName, setNewSquadName] = useState("");
   const [creatingSquad, setCreatingSquad] = useState(false);
+
+  // Revoke confirmation state
+  const [confirmRevokeId, setConfirmRevokeId] = useState<number | null>(null);
 
   // Redirect non-admins
   useEffect(() => {
@@ -59,7 +64,7 @@ export default function InvitationsPage() {
     async function fetchInvitations() {
       try {
         const invs = await getInvitations();
-        setInvitations(invs);
+        setInvitations(invs || []);
       } catch (e) {
         console.error("Failed to fetch invitations:", e);
         setError("Failed to load invitations");
@@ -84,14 +89,21 @@ export default function InvitationsPage() {
       setInvitations([invitation, ...invitations]);
       setNewInvitation({ email: "", role: "supervisor", department: "", squad_ids: [] });
     } catch (e: unknown) {
-      setError(parseErrorMessage(e));
+      setError(parseInvitationErrorMessage(e));
     } finally {
       setCreating(false);
     }
   };
 
-  const handleRevokeInvitation = async (id: number) => {
-    if (!confirm("Are you sure you want to revoke this invitation?")) return;
+  const handleRevokeInvitation = (id: number) => {
+    setConfirmRevokeId(id);
+  };
+
+  const executeRevokeInvitation = async () => {
+    if (!confirmRevokeId) return;
+
+    const id = confirmRevokeId;
+    setConfirmRevokeId(null);
 
     try {
       await revokeInvitation(id);
@@ -104,13 +116,6 @@ export default function InvitationsPage() {
       console.error("Failed to revoke invitation:", e);
       setError("Failed to revoke invitation");
     }
-  };
-
-  const copyInviteLink = (token: string) => {
-    const link = `${window.location.origin}/invite/${token}`;
-    navigator.clipboard.writeText(link);
-    setCopiedToken(true);
-    setTimeout(() => setCopiedToken(false), 2000);
   };
 
   const getStatusIcon = (status: string) => {
@@ -291,34 +296,16 @@ export default function InvitationsPage() {
               <div className="p-6">
                 <div className="text-center mb-6">
                   <div className="w-12 h-12 bg-green-900/40 flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="w-6 h-6 text-green-400" />
+                    <Mail className="w-6 h-6 text-green-400" />
                   </div>
-                  <h4 className="text-lg font-medium text-theme-text">Invitation Created!</h4>
+                  <h4 className="text-lg font-medium text-theme-text">Invitation Sent!</h4>
                   <p className="text-sm text-theme-text-muted mt-1">
-                    Share this link with {createdInvitation.email}
+                    An email has been sent to <span className="text-theme-text font-medium">{createdInvitation.email}</span> with instructions to join.
                   </p>
                 </div>
 
-                <div className="bg-theme-elevated p-3 mb-4">
-                  <p className="text-xs text-theme-text-muted mb-1">Invitation Link</p>
-                  <div className="flex items-center gap-2">
-                    <code className="text-sm text-theme-text flex-1 truncate">
-                      {`${typeof window !== "undefined" ? window.location.origin : ""}/invite/${createdInvitation.token}`}
-                    </code>
-                    <button
-                      onClick={() => copyInviteLink(createdInvitation.token || "")}
-                      className="p-2 hover:bg-theme-muted transition-colors"
-                    >
-                      <Copy className="w-4 h-4 text-theme-text-muted" />
-                    </button>
-                  </div>
-                  {copiedToken && (
-                    <p className="text-xs text-green-400 mt-1">Copied to clipboard!</p>
-                  )}
-                </div>
-
                 <p className="text-xs text-theme-text-muted text-center mb-4">
-                  This invitation expires in 7 days
+                  The invitation will expire in 7 days
                 </p>
 
                 <button
@@ -378,16 +365,53 @@ export default function InvitationsPage() {
                     Department
                   </label>
                   <div className="relative">
-                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted" />
-                    <input
-                      type="text"
-                      value={newInvitation.department || ""}
-                      onChange={(e) =>
-                        setNewInvitation({ ...newInvitation, department: e.target.value })
-                      }
-                      className="w-full pl-10 pr-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="e.g. Engineering, Sales, Marketing"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => setDepartmentDropdownOpen(!departmentDropdownOpen)}
+                      className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text text-left flex items-center justify-between focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    >
+                      <span className={newInvitation.department ? "text-theme-text" : "text-theme-text-muted"}>
+                        {newInvitation.department || "Select department..."}
+                      </span>
+                      <ChevronDown className={`w-4 h-4 ml-2 shrink-0 transition-transform ${departmentDropdownOpen ? "rotate-180" : ""}`} />
+                    </button>
+
+                    {departmentDropdownOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-theme-surface border border-theme-border shadow-lg max-h-48 overflow-y-auto">
+                        {/* Option to clear selection */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewInvitation({ ...newInvitation, department: "" });
+                            setDepartmentDropdownOpen(false);
+                          }}
+                          className="w-full px-3 py-2 text-left text-theme-text-muted hover:bg-theme-elevated"
+                        >
+                          No department
+                        </button>
+                        {departments.map((dept) => (
+                          <button
+                            key={dept}
+                            type="button"
+                            onClick={() => {
+                              setNewInvitation({ ...newInvitation, department: dept });
+                              setDepartmentDropdownOpen(false);
+                            }}
+                            className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-theme-elevated ${
+                              newInvitation.department === dept ? "bg-primary-900/20" : ""
+                            }`}
+                          >
+                            <Building2 className="w-4 h-4 text-theme-text-muted" />
+                            <span className="text-theme-text">{dept}</span>
+                          </button>
+                        ))}
+                        {departments.length === 0 && (
+                          <div className="px-3 py-2 text-theme-text-muted text-sm">
+                            No departments available
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -430,7 +454,7 @@ export default function InvitationsPage() {
                           ? "Select squads..."
                           : `${getSelectedSquads().length} squad${getSelectedSquads().length > 1 ? "s" : ""} selected`}
                       </span>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${squadDropdownOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`w-4 h-4 ml-2 shrink-0 transition-transform ${squadDropdownOpen ? "rotate-180" : ""}`} />
                     </button>
 
                     {squadDropdownOpen && (
@@ -511,6 +535,7 @@ export default function InvitationsPage() {
                     onClick={() => {
                       setShowCreateModal(false);
                       setError(null);
+                      setDepartmentDropdownOpen(false);
                       setSquadDropdownOpen(false);
                       setNewSquadName("");
                     }}
@@ -531,6 +556,16 @@ export default function InvitationsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={!!confirmRevokeId}
+        onClose={() => setConfirmRevokeId(null)}
+        onConfirm={executeRevokeInvitation}
+        title="Revoke Invitation"
+        message="Are you sure you want to revoke this invitation? The recipient will no longer be able to use it to join."
+        confirmText="Revoke"
+        variant="danger"
+      />
     </>
   );
 }

@@ -90,7 +90,9 @@ func (h *TimeOffHandlers) Create(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusCreated, timeOff)
 }
 
-// GetMyRequests returns the current user's time off requests
+// GetMyRequests returns time off requests visible to the current user:
+// - Employees: only their own requests
+// - Supervisors/Admins: their own + their direct reports' requests
 func (h *TimeOffHandlers) GetMyRequests(w http.ResponseWriter, r *http.Request) {
 	currentUser := requireAuth(w, r)
 	if currentUser == nil {
@@ -107,7 +109,8 @@ func (h *TimeOffHandlers) GetMyRequests(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	requests, err := h.timeOffRepo.GetByUserID(r.Context(), currentUser.ID, statusFilter)
+	// Use GetVisibleRequests which returns role-appropriate results
+	requests, err := h.timeOffRepo.GetVisibleRequests(r.Context(), currentUser, statusFilter)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to fetch time off requests")
 		return
@@ -295,9 +298,8 @@ func (h *TimeOffHandlers) GetTeamTimeOff(w http.ResponseWriter, r *http.Request)
 	var err error
 
 	if currentUser.IsAdmin() {
-		// Admin can see all approved time off (we could add a query for this)
-		// For now, get all direct reports' time off
-		requests = []models.TimeOffRequest{}
+		// Admin can see all approved time off
+		requests, err = h.timeOffRepo.GetAllApproved(r.Context())
 	} else {
 		// Supervisor sees only direct reports
 		requests, err = h.timeOffRepo.GetTeamTimeOff(r.Context(), currentUser.ID)

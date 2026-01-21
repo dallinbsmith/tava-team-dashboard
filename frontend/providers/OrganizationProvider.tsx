@@ -1,13 +1,15 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useMemo } from "react";
+import { createContext, useContext, ReactNode, useCallback } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useEmployeesQuery,
   useAllUsersQuery,
   useSquadsQuery,
-  useDerivedDepartments,
+  useDepartmentsQuery,
 } from "@/hooks";
+import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 import { User, Squad } from "@/shared/types/user";
 
 interface OrganizationContextType {
@@ -26,18 +28,23 @@ interface OrganizationContextType {
   squadsLoading: boolean;
   refetchSquads: () => Promise<void>;
   addSquad: (name: string) => Promise<Squad>;
+  removeSquad: (id: number) => Promise<void>;
 
   // Departments (derived from employees)
   departments: string[];
 
   // Combined loading state
   loading: boolean;
+
+  // Force refetch ALL organization data
+  refetchAll: () => Promise<void>;
 }
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
 export function OrganizationProvider({ children }: { children: ReactNode }) {
   const { user: auth0User, isLoading: authLoading } = useUser();
+  const queryClient = useQueryClient();
   const isAuthenticated = !!auth0User && !authLoading;
 
   // Use custom hooks with centralized query keys
@@ -58,12 +65,23 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     isLoading: squadsLoading,
     refetch: refetchSquads,
     addSquad,
+    removeSquad,
   } = useSquadsQuery({ enabled: isAuthenticated });
 
-  // Derive departments from users using custom hook
-  const departments = useDerivedDepartments(employees, allUsers);
+  // Fetch departments from API
+  const {
+    departments,
+    isLoading: departmentsLoading,
+    refetch: refetchDepartments,
+  } = useDepartmentsQuery({ enabled: isAuthenticated });
 
-  const loading = authLoading || employeesLoading || allUsersLoading || squadsLoading;
+  const loading = authLoading || employeesLoading || allUsersLoading || squadsLoading || departmentsLoading;
+
+  // Force refetch ALL organization data - use this after any mutation
+  const refetchAll = useCallback(
+    () => refetchQueries(queryClient, queryKeyGroups.organization()),
+    [queryClient]
+  );
 
   const value: OrganizationContextType = {
     employees,
@@ -76,8 +94,10 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     squadsLoading: authLoading || squadsLoading,
     refetchSquads,
     addSquad,
+    removeSquad,
     departments,
     loading,
+    refetchAll,
   };
 
   return (
@@ -99,8 +119,10 @@ const defaultOrganizationContext: OrganizationContextType = {
   squadsLoading: true,
   refetchSquads: async () => {},
   addSquad: async () => ({ id: 0, name: "", members: [] }),
+  removeSquad: async () => {},
   departments: [],
   loading: true,
+  refetchAll: async () => {},
 };
 
 export function useOrganization() {

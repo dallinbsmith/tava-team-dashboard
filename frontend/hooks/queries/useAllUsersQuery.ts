@@ -5,6 +5,9 @@ import { getAllUsers, getDepartments } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { User } from "@/shared/types/user";
 
+// 5 minutes in milliseconds
+const DEFAULT_STALE_TIME = 5 * 60 * 1000;
+
 export interface UseAllUsersQueryOptions {
   /** Override the default stale time (5 minutes) */
   staleTime?: number;
@@ -47,7 +50,7 @@ export interface UseAllUsersQueryResult {
 export function useAllUsersQuery(
   options: UseAllUsersQueryOptions = {}
 ): UseAllUsersQueryResult {
-  const { staleTime = 5 * 60 * 1000 } = options;
+  const { staleTime = DEFAULT_STALE_TIME } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
 
@@ -116,7 +119,7 @@ export interface UseDepartmentsQueryResult {
 export function useDepartmentsQuery(
   options: UseDepartmentsQueryOptions = {}
 ): UseDepartmentsQueryResult {
-  const { staleTime = 5 * 60 * 1000 } = options;
+  const { staleTime = DEFAULT_STALE_TIME } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
 
   const isAuthenticated = !!auth0User && !authLoading;

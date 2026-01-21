@@ -34,7 +34,7 @@ interface TeamJiraTasksProps {
 const viewModes = ["grid", "list"] as const;
 
 export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
-  const { isSupervisorOrAdmin, loading: userLoading } = useCurrentUser();
+  const { effectiveIsSupervisorOrAdmin, loading: userLoading } = useCurrentUser();
   const [tasks, setTasks] = useState<TeamTask[]>([]);
   const [settings, setSettings] = useState<JiraSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -130,13 +130,13 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
     setError(null);
 
     try {
-      if (isSupervisorOrAdmin) {
+      if (effectiveIsSupervisorOrAdmin) {
         const jiraSettings = await getJiraSettings();
         setSettings(jiraSettings);
 
         if (jiraSettings.org_configured) {
           const issues = await getTeamJiraTasks(compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT);
-          setTasks(issues);
+          setTasks(issues || []);
         }
       }
     } catch (e) {
@@ -146,7 +146,7 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [isSupervisorOrAdmin, compact]);
+  }, [effectiveIsSupervisorOrAdmin, compact]);
 
   useEffect(() => {
     if (!userLoading) {
@@ -169,7 +169,7 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
   }
 
   // Only show for supervisors and admins
-  if (!isSupervisorOrAdmin) {
+  if (!effectiveIsSupervisorOrAdmin) {
     return null;
   }
 

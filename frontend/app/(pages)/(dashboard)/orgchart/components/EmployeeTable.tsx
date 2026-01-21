@@ -117,9 +117,9 @@ export default function EmployeeTable({
                 {employee.department || "-"}
               </td>
               <td className="px-4 py-3 text-theme-text-muted hidden xl:table-cell">
-                {employee.squads?.length > 0 ? (
+                {(employee.squads?.length ?? 0) > 0 ? (
                   <div className="flex flex-wrap gap-1">
-                    {employee.squads.slice(0, 2).map(s => (
+                    {(employee.squads ?? []).slice(0, 2).map(s => (
                       <span
                         key={s.id}
                         className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border rounded"
@@ -127,9 +127,9 @@ export default function EmployeeTable({
                         {s.name}
                       </span>
                     ))}
-                    {employee.squads.length > 2 && (
+                    {(employee.squads?.length ?? 0) > 2 && (
                       <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium text-theme-text-muted">
-                        +{employee.squads.length - 2}
+                        +{(employee.squads?.length ?? 0) - 2}
                       </span>
                     )}
                   </div>

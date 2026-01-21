@@ -45,9 +45,9 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
               <div className="text-sm text-theme-text-muted mt-1">
                 {employee.title}
               </div>
-              {employee.squads?.length > 0 && (
+              {(employee.squads?.length ?? 0) > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {employee.squads.map(squad => (
+                  {(employee.squads ?? []).map(squad => (
                     <span
                       key={squad.id}
                       className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border"

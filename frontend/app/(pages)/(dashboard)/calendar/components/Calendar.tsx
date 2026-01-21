@@ -7,8 +7,11 @@ import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarEvent, CalendarEventType } from "../types";
 import { JiraIssue } from "@/app/(pages)/jira/types";
-import { getCalendarEvents } from "../api";
+import { TimeOffRequest, TIME_OFF_TYPE_LABELS } from "../../time-off/types";
+import { getCalendarEventsWithMetadata } from "../api";
 import { getJiraEpics } from "@/app/(pages)/jira/api";
+import { getTeamTimeOff } from "../../time-off/api";
+import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,7 +24,26 @@ import {
   Users,
   Palmtree,
   UserPlus,
+  UsersRound,
 } from "lucide-react";
+
+// Convert team time off request to CalendarEvent format
+function timeOffToCalendarEvent(timeOff: TimeOffRequest): CalendarEvent {
+  const userName = timeOff.user
+    ? `${timeOff.user.first_name} ${timeOff.user.last_name}`.trim()
+    : "Unknown";
+  const typeLabel = TIME_OFF_TYPE_LABELS[timeOff.request_type] || timeOff.request_type;
+
+  return {
+    id: `team-time-off-${timeOff.id}`,
+    type: "time_off",
+    title: typeLabel,
+    start: timeOff.start_date,
+    end: timeOff.end_date,
+    all_day: true,
+    time_off_request: timeOff,
+  };
+}
 
 const locales = {
   "en-US": enUS,
@@ -70,6 +92,9 @@ interface CalendarProps {
   onRequestTimeOff?: () => void;
   onCreateTimeOffForEmployee?: () => void;
   onEventClick?: (event: CalendarEvent) => void;
+  onViewTask?: (taskId: number) => void;
+  onViewMeeting?: (meetingId: number) => void;
+  onViewTimeOff?: (timeOffId: number) => void;
   compact?: boolean;
 }
 
@@ -80,8 +105,12 @@ export default function Calendar({
   onRequestTimeOff,
   onCreateTimeOffForEmployee,
   onEventClick,
+  onViewTask,
+  onViewMeeting,
+  onViewTimeOff,
   compact = false
 }: CalendarProps) {
+  const { effectiveIsSupervisorOrAdmin } = useCurrentUser();
   const [events, setEvents] = useState<CalendarComponentEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,7 +118,23 @@ export default function Calendar({
   const [view, setView] = useState<View>("month");
   const [date, setDate] = useState(new Date());
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [showTeamTimeOff, setShowTeamTimeOff] = useState(false);
+  const [visibleTypes, setVisibleTypes] = useState<Set<CalendarEventType>>(
+    new Set(["epic", "jira", "task", "meeting", "time_off"])
+  );
   const addMenuRef = useRef<HTMLDivElement>(null);
+
+  const toggleEventType = useCallback((type: CalendarEventType) => {
+    setVisibleTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) {
+        next.delete(type);
+      } else {
+        next.add(type);
+      }
+      return next;
+    });
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -121,18 +166,23 @@ export default function Calendar({
       const start = startOfMonth(subMonths(date, 1));
       const end = endOfMonth(addMonths(date, 1));
 
-      // Fetch calendar events and epics in parallel
-      const [calendarEvents, epics] = await Promise.all([
-        getCalendarEvents(start, end),
-        getJiraEpics().catch((err) => {
-          // Log error but don't fail - epics are optional
-          console.warn("Failed to fetch Jira epics:", err.message || err);
-          return [] as JiraIssue[];
-        }),
+      // First fetch calendar events with metadata to check Jira connection status
+      const calendarData = await getCalendarEventsWithMetadata(start, end);
+      const calendarEvents = calendarData.events || [];
+      const isJiraConnected = calendarData.jira_connected;
+
+      // Only fetch epics if Jira is connected, and team time off if enabled
+      const [epics, teamTimeOff] = await Promise.all([
+        isJiraConnected
+          ? getJiraEpics().catch(() => [] as JiraIssue[])
+          : Promise.resolve([] as JiraIssue[]),
+        showTeamTimeOff
+          ? getTeamTimeOff().catch(() => [] as TimeOffRequest[])
+          : Promise.resolve([] as TimeOffRequest[]),
       ]);
 
       // Convert epics to calendar events and filter by date range
-      const epicEvents = epics
+      const epicEvents = (epics || [])
         .map(epicToCalendarEvent)
         .filter((event): event is CalendarEvent => {
           if (!event) return false;
@@ -141,17 +191,48 @@ export default function Calendar({
           return eventEnd >= start && eventStart <= end;
         });
 
-      // Combine all events
-      const allEvents = [...calendarEvents, ...epicEvents];
+      // Convert team time off to calendar events and filter by date range
+      const teamTimeOffEvents = (teamTimeOff || [])
+        .filter((timeOff) => timeOff.status === "approved") // Only show approved time off
+        .map(timeOffToCalendarEvent)
+        .filter((event) => {
+          const eventStart = new Date(event.start);
+          const eventEnd = event.end ? new Date(event.end) : eventStart;
+          return eventEnd >= start && eventStart <= end;
+        });
 
-      const mapped = allEvents.map((event) => ({
-        id: event.id,
-        title: event.title,
-        start: new Date(event.start),
-        end: event.end ? new Date(event.end) : new Date(event.start),
-        allDay: event.all_day,
-        resource: event,
-      }));
+      // Combine all events (dedupe team time off that might already be in calendar events)
+      const existingTimeOffIds = new Set(
+        (calendarEvents || [])
+          .filter((e) => e.type === "time_off" && e.time_off_request)
+          .map((e) => e.time_off_request!.id)
+      );
+      const uniqueTeamTimeOffEvents = teamTimeOffEvents.filter(
+        (e) => !existingTimeOffIds.has(e.time_off_request!.id)
+      );
+
+      const allEvents = [...(calendarEvents || []), ...epicEvents, ...uniqueTeamTimeOffEvents];
+
+      const mapped = allEvents.map((event) => {
+        // For time_off events, include the employee name in the title
+        let title = event.title;
+        if (event.type === "time_off" && event.time_off_request?.user) {
+          const user = event.time_off_request.user;
+          const name = `${user.first_name} ${user.last_name}`.trim();
+          if (name) {
+            title = `${name}: ${title}`;
+          }
+        }
+
+        return {
+          id: event.id,
+          title,
+          start: new Date(event.start),
+          end: event.end ? new Date(event.end) : new Date(event.start),
+          allDay: event.all_day,
+          resource: event,
+        };
+      });
 
       setEvents(mapped);
     } catch (e) {
@@ -161,7 +242,7 @@ export default function Calendar({
       setLoading(false);
       setRefreshing(false);
     }
-  }, [date]);
+  }, [date, showTeamTimeOff]);
 
   useEffect(() => {
     fetchEvents();
@@ -176,10 +257,33 @@ export default function Calendar({
   }, []);
 
   const handleSelectEvent = useCallback((event: CalendarComponentEvent) => {
-    if (onEventClick) {
-      onEventClick(event.resource);
+    const resource = event.resource;
+
+    // Handle internal events (task, meeting, time_off) with view modals
+    if (resource.type === "task" && resource.task && onViewTask) {
+      onViewTask(resource.task.id);
+      return;
     }
-  }, [onEventClick]);
+    if (resource.type === "meeting" && resource.meeting && onViewMeeting) {
+      onViewMeeting(resource.meeting.id);
+      return;
+    }
+    if (resource.type === "time_off" && resource.time_off_request && onViewTimeOff) {
+      onViewTimeOff(resource.time_off_request.id);
+      return;
+    }
+
+    // For external events (jira, epic) or if no specific handler, open URL or use generic handler
+    if (resource.url) {
+      window.open(resource.url, "_blank");
+      return;
+    }
+
+    // Fallback to generic event click handler
+    if (onEventClick) {
+      onEventClick(resource);
+    }
+  }, [onEventClick, onViewTask, onViewMeeting, onViewTimeOff]);
 
   const handleSelectSlot = useCallback((slotInfo: SlotInfo) => {
     if (onCreateTask) {
@@ -233,44 +337,68 @@ export default function Calendar({
   }, [compact]);
 
   const CustomToolbar = useCallback(({ label }: { label: string }) => (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-theme-border">
-      <div className="flex items-center gap-3">
+    <div className="flex items-center justify-between mb-6 pb-4 border-b border-theme-border">
+      {/* Left: Navigation */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => handleNavigate(view === "month" ? subMonths(date, 1) : new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000))}
+          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
         <button
           onClick={() => handleNavigate(new Date())}
-          className="px-4 py-2 text-sm font-medium text-theme-text bg-theme-surface border border-theme-border rounded-lg hover:bg-theme-elevated transition-colors"
+          className="px-3 py-1.5 text-sm font-medium text-theme-text hover:bg-theme-elevated rounded-lg transition-colors min-w-[140px] text-center"
         >
-          Today
+          {label}
         </button>
-        <div className="flex items-center bg-theme-surface border border-theme-border rounded-lg overflow-hidden">
-          <button
-            onClick={() => handleNavigate(view === "month" ? subMonths(date, 1) : new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000))}
-            className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => handleNavigate(view === "month" ? addMonths(date, 1) : new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000))}
-            className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated transition-colors border-l border-theme-border"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-        <h2 className="text-xl font-semibold text-theme-text">{label}</h2>
-      </div>
-      <div className="flex items-center gap-3">
+        <button
+          onClick={() => handleNavigate(view === "month" ? addMonths(date, 1) : new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000))}
+          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
         <button
           onClick={() => fetchEvents(true)}
           disabled={refreshing}
-          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors disabled:opacity-50"
+          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors disabled:opacity-50 ml-1"
           title="Refresh"
         >
-          <RefreshCw className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
         </button>
+      </div>
+
+      {/* Right: Controls */}
+      <div className="flex items-center gap-2">
+        {effectiveIsSupervisorOrAdmin && (
+          <div className="flex bg-theme-surface border border-theme-border rounded-lg overflow-hidden">
+            <button
+              onClick={() => setShowTeamTimeOff(false)}
+              className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                !showTeamTimeOff
+                  ? "bg-theme-elevated text-theme-text"
+                  : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
+              }`}
+            >
+              Mine
+            </button>
+            <button
+              onClick={() => setShowTeamTimeOff(true)}
+              className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-theme-border ${
+                showTeamTimeOff
+                  ? "bg-theme-elevated text-theme-text"
+                  : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
+              }`}
+            >
+              Team
+            </button>
+          </div>
+        )}
         <div className="flex bg-theme-surface border border-theme-border rounded-lg overflow-hidden">
           <button
             onClick={() => handleViewChange("month")}
-            className={`px-4 py-2 text-sm font-medium transition-colors ${view === "month"
-                ? "bg-primary-600 text-white"
+            className={`px-3 py-1.5 text-sm font-medium transition-colors ${view === "month"
+                ? "bg-theme-elevated text-theme-text"
                 : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
               }`}
           >
@@ -278,8 +406,8 @@ export default function Calendar({
           </button>
           <button
             onClick={() => handleViewChange("week")}
-            className={`px-4 py-2 text-sm font-medium transition-colors border-l border-theme-border ${view === "week"
-                ? "bg-primary-600 text-white"
+            className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-theme-border ${view === "week"
+                ? "bg-theme-elevated text-theme-text"
                 : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
               }`}
           >
@@ -290,11 +418,10 @@ export default function Calendar({
           <div className="relative" ref={addMenuRef}>
             <button
               onClick={() => setAddMenuOpen(!addMenuOpen)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
             >
               <Plus className="w-4 h-4" />
               Add
-              <ChevronDown className={`w-4 h-4 transition-transform ${addMenuOpen ? "rotate-180" : ""}`} />
             </button>
             {addMenuOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-theme-surface border border-theme-border rounded-lg shadow-lg z-50 overflow-hidden">
@@ -349,15 +476,20 @@ export default function Calendar({
         )}
       </div>
     </div>
-  ), [view, date, refreshing, addMenuOpen, hasAnyAction, onCreateTask, onCreateEvent, onCreateMeeting, onRequestTimeOff, onCreateTimeOffForEmployee, handleAction, handleNavigate, handleViewChange, fetchEvents]);
+  ), [view, date, refreshing, addMenuOpen, hasAnyAction, onCreateTask, onCreateEvent, onCreateMeeting, onRequestTimeOff, onCreateTimeOffForEmployee, handleAction, handleNavigate, handleViewChange, fetchEvents, effectiveIsSupervisorOrAdmin, showTeamTimeOff]);
 
   const components = useMemo(() => ({
     toolbar: CustomToolbar,
   }), [CustomToolbar]);
 
+  // Filter events based on visible types
+  const filteredEvents = useMemo(() => {
+    return events.filter((event) => visibleTypes.has(event.resource.type as CalendarEventType));
+  }, [events, visibleTypes]);
+
   if (loading) {
     return (
-      <div className="bg-theme-surface border border-theme-border rounded-xl p-8">
+      <div className="bg-theme-surface border border-theme-border p-8">
         <div className="flex items-center justify-center py-16">
           <div className="animate-spin h-12 w-12 border-b-2 border-primary-500"></div>
         </div>
@@ -366,7 +498,7 @@ export default function Calendar({
   }
 
   return (
-    <div className="bg-theme-surface border border-theme-border rounded-xl overflow-hidden shadow-lg">
+    <div className="bg-theme-surface border border-theme-border overflow-hidden shadow-lg">
       {error && (
         <div className="px-6 py-4 bg-red-900/30 border-b border-red-500/30">
           <div className="flex items-center gap-2 text-red-400">
@@ -401,7 +533,6 @@ export default function Calendar({
           .rbc-month-view {
             background: rgb(var(--bg-surface));
             border: 1px solid rgb(var(--border-base)) !important;
-            border-radius: 12px;
             overflow: hidden;
           }
 
@@ -501,28 +632,39 @@ export default function Calendar({
           .rbc-time-view {
             background: rgb(var(--bg-surface));
             border: 1px solid rgb(var(--border-base)) !important;
-            border-radius: 12px;
             overflow: hidden;
           }
 
           .rbc-time-header {
             background: rgb(var(--bg-elevated));
+            border-bottom: 1px solid rgb(var(--border-base)) !important;
           }
 
           .rbc-time-header-content {
-            border-left: 1px solid rgb(var(--border-base)) !important;
+            border-left: none !important;
+          }
+
+          .rbc-time-header-cell {
+            border-left: none !important;
+          }
+
+          .rbc-header.rbc-today {
+            background: rgba(var(--color-primary-500), 0.1);
           }
 
           .rbc-time-content {
-            border-top: 1px solid rgb(var(--border-base)) !important;
+            border-top: none !important;
           }
 
+          /* Column separators between days */
           .rbc-time-content > * + * > * {
-            border-left: 1px solid rgb(var(--border-base)) !important;
+            border-left: 1px solid rgb(var(--border-muted)) !important;
           }
 
+          /* Hour group borders - more visible */
           .rbc-timeslot-group {
             border-bottom: 1px solid rgb(var(--border-muted)) !important;
+            min-height: 60px;
           }
 
           .rbc-time-slot {
@@ -530,27 +672,49 @@ export default function Calendar({
             font-size: 0.75rem;
           }
 
+          /* Remove the half-hour slot borders for cleaner look */
           .rbc-day-slot .rbc-time-slot {
-            border-top: 1px solid rgb(var(--border-muted)) !important;
+            border-top: none !important;
+          }
+
+          /* Only show subtle line at half-hour marks */
+          .rbc-day-slot .rbc-timeslot-group .rbc-time-slot:nth-child(2) {
+            border-top: 1px dashed rgba(var(--border-muted), 0.3) !important;
           }
 
           .rbc-current-time-indicator {
             background-color: rgb(var(--color-primary-500));
             height: 2px;
+            z-index: 3;
           }
 
           .rbc-allday-cell {
             background: rgb(var(--bg-elevated));
+            border-bottom: 1px solid rgb(var(--border-base)) !important;
           }
 
           .rbc-time-gutter {
-            background: rgb(var(--bg-elevated));
+            background: rgb(var(--bg-surface));
+            border-right: 1px solid rgb(var(--border-muted)) !important;
+          }
+
+          .rbc-time-gutter .rbc-timeslot-group {
+            border-bottom: none !important;
           }
 
           .rbc-label {
-            color: rgb(var(--text-muted));
-            font-size: 0.75rem;
-            padding: 4px 8px;
+            color: rgb(var(--text-subtle));
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            font-weight: 500;
+          }
+
+          .rbc-day-slot {
+            background: rgb(var(--bg-surface));
+          }
+
+          .rbc-day-slot.rbc-today {
+            background: rgba(var(--color-primary-500), 0.03);
           }
 
           /* Popup overlay */
@@ -588,7 +752,7 @@ export default function Calendar({
 
         <BigCalendar
           localizer={localizer}
-          events={events}
+          events={filteredEvents}
           startAccessor="start"
           endAccessor="end"
           view={view}
@@ -607,28 +771,68 @@ export default function Calendar({
       </div>
 
       <div className="px-6 py-4 bg-theme-elevated border-t border-theme-border">
-        <div className="flex flex-wrap items-center gap-6 text-sm">
-          <span className="text-theme-text-muted font-medium">Legend:</span>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded bg-[#6366f1] shadow-sm"></span>
-            <span className="text-theme-text-muted">Epic</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded bg-[#0052cc] shadow-sm"></span>
-            <span className="text-theme-text-muted">Jira</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded bg-[#059669] shadow-sm"></span>
-            <span className="text-theme-text-muted">Task</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded bg-[#7c3aed] shadow-sm"></span>
-            <span className="text-theme-text-muted">Meeting</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded bg-[#d97706] shadow-sm"></span>
-            <span className="text-theme-text-muted">Time Off</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <span className="text-theme-text-muted font-medium">Filter:</span>
+          <button
+            onClick={() => toggleEventType("epic")}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              visibleTypes.has("epic")
+                ? "bg-[#6366f1]/20 border border-[#6366f1]/50 text-theme-text"
+                : "bg-theme-surface border border-theme-border text-theme-text-subtle hover:bg-theme-muted hover:text-theme-text-muted"
+            }`}
+            title={visibleTypes.has("epic") ? "Hide epics" : "Show epics"}
+          >
+            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("epic") ? "bg-[#6366f1]" : "bg-[#6366f1]/40"}`}></span>
+            <span>Epic</span>
+          </button>
+          <button
+            onClick={() => toggleEventType("jira")}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              visibleTypes.has("jira")
+                ? "bg-[#0052cc]/20 border border-[#0052cc]/50 text-theme-text"
+                : "bg-theme-surface border border-theme-border text-theme-text-subtle hover:bg-theme-muted hover:text-theme-text-muted"
+            }`}
+            title={visibleTypes.has("jira") ? "Hide Jira tasks" : "Show Jira tasks"}
+          >
+            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("jira") ? "bg-[#0052cc]" : "bg-[#0052cc]/40"}`}></span>
+            <span>Jira</span>
+          </button>
+          <button
+            onClick={() => toggleEventType("task")}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              visibleTypes.has("task")
+                ? "bg-[#059669]/20 border border-[#059669]/50 text-theme-text"
+                : "bg-theme-surface border border-theme-border text-theme-text-subtle hover:bg-theme-muted hover:text-theme-text-muted"
+            }`}
+            title={visibleTypes.has("task") ? "Hide tasks" : "Show tasks"}
+          >
+            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("task") ? "bg-[#059669]" : "bg-[#059669]/40"}`}></span>
+            <span>Task</span>
+          </button>
+          <button
+            onClick={() => toggleEventType("meeting")}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              visibleTypes.has("meeting")
+                ? "bg-[#7c3aed]/20 border border-[#7c3aed]/50 text-theme-text"
+                : "bg-theme-surface border border-theme-border text-theme-text-subtle hover:bg-theme-muted hover:text-theme-text-muted"
+            }`}
+            title={visibleTypes.has("meeting") ? "Hide meetings" : "Show meetings"}
+          >
+            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("meeting") ? "bg-[#7c3aed]" : "bg-[#7c3aed]/40"}`}></span>
+            <span>Meeting</span>
+          </button>
+          <button
+            onClick={() => toggleEventType("time_off")}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              visibleTypes.has("time_off")
+                ? "bg-[#d97706]/20 border border-[#d97706]/50 text-theme-text"
+                : "bg-theme-surface border border-theme-border text-theme-text-subtle hover:bg-theme-muted hover:text-theme-text-muted"
+            }`}
+            title={visibleTypes.has("time_off") ? "Hide time off" : "Show time off"}
+          >
+            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("time_off") ? "bg-[#d97706]" : "bg-[#d97706]/40"}`}></span>
+            <span>Time Off</span>
+          </button>
         </div>
       </div>
     </div>

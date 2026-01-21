@@ -19,6 +19,7 @@ export interface User {
   avatar_url?: string;
   supervisor_id?: number;
   date_started?: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   jira_account_id?: string;
@@ -40,4 +41,5 @@ export interface UpdateUserRequest {
   squad_ids?: number[];
   role?: Role;
   supervisor_id?: number | null;
+  date_started?: string | null;
 }

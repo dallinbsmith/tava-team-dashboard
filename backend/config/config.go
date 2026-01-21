@@ -72,6 +72,12 @@ type Config struct {
 
 	// Jira Configuration
 	JiraMaxUsersPagination int // Maximum users to fetch in Jira pagination
+
+	// Resend Email Configuration
+	ResendAPIKey    string
+	ResendFromEmail string
+	ResendFromName  string
+	ResendEnabled   bool
 }
 
 // IsProduction returns true if running in production mode
@@ -87,6 +93,11 @@ func (c *Config) IsAuth0MgmtEnabled() bool {
 // IsJiraOAuthEnabled returns true if Jira OAuth is configured
 func (c *Config) IsJiraOAuthEnabled() bool {
 	return c.JiraClientID != "" && c.JiraClientSecret != ""
+}
+
+// IsResendEnabled returns true if Resend email service is configured
+func (c *Config) IsResendEnabled() bool {
+	return c.ResendEnabled && c.ResendAPIKey != ""
 }
 
 func Load() (*Config, error) {
@@ -160,6 +171,12 @@ func Load() (*Config, error) {
 
 		// Jira Configuration
 		JiraMaxUsersPagination: getEnvInt("JIRA_MAX_USERS_PAGINATION", 1000), // 1000 default
+
+		// Resend Email Configuration
+		ResendEnabled:   os.Getenv("RESEND_API_KEY") != "",
+		ResendAPIKey:    os.Getenv("RESEND_API_KEY"),
+		ResendFromEmail: getEnv("RESEND_FROM_EMAIL", "noreply@example.com"),
+		ResendFromName:  getEnv("RESEND_FROM_NAME", "Manager Dashboard"),
 	}
 
 	// Validate required configuration

@@ -27,6 +27,12 @@ const config: Config = {
   // Coverage thresholds for tested files
   // These ensure code quality doesn't regress
   coverageThreshold: {
+    global: {
+      branches: 0,
+      functions: 0,
+      lines: 0,
+      statements: 0,
+    },
     // Tested utility files - maintain high coverage
     "lib/errors.ts": {
       branches: 100,

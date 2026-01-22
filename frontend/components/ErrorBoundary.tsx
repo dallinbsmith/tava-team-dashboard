@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
+import Link from "next/link";
 import { AlertTriangle, RefreshCw, Home, ChevronDown, ChevronUp } from "lucide-react";
 
 interface ErrorBoundaryProps {
@@ -144,13 +145,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <RefreshCw className="w-4 h-4" />
               Try Again
             </button>
-            <a
+            <Link
               href="/"
               className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 border border-theme-border text-theme-text hover:bg-theme-elevated transition-colors"
             >
               <Home className="w-4 h-4" />
               Go Home
-            </a>
+            </Link>
           </div>
 
           {process.env.NODE_ENV === "development" && errorInfo && (

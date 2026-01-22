@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
 interface ErrorProps {
@@ -85,13 +86,13 @@ export default function CalendarError({ error, reset }: ErrorProps) {
             <RefreshCw className="w-4 h-4" />
             Reload Calendar
           </button>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 px-4 py-2 border border-theme-border text-theme-text hover:bg-theme-elevated transition-colors"
           >
             <Home className="w-4 h-4" />
             Dashboard
-          </a>
+          </Link>
         </div>
 
         <div className="mt-6 pt-4 border-t border-theme-border">

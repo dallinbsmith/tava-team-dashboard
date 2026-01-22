@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
 interface ErrorProps {
@@ -42,13 +43,13 @@ export default function DashboardError({ error, reset }: ErrorProps) {
             <RefreshCw className="w-4 h-4" />
             Try Again
           </button>
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 px-4 py-2 border border-theme-border text-theme-text hover:bg-theme-elevated transition-colors"
           >
             <Home className="w-4 h-4" />
             Go Home
-          </a>
+          </Link>
         </div>
       </div>
     </div>

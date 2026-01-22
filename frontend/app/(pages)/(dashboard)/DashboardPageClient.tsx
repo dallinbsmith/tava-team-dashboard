@@ -29,18 +29,18 @@ import { TimeOffWidgetSkeleton } from "./dashboard-stats/TimeOffWidgetSkeleton";
 type ModalType = "createEmployee" | "task" | "event" | "meeting" | "timeOff" | "timeOffForEmployee" | "viewTask" | "viewMeeting" | "viewTimeOff" | null;
 
 interface DashboardPageClientProps {
-  initialCurrentUser: User;
-  initialEmployees: User[];
-  initialSquads: Squad[];
-  initialDepartments: string[];
+  initialCurrentUser?: User;
+  initialEmployees?: User[];
+  initialSquads?: Squad[];
+  initialDepartments?: string[];
 }
 
 export function DashboardPageClient({
   initialCurrentUser,
-  initialEmployees,
-  initialSquads,
-  initialDepartments,
-}: DashboardPageClientProps) {
+  initialEmployees = [],
+  initialSquads = [],
+  initialDepartments = [],
+}: DashboardPageClientProps = {}) {
 
   const { currentUser, error: userError } = useCurrentUser();
   const { employees: employeesFromProvider, squads: squadsFromProvider, departments: departmentsFromProvider, addSquad, refetchEmployees } = useOrganization();

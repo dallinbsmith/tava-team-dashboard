@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import {
     validateInvitation,
@@ -26,6 +27,7 @@ type InviteStep = "loading" | "invalid" | "valid" | "authenticated" | "completin
 export default function InvitePage() {
     const params = useParams();
     const router = useRouter();
+    const queryClient = useQueryClient();
     const token = params.token as string;
     const { user: auth0User, isLoading: authLoading } = useUser();
 
@@ -107,6 +109,8 @@ export default function InvitePage() {
                 last_name: lastName,
             });
             setStep("success");
+            // Clear all cached data so dashboard fetches fresh data for the new user
+            queryClient.clear();
             // Redirect to dashboard after a brief delay
             setTimeout(() => {
                 router.push("/");

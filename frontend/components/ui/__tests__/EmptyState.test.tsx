@@ -6,7 +6,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { EmptyState, NoResults } from "../EmptyState";
-import { Calendar, Plus, Users } from "lucide-react";
+import { Calendar, Plus } from "lucide-react";
 
 // Mock the Button component
 jest.mock("../Button", () => ({

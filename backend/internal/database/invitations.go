@@ -208,8 +208,11 @@ func (r *InvitationRepository) Accept(ctx context.Context, token string, auth0ID
 		INSERT INTO users (auth0_id, email, first_name, last_name, role, title, department, date_started)
 		VALUES ($1, $2, $3, $4, $5, '', $6, NOW())
 		ON CONFLICT (auth0_id) DO UPDATE SET
+			email = EXCLUDED.email,
 			role = EXCLUDED.role,
 			department = EXCLUDED.department,
+			first_name = EXCLUDED.first_name,
+			last_name = EXCLUDED.last_name,
 			updated_at = NOW()
 		RETURNING id, COALESCE(auth0_id, ''), email, first_name, last_name, role, title, department,
 				  avatar_url, supervisor_id, date_started, created_at, updated_at`

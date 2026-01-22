@@ -29,7 +29,7 @@ func NewEmailService(cfg *config.Config) *EmailService {
 
 // SendInvitation sends an invitation email to the specified email address
 func (s *EmailService) SendInvitation(ctx context.Context, email, token, role, inviterName string) error {
-	inviteLink := fmt.Sprintf("%s/invitations/accept?token=%s", s.frontendURL, token)
+	inviteLink := fmt.Sprintf("%s/invite/%s", s.frontendURL, token)
 
 	subject := fmt.Sprintf("%s has invited you to join Manager Dashboard", inviterName)
 

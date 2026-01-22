@@ -75,12 +75,17 @@ export default function DashboardPage() {
   }
 
   if (userError) {
+    const isDev = process.env.NODE_ENV === "development";
     return (
       <div className="bg-red-900/30 border border-red-500/30 p-4 mb-6">
-        <p className="text-red-400">{userError}</p>
-        <p className="text-sm text-red-300 mt-1">
-          Make sure your Go backend is running on port 8080 and PostgreSQL is started.
+        <p className="text-red-400">
+          {isDev ? userError : "Unable to load your profile. Please try again later."}
         </p>
+        {isDev && (
+          <p className="text-sm text-red-300 mt-1">
+            Make sure your Go backend is running on port 8080 and PostgreSQL is started.
+          </p>
+        )}
       </div>
     );
   }

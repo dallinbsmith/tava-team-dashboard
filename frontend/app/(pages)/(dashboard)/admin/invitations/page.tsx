@@ -52,6 +52,9 @@ export default function InvitationsPage() {
   // Revoke confirmation state
   const [confirmRevokeId, setConfirmRevokeId] = useState<number | null>(null);
 
+  // Filter state - show only pending by default
+  const [showOnlyPending, setShowOnlyPending] = useState(true);
+
   // Redirect non-admins
   useEffect(() => {
     if (!userLoading && currentUser && !isAdmin) {
@@ -220,8 +223,19 @@ export default function InvitationsPage() {
 
       {/* Invitations List */}
       <div className="bg-theme-surface border border-theme-border overflow-hidden">
-        <div className="px-6 py-4 border-b border-theme-border">
-          <h2 className="text-lg font-semibold text-theme-text">All Invitations</h2>
+        <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-theme-text">
+            {showOnlyPending ? "Pending Invitations" : "All Invitations"}
+          </h2>
+          <label className="flex items-center gap-2 text-sm text-theme-text-muted cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!showOnlyPending}
+              onChange={(e) => setShowOnlyPending(!e.target.checked)}
+              className="rounded border-theme-border"
+            />
+            Show all
+          </label>
         </div>
 
         {invitations.length === 0 ? (
@@ -230,9 +244,25 @@ export default function InvitationsPage() {
             <p>No invitations yet</p>
             <p className="text-sm mt-1">Send your first invitation to get started</p>
           </div>
+        ) : invitations.filter((inv) => !showOnlyPending || inv.status === "pending").length === 0 ? (
+          <div className="px-6 py-12 text-center text-theme-text-muted">
+            <CheckCircle className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
+            <p>No pending invitations</p>
+            <p className="text-sm mt-1">
+              <button
+                onClick={() => setShowOnlyPending(false)}
+                className="text-primary-400 hover:text-primary-300"
+              >
+                Show all invitations
+              </button>
+              {" "}to see past invitations
+            </p>
+          </div>
         ) : (
           <div className="divide-y divide-theme-border">
-            {invitations.map((invitation) => (
+            {invitations
+              .filter((inv) => !showOnlyPending || inv.status === "pending")
+              .map((invitation) => (
               <div key={invitation.id} className="px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-theme-elevated flex items-center justify-center">

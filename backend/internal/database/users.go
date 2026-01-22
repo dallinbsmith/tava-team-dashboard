@@ -170,6 +170,26 @@ func (r *UserRepository) Create(ctx context.Context, req *models.CreateUserReque
 }
 
 func (r *UserRepository) CreateOrUpdate(ctx context.Context, auth0ID, email, firstName, lastName string) (*models.User, error) {
+	// First, check if user exists by email (handles invitation-created users)
+	existingByEmail, _ := r.GetByEmail(ctx, email)
+	if existingByEmail != nil {
+		// User exists with this email - update their auth0_id and name if needed
+		query := `
+			UPDATE users SET
+				auth0_id = $2,
+				first_name = CASE WHEN first_name = '' THEN $3 ELSE first_name END,
+				last_name = CASE WHEN last_name = '' THEN $4 ELSE last_name END,
+				updated_at = NOW()
+			WHERE id = $1
+			RETURNING ` + userColumns
+		user, err := scanUser(r.pool.QueryRow(ctx, query, existingByEmail.ID, auth0ID, firstName, lastName))
+		if err != nil {
+			return nil, fmt.Errorf("failed to update existing user: %w", err)
+		}
+		return user, nil
+	}
+
+	// No existing user by email, try insert with ON CONFLICT for auth0_id
 	query := `
 		INSERT INTO users (auth0_id, email, first_name, last_name, role, title, department)
 		VALUES ($1, $2, $3, $4, 'employee', '', '')

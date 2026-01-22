@@ -360,7 +360,7 @@ export default function EditEmployeeModal({
                 <div className="absolute z-10 w-full mt-1 bg-theme-elevated border border-theme-border max-h-48 overflow-y-auto">
                   {availableSquads.length === 0 ? (
                     <div className="px-3 py-2 text-sm text-theme-text-muted">
-                      No squads available. Click "Manage" to create one.
+                      No squads available. Click &quot;Manage&quot; to create one.
                     </div>
                   ) : (
                     availableSquads.map((squad) => (

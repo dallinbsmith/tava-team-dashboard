@@ -19,15 +19,8 @@ interface DepartmentSegment {
   percentage: number;
 }
 
-interface SquadStat {
-  id: number;
-  name: string;
-  count: number;
-  segments: DepartmentSegment[];
-}
 
 export default function SquadBreakdown({ employees: employeesInput }: SquadBreakdownProps) {
-  const employees = employeesInput || [];
   const [animate, setAnimate] = useState(false);
   const [hoveredSquad, setHoveredSquad] = useState<string | null>(null);
   const [squadPage, setSquadPage] = useState(1);
@@ -38,6 +31,7 @@ export default function SquadBreakdown({ employees: employeesInput }: SquadBreak
   }, []);
 
   const squadStats = useMemo(() => {
+    const employees = employeesInput || [];
     const squadData = employees.reduce((acc, emp) => {
       const dept = emp.department || "Unknown";
       const squadList = emp.squads?.length > 0 ? emp.squads : [{ id: 0, name: "Unassigned" }];
@@ -73,7 +67,7 @@ export default function SquadBreakdown({ employees: employeesInput }: SquadBreak
         };
       })
       .sort((a, b) => b.count - a.count);
-  }, [employees]);
+  }, [employeesInput]);
 
   const maxSquadCount = Math.max(...squadStats.map((s) => s.count), 1);
   const totalSquadPages = Math.ceil(squadStats.length / PAGINATION.SQUADS);

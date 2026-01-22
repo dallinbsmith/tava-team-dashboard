@@ -104,31 +104,7 @@ func respondErrorWithCode(w http.ResponseWriter, status int, code string, messag
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(response)
-}
-
-// respondAppError sends an error response based on an AppError
-func respondAppError(w http.ResponseWriter, err error) {
-	status := apperrors.GetHTTPStatus(err)
-	message := apperrors.GetUserMessage(err)
-	code := apperrors.GetErrorCode(err)
-
-	response := map[string]interface{}{
-		"error":  message,
-		"status": status,
-		"code":   string(code),
-	}
-
-	// Include field information for validation errors
-	if apperrors.IsValidation(err) {
-		if appErr, ok := err.(*apperrors.AppError); ok && appErr.Field != "" {
-			response["field"] = appErr.Field
-		}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 // Pagination holds pagination parameters

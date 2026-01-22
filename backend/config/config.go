@@ -73,6 +73,12 @@ type Config struct {
 	// Jira Configuration
 	JiraMaxUsersPagination int // Maximum users to fetch in Jira pagination
 
+	// External Service Timeouts (in seconds)
+	ExternalAPITimeoutSecs int // Default timeout for external API calls (Auth0, Jira, etc.)
+	EmailTimeoutSecs       int // Timeout for email sending operations
+	S3TimeoutSecs          int // Timeout for S3 operations
+	GraphQLTimeoutSecs     int // Timeout for GraphQL operations
+
 	// Resend Email Configuration
 	ResendAPIKey    string
 	ResendFromEmail string
@@ -171,6 +177,12 @@ func Load() (*Config, error) {
 
 		// Jira Configuration
 		JiraMaxUsersPagination: getEnvInt("JIRA_MAX_USERS_PAGINATION", 1000), // 1000 default
+
+		// External Service Timeouts
+		ExternalAPITimeoutSecs: getEnvInt("EXTERNAL_API_TIMEOUT_SECS", 30),  // 30 seconds default
+		EmailTimeoutSecs:       getEnvInt("EMAIL_TIMEOUT_SECS", 15),         // 15 seconds default
+		S3TimeoutSecs:          getEnvInt("S3_TIMEOUT_SECS", 60),            // 60 seconds default (uploads can be slow)
+		GraphQLTimeoutSecs:     getEnvInt("GRAPHQL_TIMEOUT_SECS", 30),       // 30 seconds default
 
 		// Resend Email Configuration
 		ResendEnabled:   os.Getenv("RESEND_API_KEY") != "",

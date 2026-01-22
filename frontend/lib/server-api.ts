@@ -4,10 +4,10 @@ import { User, Squad } from "@/shared/types/user";
 import { TimeOffRequest } from "@/app/(pages)/(dashboard)/time-off/types";
 import { JiraSettings, JiraUserWithMapping } from "@/app/(pages)/jira/types";
 import { OrgTreeNode, OrgChartDraft } from "@/app/(pages)/(dashboard)/orgchart/types";
+import { Invitation } from "@/app/(pages)/(dashboard)/admin/invitations/types";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 
-/** Server-side fetch with Auth0 token. Use in Server Components. */
 async function get<T>(path: string): Promise<T> {
   const result = await auth0.getAccessToken();
   const accessToken = result?.token;
@@ -22,7 +22,6 @@ async function get<T>(path: string): Promise<T> {
   return res.json();
 }
 
-// Server-side API functions
 export const getUserByIdServer = (id: number) => get<User>(`/users/${id}`);
 export const getCurrentUserServer = () => get<User>("/me");
 export const getEmployeesServer = () => get<User[]>("/employees");
@@ -35,3 +34,4 @@ export const getOrgTreeServer = () => get<OrgTreeNode | OrgTreeNode[]>("/orgchar
 export const getOrgChartDraftsServer = () => get<OrgChartDraft[]>("/orgchart/drafts");
 export const getSquadsServer = () => get<Squad[]>("/squads");
 export const getDepartmentsServer = () => get<string[]>("/departments");
+export const getInvitationsServer = () => get<Invitation[]>("/invitations");

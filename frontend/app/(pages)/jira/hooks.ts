@@ -15,14 +15,6 @@ import {
   autoMatchJiraUsers,
   updateUserJiraMapping,
 } from "./api";
-import {
-  JiraSettings,
-  JiraIssue,
-  JiraProject,
-  JiraUserWithMapping,
-  AutoMatchResult,
-  TeamTask,
-} from "./types";
 
 export const jiraKeys = {
   all: ["jira"] as const,

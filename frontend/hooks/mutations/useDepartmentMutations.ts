@@ -4,9 +4,7 @@ import { queryKeys } from "@/lib/queryKeys";
 import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 
 export interface UseDeleteDepartmentOptions {
-  /** Callback when mutation succeeds */
   onSuccess?: () => void;
-  /** Callback when mutation fails */
   onError?: (error: Error) => void;
 }
 
@@ -33,15 +31,11 @@ export function useDeleteDepartment(options: UseDeleteDepartmentOptions = {}) {
   return useMutation({
     mutationFn: (departmentName: string) => deleteDepartment(departmentName),
     onMutate: async (departmentName) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: queryKeys.departments.all() });
-
-      // Snapshot current state
       const previousDepartments = queryClient.getQueryData<string[]>(
         queryKeys.departments.all()
       );
 
-      // Optimistic update - remove the department from the list
       queryClient.setQueryData<string[]>(queryKeys.departments.all(), (old) =>
         old ? old.filter((d) => d !== departmentName) : []
       );
@@ -49,7 +43,6 @@ export function useDeleteDepartment(options: UseDeleteDepartmentOptions = {}) {
       return { previousDepartments };
     },
     onError: (error: Error, _departmentName, context) => {
-      // Rollback on error
       if (context?.previousDepartments) {
         queryClient.setQueryData(
           queryKeys.departments.all(),
@@ -59,9 +52,7 @@ export function useDeleteDepartment(options: UseDeleteDepartmentOptions = {}) {
       options.onError?.(error);
     },
     onSuccess: async () => {
-      // Force refetch all related queries to ensure UI updates immediately
       await refetchQueries(queryClient, queryKeyGroups.departmentRelated());
-
       options.onSuccess?.();
     },
   });

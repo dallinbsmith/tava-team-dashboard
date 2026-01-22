@@ -89,6 +89,27 @@ func (r *UserRepository) GetByID(ctx context.Context, id int64) (*models.User, e
 	return user, nil
 }
 
+// GetByIDs retrieves multiple users by their IDs in a single query (batch loading)
+// This is used by dataloaders to prevent N+1 query problems
+func (r *UserRepository) GetByIDs(ctx context.Context, ids []int64) ([]models.User, error) {
+	if len(ids) == 0 {
+		return []models.User{}, nil
+	}
+
+	query := `SELECT ` + userColumns + ` FROM users WHERE id = ANY($1)`
+	rows, err := r.pool.Query(ctx, query, ids)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users by IDs: %w", err)
+	}
+	defer rows.Close()
+
+	users, err := scanUsers(rows)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan users: %w", err)
+	}
+	return users, nil
+}
+
 func (r *UserRepository) GetByAuth0ID(ctx context.Context, auth0ID string) (*models.User, error) {
 	query := `SELECT ` + userColumns + ` FROM users WHERE auth0_id = $1`
 	user, err := scanUser(r.pool.QueryRow(ctx, query, auth0ID))
@@ -409,7 +430,7 @@ func (r *UserRepository) Deactivate(ctx context.Context, userID int64) error {
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	now := time.Now()
 

@@ -144,7 +144,7 @@ func (c *ManagementClient) fetchAccessToken(ctx context.Context) (string, int, e
 	if err != nil {
 		return "", 0, fmt.Errorf("failed to fetch access token: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)
@@ -199,7 +199,7 @@ func (c *ManagementClient) CreateUser(ctx context.Context, email, firstName, las
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, _ := io.ReadAll(resp.Body)
 
@@ -248,7 +248,7 @@ func (c *ManagementClient) CreatePasswordChangeTicket(ctx context.Context, userI
 	if err != nil {
 		return nil, fmt.Errorf("failed to create password change ticket: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, _ := io.ReadAll(resp.Body)
 
@@ -283,7 +283,7 @@ func (c *ManagementClient) DeleteUser(ctx context.Context, userID string) error 
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)

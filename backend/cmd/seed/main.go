@@ -87,7 +87,6 @@ func main() {
 	defer pool.Close()
 
 	ctx := context.Background()
-	rand.Seed(time.Now().UnixNano())
 
 	// First, create some supervisors
 	log.Println("Creating supervisors...")

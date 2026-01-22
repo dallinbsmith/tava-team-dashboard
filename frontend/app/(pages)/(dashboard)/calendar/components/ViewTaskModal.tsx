@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { Task, UpdateTaskRequest, TaskStatus, AssignmentType } from "../types";
-import { updateTask, deleteTask, getTask } from "../api";
+import { getTask } from "../api";
+import { updateTaskAction, deleteTaskAction } from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal } from "@/components";
@@ -15,7 +16,6 @@ import {
   Building2,
   Trash2,
   Edit2,
-  X,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -44,8 +44,7 @@ export default function ViewTaskModal({
 
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -98,7 +97,6 @@ export default function ViewTaskModal({
   const handleSave = async () => {
     if (!task) return;
     setError(null);
-    setSaving(true);
 
     const updates: UpdateTaskRequest = {
       title: title.trim(),
@@ -124,34 +122,31 @@ export default function ViewTaskModal({
       }
     }
 
-    try {
-      const updated = await updateTask(task.id, updates);
-      setTask(updated);
-      setIsEditing(false);
-      onUpdated();
-    } catch (e) {
-      console.error("Failed to update task:", e);
-      setError("Failed to update task");
-    } finally {
-      setSaving(false);
-    }
+    startTransition(async () => {
+      const result = await updateTaskAction(task.id, updates);
+      if (result.success) {
+        setTask(result.data);
+        setIsEditing(false);
+        onUpdated();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   const handleDelete = async () => {
     if (!task) return;
-    setDeleting(true);
     setError(null);
 
-    try {
-      await deleteTask(task.id);
-      handleClose();
-      onUpdated();
-    } catch (e) {
-      console.error("Failed to delete task:", e);
-      setError("Failed to delete task");
-    } finally {
-      setDeleting(false);
-    }
+    startTransition(async () => {
+      const result = await deleteTaskAction(task.id);
+      if (result.success) {
+        handleClose();
+        onUpdated();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   const getAssignmentDisplay = () => {
@@ -328,10 +323,10 @@ export default function ViewTaskModal({
             </button>
             <button
               onClick={handleSave}
-              disabled={saving || !title.trim()}
+              disabled={isPending || !title.trim()}
               className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
-              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               Save Changes
             </button>
           </div>
@@ -353,10 +348,10 @@ export default function ViewTaskModal({
             </button>
             <button
               onClick={handleDelete}
-              disabled={deleting}
+              disabled={isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
-              {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               Delete Task
             </button>
           </div>

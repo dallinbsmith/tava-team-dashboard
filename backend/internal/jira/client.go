@@ -126,7 +126,7 @@ func (c *Client) TestConnection() error {
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -155,7 +155,7 @@ func (c *Client) searchIssues(jql string, maxResults int) ([]models.JiraIssue, e
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -194,7 +194,7 @@ func (c *Client) GetProjects() ([]models.JiraProject, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -233,7 +233,7 @@ func (c *Client) GetAllUsers(maxResults int) ([]models.JiraUser, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
@@ -296,7 +296,7 @@ func (c *Client) CreateUser(email, displayName string) (*CreateUserResponse, err
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// 201 Created is the success status for user creation
 	if resp.StatusCode != http.StatusCreated {

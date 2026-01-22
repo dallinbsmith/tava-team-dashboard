@@ -210,7 +210,9 @@ type EndpointRateLimit struct {
 type EndpointRateLimiter struct {
 	defaultLimiter *RateLimiter
 	endpointLimits []endpointLimitEntry
+	skipPaths      []string // Paths to skip rate limiting (e.g., health checks)
 	cfg            RateLimiterConfig
+	onRateLimited  func(r *http.Request) // Callback when rate limited (for metrics)
 }
 
 type endpointLimitEntry struct {
@@ -219,12 +221,30 @@ type endpointLimitEntry struct {
 	limiter    *RateLimiter
 }
 
+// EndpointRateLimiterOption is a functional option for configuring the rate limiter
+type EndpointRateLimiterOption func(*EndpointRateLimiter)
+
+// WithSkipPaths sets paths that should skip rate limiting (e.g., health checks)
+func WithSkipPaths(paths []string) EndpointRateLimiterOption {
+	return func(erl *EndpointRateLimiter) {
+		erl.skipPaths = paths
+	}
+}
+
+// WithRateLimitedCallback sets a callback to be invoked when a request is rate limited
+func WithRateLimitedCallback(callback func(r *http.Request)) EndpointRateLimiterOption {
+	return func(erl *EndpointRateLimiter) {
+		erl.onRateLimited = callback
+	}
+}
+
 // NewEndpointRateLimiter creates an endpoint-specific rate limiter
 // defaultRPS and defaultBurst are used for endpoints without specific limits
-func NewEndpointRateLimiter(defaultRPS rate.Limit, defaultBurst int, cfg RateLimiterConfig, limits []EndpointRateLimit) *EndpointRateLimiter {
+func NewEndpointRateLimiter(defaultRPS rate.Limit, defaultBurst int, cfg RateLimiterConfig, limits []EndpointRateLimit, opts ...EndpointRateLimiterOption) *EndpointRateLimiter {
 	erl := &EndpointRateLimiter{
 		defaultLimiter: NewRateLimiterWithConfig(defaultRPS, defaultBurst, cfg),
 		endpointLimits: make([]endpointLimitEntry, 0, len(limits)),
+		skipPaths:      []string{},
 		cfg:            cfg,
 	}
 
@@ -234,6 +254,10 @@ func NewEndpointRateLimiter(defaultRPS rate.Limit, defaultBurst int, cfg RateLim
 			method:     limit.Method,
 			limiter:    NewRateLimiterWithConfig(limit.RPS, limit.Burst, cfg),
 		})
+	}
+
+	for _, opt := range opts {
+		opt(erl)
 	}
 
 	return erl
@@ -256,14 +280,34 @@ func (erl *EndpointRateLimiter) getLimiterForRequest(r *http.Request) *RateLimit
 	return erl.defaultLimiter
 }
 
+// shouldSkip checks if the request path should skip rate limiting
+func (erl *EndpointRateLimiter) shouldSkip(path string) bool {
+	for _, skipPath := range erl.skipPaths {
+		if path == skipPath || strings.HasPrefix(path, skipPath+"/") {
+			return true
+		}
+	}
+	return false
+}
+
 // Limit is middleware that applies endpoint-specific rate limits
 func (erl *EndpointRateLimiter) Limit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Skip rate limiting for configured paths (health checks, metrics, etc.)
+		if erl.shouldSkip(r.URL.Path) {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		limiter := erl.getLimiterForRequest(r)
 		ip := getIP(r)
 		ipLimiter := limiter.getVisitor(ip)
 
 		if !ipLimiter.Allow() {
+			// Invoke callback for metrics if configured
+			if erl.onRateLimited != nil {
+				erl.onRateLimited(r)
+			}
 			w.Header().Set("Retry-After", "1")
 			http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
 			return

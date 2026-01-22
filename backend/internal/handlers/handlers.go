@@ -2,12 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/smith-dallin/manager-dashboard/internal/cache"
+	"github.com/smith-dallin/manager-dashboard/internal/logger"
 	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 	"github.com/smith-dallin/manager-dashboard/internal/repository"
@@ -28,6 +28,7 @@ type Handlers struct {
 	squadRepo   repository.SquadRepository
 	userService *services.UserService
 	cache       *cache.Cache
+	logger      *logger.Logger
 }
 
 // New creates a new user handlers instance
@@ -36,6 +37,7 @@ func New(userRepo repository.UserRepository, squadRepo repository.SquadRepositor
 		userRepo:    userRepo,
 		squadRepo:   squadRepo,
 		userService: services.NewUserService(userRepo, squadRepo),
+		logger:      logger.Default().WithComponent("handlers"),
 	}
 }
 
@@ -46,6 +48,18 @@ func NewWithCache(userRepo repository.UserRepository, squadRepo repository.Squad
 		squadRepo:   squadRepo,
 		userService: services.NewUserService(userRepo, squadRepo),
 		cache:       c,
+		logger:      logger.Default().WithComponent("handlers"),
+	}
+}
+
+// NewWithLogger creates a new user handlers instance with custom logger
+func NewWithLogger(userRepo repository.UserRepository, squadRepo repository.SquadRepository, c *cache.Cache, log *logger.Logger) *Handlers {
+	return &Handlers{
+		userRepo:    userRepo,
+		squadRepo:   squadRepo,
+		userService: services.NewUserService(userRepo, squadRepo),
+		cache:       c,
+		logger:      log.WithComponent("handlers"),
 	}
 }
 
@@ -87,12 +101,12 @@ func (h *Handlers) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	// Load user with squads using service
 	userWithSquads, err := h.userService.GetByID(r.Context(), user.ID)
 	if err != nil {
-		log.Printf("Error loading user %d: %v", user.ID, err)
+		h.logger.LogError(r.Context(), "Failed to load user", err, "user_id", user.ID)
 		respondError(w, http.StatusInternalServerError, "Failed to load user")
 		return
 	}
 
-	respondJSON(w, http.StatusOK, userWithSquads)
+	respondJSON(w, http.StatusOK, userWithSquads.ToUserResponse())
 }
 
 // GetEmployees godoc
@@ -117,20 +131,23 @@ func (h *Handlers) GetEmployees(w http.ResponseWriter, r *http.Request) {
 	// Use service to get employees with squads loaded based on role
 	employees, err := h.userService.GetEmployeesForUser(r.Context(), user)
 	if err != nil {
-		log.Printf("Error fetching employees for user %d: %v", user.ID, err)
+		h.logger.LogError(r.Context(), "Failed to fetch employees", err, "user_id", user.ID)
 		respondError(w, http.StatusInternalServerError, "Failed to fetch employees")
 		return
 	}
 
+	// Convert to response DTOs to avoid exposing sensitive fields
+	employeeResponses := models.ToUserResponses(employees)
+
 	// Support optional pagination
 	if shouldPaginate(r) {
 		p := parsePagination(r)
-		paginated, total := paginateSlice(employees, p)
+		paginated, total := paginateSlice(employeeResponses, p)
 		respondPaginated(w, paginated, total, p)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, employees)
+	respondJSON(w, http.StatusOK, employeeResponses)
 }
 
 // GetAllUsers godoc
@@ -170,15 +187,18 @@ func (h *Handlers) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Convert to response DTOs to avoid exposing sensitive fields
+	userResponses := models.ToUserResponses(users)
+
 	// Support optional pagination
 	if shouldPaginate(r) {
 		p := parsePagination(r)
-		paginated, total := paginateSlice(users, p)
+		paginated, total := paginateSlice(userResponses, p)
 		respondPaginated(w, paginated, total, p)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, users)
+	respondJSON(w, http.StatusOK, userResponses)
 }
 
 // GetUserByID godoc
@@ -226,7 +246,7 @@ func (h *Handlers) GetUserByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, user)
+	respondJSON(w, http.StatusOK, user.ToUserResponse())
 }
 
 // CreateUser godoc
@@ -266,7 +286,7 @@ func (h *Handlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, user)
+	respondJSON(w, http.StatusCreated, user.ToUserResponse())
 }
 
 // UpdateUser godoc
@@ -330,7 +350,7 @@ func (h *Handlers) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Use service to update user and squads
 	user, err := h.userService.Update(r.Context(), id, &req)
 	if err != nil {
-		log.Printf("Error updating user %d: %v", id, err)
+		h.logger.LogError(r.Context(), "Failed to update user", err, "user_id", id)
 		respondError(w, http.StatusInternalServerError, "Failed to update user")
 		return
 	}
@@ -338,7 +358,7 @@ func (h *Handlers) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Invalidate user cache on successful update
 	h.InvalidateUserCache()
 
-	respondJSON(w, http.StatusOK, user)
+	respondJSON(w, http.StatusOK, user.ToUserResponse())
 }
 
 // DeleteUser godoc
@@ -454,7 +474,7 @@ func (h *Handlers) DeactivateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Deactivate the user (this also cleans up tasks, time-off, etc.)
 	if err := h.userRepo.Deactivate(r.Context(), id); err != nil {
-		log.Printf("Error deactivating user %d: %v", id, err)
+		h.logger.LogError(r.Context(), "Failed to deactivate user", err, "user_id", id)
 		respondError(w, http.StatusInternalServerError, "Failed to deactivate user")
 		return
 	}
@@ -633,7 +653,7 @@ func (h *Handlers) DeleteSquad(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.squadRepo.Delete(r.Context(), id); err != nil {
-		log.Printf("Error deleting squad %d: %v", id, err)
+		h.logger.LogError(r.Context(), "Failed to delete squad", err, "squad_id", id)
 		respondError(w, http.StatusInternalServerError, "Failed to delete squad")
 		return
 	}
@@ -663,7 +683,7 @@ func (h *Handlers) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.userRepo.ClearDepartment(r.Context(), department); err != nil {
-		log.Printf("Error clearing department %s: %v", department, err)
+		h.logger.LogError(r.Context(), "Failed to clear department", err, "department", department)
 		respondError(w, http.StatusInternalServerError, "Failed to delete department")
 		return
 	}
@@ -674,5 +694,5 @@ func (h *Handlers) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
 func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
+	_ = json.NewEncoder(w).Encode(data)
 }

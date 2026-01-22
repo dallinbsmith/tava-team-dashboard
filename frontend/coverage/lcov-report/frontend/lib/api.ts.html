@@ -1,0 +1,577 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for frontend/lib/api.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">frontend/lib</a> api.ts</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>0/213</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/36</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/65</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>0/90</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { User, Squad, UpdateUserRequest } from "@/shared/types/user";
+import { Invitation, CreateInvitationRequest } from "@/app/(pages)/(dashboard)/admin/invitations/types";
+import { JiraSettings, JiraOAuthAuthorizeResponse, JiraIssue, JiraProject, JiraUserWithMapping, AutoMatchResult, TeamTask } from "@/app/(pages)/jira/types";
+import { OrgChartDraft, DraftChange, CreateDraftRequest, UpdateDraftRequest, AddDraftChangeRequest, OrgTreeNode } from "@/app/(pages)/(dashboard)/orgchart/types";
+import { CalendarEventsResponse, Task, Meeting, CreateTaskRequest, UpdateTaskRequest, CreateMeetingRequest, UpdateMeetingRequest, ResponseStatus } from "@/app/(pages)/(dashboard)/calendar/types";
+import { TimeOffRequest, TimeOffStatus, CreateTimeOffRequest, ReviewTimeOffRequest } from "@/app/(pages)/(dashboard)/time-off/types";
+import { extractErrorMessage } from <span class="cstat-no" title="statement not covered" >"./api-utils";</span>
+&nbsp;
+export { <span class="cstat-no" title="statement not covered" >getEmployeesGraphQL, <span class="cstat-no" title="statement not covered" >g</span>etEmployeeGraphQL, <span class="cstat-no" title="statement not covered" >g</span>etCurrentUserGraphQL, <span class="cstat-no" title="statement not covered" >c</span>reateEmployeeGraphQL, <span class="cstat-no" title="statement not covered" >u</span>pdateEmployeeGraphQL, <span class="cstat-no" title="statement not covered" >d</span>eleteEmployeeGraphQL } from <span class="cstat-no" title="statement not covered" >"</span>./graphql";</span>
+&nbsp;
+const API_BASE_URL = <span class="cstat-no" title="statement not covered" >"/api/proxy";</span>
+&nbsp;
+// Get impersonated user ID from sessionStorage (client-side only)
+function <span class="fstat-no" title="function not covered" >getImpersonationHeader(): Record&lt;string, string&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  if (typeof window === "undefined") <span class="cstat-no" title="statement not covered" >return {};</span></span>
+  const impersonatedUserId = <span class="cstat-no" title="statement not covered" >sessionStorage.getItem("impersonation_user_id");</span>
+<span class="cstat-no" title="statement not covered" >  return impersonatedUserId ? { "X-Impersonate-User-Id": impersonatedUserId } : {};</span>
+}
+&nbsp;
+export async function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >fetchWithProxy(</span></span>path: string, options: RequestInit = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span>: Promise&lt;Response&gt; {
+<span class="cstat-no" title="statement not covered" >  return fetch(`${API_BASE_URL}${path}`, {</span>
+    ...options,
+    headers: {
+      ...options.headers,
+      "Content-Type": "application/json",
+      ...getImpersonationHeader(),
+    },
+    credentials: "same-origin",
+  });
+}
+&nbsp;
+/**
+ * Generic response handler for API calls
+ * Throws an error with the response text or fallback message if not ok
+ */
+export async function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >handleResponse&lt;</span></span>T&gt;(response: Response, errorMessage: string): Promise&lt;T&gt; {
+<span class="cstat-no" title="statement not covered" >  if (!response.ok) {</span>
+    const error = <span class="cstat-no" title="statement not covered" >await extractErrorMessage(response, errorMessage);</span>
+<span class="cstat-no" title="statement not covered" >    throw new Error(error);</span>
+  }
+<span class="cstat-no" title="statement not covered" >  return response.json();</span>
+}
+&nbsp;
+async function <span class="fstat-no" title="function not covered" >get&lt;T&gt;(p</span>ath: string): Promise&lt;T&gt; {
+  const res = <span class="cstat-no" title="statement not covered" >await fetchWithProxy(path);</span>
+<span class="cstat-no" title="statement not covered" >  if (!res.ok) <span class="cstat-no" title="statement not covered" >throw new Error(await extractErrorMessage(res, `GET ${path} failed`));</span></span>
+<span class="cstat-no" title="statement not covered" >  return res.json();</span>
+}
+&nbsp;
+async function <span class="fstat-no" title="function not covered" >mutate&lt;T&gt;(p</span>ath: string, method: "POST" | "PUT", body?: unknown): Promise&lt;T&gt; {
+  const res = <span class="cstat-no" title="statement not covered" >await fetchWithProxy(path, { method, body: body ? JSON.stringify(body) : undefined });</span>
+<span class="cstat-no" title="statement not covered" >  if (!res.ok) <span class="cstat-no" title="statement not covered" >throw new Error(await extractErrorMessage(res, `${method} ${path} failed`));</span></span>
+<span class="cstat-no" title="statement not covered" >  return res.json();</span>
+}
+&nbsp;
+async function <span class="fstat-no" title="function not covered" >del(p</span>ath: string): Promise&lt;void&gt; {
+  const res = <span class="cstat-no" title="statement not covered" >await fetchWithProxy(path, { method: "DELETE" });</span>
+<span class="cstat-no" title="statement not covered" >  if (!res.ok) <span class="cstat-no" title="statement not covered" >throw new Error(await extractErrorMessage(res, `DELETE ${path} failed`));</span></span>
+}
+&nbsp;
+async function <span class="fstat-no" title="function not covered" >postVoid(p</span>ath: string, body?: unknown): Promise&lt;void&gt; {
+  const res = <span class="cstat-no" title="statement not covered" >await fetchWithProxy(path, { method: "POST", body: body ? JSON.stringify(body) : undefined });</span>
+<span class="cstat-no" title="statement not covered" >  if (!res.ok) <span class="cstat-no" title="statement not covered" >throw new Error(await extractErrorMessage(res, `POST ${path} failed`));</span></span>
+}
+&nbsp;
+// User &amp; Organization
+export const <span class="cstat-no" title="statement not covered" >getCurrentUser </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;User&gt;("/me");</span></span>
+export const <span class="cstat-no" title="statement not covered" >getEmployees </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;User[]&gt;("/employees");</span></span>
+export const <span class="cstat-no" title="statement not covered" >getUserById </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >get&lt;User&gt;(`/users/${id}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getSupervisors </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;User[]&gt;("/supervisors");</span></span>
+export const <span class="cstat-no" title="statement not covered" >getAllUsers </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;User[]&gt;("/users");</span></span>
+export const <span class="cstat-no" title="statement not covered" >updateUser </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(u</span>serId: number, data: UpdateUserRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;User&gt;(`/users/${userId}`, "PUT", data);</span></span>
+export const <span class="cstat-no" title="statement not covered" >uploadAvatar </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(u</span>serId: number, imageDataUrl: string) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;User&gt;(`/users/${userId}/avatar/base64`, "POST", { image: imageDataUrl });</span></span>
+export const <span class="cstat-no" title="statement not covered" >deactivateUser </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(u</span>serId: number) =&gt; <span class="cstat-no" title="statement not covered" >postVoid(`/users/${userId}/deactivate`);</span></span>
+&nbsp;
+// Squads &amp; Departments
+export const <span class="cstat-no" title="statement not covered" >getSquads </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;Squad[]&gt;("/squads");</span></span>
+export const <span class="cstat-no" title="statement not covered" >createSquad </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(n</span>ame: string) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;Squad&gt;("/squads", "POST", { name });</span></span>
+export const <span class="cstat-no" title="statement not covered" >deleteSquad </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >del(`/squads/${id}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getDepartments </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;string[]&gt;("/departments");</span></span>
+export const <span class="cstat-no" title="statement not covered" >deleteDepartment </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(n</span>ame: string) =&gt; <span class="cstat-no" title="statement not covered" >del(`/departments/${encodeURIComponent(name)}`);</span></span>
+&nbsp;
+// Invitations
+export const <span class="cstat-no" title="statement not covered" >getInvitations </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;Invitation[]&gt;("/invitations");</span></span>
+export const <span class="cstat-no" title="statement not covered" >createInvitation </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>ata: CreateInvitationRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;Invitation&gt;("/invitations", "POST", data);</span></span>
+export const <span class="cstat-no" title="statement not covered" >revokeInvitation </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >del(`/invitations/${id}`);</span></span>
+&nbsp;
+// Public invitation endpoints (no auth - direct to backend)
+export interface ValidateInvitationResponse { valid: boolean; email: string; role: string; expires_at: string; status: string; }
+export interface AcceptInvitationRequest { auth0_id: string; first_name: string; last_name: string; }
+&nbsp;
+const BACKEND_URL = <span class="cstat-no" title="statement not covered" >process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";</span>
+&nbsp;
+export async function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >validateInvitation(</span></span>token: string): Promise&lt;ValidateInvitationResponse&gt; {
+  const res = <span class="cstat-no" title="statement not covered" >await fetch(`${BACKEND_URL}/api/invitations/validate/${token}`);</span>
+<span class="cstat-no" title="statement not covered" >  if (!res.ok) <span class="cstat-no" title="statement not covered" >throw new Error("Invalid invitation");</span></span>
+<span class="cstat-no" title="statement not covered" >  return res.json();</span>
+}
+&nbsp;
+export async function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >acceptInvitation(</span></span>token: string, data: AcceptInvitationRequest): Promise&lt;User&gt; {
+  const res = <span class="cstat-no" title="statement not covered" >await fetch(`${BACKEND_URL}/api/invitations/accept/${token}`, {</span>
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+<span class="cstat-no" title="statement not covered" >  if (!res.ok) <span class="cstat-no" title="statement not covered" >throw new Error(await extractErrorMessage(res, "Failed to accept invitation"));</span></span>
+<span class="cstat-no" title="statement not covered" >  return res.json();</span>
+}
+&nbsp;
+// Jira
+export const <span class="cstat-no" title="statement not covered" >getJiraSettings </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;JiraSettings&gt;("/jira/settings");</span></span>
+export const <span class="cstat-no" title="statement not covered" >disconnectJira </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >d</span>el("/jira/disconnect");</span></span>
+export const <span class="cstat-no" title="statement not covered" >getMyJiraTasks </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(m</span>ax = <span class="branch-0 cbranch-no" title="branch not covered" >50)</span> =&gt; <span class="cstat-no" title="statement not covered" >get&lt;JiraIssue[]&gt;(`/jira/tasks?max=${max}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getUserJiraTasks </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(u</span>serId: number, max = <span class="branch-0 cbranch-no" title="branch not covered" >50)</span> =&gt; <span class="cstat-no" title="statement not covered" >get&lt;JiraIssue[]&gt;(`/jira/tasks/user/${userId}?max=${max}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getTeamJiraTasks </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(m</span>axPerUser = <span class="branch-0 cbranch-no" title="branch not covered" >20)</span> =&gt; <span class="cstat-no" title="statement not covered" >get&lt;TeamTask[]&gt;(`/jira/tasks/team?max_per_user=${maxPerUser}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getJiraProjects </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;JiraProject[]&gt;("/jira/projects");</span></span>
+export const <span class="cstat-no" title="statement not covered" >getProjectJiraTasks </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(p</span>rojectKey: string, max = <span class="branch-0 cbranch-no" title="branch not covered" >50)</span> =&gt; <span class="cstat-no" title="statement not covered" >get&lt;JiraIssue[]&gt;(`/jira/projects/${projectKey}/tasks?max=${max}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getJiraEpics </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(m</span>ax = <span class="branch-0 cbranch-no" title="branch not covered" >100)</span> =&gt; <span class="cstat-no" title="statement not covered" >get&lt;JiraIssue[]&gt;(`/jira/epics?max=${max}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getJiraOAuthAuthorizeURL </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;JiraOAuthAuthorizeResponse&gt;("/jira/oauth/authorize");</span></span>
+export const <span class="cstat-no" title="statement not covered" >getJiraUsers </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;JiraUserWithMapping[]&gt;("/jira/users");</span></span>
+export const <span class="cstat-no" title="statement not covered" >autoMatchJiraUsers </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >m</span>utate&lt;AutoMatchResult&gt;("/jira/users/auto-match", "POST");</span></span>
+&nbsp;
+export async function <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >updateUserJiraMapping(</span></span>userId: number, jiraAccountId: string | null): Promise&lt;void&gt; {
+  const res = <span class="cstat-no" title="statement not covered" >await fetchWithProxy(`/jira/users/${userId}/mapping`, { method: "PUT", body: JSON.stringify({ jira_account_id: jiraAccountId }) });</span>
+<span class="cstat-no" title="statement not covered" >  if (!res.ok) <span class="cstat-no" title="statement not covered" >throw new Error("Failed to update Jira mapping");</span></span>
+}
+&nbsp;
+// Org Chart
+export const <span class="cstat-no" title="statement not covered" >getOrgChartDrafts </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;OrgChartDraft[]&gt;("/orgchart/drafts");</span></span>
+export const <span class="cstat-no" title="statement not covered" >getOrgChartDraft </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >get&lt;OrgChartDraft&gt;(`/orgchart/drafts/${id}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >createOrgChartDraft </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>ata: CreateDraftRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;OrgChartDraft&gt;("/orgchart/drafts", "POST", data);</span></span>
+export const <span class="cstat-no" title="statement not covered" >updateOrgChartDraft </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number, data: UpdateDraftRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;OrgChartDraft&gt;(`/orgchart/drafts/${id}`, "PUT", data);</span></span>
+export const <span class="cstat-no" title="statement not covered" >deleteOrgChartDraft </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >del(`/orgchart/drafts/${id}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >addDraftChange </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>raftId: number, change: AddDraftChangeRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;DraftChange&gt;(`/orgchart/drafts/${draftId}/changes`, "POST", change);</span></span>
+export const <span class="cstat-no" title="statement not covered" >removeDraftChange </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>raftId: number, userId: number) =&gt; <span class="cstat-no" title="statement not covered" >del(`/orgchart/drafts/${draftId}/changes/${userId}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >publishDraft </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>raftId: number) =&gt; <span class="cstat-no" title="statement not covered" >postVoid(`/orgchart/drafts/${draftId}/publish`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getOrgTree </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;OrgTreeNode | OrgTreeNode[]&gt;("/orgchart/tree");</span></span>
+&nbsp;
+// Calendar
+const calendarQuery = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(s</span>tart: Date, end: Date) =&gt; <span class="cstat-no" title="statement not covered" >`/calendar/events?start=${encodeURIComponent(start.toISOString())}&amp;end=${encodeURIComponent(end.toISOString())}`;</span></span>
+export const <span class="cstat-no" title="statement not covered" >getCalendarEvents </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >async (s</span>tart: Date, end: Date) =&gt; <span class="cstat-no" title="statement not covered" >(await get&lt;CalendarEventsResponse&gt;(calendarQuery(start, end))).events || [];</span></span>
+export const <span class="cstat-no" title="statement not covered" >getCalendarEventsWithMetadata </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(s</span>tart: Date, end: Date) =&gt; <span class="cstat-no" title="statement not covered" >get&lt;CalendarEventsResponse&gt;(calendarQuery(start, end));</span></span>
+&nbsp;
+// Tasks
+export const <span class="cstat-no" title="statement not covered" >createTask </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>ata: CreateTaskRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;Task&gt;("/calendar/tasks", "POST", data);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getTask </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >get&lt;Task&gt;(`/calendar/tasks/${id}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >updateTask </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number, data: UpdateTaskRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;Task&gt;(`/calendar/tasks/${id}`, "PUT", data);</span></span>
+export const <span class="cstat-no" title="statement not covered" >deleteTask </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >del(`/calendar/tasks/${id}`);</span></span>
+&nbsp;
+// Meetings
+export const <span class="cstat-no" title="statement not covered" >createMeeting </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>ata: CreateMeetingRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;Meeting&gt;("/calendar/meetings", "POST", data);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getMeeting </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >get&lt;Meeting&gt;(`/calendar/meetings/${id}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >updateMeeting </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number, data: UpdateMeetingRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;Meeting&gt;(`/calendar/meetings/${id}`, "PUT", data);</span></span>
+export const <span class="cstat-no" title="statement not covered" >deleteMeeting </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >del(`/calendar/meetings/${id}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >respondToMeeting </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(m</span>eetingId: number, response: ResponseStatus) =&gt; <span class="cstat-no" title="statement not covered" >postVoid(`/calendar/meetings/${meetingId}/respond`, { response });</span></span>
+&nbsp;
+// Time Off
+export const <span class="cstat-no" title="statement not covered" >createTimeOffRequest </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(d</span>ata: CreateTimeOffRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;TimeOffRequest&gt;("/time-off", "POST", data);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getMyTimeOffRequests </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(s</span>tatus?: TimeOffStatus) =&gt; <span class="cstat-no" title="statement not covered" >get&lt;TimeOffRequest[]&gt;(`/time-off${status ? `?status=${status}` : ""}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getTimeOffRequest </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >get&lt;TimeOffRequest&gt;(`/time-off/${id}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >cancelTimeOffRequest </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number) =&gt; <span class="cstat-no" title="statement not covered" >del(`/time-off/${id}`);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getPendingTimeOffRequests </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;TimeOffRequest[]&gt;("/time-off/pending");</span></span>
+export const <span class="cstat-no" title="statement not covered" >reviewTimeOffRequest </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d: number, review: ReviewTimeOffRequest) =&gt; <span class="cstat-no" title="statement not covered" >mutate&lt;TimeOffRequest&gt;(`/time-off/${id}/review`, "PUT", review);</span></span>
+export const <span class="cstat-no" title="statement not covered" >getTeamTimeOff </span>= <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >() =&gt; <span class="cstat-no" title="statement not covered" >g</span>et&lt;TimeOffRequest[]&gt;("/time-off/team");</span></span>
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-01-22T21:16:12.004Z
+            </div>
+        <script src="../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../sorter.js"></script>
+        <script src="../../block-navigation.js"></script>
+    </body>
+</html>
+    

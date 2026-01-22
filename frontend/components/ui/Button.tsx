@@ -8,19 +8,12 @@ export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
-  /** Button variant */
   variant?: ButtonVariant;
-  /** Button size */
   size?: ButtonSize;
-  /** Loading state */
   loading?: boolean;
-  /** Icon to display before text */
   icon?: LucideIcon;
-  /** Icon to display after text */
   iconAfter?: LucideIcon;
-  /** Button content */
   children: ReactNode;
-  /** Full width button */
   fullWidth?: boolean;
 }
 
@@ -118,20 +111,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = "Button";
 
-/**
- * IconButton Component
- *
- * A compact button for icon-only actions.
- */
+
 export interface IconButtonProps
   extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
-  /** The icon to display */
   icon: LucideIcon;
-  /** Button variant */
   variant?: ButtonVariant;
-  /** Button size */
   size?: ButtonSize;
-  /** Accessible label for screen readers */
   "aria-label": string;
 }
 

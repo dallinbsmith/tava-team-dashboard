@@ -235,7 +235,7 @@ func (a *App) initHandlers() error {
 	a.handlers = handlers.New(a.userRepo, a.squadRepo)
 	a.avatarHandlers = handlers.NewAvatarHandlersWithConfig(a.userRepo, a.avatarService, a.Config.AvatarMaxSizeMB)
 	a.invitationHandlers = handlers.NewInvitationHandlers(a.invitationRepo, a.userRepo, a.emailService)
-	a.jiraHandlers = handlers.NewJiraHandlersWithConfig(a.userRepo, a.orgJiraRepo, a.timeOffRepo, a.jiraOAuthService, a.oauthStateStore, a.Config.FrontendURL, a.Config.JiraMaxUsersPagination)
+	a.jiraHandlers = handlers.NewJiraHandlersWithConfig(a.userRepo, a.orgJiraRepo, a.timeOffRepo, a.jiraOAuthService, a.oauthStateStore, a.Config.FrontendURL, a.Config.JiraMaxUsersPagination, 0, a.Logger)
 	a.orgChartHandlers = handlers.NewOrgChartHandlers(a.orgChartRepo, a.userRepo)
 	a.timeOffHandlers = handlers.NewTimeOffHandlers(a.timeOffRepo, a.userRepo)
 	a.calendarHandlers = handlers.NewCalendarHandlers(a.calendarBFFService, a.taskRepo, a.meetingRepo)
@@ -243,7 +243,7 @@ func (a *App) initHandlers() error {
 }
 
 func (a *App) initGraphQL() error {
-	graphResolver := graph.NewResolver(a.userRepo, a.squadRepo, a.orgJiraRepo, a.auth0Client, a.Config.FrontendURL)
+	graphResolver := graph.NewResolver(a.userRepo, a.squadRepo, a.orgJiraRepo, a.auth0Client, a.Config.FrontendURL, a.Logger)
 	a.graphServer = handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: graphResolver}))
 	return nil
 }
@@ -251,15 +251,26 @@ func (a *App) initGraphQL() error {
 func (a *App) initRouter() {
 	r := chi.NewRouter()
 
-	// Create rate limiter using config values
-	rateLimiter := middleware.NewRateLimiterWithConfig(rate.Limit(a.Config.RateLimitRPS), a.Config.RateLimitBurst, middleware.RateLimiterConfig{
+	// Create metrics collector (before rate limiter so we can track rate-limited requests)
+	a.metrics = middleware.NewMetrics("manager_dashboard")
+
+	// Create endpoint-specific rate limiter with:
+	// - Stricter limits for sensitive endpoints (invitations, user creation, etc.)
+	// - Skip paths for health checks and metrics
+	// - Metrics callback for monitoring rate limit violations
+	rateLimiterCfg := middleware.RateLimiterConfig{
 		MaxVisitors:            a.Config.RateLimiterMaxVisitors,
 		CleanupIntervalMinutes: a.Config.RateLimiterCleanupIntervalMinutes,
 		VisitorTimeoutMinutes:  a.Config.RateLimiterVisitorTimeoutMinutes,
-	})
-
-	// Create metrics collector
-	a.metrics = middleware.NewMetrics("manager_dashboard")
+	}
+	rateLimiter := middleware.NewEndpointRateLimiter(
+		rate.Limit(a.Config.RateLimitRPS),
+		a.Config.RateLimitBurst,
+		rateLimiterCfg,
+		middleware.SensitiveEndpointLimits,
+		middleware.WithSkipPaths([]string{"/health", "/ready", "/live", "/metrics"}),
+		middleware.WithRateLimitedCallback(a.metrics.RecordRateLimited),
+	)
 
 	// Global middleware
 	r.Use(chimiddleware.RequestID)
@@ -310,7 +321,7 @@ func (a *App) registerHealthRoutes(r chi.Router) {
 
 		if err := a.DB.Ping(ctx); err != nil {
 			w.WriteHeader(http.StatusServiceUnavailable)
-			json.NewEncoder(w).Encode(map[string]string{
+			_ = json.NewEncoder(w).Encode(map[string]string{
 				"status": "unhealthy",
 				"error":  "database connection failed",
 			})
@@ -319,7 +330,7 @@ func (a *App) registerHealthRoutes(r chi.Router) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"status": "healthy",
 		})
 	})
@@ -337,7 +348,7 @@ func (a *App) registerHealthRoutes(r chi.Router) {
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
-		json.NewEncoder(w).Encode(response)
+		_ = json.NewEncoder(w).Encode(response)
 	})
 
 	// Readiness probe (for Kubernetes - checks if ready to serve traffic)
@@ -348,7 +359,7 @@ func (a *App) registerHealthRoutes(r chi.Router) {
 		// Check database connectivity
 		if err := a.DB.Ping(ctx); err != nil {
 			w.WriteHeader(http.StatusServiceUnavailable)
-			w.Write([]byte("NOT READY: database unavailable"))
+			_, _ = w.Write([]byte("NOT READY: database unavailable"))
 			return
 		}
 
@@ -356,18 +367,18 @@ func (a *App) registerHealthRoutes(r chi.Router) {
 		stats := a.DB.Stat()
 		if stats.AcquiredConns() >= stats.MaxConns() {
 			w.WriteHeader(http.StatusServiceUnavailable)
-			w.Write([]byte("NOT READY: connection pool exhausted"))
+			_, _ = w.Write([]byte("NOT READY: connection pool exhausted"))
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("READY"))
+		_, _ = w.Write([]byte("READY"))
 	})
 
 	// Liveness probe (simple check that server is running)
 	r.Get("/live", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	})
 
 	// Prometheus metrics endpoint
@@ -384,7 +395,31 @@ func (a *App) registerGraphQLRoutes(r chi.Router) {
 	// GraphQL endpoint (protected)
 	r.Group(func(r chi.Router) {
 		r.Use(a.authMiddleware.Authenticate)
+		r.Use(a.graphqlTimeoutMiddleware) // Apply operation timeout
+		r.Use(a.dataloaderMiddleware)     // Inject dataloaders for N+1 prevention
 		r.Post("/graphql", a.graphServer.ServeHTTP)
+	})
+}
+
+// dataloaderMiddleware injects dataloaders into the request context
+// This enables batched database queries to prevent N+1 problems in GraphQL resolvers
+func (a *App) dataloaderMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Create fresh loaders for each request (they cache within a single request)
+		loaders := graph.NewLoaders(a.userRepo)
+		ctx := graph.ContextWithLoaders(r.Context(), loaders)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// graphqlTimeoutMiddleware applies a timeout to GraphQL operations
+// This prevents long-running queries from holding connections indefinitely
+func (a *App) graphqlTimeoutMiddleware(next http.Handler) http.Handler {
+	timeout := time.Duration(a.Config.GraphQLTimeoutSecs) * time.Second
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), timeout)
+		defer cancel()
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 

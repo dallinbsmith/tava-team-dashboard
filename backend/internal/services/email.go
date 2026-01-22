@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/resend/resend-go/v2"
 	"github.com/smith-dallin/manager-dashboard/config"
@@ -14,6 +15,7 @@ type EmailService struct {
 	fromEmail   string
 	fromName    string
 	frontendURL string
+	timeout     time.Duration
 }
 
 // NewEmailService creates a new email service with Resend
@@ -24,6 +26,7 @@ func NewEmailService(cfg *config.Config) *EmailService {
 		fromEmail:   cfg.ResendFromEmail,
 		fromName:    cfg.ResendFromName,
 		frontendURL: cfg.FrontendURL,
+		timeout:     time.Duration(cfg.EmailTimeoutSecs) * time.Second,
 	}
 }
 
@@ -44,12 +47,30 @@ func (s *EmailService) SendInvitation(ctx context.Context, email, token, role, i
 		Text:    textContent,
 	}
 
-	_, err := s.client.Emails.Send(params)
-	if err != nil {
-		return fmt.Errorf("failed to send invitation email: %w", err)
+	// Execute email send with timeout to prevent indefinite blocking
+	// The Resend SDK doesn't support context cancellation, so we use a goroutine pattern
+	type result struct {
+		err error
 	}
+	resultCh := make(chan result, 1)
 
-	return nil
+	go func() {
+		_, err := s.client.Emails.Send(params)
+		resultCh <- result{err: err}
+	}()
+
+	// Wait for either completion, timeout, or context cancellation
+	select {
+	case res := <-resultCh:
+		if res.err != nil {
+			return fmt.Errorf("failed to send invitation email: %w", res.err)
+		}
+		return nil
+	case <-time.After(s.timeout):
+		return fmt.Errorf("email send timed out after %v", s.timeout)
+	case <-ctx.Done():
+		return fmt.Errorf("email send cancelled: %w", ctx.Err())
+	}
 }
 
 // buildInvitationHTML creates the HTML email template

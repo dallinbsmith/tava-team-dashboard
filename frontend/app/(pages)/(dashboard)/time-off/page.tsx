@@ -18,7 +18,6 @@ export default async function TimeOffPage() {
     <TimeOffPageClient
       initialMyRequests={myRequests}
       initialPendingRequests={pendingRequests}
-      currentUser={currentUser}
       isSupervisorOrAdmin={isSupervisorOrAdmin}
     />
   );

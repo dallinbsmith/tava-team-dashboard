@@ -2,8 +2,9 @@ import { User, Squad, UpdateUserRequest } from "@/shared/types/user";
 import { Invitation, CreateInvitationRequest } from "@/app/(pages)/(dashboard)/admin/invitations/types";
 import { JiraSettings, JiraOAuthAuthorizeResponse, JiraIssue, JiraProject, JiraUserWithMapping, AutoMatchResult, TeamTask } from "@/app/(pages)/jira/types";
 import { OrgChartDraft, DraftChange, CreateDraftRequest, UpdateDraftRequest, AddDraftChangeRequest, OrgTreeNode } from "@/app/(pages)/(dashboard)/orgchart/types";
-import { CalendarEvent, CalendarEventsResponse, Task, Meeting, CreateTaskRequest, UpdateTaskRequest, CreateMeetingRequest, UpdateMeetingRequest, ResponseStatus } from "@/app/(pages)/(dashboard)/calendar/types";
+import { CalendarEventsResponse, Task, Meeting, CreateTaskRequest, UpdateTaskRequest, CreateMeetingRequest, UpdateMeetingRequest, ResponseStatus } from "@/app/(pages)/(dashboard)/calendar/types";
 import { TimeOffRequest, TimeOffStatus, CreateTimeOffRequest, ReviewTimeOffRequest } from "@/app/(pages)/(dashboard)/time-off/types";
+import { extractErrorMessage } from "./api-utils";
 
 export { getEmployeesGraphQL, getEmployeeGraphQL, getCurrentUserGraphQL, createEmployeeGraphQL, updateEmployeeGraphQL, deleteEmployeeGraphQL } from "./graphql";
 
@@ -34,35 +35,32 @@ export async function fetchWithProxy(path: string, options: RequestInit = {}): P
  */
 export async function handleResponse<T>(response: Response, errorMessage: string): Promise<T> {
   if (!response.ok) {
-    const error = await response.text().catch(() => "");
-    throw new Error(error || errorMessage);
+    const error = await extractErrorMessage(response, errorMessage);
+    throw new Error(error);
   }
   return response.json();
 }
 
-/** @deprecated Use fetchWithProxy instead */
-export const fetchWithAuth = (_path: string, _token: string, options: RequestInit = {}) => fetchWithProxy(_path, options);
-
 async function get<T>(path: string): Promise<T> {
   const res = await fetchWithProxy(path);
-  if (!res.ok) throw new Error(await res.text().catch(() => `GET ${path} failed`));
+  if (!res.ok) throw new Error(await extractErrorMessage(res, `GET ${path} failed`));
   return res.json();
 }
 
 async function mutate<T>(path: string, method: "POST" | "PUT", body?: unknown): Promise<T> {
   const res = await fetchWithProxy(path, { method, body: body ? JSON.stringify(body) : undefined });
-  if (!res.ok) throw new Error(await res.text().catch(() => `${method} ${path} failed`));
+  if (!res.ok) throw new Error(await extractErrorMessage(res, `${method} ${path} failed`));
   return res.json();
 }
 
 async function del(path: string): Promise<void> {
   const res = await fetchWithProxy(path, { method: "DELETE" });
-  if (!res.ok) throw new Error(await res.text().catch(() => `DELETE ${path} failed`));
+  if (!res.ok) throw new Error(await extractErrorMessage(res, `DELETE ${path} failed`));
 }
 
 async function postVoid(path: string, body?: unknown): Promise<void> {
   const res = await fetchWithProxy(path, { method: "POST", body: body ? JSON.stringify(body) : undefined });
-  if (!res.ok) throw new Error(await res.text().catch(() => `POST ${path} failed`));
+  if (!res.ok) throw new Error(await extractErrorMessage(res, `POST ${path} failed`));
 }
 
 // User & Organization
@@ -105,7 +103,7 @@ export async function acceptInvitation(token: string, data: AcceptInvitationRequ
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text().catch(() => "Failed to accept invitation"));
+  if (!res.ok) throw new Error(await extractErrorMessage(res, "Failed to accept invitation"));
   return res.json();
 }
 

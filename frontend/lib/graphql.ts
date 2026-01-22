@@ -14,17 +14,6 @@ function getGraphQLProxyURL(): string {
 
 /**
  * Creates a GraphQL client that uses the server-side proxy.
- * The accessToken parameter is kept for backward compatibility but ignored.
- * @deprecated The accessToken parameter is no longer needed. Use createProxyGraphQLClient() instead.
- */
-export function createGraphQLClient(accessToken?: string) {
-  return new GraphQLClient(getGraphQLProxyURL(), {
-    credentials: "same-origin", // Include cookies for session
-  });
-}
-
-/**
- * Creates a GraphQL client that uses the server-side proxy.
  * The proxy automatically adds the Auth0 access token from the session.
  */
 export function createProxyGraphQLClient() {
@@ -33,144 +22,123 @@ export function createProxyGraphQLClient() {
   });
 }
 
+// =============================================================================
+// GraphQL Fragments - DRY reusable field definitions
+// =============================================================================
+
+/**
+ * Core employee fields used across all queries/mutations.
+ * This is the single source of truth for employee field selection.
+ */
+export const EMPLOYEE_CORE_FIELDS = gql`
+  fragment EmployeeCoreFields on Employee {
+    id
+    auth0_id
+    email
+    first_name
+    last_name
+    role
+    title
+    department
+    squads {
+      id
+      name
+    }
+    avatar_url
+    supervisor_id
+    date_started
+    created_at
+    updated_at
+  }
+`;
+
+/**
+ * Basic supervisor/user reference fields for nested objects.
+ */
+export const SUPERVISOR_REF_FIELDS = gql`
+  fragment SupervisorRefFields on Employee {
+    id
+    first_name
+    last_name
+    email
+  }
+`;
+
+/**
+ * Direct report fields for supervisor views.
+ */
+export const DIRECT_REPORT_FIELDS = gql`
+  fragment DirectReportFields on Employee {
+    id
+    first_name
+    last_name
+    email
+    role
+    title
+  }
+`;
+
+// =============================================================================
 // GraphQL Queries
+// =============================================================================
+
 export const GET_EMPLOYEES = gql`
+  ${EMPLOYEE_CORE_FIELDS}
+  ${SUPERVISOR_REF_FIELDS}
   query GetEmployees {
     employees {
-      id
-      auth0_id
-      email
-      first_name
-      last_name
-      role
-      title
-      department
-      squads {
-        id
-        name
-      }
-      avatar_url
-      supervisor_id
-      date_started
-      created_at
-      updated_at
+      ...EmployeeCoreFields
       supervisor {
-        id
-        first_name
-        last_name
-        email
+        ...SupervisorRefFields
       }
     }
   }
 `;
 
 export const GET_EMPLOYEE = gql`
+  ${EMPLOYEE_CORE_FIELDS}
+  ${SUPERVISOR_REF_FIELDS}
+  ${DIRECT_REPORT_FIELDS}
   query GetEmployee($id: ID!) {
     employee(id: $id) {
-      id
-      auth0_id
-      email
-      first_name
-      last_name
-      role
-      title
-      department
-      squads {
-        id
-        name
-      }
-      avatar_url
-      supervisor_id
-      date_started
-      created_at
-      updated_at
+      ...EmployeeCoreFields
       supervisor {
-        id
-        first_name
-        last_name
-        email
+        ...SupervisorRefFields
       }
       direct_reports {
-        id
-        first_name
-        last_name
-        email
-        role
-        title
+        ...DirectReportFields
       }
     }
   }
 `;
 
 export const GET_ME = gql`
+  ${EMPLOYEE_CORE_FIELDS}
   query GetMe {
     me {
-      id
-      auth0_id
-      email
-      first_name
-      last_name
-      role
-      title
-      department
-      squads {
-        id
-        name
-      }
-      avatar_url
-      supervisor_id
-      date_started
-      created_at
-      updated_at
+      ...EmployeeCoreFields
     }
   }
 `;
 
+// =============================================================================
 // GraphQL Mutations
+// =============================================================================
+
 export const CREATE_EMPLOYEE = gql`
+  ${EMPLOYEE_CORE_FIELDS}
   mutation CreateEmployee($input: CreateEmployeeInput!) {
     createEmployee(input: $input) {
-      id
-      auth0_id
-      email
-      first_name
-      last_name
-      role
-      title
-      department
-      squads {
-        id
-        name
-      }
-      avatar_url
-      supervisor_id
-      date_started
-      created_at
-      updated_at
+      ...EmployeeCoreFields
     }
   }
 `;
 
 export const UPDATE_EMPLOYEE = gql`
+  ${EMPLOYEE_CORE_FIELDS}
   mutation UpdateEmployee($id: ID!, $input: UpdateEmployeeInput!) {
     updateEmployee(id: $id, input: $input) {
-      id
-      auth0_id
-      email
-      first_name
-      last_name
-      role
-      title
-      department
-      squads {
-        id
-        name
-      }
-      avatar_url
-      supervisor_id
-      date_started
-      created_at
-      updated_at
+      ...EmployeeCoreFields
     }
   }
 `;

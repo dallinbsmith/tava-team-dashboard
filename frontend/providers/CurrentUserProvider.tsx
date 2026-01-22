@@ -9,21 +9,14 @@ import { getUserById } from "@/lib/api";
 import { User } from "@/shared/types/user";
 
 interface CurrentUserContextType {
-  /** The effective current user (impersonated user if impersonating, otherwise real user) */
   currentUser: User | null;
-  /** The actual logged-in user (always the real user, even when impersonating) */
   realUser: User | null;
   loading: boolean;
   error: string | null;
-  /** Whether the real user is an admin */
   isAdmin: boolean;
-  /** Whether the real user is a supervisor */
   isSupervisor: boolean;
-  /** Whether the real user is a supervisor or admin (use for permission checks) */
   isSupervisorOrAdmin: boolean;
-  /** Whether the effective user (respecting impersonation) is a supervisor or admin (use for UI behavior) */
   effectiveIsSupervisorOrAdmin: boolean;
-  /** Whether currently impersonating another user */
   isImpersonating: boolean;
   refetch: () => Promise<void>;
 }
@@ -68,7 +61,6 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
   // If not admin, don't allow impersonation
   useEffect(() => {
     if (realUser && realUser.role !== "admin" && isImpersonating) {
-      // Non-admins can't impersonate - end it
       endImpersonation();
     }
   }, [realUser, isImpersonating, endImpersonation]);
@@ -112,13 +104,11 @@ const defaultCurrentUserContext: CurrentUserContextType = {
   isSupervisorOrAdmin: false,
   effectiveIsSupervisorOrAdmin: false,
   isImpersonating: false,
-  refetch: async () => {},
+  refetch: async () => { },
 };
 
 export function useCurrentUser() {
   const context = useContext(CurrentUserContext);
-  // Return default context during HMR or when used outside provider
-  // This prevents crashes during hot reload
   if (context === undefined) {
     return defaultCurrentUserContext;
   }

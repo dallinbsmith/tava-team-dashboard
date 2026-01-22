@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { TimeOffType, TIME_OFF_TYPE_LABELS, CreateTimeOffRequest } from "../../time-off/types";
-import { createTimeOffRequest } from "../../time-off/api";
+import { createTimeOffRequestAction } from "../../time-off/actions";
 import { BaseModal, SelectField, InputField, TextareaField, Button, FormError } from "@/components";
 import { format, addDays } from "date-fns";
 
@@ -27,7 +27,7 @@ export default function RequestTimeOffModal({ isOpen, onClose, onCreated }: Requ
   const [endDate, setEndDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
   const [reason, setReason] = useState("");
 
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const resetForm = () => {
@@ -69,18 +69,16 @@ export default function RequestTimeOffModal({ isOpen, onClose, onCreated }: Requ
       reason: reason.trim() || undefined,
     };
 
-    setLoading(true);
+    startTransition(async () => {
+      const result = await createTimeOffRequestAction(request);
 
-    try {
-      await createTimeOffRequest(request);
-      handleClose();
-      onCreated();
-    } catch (e) {
-      console.error("Failed to create time off request:", e);
-      setError("Failed to create time off request");
-    } finally {
-      setLoading(false);
-    }
+      if (result.success) {
+        handleClose();
+        onCreated();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   const timeOffOptions = TIME_OFF_TYPES.map((type) => ({
@@ -137,7 +135,7 @@ export default function RequestTimeOffModal({ isOpen, onClose, onCreated }: Requ
           <Button type="button" variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="submit" variant="success" loading={loading}>
+          <Button type="submit" variant="success" loading={isPending}>
             Submit Request
           </Button>
         </div>

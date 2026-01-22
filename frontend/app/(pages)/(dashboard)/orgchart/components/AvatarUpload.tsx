@@ -51,7 +51,7 @@ export default function AvatarUpload({
         await onUpload(dataUrl);
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
-      } catch (err) {
+      } catch {
         setError("Failed to upload image. Please try again.");
         setPreviewUrl(null);
       } finally {

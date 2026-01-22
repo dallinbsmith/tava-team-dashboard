@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"math/rand"
-	"time"
 
 	"github.com/smith-dallin/manager-dashboard/config"
 	"github.com/smith-dallin/manager-dashboard/internal/database"
@@ -46,7 +45,6 @@ func main() {
 	defer pool.Close()
 
 	ctx := context.Background()
-	rand.Seed(time.Now().UnixNano())
 
 	// Get all users with empty squads
 	rows, err := pool.Query(ctx, "SELECT id, department FROM users WHERE squad = '' OR squad IS NULL")

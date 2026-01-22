@@ -4,23 +4,27 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/smith-dallin/manager-dashboard/internal/logger"
 	"github.com/smith-dallin/manager-dashboard/internal/storage"
 )
 
 // AvatarService handles avatar image processing and storage
 type AvatarService struct {
 	storage storage.Storage
+	logger  *logger.Logger
 }
 
 // NewAvatarService creates a new avatar service
 func NewAvatarService(store storage.Storage) *AvatarService {
-	return &AvatarService{storage: store}
+	return &AvatarService{
+		storage: store,
+		logger:  logger.Default().WithComponent("avatar-service"),
+	}
 }
 
 // ImageData represents parsed image data
@@ -111,10 +115,10 @@ func (s *AvatarService) uploadToS3(ctx context.Context, userID int64, img *Image
 	key := storage.GenerateAvatarKey(userID, img.Extension)
 	url, err := s.storage.Upload(ctx, key, img.Data, img.ContentType)
 	if err != nil {
-		log.Printf("S3 upload failed for user %d: %v", userID, err)
+		s.logger.LogError(ctx, "S3 upload failed", err, "user_id", userID)
 		return "", err
 	}
-	log.Printf("S3 upload successful for user %d: %s", userID, url)
+	s.logger.Info("S3 upload successful", "user_id", userID, "url", url)
 	return url, nil
 }
 

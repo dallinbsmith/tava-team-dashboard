@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { getAllUsers, getDepartments } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { User } from "@/shared/types/user";
@@ -150,30 +150,6 @@ export function useDepartmentsQuery(
       : null,
     refetch,
   };
-}
-
-/**
- * Hook that derives departments from users (employees + all users).
- * Useful when you need departments derived from user data without a separate API call.
- *
- * @example
- * ```tsx
- * const { departments } = useDerivedDepartments(employees, allUsers);
- * ```
- */
-export function useDerivedDepartments(
-  employees: User[],
-  allUsers: User[]
-): string[] {
-  return useMemo(() => {
-    const deptSet = new Set<string>();
-    [...employees, ...allUsers].forEach((user) => {
-      if (user.department) {
-        deptSet.add(user.department);
-      }
-    });
-    return Array.from(deptSet).sort();
-  }, [employees, allUsers]);
 }
 
 export default useAllUsersQuery;

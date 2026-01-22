@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { OrgChartDraft, DraftChange } from "../types";
+import { OrgChartDraft } from "../types";
 import { User, Squad } from "@/shared/types/user";
 import { FileText, Plus, Trash2, Send, X, AlertCircle, UserCircle, Building2, Shield, Users } from "lucide-react";
 
@@ -174,14 +174,14 @@ export default function DraftManager({
     if (hasChanges && activeTab === "drafts") {
       setActiveTab("changes");
     }
-  }, [hasChanges]);
+  }, [hasChanges, activeTab]);
 
   // Switch back to drafts tab when no draft is selected
   useEffect(() => {
     if (!currentDraft && activeTab === "changes") {
       setActiveTab("drafts");
     }
-  }, [currentDraft]);
+  }, [currentDraft, activeTab]);
 
   const handleCreate = () => {
     if (newDraftName.trim()) {

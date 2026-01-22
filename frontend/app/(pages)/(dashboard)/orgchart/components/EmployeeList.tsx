@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { User } from "@/shared/types/user";
-import { useEmployeeList, SortField, ITEMS_PER_PAGE_OPTIONS } from "@/hooks/useEmployeeList";
+import { useEmployeeList, ITEMS_PER_PAGE_OPTIONS } from "@/hooks/useEmployeeList";
 import EmployeeCard from "./EmployeeCard";
 import EmployeeTable from "./EmployeeTable";
 import FilterButton from "./FilterButton";
@@ -23,13 +23,6 @@ interface EmployeeListProps {
   isLoading?: boolean;
   error?: string | null;
 }
-
-const SORT_OPTIONS: { field: SortField; label: string }[] = [
-  { field: "name", label: "Name" },
-  { field: "email", label: "Email" },
-  { field: "department", label: "Department" },
-  { field: "date_started", label: "Start Date" },
-];
 
 export default function EmployeeList({
   employees,

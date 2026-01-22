@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useCallback, useMemo } from "react";
 import { User } from "@/shared/types/user";
@@ -48,7 +48,6 @@ export function useTeamTimeOff({
   enabled = true,
 }: UseTeamTimeOffOptions): UseTeamTimeOffResult {
   const { user: auth0User, isLoading: authLoading } = useUser();
-  const queryClient = useQueryClient();
 
   const isAuthenticated = !!auth0User && !authLoading;
 
@@ -142,7 +141,6 @@ export function useTeamTasks({
   enabled = true,
 }: UseTeamTasksOptions): UseTeamTasksResult {
   const { user: auth0User, isLoading: authLoading } = useUser();
-  const queryClient = useQueryClient();
 
   const isAuthenticated = !!auth0User && !authLoading;
 

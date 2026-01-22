@@ -18,14 +18,10 @@ import {
   deleteDepartment,
 } from "./api";
 import {
-  OrgChartDraft,
   CreateDraftRequest,
   UpdateDraftRequest,
   AddDraftChangeRequest,
-  OrgTreeNode,
 } from "./types";
-import { Squad } from "@/shared/types/user";
-import { queryKeys } from "@/lib/queryKeys";
 import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 
 export const orgChartKeys = {

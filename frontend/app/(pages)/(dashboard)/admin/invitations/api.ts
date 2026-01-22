@@ -1,24 +1,9 @@
 import { Invitation, CreateInvitationRequest } from "./types";
 import { User } from "@/shared/types/user";
+import { fetchWithProxy, handleResponse } from "@/lib/api";
+import { extractErrorMessage } from "@/lib/api-utils";
 
-const API_BASE_URL = "/api/proxy";
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-
-async function fetchWithProxy(path: string, options: RequestInit = {}): Promise<Response> {
-  return fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: { ...options.headers, "Content-Type": "application/json" },
-    credentials: "same-origin",
-  });
-}
-
-async function handleResponse<T>(response: Response, errorMessage: string): Promise<T> {
-  if (!response.ok) {
-    const error = await response.text().catch(() => "");
-    throw new Error(error || errorMessage);
-  }
-  return response.json();
-}
 
 // Authenticated invitation management
 export async function getInvitations(): Promise<Invitation[]> {
@@ -66,6 +51,6 @@ export async function acceptInvitation(token: string, data: AcceptInvitationRequ
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!response.ok) throw new Error(await response.text().catch(() => "Failed to accept invitation"));
+  if (!response.ok) throw new Error(await extractErrorMessage(response, "Failed to accept invitation"));
   return response.json();
 }

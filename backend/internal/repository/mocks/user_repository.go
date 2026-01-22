@@ -29,6 +29,8 @@ type MockUserRepository struct {
 	ClearJiraSettingsFunc              func(ctx context.Context, id int64) error
 	UpdateJiraAccountIDFunc            func(ctx context.Context, id int64, jiraAccountID *string) error
 	SaveJiraOAuthTokensFunc            func(ctx context.Context, id int64, tokens *models.JiraOAuthTokens) error
+	DeactivateFunc                     func(ctx context.Context, id int64) error
+	ReactivateFunc                     func(ctx context.Context, id int64) error
 }
 
 // NewMockUserRepository creates a new mock user repository
@@ -49,6 +51,17 @@ func (m *MockUserRepository) GetByID(ctx context.Context, id int64) (*models.Use
 		return user, nil
 	}
 	return nil, nil
+}
+
+// GetByIDs returns multiple users by their IDs (batch loading for dataloaders)
+func (m *MockUserRepository) GetByIDs(ctx context.Context, ids []int64) ([]models.User, error) {
+	var users []models.User
+	for _, id := range ids {
+		if user, ok := m.Users[id]; ok {
+			users = append(users, *user)
+		}
+	}
+	return users, nil
 }
 
 func (m *MockUserRepository) GetByAuth0ID(ctx context.Context, auth0ID string) (*models.User, error) {
@@ -212,6 +225,26 @@ func (m *MockUserRepository) UpdateJiraAccountID(ctx context.Context, id int64, 
 func (m *MockUserRepository) SaveJiraOAuthTokens(ctx context.Context, id int64, tokens *models.JiraOAuthTokens) error {
 	if m.SaveJiraOAuthTokensFunc != nil {
 		return m.SaveJiraOAuthTokensFunc(ctx, id, tokens)
+	}
+	return nil
+}
+
+func (m *MockUserRepository) Deactivate(ctx context.Context, id int64) error {
+	if m.DeactivateFunc != nil {
+		return m.DeactivateFunc(ctx, id)
+	}
+	if user, ok := m.Users[id]; ok {
+		user.IsActive = false
+	}
+	return nil
+}
+
+func (m *MockUserRepository) Reactivate(ctx context.Context, id int64) error {
+	if m.ReactivateFunc != nil {
+		return m.ReactivateFunc(ctx, id)
+	}
+	if user, ok := m.Users[id]; ok {
+		user.IsActive = true
 	}
 	return nil
 }

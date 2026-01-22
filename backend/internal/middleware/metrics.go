@@ -11,11 +11,12 @@ import (
 
 // Metrics holds Prometheus metrics for the application
 type Metrics struct {
-	requestsTotal   *prometheus.CounterVec
-	requestDuration *prometheus.HistogramVec
-	requestSize     *prometheus.HistogramVec
-	responseSize    *prometheus.HistogramVec
-	activeRequests  prometheus.Gauge
+	requestsTotal    *prometheus.CounterVec
+	requestDuration  *prometheus.HistogramVec
+	requestSize      *prometheus.HistogramVec
+	responseSize     *prometheus.HistogramVec
+	activeRequests   prometheus.Gauge
+	rateLimitedTotal *prometheus.CounterVec
 }
 
 // NewMetrics creates and registers application metrics
@@ -67,6 +68,14 @@ func NewMetrics(namespace string) *Metrics {
 				Help:      "Number of active HTTP requests",
 			},
 		),
+		rateLimitedTotal: promauto.NewCounterVec(
+			prometheus.CounterOpts{
+				Namespace: namespace,
+				Name:      "rate_limited_total",
+				Help:      "Total number of rate limited requests",
+			},
+			[]string{"method", "path"},
+		),
 	}
 }
 
@@ -97,6 +106,12 @@ func (m *Metrics) Middleware(next http.Handler) http.Handler {
 		m.requestDuration.WithLabelValues(r.Method, path, status).Observe(duration)
 		m.responseSize.WithLabelValues(r.Method, path, status).Observe(float64(wrapped.size))
 	})
+}
+
+// RecordRateLimited records a rate limited request (for use as callback)
+func (m *Metrics) RecordRateLimited(r *http.Request) {
+	path := normalizePath(r.URL.Path)
+	m.rateLimitedTotal.WithLabelValues(r.Method, path).Inc()
 }
 
 // normalizePath normalizes URL paths to prevent high cardinality

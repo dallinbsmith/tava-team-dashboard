@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { User } from "@/shared/types/user";
 import { JiraSettings, JiraUserWithMapping } from "@/app/(pages)/jira/types";
@@ -11,6 +11,7 @@ import {
   autoMatchJiraUsers,
   updateUserJiraMapping,
 } from "@/lib/api";
+import { useAsyncOperation } from "@/hooks";
 import ConfirmationModal from "@/shared/common/ConfirmationModal";
 import Avatar from "@/shared/common/Avatar";
 import {
@@ -30,7 +31,6 @@ interface SettingsPageClientProps {
   initialJiraSettings: JiraSettings;
   initialJiraUsers: JiraUserWithMapping[];
   initialAllUsers: User[];
-  currentUser: User;
   isAdmin: boolean;
 }
 
@@ -38,7 +38,6 @@ export function SettingsPageClient({
   initialJiraSettings,
   initialJiraUsers,
   initialAllUsers,
-  currentUser,
   isAdmin,
 }: SettingsPageClientProps) {
   const searchParams = useSearchParams();
@@ -46,14 +45,69 @@ export function SettingsPageClient({
   const [jiraSettings, setJiraSettings] = useState(initialJiraSettings);
   const [jiraUsers, setJiraUsers] = useState(initialJiraUsers);
   const [allUsers] = useState(initialAllUsers);
-  const [loadingUsers, setLoadingUsers] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [connecting, setConnecting] = useState(false);
-  const [autoMatching, setAutoMatching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
+
+  // Async operations using the reusable hook
+  const fetchJiraUsersOp = useAsyncOperation(
+    async () => {
+      if (!jiraSettings?.org_configured) return [];
+      return await getJiraUsers();
+    },
+    {
+      onSuccess: (users) => setJiraUsers(users),
+      onError: (err) => console.error("Failed to fetch Jira users:", err),
+    }
+  );
+
+  const disconnectJiraOp = useAsyncOperation(
+    async () => {
+      await disconnectJira();
+      setJiraSettings({
+        ...jiraSettings!,
+        org_configured: false,
+        jira_site_url: undefined,
+        jira_site_name: undefined,
+        configured_by_id: undefined,
+      });
+      setJiraUsers([]);
+      setShowDisconnectModal(false);
+    },
+    {
+      onSuccess: () => setSuccess("Jira disconnected successfully"),
+      onError: (err) => setError(err),
+    }
+  );
+
+  const autoMatchOp = useAsyncOperation(
+    async () => {
+      const result = await autoMatchJiraUsers();
+      await fetchJiraUsersOp.execute();
+      return result;
+    },
+    {
+      successMessage: (result) =>
+        `Successfully matched ${result.matched} of ${result.total_jira_users} Jira users by email`,
+      onError: (err) => setError(err),
+    }
+  );
+
+  const updateMappingOp = useAsyncOperation(
+    async ({ userId, jiraAccountId }: { userId: number; jiraAccountId: string | null }) => {
+      await updateUserJiraMapping(userId, jiraAccountId);
+      await fetchJiraUsersOp.execute();
+    },
+    {
+      successMessage: "Mapping updated",
+      onError: (err) => setError(err),
+    }
+  );
+
+  // Combine success messages from operations
+  const displaySuccess = success || autoMatchOp.success || updateMappingOp.success;
 
   // Handle OAuth callback params
   useEffect(() => {
@@ -71,19 +125,13 @@ export function SettingsPageClient({
     }
   }, [searchParams]);
 
-  const fetchJiraUsers = useCallback(async () => {
-    if (!jiraSettings?.org_configured) return;
-
-    setLoadingUsers(true);
-    try {
-      const users = await getJiraUsers();
-      setJiraUsers(users);
-    } catch (e) {
-      console.error("Failed to fetch Jira users:", e);
-    } finally {
-      setLoadingUsers(false);
+  // Clear success messages after delay
+  useEffect(() => {
+    if (updateMappingOp.success) {
+      const timer = setTimeout(() => updateMappingOp.clearSuccess(), 2000);
+      return () => clearTimeout(timer);
     }
-  }, [jiraSettings?.org_configured]);
+  }, [updateMappingOp.success, updateMappingOp]);
 
   const handleConnectJiraOAuth = async () => {
     setConnecting(true);
@@ -98,54 +146,8 @@ export function SettingsPageClient({
     }
   };
 
-  const handleDisconnectJira = async () => {
-    setSaving(true);
-    setError(null);
-
-    try {
-      await disconnectJira();
-
-      setJiraSettings({
-        ...jiraSettings!,
-        org_configured: false,
-        jira_site_url: undefined,
-        jira_site_name: undefined,
-        configured_by_id: undefined,
-      });
-      setJiraUsers([]);
-      setSuccess("Jira disconnected successfully");
-      setShowDisconnectModal(false);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to disconnect Jira");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleAutoMatch = async () => {
-    setAutoMatching(true);
-    setError(null);
-
-    try {
-      const result = await autoMatchJiraUsers();
-      setSuccess(`Successfully matched ${result.matched} of ${result.total_jira_users} Jira users by email`);
-      await fetchJiraUsers();
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to auto-match users");
-    } finally {
-      setAutoMatching(false);
-    }
-  };
-
   const handleUpdateMapping = async (userId: number, jiraAccountId: string | null) => {
-    try {
-      await updateUserJiraMapping(userId, jiraAccountId);
-      await fetchJiraUsers();
-      setSuccess("Mapping updated");
-      setTimeout(() => setSuccess(null), 2000);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to update mapping");
-    }
+    await updateMappingOp.execute({ userId, jiraAccountId });
   };
 
   const unmappedEmployees = allUsers.filter(emp =>
@@ -180,11 +182,11 @@ export function SettingsPageClient({
         </div>
       )}
 
-      {success && (
+      {displaySuccess && (
         <div className="bg-green-900/30 border border-green-500/30 p-4 mb-6">
           <div className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-400" />
-            <p className="text-green-400">{success}</p>
+            <p className="text-green-400">{displaySuccess}</p>
           </div>
         </div>
       )}
@@ -255,7 +257,7 @@ export function SettingsPageClient({
                 {isAdmin && (
                   <button
                     onClick={() => setShowDisconnectModal(true)}
-                    disabled={saving}
+                    disabled={disconnectJiraOp.loading}
                     className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/30 transition-colors disabled:opacity-50"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -337,19 +339,19 @@ export function SettingsPageClient({
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={handleAutoMatch}
-                disabled={autoMatching}
+                onClick={() => autoMatchOp.execute()}
+                disabled={autoMatchOp.loading}
                 className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-primary-400 hover:bg-primary-900/30 transition-colors disabled:opacity-50"
               >
                 <UserCheck className="w-4 h-4" />
-                {autoMatching ? "Matching..." : "Auto-match by email"}
+                {autoMatchOp.loading ? "Matching..." : "Auto-match by email"}
               </button>
               <button
-                onClick={fetchJiraUsers}
-                disabled={loadingUsers}
+                onClick={() => fetchJiraUsersOp.execute()}
+                disabled={fetchJiraUsersOp.loading}
                 className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-theme-text-muted hover:bg-theme-elevated transition-colors disabled:opacity-50"
               >
-                <RefreshCw className={`w-4 h-4 ${loadingUsers ? "animate-spin" : ""}`} />
+                <RefreshCw className={`w-4 h-4 ${fetchJiraUsersOp.loading ? "animate-spin" : ""}`} />
               </button>
             </div>
           </div>
@@ -367,7 +369,7 @@ export function SettingsPageClient({
               />
             </div>
 
-            {loadingUsers ? (
+            {fetchJiraUsersOp.loading ? (
               <div className="text-center py-8 text-theme-text-muted">Loading Jira users...</div>
             ) : jiraUsers.length === 0 ? (
               <div className="text-center py-8 text-theme-text-muted">
@@ -446,12 +448,12 @@ export function SettingsPageClient({
       <ConfirmationModal
         isOpen={showDisconnectModal}
         onClose={() => setShowDisconnectModal(false)}
-        onConfirm={handleDisconnectJira}
+        onConfirm={() => disconnectJiraOp.execute()}
         title="Disconnect Jira"
         message="Are you sure you want to disconnect Jira for the entire organization? All employee task mappings will be cleared."
         confirmText="Disconnect"
         variant="danger"
-        loading={saving}
+        loading={disconnectJiraOp.loading}
         iconUrl="https://tava-team-calendar.s3.us-east-2.amazonaws.com/avatars/tava-logo.svg"
       />
     </div>

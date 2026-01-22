@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { format } from "date-fns";
 import { TimeOffRequest, TIME_OFF_TYPE_LABELS } from "../types";
-import { reviewTimeOffRequest } from "../api";
+import { reviewTimeOffRequestAction } from "../actions";
 import { X, Check, XCircle, Loader2, Calendar, User, MessageSquare } from "lucide-react";
 
 interface TimeOffReviewModalProps {
@@ -14,7 +14,7 @@ interface TimeOffReviewModalProps {
 
 export default function TimeOffReviewModal({ request, onClose, onSuccess }: TimeOffReviewModalProps) {
   const [notes, setNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const startDate = new Date(request.start_date);
@@ -26,19 +26,19 @@ export default function TimeOffReviewModal({ request, onClose, onSuccess }: Time
 
   const handleReview = async (status: "approved" | "rejected") => {
     setError(null);
-    setSubmitting(true);
 
-    try {
-      await reviewTimeOffRequest(request.id, {
+    startTransition(async () => {
+      const result = await reviewTimeOffRequestAction(request.id, {
         status,
         reviewer_notes: notes || undefined,
       });
-      onSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to review request");
-    } finally {
-      setSubmitting(false);
-    }
+
+      if (result.success) {
+        onSuccess();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   return (
@@ -100,18 +100,18 @@ export default function TimeOffReviewModal({ request, onClose, onSuccess }: Time
           <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={() => handleReview("rejected")}
-              disabled={submitting}
+              disabled={isPending}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+              {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
               Reject
             </button>
             <button
               onClick={() => handleReview("approved")}
-              disabled={submitting}
+              disabled={isPending}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
               Approve
             </button>
           </div>

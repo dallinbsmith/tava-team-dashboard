@@ -5,7 +5,7 @@ import { CreateTaskRequest } from "../types";
 import { createTask } from "../api";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal, InputField, TextareaField, Button, FormError } from "@/components";
-import { format, addDays, addHours } from "date-fns";
+import { format, addDays } from "date-fns";
 
 interface CreateEventModalProps {
   isOpen: boolean;

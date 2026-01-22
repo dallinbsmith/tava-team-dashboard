@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useTransition } from "react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
-import { User } from "@/shared/types/user";
 import { TimeOffRequest } from "./types";
 import {
   getMyTimeOffRequests,
   getPendingTimeOffRequests,
-  cancelTimeOffRequest,
 } from "@/lib/api";
+import { cancelTimeOffRequestAction } from "./actions";
 import TimeOffRequestForm from "./components/TimeOffRequestForm";
 import TimeOffRequestList from "./components/TimeOffRequestList";
 import TimeOffReviewModal from "./components/TimeOffReviewModal";
@@ -20,14 +19,12 @@ const timeOffStatuses = ["pending", "approved", "rejected", "cancelled"] as cons
 interface TimeOffPageClientProps {
   initialMyRequests: TimeOffRequest[];
   initialPendingRequests: TimeOffRequest[];
-  currentUser: User;
   isSupervisorOrAdmin: boolean;
 }
 
 export function TimeOffPageClient({
   initialMyRequests,
   initialPendingRequests,
-  currentUser: serverCurrentUser,
   isSupervisorOrAdmin: serverIsSupervisorOrAdmin,
 }: TimeOffPageClientProps) {
   // Use effective user from context (respects impersonation)
@@ -42,6 +39,7 @@ export function TimeOffPageClient({
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [, startTransition] = useTransition();
   const [reviewRequest, setReviewRequest] = useState<TimeOffRequest | null>(null);
 
   // URL-synced filter status
@@ -76,18 +74,19 @@ export function TimeOffPageClient({
     if (effectiveUser) {
       fetchData();
     }
-  }, [effectiveUser?.id, fetchData]);
+  }, [effectiveUser, fetchData]);
 
   const handleCancel = async (id: number) => {
     setCancellingId(id);
-    try {
-      await cancelTimeOffRequest(id);
-      await fetchData();
-    } catch (err) {
-      console.error("Failed to cancel request:", err);
-    } finally {
+    startTransition(async () => {
+      const result = await cancelTimeOffRequestAction(id);
+      if (result.success) {
+        await fetchData();
+      } else {
+        setError(result.error);
+      }
       setCancellingId(null);
-    }
+    });
   };
 
   const handleReviewClick = (id: number) => {

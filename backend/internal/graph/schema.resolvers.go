@@ -7,19 +7,16 @@ package graph
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
-	"log"
 	"strconv"
 
-	"github.com/smith-dallin/manager-dashboard/internal/auth0"
-	"github.com/smith-dallin/manager-dashboard/internal/jira"
 	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
+	"github.com/smith-dallin/manager-dashboard/internal/services"
 )
 
 // Supervisor is the resolver for the supervisor field.
+// Uses dataloader to batch supervisor queries and prevent N+1 problem
 func (r *employeeResolver) Supervisor(ctx context.Context, obj *Employee) (*Employee, error) {
 	if obj.SupervisorID == nil {
 		return nil, nil
@@ -30,7 +27,8 @@ func (r *employeeResolver) Supervisor(ctx context.Context, obj *Employee) (*Empl
 		return nil, fmt.Errorf("invalid supervisor ID: %w", err)
 	}
 
-	user, err := r.UserRepo.GetByID(ctx, supervisorID)
+	// Use dataloader for batched loading (falls back to direct query if loaders not in context)
+	user, err := GetSupervisor(ctx, r.UserRepo, supervisorID)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +67,7 @@ func (r *mutationResolver) CreateEmployee(ctx context.Context, input CreateEmplo
 		return nil, fmt.Errorf("forbidden: only supervisors and admins can create employees")
 	}
 
-	// Convert input to CreateUserRequest
+	// Convert supervisor ID from string to int64
 	var supervisorID *int64
 	if input.SupervisorID != nil {
 		id, err := strconv.ParseInt(*input.SupervisorID, 10, 64)
@@ -82,73 +80,6 @@ func (r *mutationResolver) CreateEmployee(ctx context.Context, input CreateEmplo
 		supervisorID = &currentUser.ID
 	}
 
-	var auth0UserID string
-	var jiraAccountID string
-
-	// If Auth0 Management API is configured, create user in Auth0 first
-	if r.Auth0Client != nil {
-		// Generate a secure temporary password
-		tempPassword, err := auth0.GenerateSecurePassword(16)
-		if err != nil {
-			return nil, fmt.Errorf("failed to generate temporary password: %w", err)
-		}
-
-		// Create user in Auth0
-		auth0User, err := r.Auth0Client.CreateUser(ctx, input.Email, input.FirstName, input.LastName, tempPassword)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create user in Auth0: %w", err)
-		}
-		auth0UserID = auth0User.UserID
-
-		// Create a password change ticket so the user can set their own password
-		// The ticket is valid for 7 days (604800 seconds)
-		resultURL := r.FrontendURL + "/login"
-		ticket, err := r.Auth0Client.CreatePasswordChangeTicket(ctx, auth0UserID, resultURL, 604800)
-		if err != nil {
-			// Log the error but don't fail - user can still use "forgot password" flow
-			log.Printf("Warning: Failed to create password change ticket for user %s: %v", auth0UserID, err)
-		} else {
-			// TODO: Send this ticket URL to the user via email
-			// For now, just log it (in production, you'd send an email)
-			log.Printf("Password reset ticket created for new employee %s: %s", input.Email, ticket.Ticket)
-		}
-	} else {
-		// Auth0 not configured - generate a unique placeholder auth0_id
-		// This allows employees to be created without Auth0 integration
-		randomBytes := make([]byte, 16)
-		if _, err := rand.Read(randomBytes); err != nil {
-			return nil, fmt.Errorf("failed to generate unique ID: %w", err)
-		}
-		auth0UserID = fmt.Sprintf("placeholder|%s", hex.EncodeToString(randomBytes))
-		log.Printf("Auth0 not configured - created placeholder auth0_id for %s", input.Email)
-	}
-
-	// If organization has Jira OAuth configured, create user in Jira
-	if r.OrgJiraRepo != nil {
-		orgJiraSettings, err := r.OrgJiraRepo.Get(ctx)
-		if err != nil {
-			log.Printf("Warning: Failed to get org Jira settings: %v", err)
-		} else if orgJiraSettings != nil {
-			// Create Jira client with org OAuth credentials
-			jiraClient := jira.NewOAuthClient(
-				orgJiraSettings.OAuthAccessToken,
-				orgJiraSettings.CloudID,
-				orgJiraSettings.SiteURL,
-			)
-
-			// Create user in Jira
-			displayName := fmt.Sprintf("%s %s", input.FirstName, input.LastName)
-			jiraUser, err := jiraClient.CreateUser(input.Email, displayName)
-			if err != nil {
-				// Log the error but don't fail - Jira user creation is optional
-				log.Printf("Warning: Failed to create Jira user for %s: %v", input.Email, err)
-			} else {
-				jiraAccountID = jiraUser.AccountID
-				log.Printf("Jira user created for new employee %s with account ID: %s", input.Email, jiraAccountID)
-			}
-		}
-	}
-
 	// Convert squad IDs from string to int64
 	var squadIDs []int64
 	for _, squadIDStr := range input.SquadIDs {
@@ -159,7 +90,8 @@ func (r *mutationResolver) CreateEmployee(ctx context.Context, input CreateEmplo
 		squadIDs = append(squadIDs, squadID)
 	}
 
-	req := &models.CreateUserRequest{
+	// Delegate to EmployeeService for the actual creation
+	serviceInput := services.CreateEmployeeInput{
 		Email:        input.Email,
 		FirstName:    input.FirstName,
 		LastName:     input.LastName,
@@ -170,42 +102,12 @@ func (r *mutationResolver) CreateEmployee(ctx context.Context, input CreateEmplo
 		SquadIDs:     squadIDs,
 	}
 
-	user, err := r.UserRepo.Create(ctx, req, auth0UserID)
+	result, err := r.EmployeeService.CreateEmployee(ctx, serviceInput)
 	if err != nil {
-		// If we created a user in Auth0 but failed to create in DB, we should clean up
-		if auth0UserID != "" && r.Auth0Client != nil {
-			if deleteErr := r.Auth0Client.DeleteUser(ctx, auth0UserID); deleteErr != nil {
-				log.Printf("Warning: Failed to delete Auth0 user %s after DB creation failure: %v", auth0UserID, deleteErr)
-			}
-		}
-		return nil, fmt.Errorf("failed to create employee: %w", err)
+		return nil, err
 	}
 
-	// If Jira user was created, update the user with the Jira account ID mapping
-	if jiraAccountID != "" {
-		if err := r.UserRepo.UpdateJiraAccountID(ctx, user.ID, &jiraAccountID); err != nil {
-			log.Printf("Warning: Failed to save Jira account ID mapping for user %d: %v", user.ID, err)
-		} else {
-			user.JiraAccountID = &jiraAccountID
-		}
-	}
-
-	// Assign squads to the user
-	if len(squadIDs) > 0 && r.SquadRepo != nil {
-		if err := r.SquadRepo.SetUserSquads(ctx, user.ID, squadIDs); err != nil {
-			log.Printf("Warning: Failed to assign squads to user %d: %v", user.ID, err)
-		} else {
-			// Load the squads into the user object for the response
-			squads, err := r.SquadRepo.GetByUserID(ctx, user.ID)
-			if err != nil {
-				log.Printf("Warning: Failed to load squads for user %d: %v", user.ID, err)
-			} else {
-				user.Squads = squads
-			}
-		}
-	}
-
-	return userToEmployee(user), nil
+	return userToEmployee(result.User), nil
 }
 
 // UpdateEmployee is the resolver for the updateEmployee field.

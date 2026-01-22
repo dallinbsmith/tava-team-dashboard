@@ -47,7 +47,6 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const isAuthenticated = !!auth0User && !authLoading;
 
-  // Use custom hooks with centralized query keys
   const {
     employees,
     isLoading: employeesLoading,
@@ -68,7 +67,6 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     removeSquad,
   } = useSquadsQuery({ enabled: isAuthenticated });
 
-  // Fetch departments from API
   const {
     departments,
     isLoading: departmentsLoading,
@@ -77,7 +75,6 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
   const loading = authLoading || employeesLoading || allUsersLoading || squadsLoading || departmentsLoading;
 
-  // Force refetch ALL organization data - use this after any mutation
   const refetchAll = useCallback(
     () => refetchQueries(queryClient, queryKeyGroups.organization()),
     [queryClient]
@@ -107,28 +104,25 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Default context for when hook is used outside provider (e.g., during HMR)
 const defaultOrganizationContext: OrganizationContextType = {
   employees: [],
   employeesLoading: true,
-  refetchEmployees: async () => {},
+  refetchEmployees: async () => { },
   allUsers: [],
   allUsersLoading: true,
-  refetchAllUsers: async () => {},
+  refetchAllUsers: async () => { },
   squads: [],
   squadsLoading: true,
-  refetchSquads: async () => {},
+  refetchSquads: async () => { },
   addSquad: async () => ({ id: 0, name: "", members: [] }),
-  removeSquad: async () => {},
+  removeSquad: async () => { },
   departments: [],
   loading: true,
-  refetchAll: async () => {},
+  refetchAll: async () => { },
 };
 
 export function useOrganization() {
   const context = useContext(OrganizationContext);
-  // Return default context during HMR or when used outside provider
-  // This prevents crashes during hot reload
   if (context === undefined) {
     return defaultOrganizationContext;
   }

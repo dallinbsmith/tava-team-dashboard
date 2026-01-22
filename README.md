@@ -254,7 +254,10 @@ You should see:
 │   │
 │   ├── components/            # Global UI components (BaseModal, Button, etc.)
 │   ├── hooks/                 # Global React hooks
-│   ├── lib/                   # API client utilities
+│   ├── lib/                   # Utilities
+│   │   ├── api.ts             # Client-side API utilities
+│   │   ├── server-actions.ts  # Shared Server Action utilities
+│   │   └── auth0.ts           # Auth0 client configuration
 │   └── providers/             # React context providers
 │
 ├── docker-compose.yml         # PostgreSQL container config
@@ -267,14 +270,18 @@ The frontend follows a **co-located architecture** where each page folder contai
 
 ```
 app/(pages)/(dashboard)/time-off/
-├── page.tsx            # Next.js page component
+├── page.tsx            # Server Component (data fetching)
+├── TimeOffPageClient.tsx # Client Component (interactivity)
+├── loading.tsx         # Loading UI (shown during navigation)
+├── error.tsx           # Error boundary (graceful error handling)
+├── actions.ts          # Server Actions (mutations)
 ├── components/         # Page-specific React components
 │   ├── TimeOffRequestForm.tsx
 │   ├── TimeOffRequestList.tsx
 │   └── ...
 ├── types.ts            # TypeScript types for this page
-├── api.ts              # API functions (fetch calls)
-├── hooks.ts            # React Query hooks for data fetching
+├── api.ts              # API functions (server-side fetching)
+├── hooks.ts            # React Query hooks for client-side data
 └── index.ts            # Barrel export for clean imports
 ```
 
@@ -283,6 +290,89 @@ app/(pages)/(dashboard)/time-off/
 - **Clear boundaries**: Each page folder is self-contained
 - **Easy navigation**: Find everything related to a feature in one place
 - **Shared code**: Common types and components live in `shared/`
+
+### Next.js 15 Optimizations
+
+The frontend leverages Next.js 15 App Router features for optimal performance:
+
+#### Server Components
+
+Pages use React Server Components for server-side data fetching, reducing client-side JavaScript:
+
+```
+app/(pages)/(dashboard)/calendar/
+├── page.tsx              # Server Component - fetches data on server
+├── CalendarPageClient.tsx # Client Component - handles interactivity
+└── components/           # Mix of server and client components
+```
+
+#### Server Actions
+
+Mutations use Next.js Server Actions instead of client-side API calls:
+
+```typescript
+// app/(pages)/(dashboard)/calendar/actions.ts
+"use server";
+
+export async function createMeetingAction(data: CreateMeetingRequest): Promise<ActionResult<Meeting>> {
+  const res = await authPost("/api/calendar/meetings", data);
+  // ...
+  revalidatePath("/calendar");
+  return success(meeting);
+}
+```
+
+**Server Actions are implemented for:**
+- Calendar (tasks, meetings, responses)
+- Time-off (requests, reviews, cancellations)
+- Org chart (drafts, changes, squads, departments)
+- Invitations (create, revoke)
+
+#### Shared Server Action Utilities
+
+Common patterns are centralized in `lib/server-actions.ts`:
+
+```typescript
+import { authPost, authPut, authDelete, success, failure } from "@/lib/server-actions";
+
+// Type-safe results
+type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
+
+// Authenticated fetch helpers
+const res = await authPost("/api/endpoint", body);
+return success(data);  // or failure("error message")
+```
+
+#### Suspense Boundaries & Loading States
+
+Each route has dedicated loading and error states:
+
+```
+app/(pages)/(dashboard)/calendar/
+├── loading.tsx   # Skeleton UI shown during navigation
+├── error.tsx     # Error boundary for graceful error handling
+└── page.tsx
+```
+
+**Dashboard uses code splitting with React.lazy():**
+```typescript
+const JiraTasks = lazy(() => import("./components/JiraTasks"));
+const CalendarWidget = lazy(() => import("./components/CalendarWidget"));
+
+<Suspense fallback={<JiraTasksSkeleton />}>
+  <JiraTasks />
+</Suspense>
+```
+
+#### Performance Benefits
+
+| Optimization | Benefit |
+|-------------|---------|
+| Server Components | Reduced client JS bundle, faster initial load |
+| Server Actions | Type-safe mutations, automatic revalidation |
+| Suspense boundaries | Non-blocking UI, progressive loading |
+| Code splitting | Lazy-loaded widgets, smaller initial bundle |
+| Route-level loading states | Instant navigation feedback |
 
 ---
 
@@ -374,13 +464,20 @@ All REST endpoints require a valid Auth0 Bearer token in the `Authorization` hea
 
 ## Features
 
+### Core Features
 - **Auth0 Authentication**: Secure login via Auth0 Universal Login
 - **Role-Based Access Control**: Supervisors see their direct reports (employees and other supervisors), employees see only themselves
-- **Server-Side Rendering**: Dashboard data fetched on the server for fast initial load
 - **Auto-Provisioning**: Users are automatically created in the database on first login
 - **Search & Filter**: Client-side filtering by name, email, or department
 - **Department Grouping**: Employees are grouped by department in the list view
 - **Responsive Design**: Works on desktop and mobile devices
+
+### Performance Features
+- **Server Components**: Data fetched on the server for fast initial load
+- **Server Actions**: Type-safe mutations with automatic cache revalidation
+- **Suspense Boundaries**: Progressive loading with skeleton UIs
+- **Code Splitting**: Lazy-loaded dashboard widgets for smaller bundles
+- **Route-Level Loading States**: Instant navigation feedback
 
 ---
 

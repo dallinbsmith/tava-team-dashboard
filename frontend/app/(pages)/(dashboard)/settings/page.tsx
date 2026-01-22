@@ -26,7 +26,6 @@ export default async function SettingsPage() {
       initialJiraSettings={jiraSettings}
       initialJiraUsers={jiraUsers}
       initialAllUsers={allUsers}
-      currentUser={currentUser}
       isAdmin={isAdmin}
     />
   );

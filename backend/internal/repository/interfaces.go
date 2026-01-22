@@ -10,6 +10,7 @@ import (
 // UserRepository defines the interface for user data access
 type UserRepository interface {
 	GetByID(ctx context.Context, id int64) (*models.User, error)
+	GetByIDs(ctx context.Context, ids []int64) ([]models.User, error)
 	GetByAuth0ID(ctx context.Context, auth0ID string) (*models.User, error)
 	GetByEmail(ctx context.Context, email string) (*models.User, error)
 	GetAll(ctx context.Context) ([]models.User, error)

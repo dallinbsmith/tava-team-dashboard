@@ -139,7 +139,7 @@ func (r *SquadRepository) SetUserSquads(ctx context.Context, userID int64, squad
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	if err := r.setUserSquadsWithExecutor(ctx, tx, userID, squadIDs); err != nil {
 		return err
@@ -174,11 +174,11 @@ func (r *SquadRepository) setUserSquadsWithExecutor(ctx context.Context, tx pgx.
 		for i := 0; i < len(squadIDs); i++ {
 			_, err := br.Exec()
 			if err != nil {
-				br.Close()
+				_ = br.Close()
 				return fmt.Errorf("failed to insert squad membership: %w", err)
 			}
 		}
-		br.Close()
+		_ = br.Close()
 	}
 	return nil
 }

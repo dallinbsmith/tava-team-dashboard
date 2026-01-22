@@ -7,7 +7,6 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 // It receives the code and state, then forwards them to the backend
 export async function GET(request: NextRequest) {
   try {
-    // Get the authorization code and state from query params
     const url = new URL(request.url);
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
@@ -15,7 +14,6 @@ export async function GET(request: NextRequest) {
     const errorDescription = url.searchParams.get("error_description");
 
     if (error) {
-      // Redirect to settings page with error
       const settingsUrl = new URL("/settings", request.url);
       settingsUrl.searchParams.set("jira_error", error);
       if (errorDescription) {
@@ -31,7 +29,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(settingsUrl);
     }
 
-    // Get access token for backend request
     const result = await auth0.getAccessToken();
     const accessToken = result?.token;
 
@@ -40,7 +37,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // Forward the code and state to the backend to exchange for tokens
     const backendUrl = `${BACKEND_URL}/api/jira/oauth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
 
     const backendResponse = await fetch(backendUrl, {
@@ -60,7 +56,6 @@ export async function GET(request: NextRequest) {
 
     const data = await backendResponse.json();
 
-    // Redirect to settings page with success
     const settingsUrl = new URL("/settings", request.url);
     settingsUrl.searchParams.set("jira_connected", "true");
     if (data.site_name) {

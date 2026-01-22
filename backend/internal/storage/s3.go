@@ -28,6 +28,7 @@ type S3Storage struct {
 	bucket    string
 	publicURL string
 	region    string
+	timeout   time.Duration
 }
 
 // NewS3Storage creates a new S3 storage instance
@@ -73,11 +74,16 @@ func NewS3Storage(cfg *appconfig.Config) (*S3Storage, error) {
 		bucket:    cfg.S3Bucket,
 		publicURL: cfg.S3PublicURL,
 		region:    cfg.S3Region,
+		timeout:   time.Duration(cfg.S3TimeoutSecs) * time.Second,
 	}, nil
 }
 
 // Upload uploads a file to S3 and returns the public URL
 func (s *S3Storage) Upload(ctx context.Context, key string, data []byte, contentType string) (string, error) {
+	// Apply timeout to prevent indefinite blocking on slow uploads
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
 	input := &s3.PutObjectInput{
 		Bucket:      aws.String(s.bucket),
 		Key:         aws.String(key),
@@ -95,6 +101,10 @@ func (s *S3Storage) Upload(ctx context.Context, key string, data []byte, content
 
 // Delete removes a file from S3
 func (s *S3Storage) Delete(ctx context.Context, key string) error {
+	// Apply timeout to prevent indefinite blocking
+	ctx, cancel := context.WithTimeout(ctx, s.timeout)
+	defer cancel()
+
 	input := &s3.DeleteObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(key),

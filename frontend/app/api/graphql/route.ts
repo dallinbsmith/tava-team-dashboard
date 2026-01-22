@@ -10,7 +10,6 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
  */
 export async function POST(request: NextRequest) {
   try {
-    // Get access token server-side (from Auth0 session cookies)
     const result = await auth0.getAccessToken();
     const accessToken = result?.token;
 
@@ -21,10 +20,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get the GraphQL request body
     const body = await request.text();
 
-    // Forward to backend GraphQL endpoint
     const backendResponse = await fetch(`${BACKEND_URL}/graphql`, {
       method: "POST",
       headers: {
@@ -34,7 +31,6 @@ export async function POST(request: NextRequest) {
       body,
     });
 
-    // Get response and forward it
     const responseData = await backendResponse.json();
 
     return NextResponse.json(responseData, {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Calendar as BigCalendar, dateFnsLocalizer, View, SlotInfo } from "react-big-calendar";
+import { Calendar as BigCalendar, dateFnsLocalizer, View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -19,19 +19,14 @@ import {
   Plus,
   AlertCircle,
   Calendar as CalendarIcon,
-  ChevronDown,
   CheckSquare,
   Users,
   Palmtree,
   UserPlus,
-  UsersRound,
 } from "lucide-react";
 
 // Convert team time off request to CalendarEvent format
 function timeOffToCalendarEvent(timeOff: TimeOffRequest): CalendarEvent {
-  const userName = timeOff.user
-    ? `${timeOff.user.first_name} ${timeOff.user.last_name}`.trim()
-    : "Unknown";
   const typeLabel = TIME_OFF_TYPE_LABELS[timeOff.request_type] || timeOff.request_type;
 
   return {
@@ -147,12 +142,12 @@ export default function Calendar({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleAction = (action: (() => void) | undefined) => {
+  const handleAction = useCallback((action: (() => void) | undefined) => {
     if (action) {
       action();
       setAddMenuOpen(false);
     }
-  };
+  }, []);
 
   const hasAnyAction = onCreateTask || onCreateEvent || onCreateMeeting || onRequestTimeOff || onCreateTimeOffForEmployee;
 
@@ -285,7 +280,7 @@ export default function Calendar({
     }
   }, [onEventClick, onViewTask, onViewMeeting, onViewTimeOff]);
 
-  const handleSelectSlot = useCallback((slotInfo: SlotInfo) => {
+  const handleSelectSlot = useCallback(() => {
     if (onCreateTask) {
       onCreateTask();
     }

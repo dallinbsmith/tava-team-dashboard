@@ -5,22 +5,16 @@ import { LucideIcon, Inbox } from "lucide-react";
 import { Button, ButtonVariant } from "./Button";
 
 export interface EmptyStateProps {
-  /** Icon to display */
   icon?: LucideIcon;
-  /** Main title */
   title: string;
-  /** Optional description/subtitle */
   description?: string;
-  /** Optional action button */
   action?: {
     label: string;
     onClick: () => void;
     variant?: ButtonVariant;
     icon?: LucideIcon;
   };
-  /** Additional content */
   children?: ReactNode;
-  /** Additional className */
   className?: string;
 }
 
@@ -84,17 +78,10 @@ export function EmptyState({
   );
 }
 
-/**
- * NoResults Component
- *
- * A specialized empty state for search/filter results.
- */
+
 export interface NoResultsProps {
-  /** Search query that returned no results */
   query?: string;
-  /** Optional clear filters action */
   onClearFilters?: () => void;
-  /** Additional className */
   className?: string;
 }
 
@@ -110,10 +97,10 @@ export function NoResults({ query, onClearFilters, className = "" }: NoResultsPr
       action={
         onClearFilters
           ? {
-              label: "Clear filters",
-              onClick: onClearFilters,
-              variant: "secondary",
-            }
+            label: "Clear filters",
+            onClick: onClearFilters,
+            variant: "secondary",
+          }
           : undefined
       }
       className={className}

@@ -5,11 +5,8 @@ import { AlertTriangle, RefreshCw, Home, ChevronDown, ChevronUp } from "lucide-r
 
 interface ErrorBoundaryProps {
   children: ReactNode;
-  /** Optional fallback component to render when an error occurs */
   fallback?: ReactNode | ((error: Error, resetError: () => void) => ReactNode);
-  /** Called when an error is caught */
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
-  /** If true, shows minimal UI suitable for small components */
   minimal?: boolean;
 }
 
@@ -65,13 +62,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     this.setState({ errorInfo });
 
-    // Log to console in development
     if (process.env.NODE_ENV === "development") {
       console.error("Error caught by ErrorBoundary:", error);
       console.error("Component stack:", errorInfo.componentStack);
     }
 
-    // Call the onError callback if provided
     this.props.onError?.(error, errorInfo);
   }
 
@@ -96,7 +91,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return children;
     }
 
-    // Custom fallback
     if (fallback) {
       if (typeof fallback === "function") {
         return fallback(error!, this.resetError);
@@ -104,7 +98,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return fallback;
     }
 
-    // Minimal error UI for small components
     if (minimal) {
       return (
         <div className="p-4 bg-red-900/20 border border-red-500/30 text-center">
@@ -120,7 +113,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       );
     }
 
-    // Default full error UI
     return (
       <div className="min-h-[300px] flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-theme-surface border border-theme-border p-6">

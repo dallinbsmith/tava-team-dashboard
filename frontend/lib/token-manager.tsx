@@ -8,6 +8,7 @@ import React, {
   useRef,
   useEffect,
 } from "react";
+import { TOKEN } from "@/lib/constants";
 
 interface TokenState {
   accessToken: string | null;
@@ -21,9 +22,6 @@ interface TokenContextType {
 }
 
 const TokenContext = createContext<TokenContextType | null>(null);
-
-// Buffer time before expiry to refresh (60 seconds)
-const EXPIRY_BUFFER_MS = 60 * 1000;
 
 // Token is stored in memory only - not in localStorage or sessionStorage
 // This protects against XSS attacks since JavaScript from malicious scripts
@@ -163,7 +161,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     if (
       inMemoryToken.accessToken &&
       inMemoryToken.expiresAt &&
-      Date.now() < inMemoryToken.expiresAt - EXPIRY_BUFFER_MS
+      Date.now() < inMemoryToken.expiresAt - TOKEN.EXPIRY_BUFFER_MS
     ) {
       return inMemoryToken.accessToken;
     }

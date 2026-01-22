@@ -4,25 +4,15 @@ import { useEffect, useCallback, ReactNode } from "react";
 import { X } from "lucide-react";
 
 export interface BaseModalProps {
-  /** Whether the modal is open */
   isOpen: boolean;
-  /** Callback when the modal should close */
   onClose: () => void;
-  /** Modal title displayed in header */
   title: string;
-  /** Optional subtitle/description */
   subtitle?: string;
-  /** Modal content */
   children: ReactNode;
-  /** Optional footer content (buttons, etc.) */
   footer?: ReactNode;
-  /** Max width class (default: max-w-md) */
   maxWidth?: "max-w-sm" | "max-w-md" | "max-w-lg" | "max-w-xl" | "max-w-2xl";
-  /** Whether clicking the backdrop closes the modal (default: true) */
   closeOnBackdropClick?: boolean;
-  /** Whether pressing Escape closes the modal (default: true) */
   closeOnEscape?: boolean;
-  /** Custom className for the modal container */
   className?: string;
 }
 
@@ -72,7 +62,6 @@ export function BaseModal({
   closeOnEscape = true,
   className = "",
 }: BaseModalProps) {
-  // Handle Escape key
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (closeOnEscape && event.key === "Escape") {
@@ -82,11 +71,9 @@ export function BaseModal({
     [closeOnEscape, onClose]
   );
 
-  // Add/remove event listener for Escape key
   useEffect(() => {
     if (isOpen) {
       document.addEventListener("keydown", handleKeyDown);
-      // Prevent body scroll when modal is open
       document.body.style.overflow = "hidden";
     }
 
@@ -135,11 +122,7 @@ export function BaseModal({
             <X className="w-5 h-5" />
           </button>
         </div>
-
-        {/* Content */}
         <div className="p-6">{children}</div>
-
-        {/* Footer */}
         {footer && (
           <div className="px-6 py-4 border-t border-theme-border">{footer}</div>
         )}

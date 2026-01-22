@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { Meeting, UpdateMeetingRequest, ResponseStatus } from "../types";
-import { updateMeeting, deleteMeeting, getMeeting, respondToMeeting } from "../api";
+import { getMeeting } from "../api";
+import { updateMeetingAction, deleteMeetingAction, respondToMeetingAction } from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal } from "@/components";
@@ -45,9 +46,7 @@ export default function ViewMeetingModal({
 
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [responding, setResponding] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -109,14 +108,12 @@ export default function ViewMeetingModal({
   const handleSave = async () => {
     if (!meeting) return;
     setError(null);
-    setSaving(true);
 
     const startDateTime = new Date(`${startDate}T${startTime}`);
     const endDateTime = new Date(`${endDate}T${endTime}`);
 
     if (endDateTime <= startDateTime) {
       setError("End time must be after start time");
-      setSaving(false);
       return;
     }
 
@@ -128,53 +125,48 @@ export default function ViewMeetingModal({
       attendee_ids: attendeeIds,
     };
 
-    try {
-      const updated = await updateMeeting(meeting.id, updates);
-      setMeeting(updated);
-      setIsEditing(false);
-      onUpdated();
-    } catch (e) {
-      console.error("Failed to update meeting:", e);
-      setError("Failed to update meeting");
-    } finally {
-      setSaving(false);
-    }
+    startTransition(async () => {
+      const result = await updateMeetingAction(meeting.id, updates);
+      if (result.success) {
+        setMeeting(result.data);
+        setIsEditing(false);
+        onUpdated();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   const handleDelete = async () => {
     if (!meeting) return;
-    setDeleting(true);
     setError(null);
 
-    try {
-      await deleteMeeting(meeting.id);
-      handleClose();
-      onUpdated();
-    } catch (e) {
-      console.error("Failed to delete meeting:", e);
-      setError("Failed to delete meeting");
-    } finally {
-      setDeleting(false);
-    }
+    startTransition(async () => {
+      const result = await deleteMeetingAction(meeting.id);
+      if (result.success) {
+        handleClose();
+        onUpdated();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   const handleRespond = async (response: ResponseStatus) => {
     if (!meeting) return;
-    setResponding(true);
     setError(null);
 
-    try {
-      await respondToMeeting(meeting.id, response);
-      // Refresh meeting data
-      const updated = await getMeeting(meeting.id);
-      setMeeting(updated);
-      onUpdated();
-    } catch (e) {
-      console.error("Failed to respond to meeting:", e);
-      setError("Failed to update response");
-    } finally {
-      setResponding(false);
-    }
+    startTransition(async () => {
+      const result = await respondToMeetingAction(meeting.id, response);
+      if (result.success) {
+        // Refresh meeting data
+        const updated = await getMeeting(meeting.id);
+        setMeeting(updated);
+        onUpdated();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   const getCreatorName = () => {
@@ -302,10 +294,10 @@ export default function ViewMeetingModal({
             </button>
             <button
               onClick={handleSave}
-              disabled={saving || !title.trim()}
+              disabled={isPending || !title.trim()}
               className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
-              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               Save Changes
             </button>
           </div>
@@ -327,10 +319,10 @@ export default function ViewMeetingModal({
             </button>
             <button
               onClick={handleDelete}
-              disabled={deleting}
+              disabled={isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
-              {deleting && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               Delete Meeting
             </button>
           </div>
@@ -434,7 +426,7 @@ export default function ViewMeetingModal({
               <div className="flex gap-2">
                 <button
                   onClick={() => handleRespond("accepted")}
-                  disabled={responding}
+                  disabled={isPending}
                   className={`flex-1 px-3 py-2 text-sm font-medium rounded transition-colors flex items-center justify-center gap-2 ${
                     currentUserAttendee?.response_status === "accepted"
                       ? "bg-green-600 text-white"
@@ -446,7 +438,7 @@ export default function ViewMeetingModal({
                 </button>
                 <button
                   onClick={() => handleRespond("tentative")}
-                  disabled={responding}
+                  disabled={isPending}
                   className={`flex-1 px-3 py-2 text-sm font-medium rounded transition-colors flex items-center justify-center gap-2 ${
                     currentUserAttendee?.response_status === "tentative"
                       ? "bg-blue-600 text-white"
@@ -458,7 +450,7 @@ export default function ViewMeetingModal({
                 </button>
                 <button
                   onClick={() => handleRespond("declined")}
-                  disabled={responding}
+                  disabled={isPending}
                   className={`flex-1 px-3 py-2 text-sm font-medium rounded transition-colors flex items-center justify-center gap-2 ${
                     currentUserAttendee?.response_status === "declined"
                       ? "bg-red-600 text-white"

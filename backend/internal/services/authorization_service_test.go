@@ -581,3 +581,148 @@ func TestAuthorizationService_CanPublishOrgChart(t *testing.T) {
 		})
 	}
 }
+
+func TestAuthorizationService_CanCreateTimeOffForOther(t *testing.T) {
+	supervisorID := int64(1)
+
+	tests := []struct {
+		name         string
+		currentUser  *models.User
+		targetUserID int64
+		setupMocks   func(*mocks.MockUserRepository)
+		wantErr      bool
+		errType      apperrors.ErrorType
+	}{
+		{
+			name:         "admin can create time off for anyone",
+			currentUser:  &models.User{ID: 1, Role: models.RoleAdmin},
+			targetUserID: 2,
+			setupMocks:   func(m *mocks.MockUserRepository) {},
+			wantErr:      false,
+		},
+		{
+			name:         "supervisor can create time off for direct report",
+			currentUser:  &models.User{ID: 1, Role: models.RoleSupervisor},
+			targetUserID: 2,
+			setupMocks: func(m *mocks.MockUserRepository) {
+				m.AddUser(&models.User{
+					ID:           2,
+					Role:         models.RoleEmployee,
+					SupervisorID: &supervisorID,
+				})
+			},
+			wantErr: false,
+		},
+		{
+			name:         "supervisor cannot create time off for non-report",
+			currentUser:  &models.User{ID: 1, Role: models.RoleSupervisor},
+			targetUserID: 3,
+			setupMocks: func(m *mocks.MockUserRepository) {
+				otherSupervisorID := int64(99)
+				m.AddUser(&models.User{
+					ID:           3,
+					Role:         models.RoleEmployee,
+					SupervisorID: &otherSupervisorID,
+				})
+			},
+			wantErr: true,
+			errType: apperrors.ErrorTypeForbidden,
+		},
+		{
+			name:         "supervisor cannot create time off for user with no supervisor",
+			currentUser:  &models.User{ID: 1, Role: models.RoleSupervisor},
+			targetUserID: 4,
+			setupMocks: func(m *mocks.MockUserRepository) {
+				m.AddUser(&models.User{
+					ID:           4,
+					Role:         models.RoleEmployee,
+					SupervisorID: nil,
+				})
+			},
+			wantErr: true,
+			errType: apperrors.ErrorTypeForbidden,
+		},
+		{
+			name:         "employee cannot create time off for others",
+			currentUser:  &models.User{ID: 2, Role: models.RoleEmployee},
+			targetUserID: 3,
+			setupMocks:   func(m *mocks.MockUserRepository) {},
+			wantErr:      true,
+			errType:      apperrors.ErrorTypeForbidden,
+		},
+		{
+			name:         "returns error when target user not found",
+			currentUser:  &models.User{ID: 1, Role: models.RoleSupervisor},
+			targetUserID: 999,
+			setupMocks:   func(m *mocks.MockUserRepository) {}, // No user added
+			wantErr:      true,
+			errType:      apperrors.ErrorTypeNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			userRepo := mocks.NewMockUserRepository()
+			tt.setupMocks(userRepo)
+
+			svc := NewAuthorizationService(userRepo)
+			err := svc.CanCreateTimeOffForOther(context.Background(), tt.currentUser, tt.targetUserID)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("CanCreateTimeOffForOther() expected error, got nil")
+					return
+				}
+				if tt.errType != 0 {
+					if appErr, ok := err.(*apperrors.AppError); ok {
+						if appErr.Type != tt.errType {
+							t.Errorf("CanCreateTimeOffForOther() error type = %v, want %v", appErr.Type, tt.errType)
+						}
+					}
+				}
+			} else {
+				if err != nil {
+					t.Errorf("CanCreateTimeOffForOther() unexpected error: %v", err)
+				}
+			}
+		})
+	}
+}
+
+func TestAuthorizationService_CanManageDepartments(t *testing.T) {
+	tests := []struct {
+		name        string
+		currentUser *models.User
+		wantErr     bool
+	}{
+		{
+			name:        "admin can manage departments",
+			currentUser: &models.User{ID: 1, Role: models.RoleAdmin},
+			wantErr:     false,
+		},
+		{
+			name:        "supervisor can manage departments",
+			currentUser: &models.User{ID: 1, Role: models.RoleSupervisor},
+			wantErr:     false,
+		},
+		{
+			name:        "employee cannot manage departments",
+			currentUser: &models.User{ID: 1, Role: models.RoleEmployee},
+			wantErr:     true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			svc := NewAuthorizationService(nil)
+			err := svc.CanManageDepartments(tt.currentUser)
+
+			if tt.wantErr && err == nil {
+				t.Errorf("CanManageDepartments() expected error, got nil")
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("CanManageDepartments() unexpected error: %v", err)
+			}
+		})
+	}
+}

@@ -258,7 +258,7 @@ export default function CreateTimeOffForEmployeeModal({
                   </span>
                 </label>
                 <p className="text-xs text-theme-text-muted mt-1 ml-6">
-                  Since you're creating this request, it can be automatically approved.
+                  Since you&apos;re creating this request, it can be automatically approved.
                 </p>
               </div>
 

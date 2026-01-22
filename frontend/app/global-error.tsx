@@ -7,16 +7,8 @@ interface GlobalErrorProps {
   reset: () => void;
 }
 
-/**
- * Global Error Boundary
- *
- * This component catches errors in the root layout.
- * It must include its own <html> and <body> tags because it
- * replaces the root layout when an error occurs.
- */
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   useEffect(() => {
-    // Log the error to an error reporting service
     console.error("Global error:", error);
   }, [error]);
 

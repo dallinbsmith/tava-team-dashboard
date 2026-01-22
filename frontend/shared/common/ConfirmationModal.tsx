@@ -34,7 +34,6 @@ export default function ConfirmationModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Handle Escape key
   useEffect(() => {
     if (!isOpen || loading) return;
 
@@ -48,23 +47,17 @@ export default function ConfirmationModal({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, loading, onClose]);
 
-  // Focus trap and auto-focus
   useEffect(() => {
     if (!isOpen) return;
 
-    // Auto-focus the cancel button when modal opens
     cancelButtonRef.current?.focus();
-
-    // Store the element that was focused before the modal opened
     const previouslyFocused = document.activeElement as HTMLElement;
 
     return () => {
-      // Restore focus when modal closes
       previouslyFocused?.focus?.();
     };
   }, [isOpen]);
 
-  // Handle Tab key for focus trap
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       if (event.key !== "Tab" || !modalRef.current) return;
@@ -79,13 +72,11 @@ export default function ConfirmationModal({
       const lastElement = focusableElements[focusableElements.length - 1];
 
       if (event.shiftKey) {
-        // Shift + Tab: if on first element, go to last
         if (document.activeElement === firstElement) {
           event.preventDefault();
           lastElement.focus();
         }
       } else {
-        // Tab: if on last element, go to first
         if (document.activeElement === lastElement) {
           event.preventDefault();
           firstElement.focus();

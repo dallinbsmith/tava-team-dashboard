@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 
+	"github.com/smith-dallin/manager-dashboard/internal/logger"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 	"github.com/smith-dallin/manager-dashboard/internal/repository"
 	"github.com/smith-dallin/manager-dashboard/internal/services"
@@ -18,6 +18,7 @@ type AvatarHandlers struct {
 	userRepo      repository.UserRepository
 	avatarService *services.AvatarService
 	maxSizeMB     int
+	logger        *logger.Logger
 }
 
 // NewAvatarHandlers creates a new avatar handlers instance
@@ -34,6 +35,7 @@ func NewAvatarHandlersWithConfig(userRepo repository.UserRepository, avatarServi
 		userRepo:      userRepo,
 		avatarService: avatarService,
 		maxSizeMB:     maxSizeMB,
+		logger:        logger.Default().WithComponent("avatar"),
 	}
 }
 
@@ -88,7 +90,7 @@ func (h *AvatarHandlers) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, "No file uploaded")
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// Validate file type
 	contentType := header.Header.Get("Content-Type")
@@ -135,7 +137,7 @@ func (h *AvatarHandlers) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, user)
+	respondJSON(w, http.StatusOK, user.ToUserResponse())
 }
 
 // UploadAvatarBase64 handles avatar upload as base64 encoded data
@@ -169,7 +171,7 @@ func (h *AvatarHandlers) UploadAvatarBase64(w http.ResponseWriter, r *http.Reque
 	// Upload using the avatar service
 	avatarURL, err := h.avatarService.Upload(r.Context(), id, img)
 	if err != nil {
-		log.Printf("Avatar upload (base64) failed for user %d: %v", id, err)
+		h.logger.LogError(r.Context(), "Avatar upload (base64) failed", err, "user_id", id)
 		respondError(w, http.StatusInternalServerError, "Failed to upload file")
 		return
 	}
@@ -185,5 +187,5 @@ func (h *AvatarHandlers) UploadAvatarBase64(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	respondJSON(w, http.StatusOK, user)
+	respondJSON(w, http.StatusOK, user.ToUserResponse())
 }

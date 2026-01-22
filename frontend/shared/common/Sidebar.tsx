@@ -22,7 +22,6 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
 
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -30,12 +29,10 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed left-0 top-0 h-full w-64 bg-theme-sidebar border-r border-theme-border flex flex-col z-50 transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }`}
       >
-        {/* Logo/Brand */}
         <div className="px-3 py-3 border-b border-theme-border flex items-center justify-between">
           <div className="ml-2">
             <Link href="/" onClick={onToggle} className="flex items-center gap-1">
@@ -46,7 +43,6 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
               />
             </Link>
           </div>
-          {/* Mobile close button */}
           <button
             onClick={onToggle}
             className="lg:hidden p-1 text-theme-text-muted hover:text-theme-text transition-colors"
@@ -56,7 +52,6 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
           </button>
         </div>
 
-        {/* Navigation Links */}
         <nav className="flex-1 px-4 py-6">
           <ul className="space-y-2">
             <li>
@@ -165,7 +160,6 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
           </ul>
         </nav>
 
-        {/* User Profile & Logout */}
         <div className="px-4 py-4 border-t border-theme-border">
           <div className="flex items-center gap-3 px-4 py-3 mb-2">
             <Avatar

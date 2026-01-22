@@ -38,12 +38,9 @@ export function CreateEmployeeModal({
     date_started: "",
   });
 
-  // Squad dropdown state
   const [squadDropdownOpen, setSquadDropdownOpen] = useState(false);
   const [newSquadName, setNewSquadName] = useState("");
   const [creatingSquad, setCreatingSquad] = useState(false);
-
-  // Department dropdown state
   const [departmentDropdownOpen, setDepartmentDropdownOpen] = useState(false);
   const [departmentSearch, setDepartmentSearch] = useState("");
 
@@ -409,26 +406,23 @@ export function CreateEmployeeModal({
             <button
               type="button"
               onClick={() => setNewEmployee({ ...newEmployee, role: "employee" })}
-              className={`p-3 border text-left transition-colors ${
-                newEmployee.role === "employee"
+              className={`p-3 border text-left transition-colors ${newEmployee.role === "employee"
                   ? "border-primary-500 bg-primary-500/10"
                   : "border-theme-border bg-theme-elevated hover:border-theme-text-muted"
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 <UserIcon
-                  className={`w-4 h-4 ${
-                    newEmployee.role === "employee"
+                  className={`w-4 h-4 ${newEmployee.role === "employee"
                       ? "text-primary-400"
                       : "text-theme-text-muted"
-                  }`}
+                    }`}
                 />
                 <span
-                  className={`font-medium ${
-                    newEmployee.role === "employee"
+                  className={`font-medium ${newEmployee.role === "employee"
                       ? "text-primary-400"
                       : "text-theme-text"
-                  }`}
+                    }`}
                 >
                   Employee
                 </span>
@@ -439,26 +433,23 @@ export function CreateEmployeeModal({
             <button
               type="button"
               onClick={() => setNewEmployee({ ...newEmployee, role: "supervisor" })}
-              className={`p-3 border text-left transition-colors ${
-                newEmployee.role === "supervisor"
+              className={`p-3 border text-left transition-colors ${newEmployee.role === "supervisor"
                   ? "border-primary-500 bg-primary-500/10"
                   : "border-theme-border bg-theme-elevated hover:border-theme-text-muted"
-              }`}
+                }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Shield
-                  className={`w-4 h-4 ${
-                    newEmployee.role === "supervisor"
+                  className={`w-4 h-4 ${newEmployee.role === "supervisor"
                       ? "text-primary-400"
                       : "text-theme-text-muted"
-                  }`}
+                    }`}
                 />
                 <span
-                  className={`font-medium ${
-                    newEmployee.role === "supervisor"
+                  className={`font-medium ${newEmployee.role === "supervisor"
                       ? "text-primary-400"
                       : "text-theme-text"
-                  }`}
+                    }`}
                 >
                   Supervisor
                 </span>

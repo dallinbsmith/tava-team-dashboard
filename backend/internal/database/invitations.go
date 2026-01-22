@@ -9,6 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/smith-dallin/manager-dashboard/internal/logger"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 )
 
@@ -23,12 +24,17 @@ const (
 type InvitationRepository struct {
 	pool       *pgxpool.Pool
 	expiryDays int
+	logger     *logger.Logger
 }
 
 // NewInvitationRepository creates a new invitation repository
 // expiryDays specifies how many days until an invitation expires (default: 7)
 func NewInvitationRepository(pool *pgxpool.Pool) *InvitationRepository {
-	return &InvitationRepository{pool: pool, expiryDays: 7}
+	return &InvitationRepository{
+		pool:       pool,
+		expiryDays: 7,
+		logger:     logger.Default().WithComponent("invitation-repo"),
+	}
 }
 
 // NewInvitationRepositoryWithConfig creates a new invitation repository with custom expiry
@@ -36,7 +42,11 @@ func NewInvitationRepositoryWithConfig(pool *pgxpool.Pool, expiryDays int) *Invi
 	if expiryDays <= 0 {
 		expiryDays = 7
 	}
-	return &InvitationRepository{pool: pool, expiryDays: expiryDays}
+	return &InvitationRepository{
+		pool:       pool,
+		expiryDays: expiryDays,
+		logger:     logger.Default().WithComponent("invitation-repo"),
+	}
 }
 
 // scanInvitation scans a row into an Invitation struct
@@ -177,7 +187,7 @@ func (r *InvitationRepository) Accept(ctx context.Context, token string, auth0ID
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Get and validate the invitation (including department and squad_ids)
 	var inv models.Invitation
@@ -198,8 +208,10 @@ func (r *InvitationRepository) Accept(ctx context.Context, token string, auth0ID
 		return nil, fmt.Errorf("invitation is no longer valid (status: %s)", inv.Status)
 	}
 	if time.Now().After(inv.ExpiresAt) {
-		// Mark as expired
-		_, _ = tx.Exec(ctx, `UPDATE invitations SET status = 'expired', updated_at = NOW() WHERE id = $1`, inv.ID)
+		// Mark as expired (log error but still return expiration error to caller)
+		if _, err := tx.Exec(ctx, `UPDATE invitations SET status = 'expired', updated_at = NOW() WHERE id = $1`, inv.ID); err != nil {
+			r.logger.Warn("Failed to mark invitation as expired", "invitation_id", inv.ID, "error", err.Error())
+		}
 		return nil, fmt.Errorf("invitation has expired")
 	}
 

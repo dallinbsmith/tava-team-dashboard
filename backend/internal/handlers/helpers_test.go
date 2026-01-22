@@ -16,6 +16,12 @@ func ctxWithUser(user *models.User) context.Context {
 	return context.WithValue(context.Background(), middleware.UserContextKey, user)
 }
 
+// ctxWithUserFrom creates a context with a user attached, using an existing context as base.
+// Useful when you need to preserve other context values (like chi route params).
+func ctxWithUserFrom(ctx context.Context, user *models.User) context.Context {
+	return context.WithValue(ctx, middleware.UserContextKey, user)
+}
+
 // ============================================
 // Pagination Helper Tests
 // ============================================
@@ -292,7 +298,7 @@ func TestRespondPaginated_HasMore(t *testing.T) {
 	respondPaginated(rr, items, total, p)
 
 	var response PaginatedResponse
-	json.NewDecoder(rr.Body).Decode(&response)
+	_ = json.NewDecoder(rr.Body).Decode(&response)
 
 	if !response.Pagination.HasMore {
 		t.Error("Pagination.HasMore should be true")

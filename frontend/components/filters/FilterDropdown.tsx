@@ -27,12 +27,10 @@ export default function FilterDropdown({
   const panelRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
-  // Ensure we're mounted before using portal
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Close filter panel when clicking outside
   useEffect(() => {
     if (!isOpen) return;
 
@@ -48,7 +46,6 @@ export default function FilterDropdown({
       }
     }
 
-    // Small delay to prevent the opening click from triggering close
     const timeoutId = setTimeout(() => {
       document.addEventListener("mousedown", handleClickOutside);
     }, 10);
@@ -59,7 +56,6 @@ export default function FilterDropdown({
     };
   }, [isOpen, onClose]);
 
-  // Close on escape key
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -72,7 +68,6 @@ export default function FilterDropdown({
     }
   }, [isOpen, onClose]);
 
-  // Close on scroll (with small delay to avoid closing on layout shifts)
   useEffect(() => {
     if (isOpen) {
       let scrollListenerActive = false;
@@ -99,11 +94,10 @@ export default function FilterDropdown({
       <button
         ref={buttonRef}
         onClick={onToggle}
-        className={`relative p-2 transition-colors ${
-          isOpen || activeFilterCount > 0
+        className={`relative p-2 transition-colors ${isOpen || activeFilterCount > 0
             ? "bg-primary-500 text-white"
             : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-        }`}
+          }`}
         title={title}
       >
         <Filter className="w-4 h-4" />
@@ -114,7 +108,6 @@ export default function FilterDropdown({
         )}
       </button>
 
-      {/* Filter Dropdown Panel - rendered via portal */}
       {mounted && isOpen && buttonRef.current && createPortal(
         <DropdownPanel
           buttonRect={buttonRef.current.getBoundingClientRect()}
@@ -131,7 +124,6 @@ export default function FilterDropdown({
   );
 }
 
-// Separate component to handle positioning before paint
 function DropdownPanel({
   buttonRect,
   panelRef,
@@ -147,7 +139,7 @@ function DropdownPanel({
   title: string;
   children: React.ReactNode;
 }) {
-  // Calculate position synchronously from the button rect passed in
+
   const position = {
     top: buttonRect.bottom + 8,
     left: Math.min(buttonRect.left, window.innerWidth - 288 - 16),

@@ -58,3 +58,25 @@ export const UI = {
   /** Animation delay increment for staggered animations (ms) */
   STAGGER_DELAY: 100,
 } as const;
+
+// =============================================================================
+// ANIMATION CONSTANTS
+// =============================================================================
+
+export const ANIMATION = {
+  /** Duration for number counting animations (ms) */
+  COUNT_DURATION_MS: 1000,
+  /** Number of steps for smooth counting animations */
+  COUNT_STEPS: 30,
+} as const;
+
+// =============================================================================
+// TOKEN MANAGEMENT
+// =============================================================================
+
+export const TOKEN = {
+  /** Buffer time before token expiry to trigger refresh (ms) - 60 seconds */
+  EXPIRY_BUFFER_MS: 60 * 1000,
+  /** Default token expiry time if not provided by server (seconds) */
+  DEFAULT_EXPIRY_SECONDS: 3600,
+} as const;

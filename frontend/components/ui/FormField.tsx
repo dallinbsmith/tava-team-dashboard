@@ -6,49 +6,36 @@ const baseInputClass =
   "w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed";
 
 export interface FormFieldProps {
-  /** Field label */
   label: string;
-  /** Whether the field is required */
   required?: boolean;
-  /** Error message to display */
   error?: string;
-  /** Helper text below the input */
   helperText?: string;
-  /** Field ID (auto-generated if not provided) */
   id?: string;
-  /** Additional className for the wrapper */
   className?: string;
-  /** Children (for custom inputs) */
   children?: ReactNode;
 }
 
 interface InputFieldProps
   extends FormFieldProps,
-    Omit<React.InputHTMLAttributes<HTMLInputElement>, "id" | "className"> {
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, "id" | "className"> {
   /** Input type */
   type?: "text" | "email" | "password" | "date" | "time" | "number";
 }
 
 interface TextareaFieldProps
   extends FormFieldProps,
-    Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "id" | "className"> {
-  /** Number of rows */
+  Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "id" | "className"> {
   rows?: number;
 }
 
 interface SelectFieldProps
   extends FormFieldProps,
-    Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "id" | "className"> {
-  /** Select options */
+  Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "id" | "className"> {
   options: { value: string; label: string }[];
-  /** Placeholder option text */
   placeholder?: string;
 }
 
-/**
- * FormField wrapper component
- * Provides consistent label, error, and helper text styling for any form input
- */
+
 export function FormField({
   label,
   required,
@@ -76,9 +63,7 @@ export function FormField({
   );
 }
 
-/**
- * Input field component with label support
- */
+
 export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   (
     {
@@ -120,9 +105,7 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
 
 InputField.displayName = "InputField";
 
-/**
- * Textarea field component with label support
- */
+
 export const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
   (
     {
@@ -164,9 +147,7 @@ export const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>
 
 TextareaField.displayName = "TextareaField";
 
-/**
- * Select field component with label support
- */
+
 export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
   (
     {

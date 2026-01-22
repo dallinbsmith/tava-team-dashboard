@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -105,25 +106,33 @@ func (h *InvitationHandlers) CreateInvitation(w http.ResponseWriter, r *http.Req
 	})
 
 	// Send invitation email asynchronously (don't block API response)
+	// Use context.Background() since the email should complete independently of the HTTP request.
+	// The request context would be cancelled when the response is sent, causing premature cancellation.
 	if h.emailService != nil {
 		inviterName := fmt.Sprintf("%s %s", currentUser.FirstName, currentUser.LastName)
+		email := req.Email
+		token := invitation.Token
+		role := string(req.Role)
+		invitationID := invitation.ID
+		// Preserve request ID for log correlation in the background goroutine
+		asyncLogger := h.logger.WithContext(r.Context())
 		go func() {
-			if err := h.emailService.SendInvitation(r.Context(), req.Email, invitation.Token, string(req.Role), inviterName); err != nil {
-				h.logger.Error("Failed to send invitation email",
-					"email", req.Email,
-					"invitation_id", invitation.ID,
+			if err := h.emailService.SendInvitation(context.Background(), email, token, role, inviterName); err != nil {
+				asyncLogger.Error("Failed to send invitation email",
+					"email", email,
+					"invitation_id", invitationID,
 					"error", err,
 				)
 			} else {
-				h.logger.Info("Invitation email sent",
-					"email", req.Email,
-					"invitation_id", invitation.ID,
+				asyncLogger.Info("Invitation email sent",
+					"email", email,
+					"invitation_id", invitationID,
 				)
 			}
 		}()
 	}
 
-	respondJSON(w, http.StatusCreated, invitation)
+	respondJSON(w, http.StatusCreated, invitation.ToInvitationResponse())
 }
 
 // GetInvitations godoc
@@ -145,8 +154,10 @@ func (h *InvitationHandlers) GetInvitations(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Expire any pending invitations first
-	_ = h.invitationRepo.ExpirePending(r.Context())
+	// Expire any pending invitations first (non-critical, log errors but don't fail)
+	if err := h.invitationRepo.ExpirePending(r.Context()); err != nil {
+		h.logger.Error("failed to expire pending invitations", "error", err)
+	}
 
 	invitations, err := h.invitationRepo.GetAll(r.Context())
 	if err != nil {
@@ -166,7 +177,7 @@ func (h *InvitationHandlers) GetInvitations(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	respondJSON(w, http.StatusOK, invitations)
+	respondJSON(w, http.StatusOK, models.ToInvitationResponses(invitations))
 }
 
 // GetInvitation godoc
@@ -200,7 +211,7 @@ func (h *InvitationHandlers) GetInvitation(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	respondJSON(w, http.StatusOK, invitation)
+	respondJSON(w, http.StatusOK, invitation.ToInvitationResponse())
 }
 
 // RevokeInvitation godoc
@@ -350,5 +361,5 @@ func (h *InvitationHandlers) AcceptInvitation(w http.ResponseWriter, r *http.Req
 		},
 	})
 
-	respondJSON(w, http.StatusOK, user)
+	respondJSON(w, http.StatusOK, user.ToUserResponse())
 }

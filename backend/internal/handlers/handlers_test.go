@@ -9,15 +9,10 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 )
 
-// contextWithUser creates a request context with a user attached
-// This mirrors what the auth middleware does
-func contextWithUser(ctx context.Context, user *models.User) context.Context {
-	return context.WithValue(ctx, middleware.UserContextKey, user)
-}
+// Note: ctxWithUser and ctxWithUserFrom helpers are defined in helpers_test.go
 
 func TestGetCurrentUser(t *testing.T) {
 	// Test only the unauthorized case since the authenticated case requires a database connection
@@ -176,7 +171,7 @@ func TestCreateUser_Authorization(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 
 			if tt.currentUser != nil {
-				req = req.WithContext(contextWithUser(req.Context(), tt.currentUser))
+				req = req.WithContext(ctxWithUserFrom(req.Context(), tt.currentUser))
 			}
 
 			rr := httptest.NewRecorder()
@@ -249,7 +244,7 @@ func TestDeleteUser_Authorization(t *testing.T) {
 			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
 
 			if tt.currentUser != nil {
-				req = req.WithContext(contextWithUser(req.Context(), tt.currentUser))
+				req = req.WithContext(ctxWithUserFrom(req.Context(), tt.currentUser))
 				// Re-add chi context
 				rctx := chi.NewRouteContext()
 				rctx.URLParams.Add("id", "3")
@@ -323,7 +318,7 @@ func TestUploadAvatarBase64_InvalidFormat(t *testing.T) {
 	req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
 
 	user := &models.User{ID: 1, Role: models.RoleEmployee}
-	req = req.WithContext(contextWithUser(req.Context(), user))
+	req = req.WithContext(ctxWithUserFrom(req.Context(), user))
 	// Re-add chi context
 	rctx = chi.NewRouteContext()
 	rctx.URLParams.Add("id", "1")

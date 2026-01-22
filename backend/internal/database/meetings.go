@@ -14,8 +14,6 @@ const meetingColumns = `id, title, description, start_time, end_time, created_by
 	recurrence_type, recurrence_interval, recurrence_end_date, recurrence_days_of_week,
 	recurrence_day_of_month, parent_meeting_id, created_at, updated_at`
 
-const attendeeColumns = `id, meeting_id, user_id, response_status, created_at, updated_at`
-
 type MeetingRepository struct {
 	pool *pgxpool.Pool
 }
@@ -74,7 +72,7 @@ func (r *MeetingRepository) Create(ctx context.Context, req *models.CreateMeetin
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var recurrenceType *string
 	if req.RecurrenceType != nil {
@@ -198,7 +196,7 @@ func (r *MeetingRepository) Update(ctx context.Context, id int64, req *models.Up
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var recurrenceType *string
 	if req.RecurrenceType != nil {

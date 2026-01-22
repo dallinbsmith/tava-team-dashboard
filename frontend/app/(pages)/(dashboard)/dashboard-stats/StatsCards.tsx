@@ -7,7 +7,7 @@ import { getMyJiraTasks } from "@/app/(pages)/jira/api";
 import { getCalendarEvents } from "@/app/(pages)/(dashboard)/calendar/api";
 import { JiraIssue } from "@/app/(pages)/jira/types";
 import { CalendarEvent } from "@/app/(pages)/(dashboard)/calendar/types";
-import { JIRA_LIMITS } from "@/lib/constants";
+import { JIRA_LIMITS, ANIMATION } from "@/lib/constants";
 
 interface StatsCardsProps {
   employees: User[];
@@ -129,8 +129,8 @@ function AnimatedNumber({ value, animate }: { value: number; animate: boolean })
       return;
     }
 
-    const duration = 1000;
-    const steps = 30;
+    const duration = ANIMATION.COUNT_DURATION_MS;
+    const steps = ANIMATION.COUNT_STEPS;
     const stepDuration = duration / steps;
     const increment = value / steps;
     let current = 0;

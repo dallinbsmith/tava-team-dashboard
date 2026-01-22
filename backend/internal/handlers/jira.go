@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -12,38 +11,50 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/smith-dallin/manager-dashboard/internal/database"
 	"github.com/smith-dallin/manager-dashboard/internal/jira"
+	"github.com/smith-dallin/manager-dashboard/internal/logger"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 	"github.com/smith-dallin/manager-dashboard/internal/oauth"
 	"github.com/smith-dallin/manager-dashboard/internal/repository"
 )
 
+// maxConcurrentJiraRequests is the default limit for concurrent Jira API requests
+// to avoid overwhelming the Jira API rate limits
+const maxConcurrentJiraRequests = 5
+
 type JiraHandlers struct {
-	userRepo            repository.UserRepository
-	orgJiraRepo         repository.OrgJiraRepository
-	timeOffRepo         repository.TimeOffRepository
-	oauthService        *jira.OAuthService
-	stateStore          oauth.StateStore
-	frontendURL         string
-	maxUsersPagination  int
+	userRepo             repository.UserRepository
+	orgJiraRepo          repository.OrgJiraRepository
+	timeOffRepo          repository.TimeOffRepository
+	oauthService         *jira.OAuthService
+	stateStore           oauth.StateStore
+	frontendURL          string
+	maxUsersPagination   int
+	maxConcurrentAPIReqs int
+	logger               *logger.Logger
 }
 
-func NewJiraHandlers(userRepo repository.UserRepository, orgJiraRepo repository.OrgJiraRepository, timeOffRepo repository.TimeOffRepository, oauthService *jira.OAuthService, stateStore oauth.StateStore, frontendURL string) *JiraHandlers {
-	return NewJiraHandlersWithConfig(userRepo, orgJiraRepo, timeOffRepo, oauthService, stateStore, frontendURL, 1000)
+func NewJiraHandlers(userRepo repository.UserRepository, orgJiraRepo repository.OrgJiraRepository, timeOffRepo repository.TimeOffRepository, oauthService *jira.OAuthService, stateStore oauth.StateStore, frontendURL string, log *logger.Logger) *JiraHandlers {
+	return NewJiraHandlersWithConfig(userRepo, orgJiraRepo, timeOffRepo, oauthService, stateStore, frontendURL, 1000, maxConcurrentJiraRequests, log)
 }
 
 // NewJiraHandlersWithConfig creates Jira handlers with custom configuration
-func NewJiraHandlersWithConfig(userRepo repository.UserRepository, orgJiraRepo repository.OrgJiraRepository, timeOffRepo repository.TimeOffRepository, oauthService *jira.OAuthService, stateStore oauth.StateStore, frontendURL string, maxUsersPagination int) *JiraHandlers {
+func NewJiraHandlersWithConfig(userRepo repository.UserRepository, orgJiraRepo repository.OrgJiraRepository, timeOffRepo repository.TimeOffRepository, oauthService *jira.OAuthService, stateStore oauth.StateStore, frontendURL string, maxUsersPagination int, maxConcurrentAPIReqs int, log *logger.Logger) *JiraHandlers {
 	if maxUsersPagination <= 0 {
 		maxUsersPagination = 1000
 	}
+	if maxConcurrentAPIReqs <= 0 {
+		maxConcurrentAPIReqs = maxConcurrentJiraRequests
+	}
 	return &JiraHandlers{
-		userRepo:           userRepo,
-		orgJiraRepo:        orgJiraRepo,
-		timeOffRepo:        timeOffRepo,
-		oauthService:       oauthService,
-		stateStore:         stateStore,
-		frontendURL:        frontendURL,
-		maxUsersPagination: maxUsersPagination,
+		userRepo:             userRepo,
+		orgJiraRepo:          orgJiraRepo,
+		timeOffRepo:          timeOffRepo,
+		oauthService:         oauthService,
+		stateStore:           stateStore,
+		frontendURL:          frontendURL,
+		maxUsersPagination:   maxUsersPagination,
+		maxConcurrentAPIReqs: maxConcurrentAPIReqs,
+		logger:               log.WithComponent("jira_handlers"),
 	}
 }
 
@@ -56,7 +67,7 @@ func (h *JiraHandlers) getJiraClient(ctx context.Context) (*jira.Client, error) 
 	}
 
 	if orgSettings == nil {
-		return nil, fmt.Errorf("Jira is not configured for this organization")
+		return nil, fmt.Errorf("jira is not configured for this organization")
 	}
 
 	accessToken := orgSettings.OAuthAccessToken
@@ -67,7 +78,7 @@ func (h *JiraHandlers) getJiraClient(ctx context.Context) (*jira.Client, error) 
 			return nil, fmt.Errorf("cannot refresh token: OAuth service not configured")
 		}
 
-		log.Printf("Jira OAuth token expired, attempting to refresh...")
+		h.logger.WithContext(ctx).Info("Jira OAuth token expired, attempting to refresh")
 
 		tokenResp, err := h.oauthService.RefreshAccessToken(orgSettings.OAuthRefreshToken)
 		if err != nil {
@@ -78,10 +89,10 @@ func (h *JiraHandlers) getJiraClient(ctx context.Context) (*jira.Client, error) 
 		// Atlassian uses refresh token rotation - each refresh token can only be used once
 		newExpiry := jira.CalculateExpiry(tokenResp.ExpiresIn)
 		if err := h.orgJiraRepo.UpdateTokens(ctx, tokenResp.AccessToken, tokenResp.RefreshToken, newExpiry); err != nil {
-			log.Printf("Warning: Failed to save refreshed tokens: %v", err)
+			h.logger.WithContext(ctx).Warn("Failed to save refreshed tokens", "error", err)
 			// Continue with the new token even if save fails
 		} else {
-			log.Printf("Jira OAuth tokens refreshed successfully")
+			h.logger.WithContext(ctx).Info("Jira OAuth tokens refreshed successfully")
 		}
 
 		accessToken = tokenResp.AccessToken
@@ -151,64 +162,90 @@ func (h *JiraHandlers) GetOAuthAuthorizeURL(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-// HandleOAuthCallback handles the OAuth callback from Atlassian
-// Saves the OAuth tokens as organization-wide Jira settings and redirects to frontend
-func (h *JiraHandlers) HandleOAuthCallback(w http.ResponseWriter, r *http.Request) {
-	redirectURL := h.frontendURL + "/settings"
+// oauthCallbackParams holds the validated OAuth callback parameters
+type oauthCallbackParams struct {
+	code   string
+	state  string
+	userID int64
+}
 
-	// Helper to redirect with error
-	redirectWithError := func(errMsg string) {
-		http.Redirect(w, r, redirectURL+"?jira_error="+errMsg, http.StatusFound)
+// validateOAuthCallback validates the OAuth callback parameters and state.
+// Returns the validated params or an error string for the redirect.
+func (h *JiraHandlers) validateOAuthCallback(ctx context.Context, r *http.Request) (*oauthCallbackParams, string) {
+	// Guard: Check for OAuth error from provider
+	if errorParam := r.URL.Query().Get("error"); errorParam != "" {
+		errorDesc := r.URL.Query().Get("error_description")
+		return nil, errorParam + ": " + errorDesc
 	}
 
-	// Get the authorization code and state from query params
 	code := r.URL.Query().Get("code")
 	state := r.URL.Query().Get("state")
-	errorParam := r.URL.Query().Get("error")
 
-	if errorParam != "" {
-		errorDesc := r.URL.Query().Get("error_description")
-		redirectWithError(errorParam + ": " + errorDesc)
-		return
-	}
-
+	// Guard: Require both code and state
 	if code == "" || state == "" {
-		redirectWithError("missing_parameters")
-		return
+		return nil, "missing_parameters"
 	}
 
-	// Validate state and get userID from state store
-	userID, err := h.stateStore.Validate(r.Context(), state)
+	// Guard: Validate state and get userID
+	userID, err := h.stateStore.Validate(ctx, state)
 	if err != nil {
 		if err == oauth.ErrStateNotFound || err == oauth.ErrStateExpired {
-			redirectWithError("invalid_state")
-		} else {
-			redirectWithError("state_validation_failed")
+			return nil, "invalid_state"
 		}
-		return
+		return nil, "state_validation_failed"
 	}
 
+	return &oauthCallbackParams{code: code, state: state, userID: userID}, ""
+}
+
+// exchangeAndGetResources exchanges the OAuth code for tokens and retrieves accessible resources.
+// Returns the token response, resources, or an error string for the redirect.
+func (h *JiraHandlers) exchangeAndGetResources(code string) (*jira.TokenResponse, []jira.AccessibleResource, string) {
+	// Guard: OAuth service must be configured
 	if h.oauthService == nil {
-		redirectWithError("oauth_not_configured")
-		return
+		return nil, nil, "oauth_not_configured"
 	}
 
 	// Exchange code for tokens
 	tokenResp, err := h.oauthService.ExchangeCode(code)
 	if err != nil {
-		redirectWithError("token_exchange_failed")
-		return
+		return nil, nil, "token_exchange_failed"
 	}
 
 	// Get accessible resources to find the cloud ID and site URL
 	resources, err := h.oauthService.GetAccessibleResources(tokenResp.AccessToken)
 	if err != nil {
-		redirectWithError("resources_failed")
+		return nil, nil, "resources_failed"
+	}
+
+	// Guard: At least one site must be accessible
+	if len(resources) == 0 {
+		return nil, nil, "no_sites_found"
+	}
+
+	return tokenResp, resources, ""
+}
+
+// HandleOAuthCallback handles the OAuth callback from Atlassian
+// Saves the OAuth tokens as organization-wide Jira settings and redirects to frontend
+func (h *JiraHandlers) HandleOAuthCallback(w http.ResponseWriter, r *http.Request) {
+	redirectURL := h.frontendURL + "/settings"
+
+	redirectWithError := func(errMsg string) {
+		http.Redirect(w, r, redirectURL+"?jira_error="+errMsg, http.StatusFound)
+	}
+
+	// Validate callback parameters and state
+	params, errMsg := h.validateOAuthCallback(r.Context(), r)
+	if errMsg != "" {
+		redirectWithError(errMsg)
 		return
 	}
 
-	if len(resources) == 0 {
-		redirectWithError("no_sites_found")
+	// Exchange code for tokens and get accessible resources
+	tokenResp, resources, errMsg := h.exchangeAndGetResources(params.code)
+	if errMsg != "" {
+		redirectWithError(errMsg)
 		return
 	}
 
@@ -223,7 +260,7 @@ func (h *JiraHandlers) HandleOAuthCallback(w http.ResponseWriter, r *http.Reques
 		CloudID:             resource.ID,
 		SiteURL:             resource.URL,
 		SiteName:            &resource.Name,
-		ConfiguredByID:      userID,
+		ConfiguredByID:      params.userID,
 	}
 
 	if err := h.orgJiraRepo.Save(r.Context(), orgSettings); err != nil {
@@ -339,7 +376,7 @@ func (h *JiraHandlers) GetMyTasks(w http.ResponseWriter, r *http.Request) {
 	if h.timeOffRepo != nil {
 		timeOffRequests, err = h.timeOffRepo.GetApprovedFutureTimeOffByUser(r.Context(), currentUser.ID)
 		if err != nil {
-			log.Printf("Warning: Failed to fetch time off for user %d: %v", currentUser.ID, err)
+			h.logger.WithContext(r.Context()).Warn("Failed to fetch time off for user", "user_id", currentUser.ID, "error", err)
 			// Continue without time off impact
 			timeOffRequests = []models.TimeOffRequest{}
 		}
@@ -509,7 +546,7 @@ func (h *JiraHandlers) GetUserTasks(w http.ResponseWriter, r *http.Request) {
 	if h.timeOffRepo != nil {
 		timeOffRequests, err = h.timeOffRepo.GetApprovedFutureTimeOffByUser(r.Context(), targetUser.ID)
 		if err != nil {
-			log.Printf("Warning: Failed to fetch time off for user %d: %v", targetUser.ID, err)
+			h.logger.WithContext(r.Context()).Warn("Failed to fetch time off for user", "user_id", targetUser.ID, "error", err)
 			// Continue without time off impact
 			timeOffRequests = []models.TimeOffRequest{}
 		}
@@ -720,7 +757,7 @@ func (h *JiraHandlers) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		log.Printf("Error fetching direct reports for user %d: %v", currentUser.ID, err)
+		h.logger.WithContext(r.Context()).Error("Failed to fetch direct reports", "user_id", currentUser.ID, "error", err)
 		respondError(w, http.StatusInternalServerError, "Failed to fetch direct reports")
 		return
 	}
@@ -756,22 +793,19 @@ func (h *JiraHandlers) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
 	// Pre-fetch time off for all users (batch query)
 	userTimeOffMap := make(map[int64][]models.TimeOffRequest)
 	if h.timeOffRepo != nil {
-		var userIDs []int64
-		for _, u := range usersWithJira {
-			userIDs = append(userIDs, u.ID)
-		}
 		// Fetch time off for all users in the date range (now to far future for impact calc)
 		for _, u := range usersWithJira {
 			timeOff, err := h.timeOffRepo.GetApprovedFutureTimeOffByUser(r.Context(), u.ID)
 			if err != nil {
-				log.Printf("Warning: Failed to fetch time off for user %d: %v", u.ID, err)
+				h.logger.WithContext(r.Context()).Warn("Failed to fetch time off for user", "user_id", u.ID, "error", err)
 				continue
 			}
 			userTimeOffMap[u.ID] = timeOff
 		}
 	}
 
-	// Fetch tasks for each direct report concurrently
+	// Fetch tasks for each direct report concurrently with bounded parallelism
+	// to avoid overwhelming Jira API rate limits
 	type userTasks struct {
 		user   models.User
 		issues []models.JiraIssue
@@ -781,10 +815,17 @@ func (h *JiraHandlers) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
 	results := make(chan userTasks, len(usersWithJira))
 	var wg sync.WaitGroup
 
+	// Semaphore to limit concurrent Jira API requests
+	semaphore := make(chan struct{}, h.maxConcurrentAPIReqs)
+
 	for _, user := range usersWithJira {
 		wg.Add(1)
 		go func(u models.User) {
 			defer wg.Done()
+			// Acquire semaphore slot (blocks if at capacity)
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }() // Release slot when done
+
 			issues, err := client.GetIssuesByAccountID(*u.JiraAccountID, maxPerUser)
 			results <- userTasks{user: u, issues: issues, err: err}
 		}(user)
@@ -800,7 +841,7 @@ func (h *JiraHandlers) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
 	var teamTasks []TeamTask
 	for result := range results {
 		if result.err != nil {
-			log.Printf("Error fetching Jira issues for user %d: %v", result.user.ID, result.err)
+			h.logger.WithContext(r.Context()).Error("Failed to fetch Jira issues for user", "user_id", result.user.ID, "error", result.err)
 			continue
 		}
 

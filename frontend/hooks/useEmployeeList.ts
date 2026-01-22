@@ -51,27 +51,18 @@ export interface UseEmployeeListResult {
 export const ITEMS_PER_PAGE_OPTIONS = [6, 12, 24, 48];
 
 export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
-  // Ensure employees is always an array
   const employees = employeesInput || [];
-  // Search & Filters
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | Role>("all");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [squadFilter, setSquadFilter] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
-
-  // Sorting
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
-
-  // View mode
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
-  // Get unique departments for filter dropdown
   const departments = useMemo(() => {
     const depts = new Set<string>();
     employees.forEach((e) => {
@@ -80,7 +71,6 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
     return Array.from(depts).sort();
   }, [employees]);
 
-  // Get unique squads for filter dropdown
   const squads = useMemo(() => {
     const squadSet = new Set<string>();
     employees.forEach((e) => {
@@ -89,10 +79,9 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
     return Array.from(squadSet).sort();
   }, [employees]);
 
-  // Filter employees
   const filteredEmployees = useMemo(() => {
     return employees.filter((employee) => {
-      // Search through squad names
+
       const squadNamesMatch = employee.squads?.some((s) =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -112,18 +101,18 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
       const matchesDepartment =
         departmentFilter === "all" || employee.department === departmentFilter;
 
-      // Filter matches if user belongs to ANY of their squads
       const matchesSquad =
         squadFilter === "all" ||
         employee.squads?.some((s) => s.name === squadFilter);
 
       return matchesSearch && matchesRole && matchesDepartment && matchesSquad;
     });
+
   }, [employees, searchQuery, roleFilter, departmentFilter, squadFilter]);
 
-  // Sort employees
   const sortedEmployees = useMemo(() => {
     const sorted = [...filteredEmployees];
+
     sorted.sort((a, b) => {
       let comparison = 0;
       switch (sortField) {
@@ -146,10 +135,10 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
       }
       return sortOrder === "asc" ? comparison : -comparison;
     });
+
     return sorted;
   }, [filteredEmployees, sortField, sortOrder]);
 
-  // Pagination
   const totalPages = Math.ceil(sortedEmployees.length / itemsPerPage);
 
   const paginatedEmployees = useMemo(() => {
@@ -157,7 +146,6 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
     return sortedEmployees.slice(start, start + itemsPerPage);
   }, [sortedEmployees, currentPage, itemsPerPage]);
 
-  // Toggle sort
   const handleSort = useCallback((field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -167,7 +155,6 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
     }
   }, [sortField, sortOrder]);
 
-  // Clear all filters
   const clearFilters = useCallback(() => {
     setSearchQuery("");
     setRoleFilter("all");

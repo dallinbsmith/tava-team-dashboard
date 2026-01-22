@@ -10,21 +10,17 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 	"github.com/smith-dallin/manager-dashboard/internal/repository/mocks"
 )
 
-// Helper to create context with user for invitation tests
-func invitationCtxWithUser(user *models.User) context.Context {
-	return context.WithValue(context.Background(), middleware.UserContextKey, user)
-}
+// Note: ctxWithUser and ctxWithUserFrom helpers are defined in test_helpers_test.go
 
 func TestNewInvitationHandlers(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
 
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	if h == nil {
 		t.Fatal("expected handlers to be created")
@@ -40,7 +36,7 @@ func TestNewInvitationHandlers(t *testing.T) {
 func TestCreateInvitation_Authorization(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	tests := []struct {
 		name           string
@@ -70,7 +66,7 @@ func TestCreateInvitation_Authorization(t *testing.T) {
 			req := httptest.NewRequest(http.MethodPost, "/invitations", bytes.NewBufferString(body))
 			req.Header.Set("Content-Type", "application/json")
 			if tt.user != nil {
-				req = req.WithContext(invitationCtxWithUser(tt.user))
+				req = req.WithContext(ctxWithUser(tt.user))
 			}
 			rr := httptest.NewRecorder()
 
@@ -86,14 +82,14 @@ func TestCreateInvitation_Authorization(t *testing.T) {
 func TestCreateInvitation_AdminSuccess(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	admin := &models.User{ID: 1, Role: models.RoleAdmin}
 	// Note: Only admin and supervisor roles can be invited per validation rules
 	body := `{"email":"newuser@example.com","role":"supervisor"}`
 	req := httptest.NewRequest(http.MethodPost, "/invitations", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
-	req = req.WithContext(invitationCtxWithUser(admin))
+	req = req.WithContext(ctxWithUser(admin))
 	rr := httptest.NewRecorder()
 
 	h.CreateInvitation(rr, req)
@@ -118,7 +114,7 @@ func TestCreateInvitation_AdminSuccess(t *testing.T) {
 func TestCreateInvitation_DuplicateEmail(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	// Add existing user
 	userRepo.AddUser(&models.User{
@@ -131,7 +127,7 @@ func TestCreateInvitation_DuplicateEmail(t *testing.T) {
 	body := `{"email":"existing@example.com","role":"supervisor"}`
 	req := httptest.NewRequest(http.MethodPost, "/invitations", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
-	req = req.WithContext(invitationCtxWithUser(admin))
+	req = req.WithContext(ctxWithUser(admin))
 	rr := httptest.NewRecorder()
 
 	h.CreateInvitation(rr, req)
@@ -144,7 +140,7 @@ func TestCreateInvitation_DuplicateEmail(t *testing.T) {
 func TestCreateInvitation_DuplicateInvitation(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	// Add existing invitation
 	invRepo.AddInvitation(&models.Invitation{
@@ -159,7 +155,7 @@ func TestCreateInvitation_DuplicateInvitation(t *testing.T) {
 	body := `{"email":"pending@example.com","role":"supervisor"}`
 	req := httptest.NewRequest(http.MethodPost, "/invitations", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
-	req = req.WithContext(invitationCtxWithUser(admin))
+	req = req.WithContext(ctxWithUser(admin))
 	rr := httptest.NewRecorder()
 
 	h.CreateInvitation(rr, req)
@@ -172,13 +168,13 @@ func TestCreateInvitation_DuplicateInvitation(t *testing.T) {
 func TestCreateInvitation_InvalidBody(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	admin := &models.User{ID: 1, Role: models.RoleAdmin}
 	body := `{invalid json}`
 	req := httptest.NewRequest(http.MethodPost, "/invitations", bytes.NewBufferString(body))
 	req.Header.Set("Content-Type", "application/json")
-	req = req.WithContext(invitationCtxWithUser(admin))
+	req = req.WithContext(ctxWithUser(admin))
 	rr := httptest.NewRecorder()
 
 	h.CreateInvitation(rr, req)
@@ -191,7 +187,7 @@ func TestCreateInvitation_InvalidBody(t *testing.T) {
 func TestGetInvitations_Authorization(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	tests := []struct {
 		name           string
@@ -219,7 +215,7 @@ func TestGetInvitations_Authorization(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/invitations", nil)
 			if tt.user != nil {
-				req = req.WithContext(invitationCtxWithUser(tt.user))
+				req = req.WithContext(ctxWithUser(tt.user))
 			}
 			rr := httptest.NewRecorder()
 
@@ -235,7 +231,7 @@ func TestGetInvitations_Authorization(t *testing.T) {
 func TestGetInvitations_AdminSuccess(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	// Add some invitations
 	invRepo.AddInvitation(&models.Invitation{
@@ -257,7 +253,7 @@ func TestGetInvitations_AdminSuccess(t *testing.T) {
 
 	admin := &models.User{ID: 1, Role: models.RoleAdmin}
 	req := httptest.NewRequest(http.MethodGet, "/invitations", nil)
-	req = req.WithContext(invitationCtxWithUser(admin))
+	req = req.WithContext(ctxWithUser(admin))
 	rr := httptest.NewRecorder()
 
 	h.GetInvitations(rr, req)
@@ -279,7 +275,7 @@ func TestGetInvitations_AdminSuccess(t *testing.T) {
 func TestGetInvitations_WithPagination(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	// Add several invitations
 	for i := 1; i <= 5; i++ {
@@ -295,7 +291,7 @@ func TestGetInvitations_WithPagination(t *testing.T) {
 
 	admin := &models.User{ID: 1, Role: models.RoleAdmin}
 	req := httptest.NewRequest(http.MethodGet, "/invitations?page=1&per_page=2", nil)
-	req = req.WithContext(invitationCtxWithUser(admin))
+	req = req.WithContext(ctxWithUser(admin))
 	rr := httptest.NewRecorder()
 
 	h.GetInvitations(rr, req)
@@ -320,7 +316,7 @@ func TestGetInvitations_WithPagination(t *testing.T) {
 func TestGetInvitation_Authorization(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	tests := []struct {
 		name           string
@@ -346,7 +342,7 @@ func TestGetInvitation_Authorization(t *testing.T) {
 			rctx.URLParams.Add("id", "1")
 			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
 			if tt.user != nil {
-				req = req.WithContext(context.WithValue(invitationCtxWithUser(tt.user), chi.RouteCtxKey, rctx))
+				req = req.WithContext(context.WithValue(ctxWithUser(tt.user), chi.RouteCtxKey, rctx))
 			}
 			rr := httptest.NewRecorder()
 
@@ -362,13 +358,13 @@ func TestGetInvitation_Authorization(t *testing.T) {
 func TestGetInvitation_NotFound(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	admin := &models.User{ID: 1, Role: models.RoleAdmin}
 	req := httptest.NewRequest(http.MethodGet, "/invitations/999", nil)
 	rctx := chi.NewRouteContext()
 	rctx.URLParams.Add("id", "999")
-	ctx := context.WithValue(invitationCtxWithUser(admin), chi.RouteCtxKey, rctx)
+	ctx := context.WithValue(ctxWithUser(admin), chi.RouteCtxKey, rctx)
 	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
@@ -382,7 +378,7 @@ func TestGetInvitation_NotFound(t *testing.T) {
 func TestRevokeInvitation_Authorization(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	tests := []struct {
 		name           string
@@ -408,7 +404,7 @@ func TestRevokeInvitation_Authorization(t *testing.T) {
 			rctx.URLParams.Add("id", "1")
 			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
 			if tt.user != nil {
-				req = req.WithContext(context.WithValue(invitationCtxWithUser(tt.user), chi.RouteCtxKey, rctx))
+				req = req.WithContext(context.WithValue(ctxWithUser(tt.user), chi.RouteCtxKey, rctx))
 			}
 			rr := httptest.NewRecorder()
 
@@ -424,7 +420,7 @@ func TestRevokeInvitation_Authorization(t *testing.T) {
 func TestRevokeInvitation_AdminSuccess(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	invRepo.AddInvitation(&models.Invitation{
 		ID:        1,
@@ -439,7 +435,7 @@ func TestRevokeInvitation_AdminSuccess(t *testing.T) {
 	req := httptest.NewRequest(http.MethodDelete, "/invitations/1/revoke", nil)
 	rctx := chi.NewRouteContext()
 	rctx.URLParams.Add("id", "1")
-	ctx := context.WithValue(invitationCtxWithUser(admin), chi.RouteCtxKey, rctx)
+	ctx := context.WithValue(ctxWithUser(admin), chi.RouteCtxKey, rctx)
 	req = req.WithContext(ctx)
 	rr := httptest.NewRecorder()
 
@@ -459,7 +455,7 @@ func TestRevokeInvitation_AdminSuccess(t *testing.T) {
 func TestValidateInvitation(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	invRepo.AddInvitation(&models.Invitation{
 		ID:        1,
@@ -484,7 +480,7 @@ func TestValidateInvitation(t *testing.T) {
 		}
 
 		var response map[string]interface{}
-		json.NewDecoder(rr.Body).Decode(&response)
+		_ = json.NewDecoder(rr.Body).Decode(&response)
 
 		if response["valid"] != true {
 			t.Error("expected valid=true")
@@ -526,7 +522,7 @@ func TestValidateInvitation(t *testing.T) {
 func TestAcceptInvitation(t *testing.T) {
 	invRepo := mocks.NewMockInvitationRepository()
 	userRepo := mocks.NewMockUserRepository()
-	h := NewInvitationHandlers(invRepo, userRepo)
+	h := NewInvitationHandlers(invRepo, userRepo, nil)
 
 	invRepo.AddInvitation(&models.Invitation{
 		ID:        1,
@@ -553,7 +549,7 @@ func TestAcceptInvitation(t *testing.T) {
 		}
 
 		var response models.User
-		json.NewDecoder(rr.Body).Decode(&response)
+		_ = json.NewDecoder(rr.Body).Decode(&response)
 
 		if response.Email != "user@example.com" {
 			t.Errorf("email = %s, want user@example.com", response.Email)

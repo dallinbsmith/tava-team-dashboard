@@ -5,9 +5,7 @@ import { Loader2 } from "lucide-react";
 export type SpinnerSize = "sm" | "md" | "lg" | "xl";
 
 export interface LoadingSpinnerProps {
-  /** Spinner size */
   size?: SpinnerSize;
-  /** Additional className */
   className?: string;
 }
 
@@ -36,13 +34,8 @@ export function LoadingSpinner({ size = "md", className = "" }: LoadingSpinnerPr
   );
 }
 
-/**
- * CenteredSpinner Component
- *
- * A centered loading spinner for content areas.
- */
+
 export interface CenteredSpinnerProps extends LoadingSpinnerProps {
-  /** Optional loading text */
   text?: string;
 }
 
@@ -59,13 +52,8 @@ export function CenteredSpinner({
   );
 }
 
-/**
- * FullPageSpinner Component
- *
- * A full-page loading spinner overlay.
- */
+
 export interface FullPageSpinnerProps extends LoadingSpinnerProps {
-  /** Optional loading text */
   text?: string;
 }
 
@@ -78,19 +66,11 @@ export function FullPageSpinner({ size = "xl", text }: FullPageSpinnerProps) {
   );
 }
 
-/**
- * Skeleton Component
- *
- * A skeleton loader for content placeholders.
- */
+
 export interface SkeletonProps {
-  /** Width class (default: w-full) */
   width?: string;
-  /** Height class (default: h-4) */
   height?: string;
-  /** Whether it's circular */
   circle?: boolean;
-  /** Additional className */
   className?: string;
 }
 
@@ -112,11 +92,6 @@ export function Skeleton({
   );
 }
 
-/**
- * SkeletonCard Component
- *
- * A skeleton loader for card content.
- */
 export function SkeletonCard({ className = "" }: { className?: string }) {
   return (
     <div

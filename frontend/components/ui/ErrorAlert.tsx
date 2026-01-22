@@ -6,17 +6,11 @@ import { AlertCircle, AlertTriangle, XCircle, Info, X } from "lucide-react";
 export type AlertVariant = "error" | "warning" | "info" | "success";
 
 export interface ErrorAlertProps {
-  /** Alert content */
   children: ReactNode;
-  /** Alert variant */
   variant?: AlertVariant;
-  /** Optional title */
   title?: string;
-  /** Whether the alert can be dismissed */
   dismissible?: boolean;
-  /** Callback when dismissed */
   onDismiss?: () => void;
-  /** Additional className */
   className?: string;
 }
 
@@ -116,15 +110,9 @@ export function ErrorAlert({
   );
 }
 
-/**
- * FormError Component
- *
- * A simplified error alert for form validation errors.
- */
+
 export interface FormErrorProps {
-  /** Error message */
   error?: string | null;
-  /** Additional className */
   className?: string;
 }
 

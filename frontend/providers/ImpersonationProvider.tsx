@@ -6,17 +6,11 @@ import { User } from "@/shared/types/user";
 const IMPERSONATION_STORAGE_KEY = "impersonation_user_id";
 
 interface ImpersonationContextType {
-  /** The user being impersonated (null if not impersonating) */
   impersonatedUser: User | null;
-  /** Whether impersonation is currently active */
   isImpersonating: boolean;
-  /** Start impersonating a user */
   startImpersonation: (user: User) => void;
-  /** End the current impersonation */
   endImpersonation: () => void;
-  /** The ID of the user being impersonated (persisted in sessionStorage) */
   impersonatedUserId: number | null;
-  /** Set the impersonated user data (called by CurrentUserProvider) */
   setImpersonatedUser: (user: User | null) => void;
 }
 
@@ -26,7 +20,6 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
   const [impersonatedUserId, setImpersonatedUserId] = useState<number | null>(null);
   const [impersonatedUser, setImpersonatedUser] = useState<User | null>(null);
 
-  // Load impersonation state from sessionStorage on mount
   useEffect(() => {
     const storedId = sessionStorage.getItem(IMPERSONATION_STORAGE_KEY);
     if (storedId) {
@@ -65,20 +58,17 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Default context for when hook is used outside provider (e.g., during HMR)
 const defaultImpersonationContext: ImpersonationContextType = {
   impersonatedUser: null,
   isImpersonating: false,
-  startImpersonation: () => {},
-  endImpersonation: () => {},
+  startImpersonation: () => { },
+  endImpersonation: () => { },
   impersonatedUserId: null,
-  setImpersonatedUser: () => {},
+  setImpersonatedUser: () => { },
 };
 
 export function useImpersonation() {
   const context = useContext(ImpersonationContext);
-  // Return default context during HMR or when used outside provider
-  // This prevents crashes during hot reload
   if (context === undefined) {
     return defaultImpersonationContext;
   }

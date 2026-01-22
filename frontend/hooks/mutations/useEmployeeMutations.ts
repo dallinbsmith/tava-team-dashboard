@@ -36,15 +36,12 @@ export function useUpdateEmployee(options: UseUpdateEmployeeOptions = {}) {
   return useMutation({
     mutationFn: ({ id, data }: UpdateEmployeeVariables) => updateUser(id, data),
     onSuccess: async (updatedUser) => {
-      // Update the specific employee in cache
       queryClient.setQueryData(
         queryKeys.employees.detail(updatedUser.id),
         updatedUser
       );
 
-      // Force refetch all related queries to ensure UI updates immediately
       await refetchQueries(queryClient, queryKeyGroups.employeeRelated());
-
       options.onSuccess?.(updatedUser);
     },
     onError: (error: Error) => {
@@ -54,9 +51,7 @@ export function useUpdateEmployee(options: UseUpdateEmployeeOptions = {}) {
 }
 
 export interface UseDeactivateEmployeeOptions {
-  /** Callback when mutation succeeds */
   onSuccess?: () => void;
-  /** Callback when mutation fails */
   onError?: (error: Error) => void;
 }
 
@@ -79,10 +74,8 @@ export function useDeactivateEmployee(options: UseDeactivateEmployeeOptions = {}
   return useMutation({
     mutationFn: (userId: number) => deactivateUser(userId),
     onSuccess: async (_data, userId) => {
-      // Remove from specific employee cache
       queryClient.removeQueries({ queryKey: queryKeys.employees.detail(userId) });
 
-      // Force refetch all user lists to ensure UI updates immediately
       await refetchQueries(queryClient, [
         ...queryKeyGroups.users(),
         queryKeys.orgChart.tree(),

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { CreateMeetingRequest, RecurrenceType } from "../types";
-import { createMeeting } from "../api";
+import { createMeetingAction } from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { BaseModal } from "@/components";
 import { Loader2 } from "lucide-react";
@@ -32,7 +32,7 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
   const [recurrenceInterval, setRecurrenceInterval] = useState(1);
   const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
 
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const resetForm = () => {
@@ -109,18 +109,15 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
       }
     }
 
-    setLoading(true);
-
-    try {
-      await createMeeting(request);
-      handleClose();
-      onCreated();
-    } catch (e) {
-      console.error("Failed to create meeting:", e);
-      setError("Failed to create meeting");
-    } finally {
-      setLoading(false);
-    }
+    startTransition(async () => {
+      const result = await createMeetingAction(request);
+      if (result.success) {
+        handleClose();
+        onCreated();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   return (
@@ -300,10 +297,10 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-50 rounded transition-colors flex items-center gap-2"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               Create Meeting
             </button>
           </div>

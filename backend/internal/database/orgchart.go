@@ -57,21 +57,6 @@ func scanDrafts(rows pgx.Rows) ([]models.OrgChartDraft, error) {
 	return drafts, nil
 }
 
-// scanOrgUser scans a row into a User struct for org tree operations
-// Note: Squads are loaded separately via SquadRepository
-func scanOrgUser(row pgx.Row) (*models.User, error) {
-	var user models.User
-	err := row.Scan(
-		&user.ID, &user.Auth0ID, &user.Email, &user.FirstName, &user.LastName,
-		&user.Role, &user.Title, &user.Department, &user.AvatarURL, &user.SupervisorID,
-		&user.DateStarted, &user.CreatedAt, &user.UpdatedAt,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &user, nil
-}
-
 // scanOrgUsers scans multiple rows into a slice of Users for org tree operations
 // Note: Squads are loaded separately via SquadRepository
 func scanOrgUsers(rows pgx.Rows) ([]models.User, error) {
@@ -340,7 +325,7 @@ func (r *OrgChartRepository) PublishDraft(ctx context.Context, draftID int64) er
 	if err != nil {
 		return fmt.Errorf("failed to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Verify draft exists and is in draft status
 	var status models.DraftStatus
@@ -422,22 +407,47 @@ func (r *OrgChartRepository) PublishDraft(ctx context.Context, draftID int64) er
 }
 
 // GetOrgTree builds the organization tree for a supervisor
+// Uses a single recursive CTE query to fetch all descendants, then builds tree in memory
 func (r *OrgChartRepository) GetOrgTree(ctx context.Context, supervisorID int64) (*models.OrgTreeNode, error) {
-	query := `SELECT ` + orgUserColumns + ` FROM users WHERE id = $1`
+	// Use recursive CTE to fetch all descendants in ONE query
+	query := `
+		WITH RECURSIVE org_tree AS (
+			-- Base case: the root supervisor
+			SELECT ` + orgUserColumns + `, 0 as depth
+			FROM users
+			WHERE id = $1
 
-	root, err := scanOrgUser(r.pool.QueryRow(ctx, query, supervisorID))
+			UNION ALL
+
+			-- Recursive case: all descendants
+			SELECT ` + orgUserColumns + `, ot.depth + 1
+			FROM users u
+			INNER JOIN org_tree ot ON u.supervisor_id = ot.id
+		)
+		SELECT ` + orgUserColumns + `
+		FROM org_tree
+		ORDER BY depth, last_name, first_name
+	`
+
+	rows, err := r.pool.Query(ctx, query, supervisorID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get supervisor: %w", err)
+		return nil, fmt.Errorf("failed to get org tree: %w", err)
+	}
+	defer rows.Close()
+
+	users, err := scanOrgUsers(rows)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan users: %w", err)
 	}
 
-	// Build tree recursively
-	tree := &models.OrgTreeNode{
-		User:     *root,
-		Children: []models.OrgTreeNode{},
+	if len(users) == 0 {
+		return nil, fmt.Errorf("supervisor not found")
 	}
 
-	if err := r.buildTreeChildren(ctx, tree); err != nil {
-		return nil, err
+	// Build tree in memory from flat list
+	tree := r.buildTreeFromUsers(users)
+	if tree == nil {
+		return nil, fmt.Errorf("failed to build tree")
 	}
 
 	// Load squads for all users in the tree
@@ -449,33 +459,28 @@ func (r *OrgChartRepository) GetOrgTree(ctx context.Context, supervisorID int64)
 }
 
 // GetFullOrgTree builds the full organization tree starting from top-level users (admin only)
+// Uses a single query to fetch ALL users, then builds multiple trees in memory
 func (r *OrgChartRepository) GetFullOrgTree(ctx context.Context) ([]models.OrgTreeNode, error) {
-	query := `SELECT ` + orgUserColumns + ` FROM users WHERE supervisor_id IS NULL ORDER BY last_name, first_name`
+	// Fetch ALL active users in ONE query, ordered for consistent tree building
+	query := `SELECT ` + orgUserColumns + ` FROM users WHERE is_active = true ORDER BY supervisor_id NULLS FIRST, last_name, first_name`
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get top-level users: %w", err)
+		return nil, fmt.Errorf("failed to get all users: %w", err)
 	}
 	defer rows.Close()
 
 	users, err := scanOrgUsers(rows)
 	if err != nil {
-		return nil, fmt.Errorf("failed to scan user: %w", err)
+		return nil, fmt.Errorf("failed to scan users: %w", err)
 	}
 
-	var trees []models.OrgTreeNode
-	for _, user := range users {
-		node := models.OrgTreeNode{
-			User:     user,
-			Children: []models.OrgTreeNode{},
-		}
-
-		if err := r.buildTreeChildren(ctx, &node); err != nil {
-			return nil, err
-		}
-
-		trees = append(trees, node)
+	if len(users) == 0 {
+		return []models.OrgTreeNode{}, nil
 	}
+
+	// Build multiple trees in memory from flat list
+	trees := r.buildTreesFromUsers(users)
 
 	// Load squads for all users in all trees
 	if err := r.loadSquadsForTrees(ctx, trees); err != nil {
@@ -485,36 +490,88 @@ func (r *OrgChartRepository) GetFullOrgTree(ctx context.Context) ([]models.OrgTr
 	return trees, nil
 }
 
-// buildTreeChildren recursively builds the children of a tree node
-func (r *OrgChartRepository) buildTreeChildren(ctx context.Context, node *models.OrgTreeNode) error {
-	query := `SELECT ` + orgUserColumns + ` FROM users WHERE supervisor_id = $1 ORDER BY last_name, first_name`
-
-	rows, err := r.pool.Query(ctx, query, node.User.ID)
-	if err != nil {
-		return fmt.Errorf("failed to get children: %w", err)
-	}
-	defer rows.Close()
-
-	users, err := scanOrgUsers(rows)
-	if err != nil {
-		return fmt.Errorf("failed to scan user: %w", err)
+// buildTreeFromUsers builds a single tree from a flat list of users (first user is root)
+// This eliminates N+1 queries by building the tree structure in memory
+func (r *OrgChartRepository) buildTreeFromUsers(users []models.User) *models.OrgTreeNode {
+	if len(users) == 0 {
+		return nil
 	}
 
-	for _, user := range users {
-		child := models.OrgTreeNode{
-			User:     user,
+	// Create a map of user ID -> tree node pointer for O(1) lookup
+	nodeMap := make(map[int64]*models.OrgTreeNode)
+
+	// First pass: create all nodes
+	for i := range users {
+		nodeMap[users[i].ID] = &models.OrgTreeNode{
+			User:     users[i],
 			Children: []models.OrgTreeNode{},
 		}
-
-		// Recursively build children
-		if err := r.buildTreeChildren(ctx, &child); err != nil {
-			return err
-		}
-
-		node.Children = append(node.Children, child)
 	}
 
-	return nil
+	// The first user is the root (based on CTE ordering)
+	root := nodeMap[users[0].ID]
+
+	// Second pass: build parent-child relationships
+	for i := range users {
+		if users[i].SupervisorID != nil {
+			parentID := *users[i].SupervisorID
+			if parent, exists := nodeMap[parentID]; exists {
+				child := nodeMap[users[i].ID]
+				parent.Children = append(parent.Children, *child)
+			}
+		}
+	}
+
+	return root
+}
+
+// buildTreesFromUsers builds multiple trees from a flat list of all users
+// Users with supervisor_id = NULL become root nodes of separate trees
+// This eliminates N+1 queries by building all tree structures in memory
+func (r *OrgChartRepository) buildTreesFromUsers(users []models.User) []models.OrgTreeNode {
+	if len(users) == 0 {
+		return []models.OrgTreeNode{}
+	}
+
+	// Create a map of user ID -> tree node pointer for O(1) lookup
+	nodeMap := make(map[int64]*models.OrgTreeNode)
+
+	// First pass: create all nodes
+	for i := range users {
+		nodeMap[users[i].ID] = &models.OrgTreeNode{
+			User:     users[i],
+			Children: []models.OrgTreeNode{},
+		}
+	}
+
+	// Track root nodes (users with no supervisor)
+	var roots []*models.OrgTreeNode
+
+	// Second pass: build parent-child relationships and identify roots
+	for i := range users {
+		node := nodeMap[users[i].ID]
+		if users[i].SupervisorID == nil {
+			// This is a root node
+			roots = append(roots, node)
+		} else {
+			// Attach to parent
+			parentID := *users[i].SupervisorID
+			if parent, exists := nodeMap[parentID]; exists {
+				parent.Children = append(parent.Children, *node)
+			} else {
+				// Parent not found (orphan) - treat as root
+				roots = append(roots, node)
+			}
+		}
+	}
+
+	// Convert to value slice for return
+	trees := make([]models.OrgTreeNode, len(roots))
+	for i, root := range roots {
+		trees[i] = *root
+	}
+
+	return trees
 }
 
 // loadSquadsForTree loads squads for all users in the tree

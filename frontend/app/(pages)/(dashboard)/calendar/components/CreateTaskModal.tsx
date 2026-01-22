@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { CreateTaskRequest, AssignmentType } from "../types";
-import { createTask } from "../api";
+import { createTaskAction } from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal } from "@/components";
@@ -27,7 +27,7 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
   const [assignedSquadId, setAssignedSquadId] = useState<number | undefined>();
   const [assignedDepartment, setAssignedDepartment] = useState<string>("");
 
-  const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const resetForm = () => {
@@ -78,18 +78,15 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
       }
     }
 
-    setLoading(true);
-
-    try {
-      await createTask(request);
-      handleClose();
-      onCreated();
-    } catch (e) {
-      console.error("Failed to create task:", e);
-      setError("Failed to create task");
-    } finally {
-      setLoading(false);
-    }
+    startTransition(async () => {
+      const result = await createTaskAction(request);
+      if (result.success) {
+        handleClose();
+        onCreated();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   return (
@@ -231,10 +228,10 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
               Create Task
             </button>
           </div>

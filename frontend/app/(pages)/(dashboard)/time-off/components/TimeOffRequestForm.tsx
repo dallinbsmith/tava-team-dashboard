@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { format, addDays } from "date-fns";
 import { TimeOffType, CreateTimeOffRequest, TIME_OFF_TYPE_LABELS } from "../types";
-import { createTimeOffRequest } from "../api";
+import { createTimeOffRequestAction } from "../actions";
 import { Calendar, Loader2, X } from "lucide-react";
 
 interface TimeOffRequestFormProps {
@@ -16,28 +16,28 @@ export default function TimeOffRequestForm({ onSuccess, onCancel }: TimeOffReque
   const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
   const [reason, setReason] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSubmitting(true);
 
-    try {
-      const data: CreateTimeOffRequest = {
-        start_date: startDate,
-        end_date: endDate,
-        request_type: requestType,
-        reason: reason || undefined,
-      };
-      await createTimeOffRequest(data);
-      onSuccess();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create request");
-    } finally {
-      setSubmitting(false);
-    }
+    const data: CreateTimeOffRequest = {
+      start_date: startDate,
+      end_date: endDate,
+      request_type: requestType,
+      reason: reason || undefined,
+    };
+
+    startTransition(async () => {
+      const result = await createTimeOffRequestAction(data);
+      if (result.success) {
+        onSuccess();
+      } else {
+        setError(result.error);
+      }
+    });
   };
 
   return (
@@ -134,10 +134,10 @@ export default function TimeOffRequestForm({ onSuccess, onCancel }: TimeOffReque
           </button>
           <button
             type="submit"
-            disabled={submitting}
+            disabled={isPending}
             className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
             Submit Request
           </button>
         </div>

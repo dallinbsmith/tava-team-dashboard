@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { JiraIssue, JiraSettings, TeamTask } from "../types";
+import { TimeOffImpact } from "@/app/(pages)/(dashboard)/time-off/types";
 import { getMyJiraTasks, getTeamJiraTasks, getJiraSettings } from "../api";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { useOrganization } from "@/providers/OrganizationProvider";
@@ -59,7 +60,7 @@ interface DisplayTask {
   url: string;
   project: { key: string; name: string };
   epic?: { key: string; summary: string };
-  time_off_impact?: any;
+  time_off_impact?: TimeOffImpact;
   employee?: {
     id: number;
     first_name: string;
@@ -69,12 +70,13 @@ interface DisplayTask {
 }
 
 export default function JiraTasks({ compact = false }: JiraTasksProps) {
-  const { currentUser, loading: userLoading, effectiveIsSupervisorOrAdmin } = useCurrentUser();
+  const { loading: userLoading, effectiveIsSupervisorOrAdmin } = useCurrentUser();
   const { departments: departmentsInput, squads: squadsInput, allUsers: allUsersInput } = useOrganization();
-  // Ensure organization data is always arrays
-  const allUsers = allUsersInput || [];
-  const departments = departmentsInput || [];
-  const squads = squadsInput || [];
+
+  // Memoize organization data to prevent useMemo dependency warnings
+  const allUsers = useMemo(() => allUsersInput || [], [allUsersInput]);
+  const departments = useMemo(() => departmentsInput || [], [departmentsInput]);
+  const squads = useMemo(() => squadsInput || [], [squadsInput]);
   const [myTasks, setMyTasks] = useState<JiraIssue[]>([]);
   const [teamTasks, setTeamTasks] = useState<TeamTask[]>([]);
   const [settings, setSettings] = useState<JiraSettings | null>(null);

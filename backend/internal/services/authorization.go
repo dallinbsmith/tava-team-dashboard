@@ -20,28 +20,39 @@ func NewAuthorizationService(userRepo repository.UserRepository) *AuthorizationS
 	}
 }
 
+// isDirectReport checks if targetUserID is a direct report of supervisorID.
+// Returns the target user, whether they are a direct report, and any error.
+func (s *AuthorizationService) isDirectReport(ctx context.Context, supervisorID, targetUserID int64) (*models.User, bool, error) {
+	targetUser, err := s.userRepo.GetByID(ctx, targetUserID)
+	if err != nil {
+		return nil, false, apperrors.NewInternalError("failed to get user", err)
+	}
+	if targetUser == nil {
+		return nil, false, apperrors.NewNotFoundError("User")
+	}
+	isReport := targetUser.SupervisorID != nil && *targetUser.SupervisorID == supervisorID
+	return targetUser, isReport, nil
+}
+
 // CanViewUser checks if the current user can view another user's details
 func (s *AuthorizationService) CanViewUser(ctx context.Context, currentUser *models.User, targetUserID int64) error {
-	// Admin can view anyone
+	// Guard: Admin can view anyone
 	if currentUser.IsAdmin() {
 		return nil
 	}
 
-	// Users can view themselves
+	// Guard: Users can view themselves
 	if currentUser.ID == targetUserID {
 		return nil
 	}
 
-	// Supervisors can view their direct reports
+	// Guard: Supervisors can view their direct reports
 	if currentUser.IsSupervisor() {
-		targetUser, err := s.userRepo.GetByID(ctx, targetUserID)
+		_, isReport, err := s.isDirectReport(ctx, currentUser.ID, targetUserID)
 		if err != nil {
-			return apperrors.NewInternalError("failed to get user", err)
+			return err
 		}
-		if targetUser == nil {
-			return apperrors.NewNotFoundError("User")
-		}
-		if targetUser.SupervisorID != nil && *targetUser.SupervisorID == currentUser.ID {
+		if isReport {
 			return nil
 		}
 	}
@@ -51,26 +62,23 @@ func (s *AuthorizationService) CanViewUser(ctx context.Context, currentUser *mod
 
 // CanUpdateUser checks if the current user can update another user
 func (s *AuthorizationService) CanUpdateUser(ctx context.Context, currentUser *models.User, targetUserID int64) error {
-	// Admin can update anyone
+	// Guard: Admin can update anyone
 	if currentUser.IsAdmin() {
 		return nil
 	}
 
-	// Users can update themselves (limited fields handled by handler)
+	// Guard: Users can update themselves (limited fields handled by handler)
 	if currentUser.ID == targetUserID {
 		return nil
 	}
 
-	// Supervisors can update their direct reports
+	// Guard: Supervisors can update their direct reports
 	if currentUser.IsSupervisor() {
-		targetUser, err := s.userRepo.GetByID(ctx, targetUserID)
+		_, isReport, err := s.isDirectReport(ctx, currentUser.ID, targetUserID)
 		if err != nil {
-			return apperrors.NewInternalError("failed to get user", err)
+			return err
 		}
-		if targetUser == nil {
-			return apperrors.NewNotFoundError("User")
-		}
-		if targetUser.SupervisorID != nil && *targetUser.SupervisorID == currentUser.ID {
+		if isReport {
 			return nil
 		}
 	}
@@ -80,24 +88,23 @@ func (s *AuthorizationService) CanUpdateUser(ctx context.Context, currentUser *m
 
 // CanDeleteUser checks if the current user can delete another user
 func (s *AuthorizationService) CanDeleteUser(ctx context.Context, currentUser *models.User, targetUserID int64) error {
-	// Admin can delete anyone except themselves
+	// Guard: Nobody can delete themselves
+	if currentUser.ID == targetUserID {
+		return apperrors.NewForbiddenError("Cannot delete yourself")
+	}
+
+	// Guard: Admin can delete anyone (except themselves, checked above)
 	if currentUser.IsAdmin() {
-		if currentUser.ID == targetUserID {
-			return apperrors.NewForbiddenError("Cannot delete yourself")
-		}
 		return nil
 	}
 
-	// Supervisors can delete their direct reports
+	// Guard: Supervisors can delete their direct reports
 	if currentUser.IsSupervisor() {
-		targetUser, err := s.userRepo.GetByID(ctx, targetUserID)
+		_, isReport, err := s.isDirectReport(ctx, currentUser.ID, targetUserID)
 		if err != nil {
-			return apperrors.NewInternalError("failed to get user", err)
+			return err
 		}
-		if targetUser == nil {
-			return apperrors.NewNotFoundError("User")
-		}
-		if targetUser.SupervisorID != nil && *targetUser.SupervisorID == currentUser.ID {
+		if isReport {
 			return nil
 		}
 	}

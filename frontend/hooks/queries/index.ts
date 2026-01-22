@@ -25,7 +25,6 @@ export type {
 export {
   useAllUsersQuery,
   useDepartmentsQuery,
-  useDerivedDepartments,
 } from "./useAllUsersQuery";
 export type {
   UseAllUsersQueryOptions,

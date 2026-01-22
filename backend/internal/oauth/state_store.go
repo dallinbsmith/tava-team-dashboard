@@ -110,7 +110,7 @@ func (s *MemoryStateStore) backgroundCleanup() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		s.Cleanup(context.Background())
+		_ = s.Cleanup(context.Background())
 	}
 }
 
@@ -182,7 +182,7 @@ func (s *DatabaseStateStore) Validate(ctx context.Context, state string) (int64,
 	if err != nil {
 		return 0, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var userID int64
 	var expiresAt time.Time
@@ -226,7 +226,7 @@ func (s *DatabaseStateStore) backgroundCleanup() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		s.Cleanup(context.Background())
+		_ = s.Cleanup(context.Background())
 	}
 }
 

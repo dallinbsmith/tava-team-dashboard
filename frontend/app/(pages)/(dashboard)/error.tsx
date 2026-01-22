@@ -8,15 +8,8 @@ interface ErrorProps {
   reset: () => void;
 }
 
-/**
- * Dashboard Error Boundary
- *
- * This component catches errors in the dashboard route segment and its children.
- * It provides a user-friendly error message and recovery options.
- */
 export default function DashboardError({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // Log the error to an error reporting service
     console.error("Dashboard error:", error);
   }, [error]);
 

@@ -106,6 +106,8 @@ export const getUsersBySquad = (id: number) =>
   get<User[]>(`/squads/${id}/users`);
 
 export const getDepartments = () => get<string[]>("/departments");
+export const createDepartment = (name: string) =>
+  mutate<{ id: number; name: string }>("/departments", "POST", { name });
 export const renameDepartment = (oldName: string, newName: string) =>
   mutate<void>(`/departments/${encodeURIComponent(oldName)}`, "PUT", {
     name: newName,

@@ -25,20 +25,22 @@ const (
 
 // Handlers handles user-related HTTP requests
 type Handlers struct {
-	userRepo    repository.UserRepository
-	squadRepo   repository.SquadRepository
-	userService *services.UserService
-	cache       *cache.Cache
-	logger      *logger.Logger
+	userRepo       repository.UserRepository
+	squadRepo      repository.SquadRepository
+	departmentRepo repository.DepartmentRepository
+	userService    *services.UserService
+	cache          *cache.Cache
+	logger         *logger.Logger
 }
 
 // New creates a new user handlers instance
-func New(userRepo repository.UserRepository, squadRepo repository.SquadRepository) *Handlers {
+func New(userRepo repository.UserRepository, squadRepo repository.SquadRepository, departmentRepo repository.DepartmentRepository) *Handlers {
 	return &Handlers{
-		userRepo:    userRepo,
-		squadRepo:   squadRepo,
-		userService: services.NewUserService(userRepo, squadRepo),
-		logger:      logger.Default().WithComponent("handlers"),
+		userRepo:       userRepo,
+		squadRepo:      squadRepo,
+		departmentRepo: departmentRepo,
+		userService:    services.NewUserService(userRepo, squadRepo),
+		logger:         logger.Default().WithComponent("handlers"),
 	}
 }
 
@@ -622,13 +624,75 @@ func (h *Handlers) CreateSquad(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) GetDepartments(w http.ResponseWriter, r *http.Request) {
-	departments, err := h.userRepo.GetAllDepartments(r.Context())
+	departments, err := h.departmentRepo.GetAllNames(r.Context())
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to fetch departments")
-		return
+		// Fallback to user-based departments if department table doesn't exist
+		departments, err = h.userRepo.GetAllDepartments(r.Context())
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, "Failed to fetch departments")
+			return
+		}
 	}
 
 	respondJSON(w, http.StatusOK, departments)
+}
+
+// CreateDepartment godoc
+// @Summary Create a new department
+// @Description Creates a new department in the organization
+// @Tags Departments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param body body object{name=string} true "Department name"
+// @Success 201 {object} models.Department
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 409 {object} map[string]interface{} "Department already exists"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /departments [post]
+func (h *Handlers) CreateDepartment(w http.ResponseWriter, r *http.Request) {
+	currentUser := requireAuth(w, r)
+	if currentUser == nil {
+		return
+	}
+
+	// Only admins and supervisors can create departments
+	if currentUser.Role == models.RoleEmployee {
+		respondError(w, http.StatusForbidden, "Forbidden: only admins and supervisors can create departments")
+		return
+	}
+
+	var req struct {
+		Name string `json:"name"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	sanitizedName, validationErr := sanitize.SanitizeAndValidate(req.Name, "Department name", 1, 100)
+	if validationErr != "" {
+		respondError(w, http.StatusBadRequest, validationErr)
+		return
+	}
+
+	// Check if department already exists
+	existing, _ := h.departmentRepo.GetByName(r.Context(), sanitizedName)
+	if existing != nil {
+		respondError(w, http.StatusConflict, "Department already exists")
+		return
+	}
+
+	dept, err := h.departmentRepo.Create(r.Context(), sanitizedName)
+	if err != nil {
+		h.logger.LogError(r.Context(), "Failed to create department", err, "name", sanitizedName)
+		respondError(w, http.StatusInternalServerError, "Failed to create department")
+		return
+	}
+
+	respondJSON(w, http.StatusCreated, dept)
 }
 
 func (h *Handlers) DeleteSquad(w http.ResponseWriter, r *http.Request) {
@@ -680,8 +744,8 @@ func (h *Handlers) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.userRepo.ClearDepartment(r.Context(), department); err != nil {
-		h.logger.LogError(r.Context(), "Failed to clear department", err, "department", department)
+	if err := h.departmentRepo.Delete(r.Context(), department); err != nil {
+		h.logger.LogError(r.Context(), "Failed to delete department", err, "department", department)
 		respondError(w, http.StatusInternalServerError, "Failed to delete department")
 		return
 	}
@@ -736,7 +800,7 @@ func (h *Handlers) RenameDepartment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.userRepo.RenameDepartment(r.Context(), oldName, sanitizedName); err != nil {
+	if err := h.departmentRepo.Rename(r.Context(), oldName, sanitizedName); err != nil {
 		h.logger.LogError(r.Context(), "Failed to rename department", err, "old_name", oldName, "new_name", sanitizedName)
 		respondError(w, http.StatusInternalServerError, "Failed to rename department")
 		return

@@ -37,6 +37,14 @@ type Squad struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+// Department represents a department in the organization
+type Department struct {
+	ID        int64     `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type User struct {
 	ID           int64      `json:"id"`
 	Auth0ID      string     `json:"auth0_id"`

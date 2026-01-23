@@ -1,7 +1,64 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteDepartment, renameDepartment } from "@/lib/api";
+import { createDepartment, deleteDepartment, renameDepartment } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
+
+export interface UseCreateDepartmentOptions {
+  onSuccess?: (department: { id: number; name: string }) => void;
+  onError?: (error: Error) => void;
+}
+
+/**
+ * Hook for creating a new department.
+ * Automatically invalidates related queries on success.
+ *
+ * @example
+ * ```tsx
+ * const { mutate: createDept, isPending } = useCreateDepartment({
+ *   onSuccess: (dept) => console.log('Created:', dept.name),
+ *   onError: (err) => setError(err.message),
+ * });
+ *
+ * createDept('Engineering');
+ * ```
+ */
+export const useCreateDepartment = (
+  options: UseCreateDepartmentOptions = {},
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (name: string) => createDepartment(name),
+    onMutate: async (name) => {
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.departments.all(),
+      });
+      const previousDepartments = queryClient.getQueryData<string[]>(
+        queryKeys.departments.all(),
+      );
+
+      // Optimistically add the new department
+      queryClient.setQueryData<string[]>(queryKeys.departments.all(), (old) =>
+        old ? [...old, name].sort() : [name],
+      );
+
+      return { previousDepartments };
+    },
+    onError: (error: Error, _name, context) => {
+      if (context?.previousDepartments) {
+        queryClient.setQueryData(
+          queryKeys.departments.all(),
+          context.previousDepartments,
+        );
+      }
+      options.onError?.(error);
+    },
+    onSuccess: async (data) => {
+      await refetchQueries(queryClient, queryKeyGroups.departmentRelated());
+      options.onSuccess?.(data);
+    },
+  });
+};
 
 export interface UseRenameDepartmentOptions {
   onSuccess?: () => void;

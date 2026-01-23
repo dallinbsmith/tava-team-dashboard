@@ -11,10 +11,12 @@ export type {
 
 // Department Mutations
 export {
+  useCreateDepartment,
   useDeleteDepartment,
   useRenameDepartment,
 } from "./useDepartmentMutations";
 export type {
+  UseCreateDepartmentOptions,
   UseDeleteDepartmentOptions,
   UseRenameDepartmentOptions,
 } from "./useDepartmentMutations";

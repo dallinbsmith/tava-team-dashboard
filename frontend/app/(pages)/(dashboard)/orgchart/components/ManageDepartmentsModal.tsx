@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import {
   X,
+  Plus,
   Trash2,
   Pencil,
   Check,
@@ -12,7 +13,11 @@ import {
 import { parseErrorMessage } from "@/lib/errors";
 import { ConfirmModal, FormError } from "@/components";
 import { useOrganization } from "@/providers/OrganizationProvider";
-import { useDeleteDepartment, useRenameDepartment } from "@/hooks";
+import {
+  useCreateDepartment,
+  useDeleteDepartment,
+  useRenameDepartment,
+} from "@/hooks";
 import { getUsersByDepartment } from "@/lib/api";
 import { sanitizeName, validateName } from "@/lib/sanitize";
 import { User } from "@/shared/types/user";
@@ -33,10 +38,12 @@ export default function ManageDepartmentsModal({
   const { departments, loading } = useOrganization();
 
   // Mutation hooks
+  const createDepartmentMutation = useCreateDepartment();
   const deleteDepartmentMutation = useDeleteDepartment();
   const renameDepartmentMutation = useRenameDepartment();
 
   const [error, setError] = useState<string | null>(null);
+  const [newDepartmentName, setNewDepartmentName] = useState("");
   const [confirmDeleteDepartment, setConfirmDeleteDepartment] = useState<
     string | null
   >(null);
@@ -57,6 +64,7 @@ export default function ManageDepartmentsModal({
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
+      setNewDepartmentName("");
       setEditingDepartment(null);
       setEditedName("");
       setSelectedDepartment(null);
@@ -77,6 +85,27 @@ export default function ManageDepartmentsModal({
       setDepartmentUsers([]);
     }
   }, [selectedDepartment]);
+
+  const handleCreateDepartment = async () => {
+    const sanitized = sanitizeName(newDepartmentName);
+    const validationError = validateName(sanitized, "Department name");
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setError(null);
+    createDepartmentMutation.mutate(sanitized, {
+      onSuccess: () => {
+        setNewDepartmentName("");
+        onDepartmentsChanged();
+      },
+      onError: (err) => {
+        setError(parseErrorMessage(err));
+      },
+    });
+  };
 
   const handleDeleteDepartment = (department: string) => {
     setConfirmDeleteDepartment(department);
@@ -155,7 +184,9 @@ export default function ManageDepartmentsModal({
   };
 
   const isMutating =
-    deleteDepartmentMutation.isPending || renameDepartmentMutation.isPending;
+    createDepartmentMutation.isPending ||
+    deleteDepartmentMutation.isPending ||
+    renameDepartmentMutation.isPending;
 
   if (!isOpen) return null;
 
@@ -182,11 +213,28 @@ export default function ManageDepartmentsModal({
           <div className="p-4 space-y-4 overflow-y-auto flex-1">
             <FormError error={error} />
 
-            <div className="space-y-2">
-              <p className="text-sm text-theme-text-muted">
-                Departments are created by assigning them to employees. Use the
-                employee edit form to add new departments.
-              </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newDepartmentName}
+                onChange={(e) => setNewDepartmentName(e.target.value)}
+                placeholder="New department name..."
+                className="flex-1 px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleCreateDepartment();
+                  }
+                }}
+              />
+              <button
+                onClick={handleCreateDepartment}
+                disabled={!newDepartmentName.trim() || isMutating}
+                className="px-4 py-2 bg-primary-500 text-white hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add
+              </button>
             </div>
 
             <div className="border border-theme-border">
@@ -196,8 +244,7 @@ export default function ManageDepartmentsModal({
                 </div>
               ) : sortedDepartments.length === 0 ? (
                 <div className="p-4 text-center text-theme-text-muted">
-                  No departments yet. Assign a department to an employee to
-                  create one.
+                  No departments yet. Create one above.
                 </div>
               ) : (
                 <ul className="divide-y divide-theme-border">

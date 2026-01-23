@@ -41,6 +41,7 @@ type App struct {
 	// Repositories
 	userRepo       *database.UserRepository
 	squadRepo      *database.SquadRepository
+	departmentRepo *database.DepartmentRepository
 	invitationRepo *database.InvitationRepository
 	orgJiraRepo    *database.OrgJiraRepository
 	orgChartRepo   *database.OrgChartRepository
@@ -144,6 +145,7 @@ func (a *App) initDatabase() error {
 func (a *App) initRepositories() error {
 	a.userRepo = database.NewUserRepository(a.DB)
 	a.squadRepo = database.NewSquadRepository(a.DB)
+	a.departmentRepo = database.NewDepartmentRepository(a.DB)
 	a.invitationRepo = database.NewInvitationRepositoryWithConfig(a.DB, a.Config.InvitationExpiryDays)
 	a.orgJiraRepo = database.NewOrgJiraRepository(a.DB)
 	a.orgChartRepo = database.NewOrgChartRepository(a.DB, a.squadRepo)
@@ -232,7 +234,7 @@ func (a *App) initAuth() error {
 }
 
 func (a *App) initHandlers() error {
-	a.handlers = handlers.New(a.userRepo, a.squadRepo)
+	a.handlers = handlers.New(a.userRepo, a.squadRepo, a.departmentRepo)
 	a.avatarHandlers = handlers.NewAvatarHandlersWithConfig(a.userRepo, a.avatarService, a.Config.AvatarMaxSizeMB)
 	a.invitationHandlers = handlers.NewInvitationHandlers(a.invitationRepo, a.userRepo, a.emailService)
 	a.jiraHandlers = handlers.NewJiraHandlersWithConfig(a.userRepo, a.orgJiraRepo, a.timeOffRepo, a.jiraOAuthService, a.oauthStateStore, a.Config.FrontendURL, a.Config.JiraMaxUsersPagination, 0, a.Logger)
@@ -453,8 +455,9 @@ func (a *App) registerAPIRoutes(r chi.Router) {
 			r.Delete("/squads/{id}", a.handlers.DeleteSquad)
 			r.Get("/squads/{id}/users", a.handlers.GetUsersBySquad)
 
-			// Departments list, update, delete
+			// Departments CRUD
 			r.Get("/departments", a.handlers.GetDepartments)
+			r.Post("/departments", a.handlers.CreateDepartment)
 			r.Put("/departments/{name}", a.handlers.RenameDepartment)
 			r.Delete("/departments/{name}", a.handlers.DeleteDepartment)
 			r.Get("/departments/{name}/users", a.handlers.GetUsersByDepartment)

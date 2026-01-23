@@ -46,6 +46,17 @@ type SquadRepository interface {
 	GetUsersBySquadID(ctx context.Context, squadID int64) ([]models.User, error)
 }
 
+// DepartmentRepository defines the interface for department data access
+type DepartmentRepository interface {
+	GetAll(ctx context.Context) ([]models.Department, error)
+	GetAllNames(ctx context.Context) ([]string, error)
+	GetByID(ctx context.Context, id int64) (*models.Department, error)
+	GetByName(ctx context.Context, name string) (*models.Department, error)
+	Create(ctx context.Context, name string) (*models.Department, error)
+	Delete(ctx context.Context, name string) error
+	Rename(ctx context.Context, oldName, newName string) error
+}
+
 // TimeOffRepository defines the interface for time-off request data access
 type TimeOffRepository interface {
 	Create(ctx context.Context, userID int64, req *models.CreateTimeOffRequestInput) (*models.TimeOffRequest, error)

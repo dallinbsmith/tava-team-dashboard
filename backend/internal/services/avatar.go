@@ -4,10 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/smith-dallin/manager-dashboard/internal/logger"
 	"github.com/smith-dallin/manager-dashboard/internal/storage"
@@ -101,40 +98,25 @@ func (s *AvatarService) GetExtensionFromContentType(contentType string) string {
 	}
 }
 
+// ErrStorageNotConfigured is returned when S3 storage is not configured
+var ErrStorageNotConfigured = fmt.Errorf("image storage is not configured")
+
+// ErrUploadFailed is returned when the upload fails
+var ErrUploadFailed = fmt.Errorf("failed to upload image, please try again later")
+
 // Upload stores an avatar image and returns the URL
 func (s *AvatarService) Upload(ctx context.Context, userID int64, img *ImageData) (string, error) {
-	// Use S3 storage if configured, otherwise fall back to local
-	if s.storage != nil {
-		return s.uploadToS3(ctx, userID, img)
+	if s.storage == nil {
+		s.logger.LogError(ctx, "S3 storage not configured", ErrStorageNotConfigured, "user_id", userID)
+		return "", ErrStorageNotConfigured
 	}
-	return s.uploadToLocal(userID, img)
-}
 
-// uploadToS3 uploads the image to S3-compatible storage
-func (s *AvatarService) uploadToS3(ctx context.Context, userID int64, img *ImageData) (string, error) {
 	key := storage.GenerateAvatarKey(userID, img.Extension)
 	url, err := s.storage.Upload(ctx, key, img.Data, img.ContentType)
 	if err != nil {
 		s.logger.LogError(ctx, "S3 upload failed", err, "user_id", userID)
-		return "", err
+		return "", ErrUploadFailed
 	}
 	s.logger.Info("S3 upload successful", "user_id", userID, "url", url)
 	return url, nil
-}
-
-// uploadToLocal saves the image to local filesystem
-func (s *AvatarService) uploadToLocal(userID int64, img *ImageData) (string, error) {
-	uploadsDir := "uploads/avatars"
-	if err := os.MkdirAll(uploadsDir, 0755); err != nil {
-		return "", fmt.Errorf("failed to create uploads directory: %w", err)
-	}
-
-	filename := fmt.Sprintf("%d_%d%s", userID, time.Now().UnixNano(), img.Extension)
-	filePath := filepath.Join(uploadsDir, filename)
-
-	if err := os.WriteFile(filePath, img.Data, 0644); err != nil {
-		return "", fmt.Errorf("failed to save file: %w", err)
-	}
-
-	return fmt.Sprintf("/uploads/avatars/%s", filename), nil
 }

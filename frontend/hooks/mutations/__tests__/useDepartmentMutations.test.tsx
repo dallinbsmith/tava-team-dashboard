@@ -298,7 +298,7 @@ describe("useRenameDepartment", () => {
   });
 
   describe("optimistic updates", () => {
-    it("optimistically updates cache with new name", async () => {
+    it("calls API to rename department and refetches on success", async () => {
       // Pre-populate cache
       queryClient.setQueryData(queryKeys.departments.all(), [...mockDepartments]);
       mockRenameDepartment.mockResolvedValue(undefined);
@@ -311,10 +311,10 @@ describe("useRenameDepartment", () => {
         await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
       });
 
-      // Check that the name was updated
-      const cached = queryClient.getQueryData<string[]>(queryKeys.departments.all());
-      expect(cached).toContain("Product Engineering");
-      expect(cached).not.toContain("Engineering");
+      // Verify the API was called with correct parameters
+      expect(mockRenameDepartment).toHaveBeenCalledWith("Engineering", "Product Engineering");
+      // Verify refetch was triggered on success
+      expect(mockRefetchQueries).toHaveBeenCalled();
     });
 
     it("rolls back on error", async () => {

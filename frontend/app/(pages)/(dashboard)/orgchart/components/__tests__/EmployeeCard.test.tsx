@@ -233,6 +233,32 @@ describe("EmployeeCard", () => {
     });
   });
 
+  describe("responsive styling", () => {
+    it("has responsive padding classes", () => {
+      const employee = createMockEmployee();
+      render(<EmployeeCard employee={employee} />);
+
+      const link = screen.getByRole("link");
+      expect(link).toHaveClass("p-4", "sm:p-6");
+    });
+
+    it("has rounded-lg class for border radius", () => {
+      const employee = createMockEmployee();
+      render(<EmployeeCard employee={employee} />);
+
+      const link = screen.getByRole("link");
+      expect(link).toHaveClass("rounded-lg");
+    });
+
+    it("has responsive text size classes on heading", () => {
+      const employee = createMockEmployee();
+      render(<EmployeeCard employee={employee} />);
+
+      const heading = screen.getByRole("heading", { level: 3 });
+      expect(heading).toHaveClass("text-sm", "sm:text-base");
+    });
+  });
+
   describe("icons", () => {
     it("renders mail icon with email", () => {
       const employee = createMockEmployee();

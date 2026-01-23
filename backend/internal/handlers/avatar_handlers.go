@@ -122,7 +122,7 @@ func (h *AvatarHandlers) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	// Upload using the avatar service
 	avatarURL, err := h.avatarService.Upload(r.Context(), id, img)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "Failed to upload file")
+		respondError(w, http.StatusServiceUnavailable, "Image upload is temporarily unavailable. Please try again later.")
 		return
 	}
 
@@ -172,7 +172,7 @@ func (h *AvatarHandlers) UploadAvatarBase64(w http.ResponseWriter, r *http.Reque
 	avatarURL, err := h.avatarService.Upload(r.Context(), id, img)
 	if err != nil {
 		h.logger.LogError(r.Context(), "Avatar upload (base64) failed", err, "user_id", id)
-		respondError(w, http.StatusInternalServerError, "Failed to upload file")
+		respondError(w, http.StatusServiceUnavailable, "Image upload is temporarily unavailable. Please try again later.")
 		return
 	}
 

@@ -17,9 +17,11 @@ type MockSquadRepository struct {
 	GetByUserIDFunc      func(ctx context.Context, userID int64) ([]models.Squad, error)
 	GetByUserIDsFunc     func(ctx context.Context, userIDs []int64) (map[int64][]models.Squad, error)
 	GetSquadIDsByUserIDFunc func(ctx context.Context, userID int64) ([]int64, error)
-	CreateFunc           func(ctx context.Context, name string) (*models.Squad, error)
-	DeleteFunc           func(ctx context.Context, id int64) error
-	SetUserSquadsFunc    func(ctx context.Context, userID int64, squadIDs []int64) error
+	CreateFunc              func(ctx context.Context, name string) (*models.Squad, error)
+	RenameFunc              func(ctx context.Context, id int64, newName string) (*models.Squad, error)
+	DeleteFunc              func(ctx context.Context, id int64) error
+	SetUserSquadsFunc       func(ctx context.Context, userID int64, squadIDs []int64) error
+	GetUsersBySquadIDFunc   func(ctx context.Context, squadID int64) ([]models.User, error)
 }
 
 // NewMockSquadRepository creates a new mock squad repository
@@ -113,12 +115,32 @@ func (m *MockSquadRepository) Create(ctx context.Context, name string) (*models.
 	return squad, nil
 }
 
+func (m *MockSquadRepository) Rename(ctx context.Context, id int64, newName string) (*models.Squad, error) {
+	if m.RenameFunc != nil {
+		return m.RenameFunc(ctx, id, newName)
+	}
+	squad, ok := m.Squads[id]
+	if !ok {
+		return nil, nil
+	}
+	squad.Name = newName
+	return squad, nil
+}
+
 func (m *MockSquadRepository) Delete(ctx context.Context, id int64) error {
 	if m.DeleteFunc != nil {
 		return m.DeleteFunc(ctx, id)
 	}
 	delete(m.Squads, id)
 	return nil
+}
+
+func (m *MockSquadRepository) GetUsersBySquadID(ctx context.Context, squadID int64) ([]models.User, error) {
+	if m.GetUsersBySquadIDFunc != nil {
+		return m.GetUsersBySquadIDFunc(ctx, squadID)
+	}
+	// Return empty slice by default - tests should set up the function hook if needed
+	return []models.User{}, nil
 }
 
 func (m *MockSquadRepository) SetUserSquads(ctx context.Context, userID int64, squadIDs []int64) error {

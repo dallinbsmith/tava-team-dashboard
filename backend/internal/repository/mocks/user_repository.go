@@ -31,6 +31,8 @@ type MockUserRepository struct {
 	SaveJiraOAuthTokensFunc            func(ctx context.Context, id int64, tokens *models.JiraOAuthTokens) error
 	DeactivateFunc                     func(ctx context.Context, id int64) error
 	ReactivateFunc                     func(ctx context.Context, id int64) error
+	RenameDepartmentFunc               func(ctx context.Context, oldName, newName string) error
+	GetUsersByDepartmentFunc           func(ctx context.Context, department string) ([]models.User, error)
 }
 
 // NewMockUserRepository creates a new mock user repository
@@ -247,6 +249,33 @@ func (m *MockUserRepository) Reactivate(ctx context.Context, id int64) error {
 		user.IsActive = true
 	}
 	return nil
+}
+
+func (m *MockUserRepository) RenameDepartment(ctx context.Context, oldName, newName string) error {
+	if m.RenameDepartmentFunc != nil {
+		return m.RenameDepartmentFunc(ctx, oldName, newName)
+	}
+	for _, user := range m.Users {
+		if user.Department == oldName {
+			user.Department = newName
+		}
+	}
+	delete(m.Departments, oldName)
+	m.Departments[newName] = true
+	return nil
+}
+
+func (m *MockUserRepository) GetUsersByDepartment(ctx context.Context, department string) ([]models.User, error) {
+	if m.GetUsersByDepartmentFunc != nil {
+		return m.GetUsersByDepartmentFunc(ctx, department)
+	}
+	var users []models.User
+	for _, user := range m.Users {
+		if user.Department == department {
+			users = append(users, *user)
+		}
+	}
+	return users, nil
 }
 
 // AddUser is a helper method for setting up test data

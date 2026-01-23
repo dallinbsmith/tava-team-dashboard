@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -127,49 +126,6 @@ func (s *S3Storage) GetURL(key string) string {
 
 	// Default S3 URL format
 	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", s.bucket, s.region, key)
-}
-
-// LocalStorage implements Storage interface for local file system (fallback)
-type LocalStorage struct {
-	basePath  string
-	baseURL   string
-}
-
-// NewLocalStorage creates a new local storage instance
-func NewLocalStorage(basePath, baseURL string) *LocalStorage {
-	return &LocalStorage{
-		basePath: basePath,
-		baseURL:  baseURL,
-	}
-}
-
-// Upload saves a file locally and returns the URL
-func (l *LocalStorage) Upload(ctx context.Context, key string, data []byte, contentType string) (string, error) {
-	fullPath := filepath.Join(l.basePath, key)
-
-	// Create directory if needed
-	dir := filepath.Dir(fullPath)
-	if err := createDirIfNotExists(dir); err != nil {
-		return "", fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	// Write file
-	if err := writeFile(fullPath, data); err != nil {
-		return "", fmt.Errorf("failed to write file: %w", err)
-	}
-
-	return l.GetURL(key), nil
-}
-
-// Delete removes a local file
-func (l *LocalStorage) Delete(ctx context.Context, key string) error {
-	fullPath := filepath.Join(l.basePath, key)
-	return deleteFile(fullPath)
-}
-
-// GetURL returns the URL for a local file
-func (l *LocalStorage) GetURL(key string) string {
-	return fmt.Sprintf("%s/%s", strings.TrimRight(l.baseURL, "/"), key)
 }
 
 // GenerateAvatarKey creates a unique key for avatar storage

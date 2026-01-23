@@ -21,10 +21,18 @@ const mockUseOrganization = useOrganization as jest.MockedFunction<
 >;
 
 jest.mock("@/hooks", () => ({
+  useCreateDepartment: jest.fn(),
   useDeleteDepartment: jest.fn(),
   useRenameDepartment: jest.fn(),
 }));
-import { useDeleteDepartment, useRenameDepartment } from "@/hooks";
+import {
+  useCreateDepartment,
+  useDeleteDepartment,
+  useRenameDepartment,
+} from "@/hooks";
+const mockUseCreateDepartment = useCreateDepartment as jest.MockedFunction<
+  typeof useCreateDepartment
+>;
 const mockUseDeleteDepartment = useDeleteDepartment as jest.MockedFunction<
   typeof useDeleteDepartment
 >;
@@ -150,6 +158,25 @@ describe("ManageDepartmentsModal", () => {
       refetchAll: jest.fn(),
     });
 
+    mockUseCreateDepartment.mockReturnValue({
+      mutate: jest.fn(),
+      mutateAsync: jest.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+      data: undefined,
+      error: null,
+      reset: jest.fn(),
+      status: "idle",
+      variables: undefined,
+      isIdle: true,
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
+    });
+
     mockUseDeleteDepartment.mockReturnValue({
       mutate: jest.fn(),
       mutateAsync: jest.fn(),
@@ -255,15 +282,14 @@ describe("ManageDepartmentsModal", () => {
       expect(screen.getByText(/No departments yet/)).toBeInTheDocument();
     });
 
-    it("renders informational text about department creation", () => {
+    it("renders add department input and button", () => {
       render(<ManageDepartmentsModal {...defaultProps} />, {
         wrapper: createWrapper(queryClient),
       });
       expect(
-        screen.getByText(
-          /Departments are created by assigning them to employees/,
-        ),
+        screen.getByPlaceholderText("New department name..."),
       ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Add/i })).toBeInTheDocument();
     });
   });
 
@@ -293,6 +319,230 @@ describe("ManageDepartmentsModal", () => {
       );
       fireEvent.click(backdrop!);
       expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe("create functionality", () => {
+    it("calls create mutation when Add button clicked with valid name", async () => {
+      const mockMutate = jest.fn();
+      mockUseCreateDepartment.mockReturnValue({
+        mutate: mockMutate,
+        mutateAsync: jest.fn(),
+        isPending: false,
+        isError: false,
+        isSuccess: false,
+        data: undefined,
+        error: null,
+        reset: jest.fn(),
+        status: "idle",
+        variables: undefined,
+        isIdle: true,
+        context: undefined,
+        failureCount: 0,
+        failureReason: null,
+        isPaused: false,
+        submittedAt: 0,
+      });
+
+      const user = userEvent.setup();
+      render(<ManageDepartmentsModal {...defaultProps} />, {
+        wrapper: createWrapper(queryClient),
+      });
+
+      const input = screen.getByPlaceholderText("New department name...");
+      await user.type(input, "Marketing");
+
+      fireEvent.click(screen.getByRole("button", { name: /Add/i }));
+
+      expect(mockMutate).toHaveBeenCalledWith("Marketing", expect.any(Object));
+    });
+
+    it("calls create mutation on Enter key in input", async () => {
+      const mockMutate = jest.fn();
+      mockUseCreateDepartment.mockReturnValue({
+        mutate: mockMutate,
+        mutateAsync: jest.fn(),
+        isPending: false,
+        isError: false,
+        isSuccess: false,
+        data: undefined,
+        error: null,
+        reset: jest.fn(),
+        status: "idle",
+        variables: undefined,
+        isIdle: true,
+        context: undefined,
+        failureCount: 0,
+        failureReason: null,
+        isPaused: false,
+        submittedAt: 0,
+      });
+
+      const user = userEvent.setup();
+      render(<ManageDepartmentsModal {...defaultProps} />, {
+        wrapper: createWrapper(queryClient),
+      });
+
+      const input = screen.getByPlaceholderText("New department name...");
+      await user.type(input, "Marketing{Enter}");
+
+      expect(mockMutate).toHaveBeenCalledWith("Marketing", expect.any(Object));
+    });
+
+    it("clears input after successful creation", async () => {
+      const mockMutate = jest.fn((_, options) => {
+        options.onSuccess({ id: 1, name: "Marketing" });
+      });
+      mockUseCreateDepartment.mockReturnValue({
+        mutate: mockMutate,
+        mutateAsync: jest.fn(),
+        isPending: false,
+        isError: false,
+        isSuccess: false,
+        data: undefined,
+        error: null,
+        reset: jest.fn(),
+        status: "idle",
+        variables: undefined,
+        isIdle: true,
+        context: undefined,
+        failureCount: 0,
+        failureReason: null,
+        isPaused: false,
+        submittedAt: 0,
+      });
+
+      const user = userEvent.setup();
+      render(<ManageDepartmentsModal {...defaultProps} />, {
+        wrapper: createWrapper(queryClient),
+      });
+
+      const input = screen.getByPlaceholderText("New department name...");
+      await user.type(input, "Marketing");
+      fireEvent.click(screen.getByRole("button", { name: /Add/i }));
+
+      await waitFor(() => {
+        expect(input).toHaveValue("");
+      });
+    });
+
+    it("disables Add button when input is empty", () => {
+      render(<ManageDepartmentsModal {...defaultProps} />, {
+        wrapper: createWrapper(queryClient),
+      });
+
+      const addButton = screen.getByRole("button", { name: /Add/i });
+      expect(addButton).toBeDisabled();
+    });
+
+    it("disables Add button while mutation is pending", async () => {
+      mockUseCreateDepartment.mockReturnValue({
+        mutate: jest.fn(),
+        mutateAsync: jest.fn(),
+        isPending: true,
+        isError: false,
+        isSuccess: false,
+        data: undefined,
+        error: null,
+        reset: jest.fn(),
+        status: "pending",
+        variables: undefined,
+        isIdle: false,
+        context: undefined,
+        failureCount: 0,
+        failureReason: null,
+        isPaused: false,
+        submittedAt: 0,
+      });
+
+      const user = userEvent.setup();
+      render(<ManageDepartmentsModal {...defaultProps} />, {
+        wrapper: createWrapper(queryClient),
+      });
+
+      const input = screen.getByPlaceholderText("New department name...");
+      await user.type(input, "Marketing");
+
+      const addButton = screen.getByRole("button", { name: /Add/i });
+      expect(addButton).toBeDisabled();
+    });
+
+    it("calls onDepartmentsChanged after successful creation", async () => {
+      const onDepartmentsChanged = jest.fn();
+      const mockMutate = jest.fn((_, options) => {
+        options.onSuccess({ id: 1, name: "Marketing" });
+      });
+      mockUseCreateDepartment.mockReturnValue({
+        mutate: mockMutate,
+        mutateAsync: jest.fn(),
+        isPending: false,
+        isError: false,
+        isSuccess: false,
+        data: undefined,
+        error: null,
+        reset: jest.fn(),
+        status: "idle",
+        variables: undefined,
+        isIdle: true,
+        context: undefined,
+        failureCount: 0,
+        failureReason: null,
+        isPaused: false,
+        submittedAt: 0,
+      });
+
+      const user = userEvent.setup();
+      render(
+        <ManageDepartmentsModal
+          {...defaultProps}
+          onDepartmentsChanged={onDepartmentsChanged}
+        />,
+        {
+          wrapper: createWrapper(queryClient),
+        },
+      );
+
+      const input = screen.getByPlaceholderText("New department name...");
+      await user.type(input, "Marketing");
+      fireEvent.click(screen.getByRole("button", { name: /Add/i }));
+
+      await waitFor(() => {
+        expect(onDepartmentsChanged).toHaveBeenCalled();
+      });
+    });
+
+    it("trims whitespace from department name", async () => {
+      const mockMutate = jest.fn();
+      mockUseCreateDepartment.mockReturnValue({
+        mutate: mockMutate,
+        mutateAsync: jest.fn(),
+        isPending: false,
+        isError: false,
+        isSuccess: false,
+        data: undefined,
+        error: null,
+        reset: jest.fn(),
+        status: "idle",
+        variables: undefined,
+        isIdle: true,
+        context: undefined,
+        failureCount: 0,
+        failureReason: null,
+        isPaused: false,
+        submittedAt: 0,
+      });
+
+      const user = userEvent.setup();
+      render(<ManageDepartmentsModal {...defaultProps} />, {
+        wrapper: createWrapper(queryClient),
+      });
+
+      const input = screen.getByPlaceholderText("New department name...");
+      await user.type(input, "  Marketing  ");
+      fireEvent.click(screen.getByRole("button", { name: /Add/i }));
+
+      // sanitizeName trims whitespace
+      expect(mockMutate).toHaveBeenCalledWith("Marketing", expect.any(Object));
     });
   });
 
@@ -568,6 +818,41 @@ describe("ManageDepartmentsModal", () => {
   });
 
   describe("disabled states", () => {
+    it("disables edit and delete buttons while create is pending", () => {
+      mockUseCreateDepartment.mockReturnValue({
+        mutate: jest.fn(),
+        mutateAsync: jest.fn(),
+        isPending: true,
+        isError: false,
+        isSuccess: false,
+        data: undefined,
+        error: null,
+        reset: jest.fn(),
+        status: "pending",
+        variables: undefined,
+        isIdle: false,
+        context: undefined,
+        failureCount: 0,
+        failureReason: null,
+        isPaused: false,
+        submittedAt: 0,
+      });
+
+      render(<ManageDepartmentsModal {...defaultProps} />, {
+        wrapper: createWrapper(queryClient),
+      });
+
+      const editButtons = screen.getAllByTitle("Rename department");
+      editButtons.forEach((button) => {
+        expect(button).toBeDisabled();
+      });
+
+      const deleteButtons = screen.getAllByTitle("Delete department");
+      deleteButtons.forEach((button) => {
+        expect(button).toBeDisabled();
+      });
+    });
+
     it("disables edit button while mutation is pending", () => {
       mockUseDeleteDepartment.mockReturnValue({
         mutate: jest.fn(),

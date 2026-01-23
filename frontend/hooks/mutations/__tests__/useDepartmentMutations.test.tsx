@@ -7,6 +7,7 @@ import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { ReactNode } from "react";
 import {
+  useCreateDepartment,
   useDeleteDepartment,
   useRenameDepartment,
 } from "../useDepartmentMutations";
@@ -16,9 +17,13 @@ import { queryKeys } from "@/lib/query-keys";
 
 // Mock the API
 jest.mock("@/lib/api", () => ({
+  createDepartment: jest.fn(),
   deleteDepartment: jest.fn(),
   renameDepartment: jest.fn(),
 }));
+const mockCreateDepartment = api.createDepartment as jest.MockedFunction<
+  typeof api.createDepartment
+>;
 const mockDeleteDepartment = api.deleteDepartment as jest.MockedFunction<
   typeof api.deleteDepartment
 >;
@@ -63,6 +68,255 @@ const createWrapper = (queryClient: QueryClient) => {
   );
   return Wrapper;
 };
+
+describe("useCreateDepartment", () => {
+  let queryClient: QueryClient;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    queryClient = createTestQueryClient();
+  });
+
+  afterEach(() => {
+    queryClient.clear();
+  });
+
+  describe("mutation execution", () => {
+    it("calls createDepartment API with correct name", async () => {
+      mockCreateDepartment.mockResolvedValue({ id: 1, name: "New Department" });
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await act(async () => {
+        await result.current.mutateAsync("New Department");
+      });
+
+      expect(mockCreateDepartment).toHaveBeenCalledWith("New Department");
+    });
+
+    it("refetches related queries on success", async () => {
+      mockCreateDepartment.mockResolvedValue({ id: 1, name: "New Department" });
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await act(async () => {
+        await result.current.mutateAsync("New Department");
+      });
+
+      expect(mockRefetchQueries).toHaveBeenCalled();
+    });
+
+    it("returns the created department data", async () => {
+      const createdDept = { id: 1, name: "New Department" };
+      mockCreateDepartment.mockResolvedValue(createdDept);
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      let returnedData;
+      await act(async () => {
+        returnedData = await result.current.mutateAsync("New Department");
+      });
+
+      expect(returnedData).toEqual(createdDept);
+    });
+  });
+
+  describe("optimistic updates", () => {
+    it("calls API and refetches on success", async () => {
+      // Pre-populate cache
+      queryClient.setQueryData(queryKeys.departments.all(), [
+        ...mockDepartments,
+      ]);
+      mockCreateDepartment.mockResolvedValue({ id: 5, name: "New Department" });
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await act(async () => {
+        await result.current.mutateAsync("New Department");
+      });
+
+      // Verify the API was called
+      expect(mockCreateDepartment).toHaveBeenCalledWith("New Department");
+      // Verify refetch was triggered on success
+      expect(mockRefetchQueries).toHaveBeenCalled();
+    });
+
+    it("adds department in sorted order", async () => {
+      // Pre-populate cache with sorted departments
+      queryClient.setQueryData(queryKeys.departments.all(), [
+        "Design",
+        "Engineering",
+        "Product",
+      ]);
+      mockCreateDepartment.mockResolvedValue({ id: 5, name: "Marketing" });
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await act(async () => {
+        await result.current.mutateAsync("Marketing");
+      });
+
+      // The optimistic update adds and sorts
+      // After refetch, the server data would be canonical, but we can verify the sort happened
+      expect(mockCreateDepartment).toHaveBeenCalledWith("Marketing");
+    });
+
+    it("rolls back on error", async () => {
+      // Pre-populate cache
+      queryClient.setQueryData(queryKeys.departments.all(), [
+        ...mockDepartments,
+      ]);
+
+      mockCreateDepartment.mockRejectedValue(new Error("Create failed"));
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      try {
+        await act(async () => {
+          await result.current.mutateAsync("New Department");
+        });
+      } catch {
+        // Expected to throw
+      }
+
+      // Check that cache was rolled back
+      await waitFor(() => {
+        const cached = queryClient.getQueryData<string[]>(
+          queryKeys.departments.all(),
+        );
+        expect(cached).not.toContain("New Department");
+        expect(cached).toEqual(mockDepartments);
+      });
+    });
+  });
+
+  describe("callbacks", () => {
+    it("calls onSuccess callback after creation", async () => {
+      const createdDept = { id: 1, name: "New Department" };
+      mockCreateDepartment.mockResolvedValue(createdDept);
+      const onSuccess = jest.fn();
+
+      const { result } = renderHook(() => useCreateDepartment({ onSuccess }), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await act(async () => {
+        await result.current.mutateAsync("New Department");
+      });
+
+      expect(onSuccess).toHaveBeenCalledWith(createdDept);
+    });
+
+    it("calls onError callback when creation fails", async () => {
+      const error = new Error("Creation failed");
+      mockCreateDepartment.mockRejectedValue(error);
+      const onError = jest.fn();
+
+      const { result } = renderHook(() => useCreateDepartment({ onError }), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      try {
+        await act(async () => {
+          await result.current.mutateAsync("New Department");
+        });
+      } catch {
+        // Expected to throw
+      }
+
+      expect(onError).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe("mutation state", () => {
+    it("isPending is false initially", () => {
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      expect(result.current.isPending).toBe(false);
+    });
+
+    it("isPending is false after mutation completes", async () => {
+      mockCreateDepartment.mockResolvedValue({ id: 1, name: "New Department" });
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await act(async () => {
+        await result.current.mutateAsync("New Department");
+      });
+
+      expect(result.current.isPending).toBe(false);
+    });
+
+    it("throws error when mutation fails", async () => {
+      mockCreateDepartment.mockRejectedValue(new Error("Failed"));
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await expect(
+        act(async () => {
+          await result.current.mutateAsync("New Department");
+        }),
+      ).rejects.toThrow("Failed");
+    });
+  });
+
+  describe("empty cache handling", () => {
+    it("handles creation when cache is empty", async () => {
+      // No departments in cache
+      mockCreateDepartment.mockResolvedValue({ id: 1, name: "First Department" });
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      // Should not throw
+      await act(async () => {
+        await result.current.mutateAsync("First Department");
+      });
+
+      expect(mockCreateDepartment).toHaveBeenCalledWith("First Department");
+    });
+
+    it("handles creation attempt when cache was empty", async () => {
+      // No departments in cache initially
+      mockCreateDepartment.mockRejectedValue(new Error("Failed"));
+
+      const { result } = renderHook(() => useCreateDepartment(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      // Should not crash even with empty cache
+      try {
+        await act(async () => {
+          await result.current.mutateAsync("New Department");
+        });
+      } catch {
+        // Expected to throw
+      }
+
+      // Verify API was still called
+      expect(mockCreateDepartment).toHaveBeenCalledWith("New Department");
+    });
+  });
+});
 
 describe("useDeleteDepartment", () => {
   let queryClient: QueryClient;

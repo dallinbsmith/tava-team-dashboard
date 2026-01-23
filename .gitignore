@@ -33,5 +33,9 @@ dist-ssr
 frontend/.next/
 frontend/out/
 
+# Test coverage
+frontend/coverage/
+coverage/
+
 # Go
 backend/tmp/

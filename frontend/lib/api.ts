@@ -76,9 +76,14 @@ export const deactivateUser = (userId: number) => postVoid(`/users/${userId}/dea
 // Squads & Departments
 export const getSquads = () => get<Squad[]>("/squads");
 export const createSquad = (name: string) => mutate<Squad>("/squads", "POST", { name });
+export const renameSquad = (id: number, name: string) => mutate<Squad>(`/squads/${id}`, "PUT", { name });
 export const deleteSquad = (id: number) => del(`/squads/${id}`);
+export const getUsersBySquad = (id: number) => get<User[]>(`/squads/${id}/users`);
 export const getDepartments = () => get<string[]>("/departments");
+export const renameDepartment = (oldName: string, newName: string) =>
+  mutate<void>(`/departments/${encodeURIComponent(oldName)}`, "PUT", { name: newName });
 export const deleteDepartment = (name: string) => del(`/departments/${encodeURIComponent(name)}`);
+export const getUsersByDepartment = (name: string) => get<User[]>(`/departments/${encodeURIComponent(name)}/users`);
 
 // Invitations
 export const getInvitations = () => get<Invitation[]>("/invitations");

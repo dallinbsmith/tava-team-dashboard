@@ -27,7 +27,7 @@ export function applyDraftChangesToTree(
   }
 
   // Deep clone the trees
-  const clonedTrees = JSON.parse(JSON.stringify(trees)) as OrgTreeNode[];
+  let clonedTrees = JSON.parse(JSON.stringify(trees)) as OrgTreeNode[];
 
   // Build a map of user ID to their node for quick lookup
   const nodeMap = new Map<number, OrgTreeNode>();
@@ -62,6 +62,9 @@ export function applyDraftChangesToTree(
         currentParent.children = currentParent.children.filter(
           (child) => child.user.id !== userId
         );
+      } else {
+        // Node is at root level - remove from clonedTrees array
+        clonedTrees = clonedTrees.filter((tree) => tree.user.id !== userId);
       }
 
       // Add to new supervisor
@@ -129,7 +132,7 @@ export function DraggableEmployeeCard({
     <div
       ref={setNodeRef}
       onClick={handleClick}
-      className={`flex items-center gap-3 p-3 bg-theme-surface border transition-all ${hasChange
+      className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-theme-surface border transition-all rounded-lg ${hasChange
         ? "border-purple-400 ring-2 ring-purple-500/30"
         : isDraftMode
           ? "border-theme-border hover:border-primary-400 hover:shadow-sm cursor-pointer"
@@ -158,28 +161,31 @@ export function DraggableEmployeeCard({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-theme-text truncate">
+        <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+          <span className="font-medium text-theme-text truncate text-sm sm:text-base">
             {node.user.first_name} {node.user.last_name}
           </span>
-          {(node.user.role === "supervisor" || node.user.role === "admin") && (
-            <Shield className="w-4 h-4 text-purple-500" />
+          {node.user.role === "admin" && (
+            <Shield className="w-4 h-4 text-amber-400" />
+          )}
+          {node.user.role === "supervisor" && (
+            <Shield className="w-4 h-4 text-purple-400" />
           )}
         </div>
-        <div className="text-sm text-theme-text-muted">
-          <span>
+        <div className="text-xs sm:text-sm text-theme-text-muted">
+          <span className="truncate">
             {node.user.title || node.user.role.charAt(0).toUpperCase() + node.user.role.slice(1)}
           </span>
           {node.user.department && (
             <>
-              <span> - </span>
-              <span>{node.user.department}</span>
+              <span className="hidden sm:inline"> - </span>
+              <span className="hidden sm:inline">{node.user.department}</span>
             </>
           )}
         </div>
         {/* Squad display - simple list, detailed changes shown in Pending Changes panel */}
         {node.user.squads && node.user.squads.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1">
+          <div className="hidden sm:flex flex-wrap gap-1 mt-1">
             {node.user.squads.map(squad => (
               <span
                 key={squad.id}
@@ -194,9 +200,9 @@ export function DraggableEmployeeCard({
 
       {/* Pending change indicator */}
       {hasChange && (
-        <div className="flex items-center gap-1 text-xs bg-purple-900/40 text-purple-300 px-2 py-1 rounded">
+        <div className="flex items-center gap-1 text-xs bg-purple-900/40 text-purple-300 px-1.5 sm:px-2 py-1 rounded flex-shrink-0">
           <AlertCircle className="w-3 h-3" />
-          <span>Changed</span>
+          <span className="hidden sm:inline">Changed</span>
         </div>
       )}
 
@@ -242,7 +248,7 @@ export function DroppableSupervisorZone({
   const canReceiveDrop = isDraftMode && draggedUserId !== null && draggedUserId !== node.user.id && (node.user.role === "supervisor" || node.user.role === "admin");
 
   return (
-    <div className={`${level > 0 ? "ml-6 border-l-2 border-theme-border pl-4" : ""}`}>
+    <div className={`${level > 0 ? "ml-3 sm:ml-6 border-l-2 border-theme-border pl-2 sm:pl-4" : ""}`}>
       {/* Supervisor header with drop zone */}
       <div
         ref={setNodeRef}
@@ -354,32 +360,20 @@ export function OrgTreeRenderer({
 // Drag overlay - shows the card being dragged
 export function DragOverlayCard({ user }: { user: User }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-theme-surface border border-primary-400 shadow-xl rounded-lg opacity-90">
-      <GripVertical className="w-5 h-5 text-theme-text-muted" />
+    <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-theme-surface border border-primary-400 shadow-xl rounded-lg opacity-90 max-w-xs sm:max-w-sm">
+      <GripVertical className="w-4 sm:w-5 h-4 sm:h-5 text-theme-text-muted flex-shrink-0" />
       <Avatar
         s3AvatarUrl={user.avatar_url}
         firstName={user.first_name}
         lastName={user.last_name}
         size="md"
-        className="rounded-full"
+        className="rounded-full flex-shrink-0"
       />
-      <div>
-        <div className="font-medium text-theme-text">
+      <div className="min-w-0 flex-1">
+        <div className="font-medium text-theme-text text-sm sm:text-base truncate">
           {user.first_name} {user.last_name}
         </div>
-        <div className="text-sm text-theme-text-muted">{user.title || user.role.charAt(0).toUpperCase() + user.role.slice(1)}</div>
-        {user.squads && user.squads.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1">
-            {user.squads.map(squad => (
-              <span
-                key={squad.id}
-                className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border rounded"
-              >
-                {squad.name}
-              </span>
-            ))}
-          </div>
-        )}
+        <div className="text-xs sm:text-sm text-theme-text-muted truncate">{user.title || user.role.charAt(0).toUpperCase() + user.role.slice(1)}</div>
       </div>
     </div>
   );

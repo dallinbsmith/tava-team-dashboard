@@ -100,6 +100,7 @@ func (r *mutationResolver) CreateEmployee(ctx context.Context, input CreateEmplo
 		AvatarURL:    input.AvatarURL,
 		SupervisorID: supervisorID,
 		SquadIDs:     squadIDs,
+		DateStarted:  input.DateStarted,
 	}
 
 	result, err := r.EmployeeService.CreateEmployee(ctx, serviceInput)

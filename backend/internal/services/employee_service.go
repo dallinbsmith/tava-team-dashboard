@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"time"
 
 	"github.com/smith-dallin/manager-dashboard/internal/constants"
 	"github.com/smith-dallin/manager-dashboard/internal/jira"
@@ -42,6 +43,7 @@ type CreateEmployeeInput struct {
 	AvatarURL    *string
 	SupervisorID *int64
 	SquadIDs     []int64
+	DateStarted  *time.Time
 }
 
 // CreateEmployeeResult contains the result of creating an employee.
@@ -217,6 +219,7 @@ func (s *EmployeeService) createDatabaseUser(ctx context.Context, input CreateEm
 		AvatarURL:    input.AvatarURL,
 		SupervisorID: input.SupervisorID,
 		SquadIDs:     input.SquadIDs,
+		DateStarted:  input.DateStarted,
 	}
 
 	user, err := s.userRepo.Create(ctx, req, auth0UserID)

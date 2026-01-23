@@ -21,10 +21,12 @@ const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 jest.mock("@/lib/api", () => ({
   getSquads: jest.fn(),
   createSquad: jest.fn(),
+  renameSquad: jest.fn(),
   deleteSquad: jest.fn(),
 }));
 const mockGetSquads = api.getSquads as jest.MockedFunction<typeof api.getSquads>;
 const mockCreateSquad = api.createSquad as jest.MockedFunction<typeof api.createSquad>;
+const mockRenameSquad = api.renameSquad as jest.MockedFunction<typeof api.renameSquad>;
 const mockDeleteSquad = api.deleteSquad as jest.MockedFunction<typeof api.deleteSquad>;
 
 // Mock the queryUtils
@@ -454,6 +456,143 @@ describe("useSquadsQuery", () => {
 
       // After mutation completes, isMutating should be false
       expect(result.current.isMutating).toBe(false);
+    });
+  });
+
+  describe("updateSquad mutation", () => {
+    it("renames a squad successfully with optimistic update", async () => {
+      mockGetSquads.mockResolvedValue(mockSquads);
+      const renamedSquad: Squad = { id: 1, name: "Frontend Engineers" };
+      mockRenameSquad.mockResolvedValue(renamedSquad);
+
+      const { result } = renderHook(() => useSquadsQuery(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => {
+        expect(result.current.squads.length).toBe(3);
+      });
+
+      let returnedSquad: Squad | undefined;
+      await act(async () => {
+        returnedSquad = await result.current.updateSquad(1, "Frontend Engineers");
+      });
+
+      expect(mockRenameSquad).toHaveBeenCalledWith(1, "Frontend Engineers");
+      expect(returnedSquad).toEqual(renamedSquad);
+
+      // Cache should be updated with new name
+      await waitFor(() => {
+        const squad = result.current.squads.find((s) => s.id === 1);
+        expect(squad?.name).toBe("Frontend Engineers");
+      });
+    });
+
+    it("refetches related queries after renaming squad", async () => {
+      mockGetSquads.mockResolvedValue(mockSquads);
+      const renamedSquad: Squad = { id: 1, name: "Frontend Engineers" };
+      mockRenameSquad.mockResolvedValue(renamedSquad);
+
+      const { result } = renderHook(() => useSquadsQuery(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => {
+        expect(result.current.squads.length).toBe(3);
+      });
+
+      await act(async () => {
+        await result.current.updateSquad(1, "Frontend Engineers");
+      });
+
+      expect(mockRefetchQueries).toHaveBeenCalled();
+    });
+
+    it("rolls back on rename error", async () => {
+      mockGetSquads.mockResolvedValue(mockSquads);
+      mockRenameSquad.mockRejectedValue(new Error("Rename failed"));
+
+      const { result } = renderHook(() => useSquadsQuery(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => {
+        expect(result.current.squads.length).toBe(3);
+      });
+
+      // Try to rename - should fail
+      try {
+        await act(async () => {
+          await result.current.updateSquad(1, "Frontend Engineers");
+        });
+      } catch {
+        // Expected to throw
+      }
+
+      // Squad name should be rolled back to original
+      await waitFor(() => {
+        const squad = result.current.squads.find((s) => s.id === 1);
+        expect(squad?.name).toBe("Frontend Team");
+      });
+    });
+
+    it("completes rename mutation successfully", async () => {
+      mockGetSquads.mockResolvedValue(mockSquads);
+      const renamedSquad: Squad = { id: 1, name: "Frontend Engineers" };
+      mockRenameSquad.mockResolvedValue(renamedSquad);
+
+      const { result } = renderHook(() => useSquadsQuery(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => {
+        expect(result.current.squads.length).toBe(3);
+      });
+
+      await act(async () => {
+        await result.current.updateSquad(1, "Frontend Engineers");
+      });
+
+      // After mutation completes, isMutating should be false
+      expect(result.current.isMutating).toBe(false);
+    });
+
+    it("isMutating reflects rename mutation in progress", async () => {
+      mockGetSquads.mockResolvedValue(mockSquads);
+      // Create a promise we can control
+      let resolveRename: (value: Squad) => void;
+      const renamePromise = new Promise<Squad>((resolve) => {
+        resolveRename = resolve;
+      });
+      mockRenameSquad.mockReturnValue(renamePromise);
+
+      const { result } = renderHook(() => useSquadsQuery(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      await waitFor(() => {
+        expect(result.current.squads.length).toBe(3);
+      });
+
+      // Start mutation without awaiting
+      act(() => {
+        result.current.updateSquad(1, "Frontend Engineers");
+      });
+
+      // isMutating should be true during mutation
+      await waitFor(() => {
+        expect(result.current.isMutating).toBe(true);
+      });
+
+      // Resolve the promise
+      await act(async () => {
+        resolveRename!({ id: 1, name: "Frontend Engineers" });
+      });
+
+      // isMutating should be false after mutation completes
+      await waitFor(() => {
+        expect(result.current.isMutating).toBe(false);
+      });
     });
   });
 

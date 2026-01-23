@@ -177,12 +177,12 @@ func (r *UserRepository) Create(ctx context.Context, req *models.CreateUserReque
 	// Note: Squad is now handled separately via SquadRepository.SetUserSquads
 	query := `
 		INSERT INTO users (auth0_id, email, first_name, last_name, role, title, department, avatar_url, supervisor_id, date_started)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, NOW()))
 		RETURNING ` + userColumns
 
 	user, err := scanUser(r.pool.QueryRow(ctx, query,
 		auth0ID, req.Email, req.FirstName, req.LastName, req.Role,
-		req.Title, req.Department, req.AvatarURL, req.SupervisorID,
+		req.Title, req.Department, req.AvatarURL, req.SupervisorID, req.DateStarted,
 	))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
@@ -478,4 +478,30 @@ func (r *UserRepository) Reactivate(ctx context.Context, userID int64) error {
 		return fmt.Errorf("failed to reactivate user: %w", err)
 	}
 	return nil
+}
+
+// RenameDepartment renames a department by updating all users with the old department name to the new name
+func (r *UserRepository) RenameDepartment(ctx context.Context, oldName, newName string) error {
+	query := `UPDATE users SET department = $1, updated_at = $2 WHERE department = $3`
+	_, err := r.pool.Exec(ctx, query, newName, time.Now(), oldName)
+	if err != nil {
+		return fmt.Errorf("failed to rename department: %w", err)
+	}
+	return nil
+}
+
+// GetUsersByDepartment returns all active users in a specific department
+func (r *UserRepository) GetUsersByDepartment(ctx context.Context, department string) ([]models.User, error) {
+	query := `SELECT ` + userColumns + ` FROM users WHERE department = $1 AND is_active = true ORDER BY last_name, first_name`
+	rows, err := r.pool.Query(ctx, query, department)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users by department: %w", err)
+	}
+	defer rows.Close()
+
+	users, err := scanUsers(rows)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan users: %w", err)
+	}
+	return users, nil
 }

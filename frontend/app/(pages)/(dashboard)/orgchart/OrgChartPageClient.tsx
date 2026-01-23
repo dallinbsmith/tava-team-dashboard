@@ -42,6 +42,8 @@ import {
   Pencil,
   Eye,
   Users,
+  PanelRightOpen,
+  PanelRightClose,
 } from "lucide-react";
 
 interface OrgChartPageClientProps {
@@ -77,6 +79,7 @@ export function OrgChartPageClient({
     type: "delete" | "publish";
     id: number;
   } | null>(null);
+  const [showSidebar, setShowSidebar] = useState(true);
 
   // Auto-expand all nodes
   const [expandedNodes, setExpandedNodes] = useState<Set<number>>(() => {
@@ -328,8 +331,8 @@ export function OrgChartPageClient({
       onDragEnd={handleDragEnd}
     >
       <div className="h-full">
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <h1 className="text-2xl font-bold text-theme-text">Organization Chart</h1>
               <p className="text-theme-text-muted mt-1">
@@ -341,20 +344,20 @@ export function OrgChartPageClient({
               </p>
             </div>
             {canEdit && (
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mt-3 sm:mt-0">
                 <button
                   onClick={() => setShowManageDepartmentsModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 border border-theme-border text-theme-text rounded-full text-sm font-medium hover:bg-theme-elevated transition-all"
+                  className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border border-theme-border text-theme-text rounded-full text-sm font-medium hover:bg-theme-elevated transition-all"
                 >
                   <Building2 className="w-4 h-4" />
-                  Manage Departments
+                  <span className="hidden xs:inline">Manage</span> Departments
                 </button>
                 <button
                   onClick={() => setShowManageSquadsModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 border border-theme-border text-theme-text rounded-full text-sm font-medium hover:bg-theme-elevated transition-all"
+                  className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 border border-theme-border text-theme-text rounded-full text-sm font-medium hover:bg-theme-elevated transition-all"
                 >
                   <Users className="w-4 h-4" />
-                  Manage Squads
+                  <span className="hidden xs:inline">Manage</span> Squads
                 </button>
               </div>
             )}
@@ -373,10 +376,10 @@ export function OrgChartPageClient({
           </div>
         )}
 
-        <div className="grid grid-cols-12 gap-6 h-[calc(100vh-220px)]">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-auto lg:h-[calc(100vh-220px)]">
           {/* Org Tree */}
           <div
-            className={`${canEdit ? "col-span-8" : "col-span-12"} p-4 overflow-y-auto rounded transition-all ${isDraftMode
+            className={`flex-1 min-h-[400px] lg:min-h-0 p-3 sm:p-4 overflow-y-auto rounded transition-all ${isDraftMode
               ? "border-2 border-purple-500/50 ring-2 ring-purple-500/20"
               : "bg-theme-surface border border-theme-border"
               }`}
@@ -422,8 +425,26 @@ export function OrgChartPageClient({
 
           {/* Sidebar - only show for users who can edit */}
           {canEdit && (
-            <div className="col-span-4 overflow-y-auto">
-              <DraftManager
+            <div className={`${showSidebar ? "w-full lg:w-96 xl:w-[420px]" : "w-0 overflow-hidden"} transition-all duration-300 flex-shrink-0`}>
+              {/* Mobile sidebar toggle */}
+              <button
+                onClick={() => setShowSidebar(!showSidebar)}
+                className="lg:hidden mb-3 flex items-center gap-2 px-3 py-2 text-sm font-medium text-theme-text-muted hover:text-theme-text border border-theme-border rounded-lg hover:bg-theme-elevated transition-colors w-full justify-center"
+              >
+                {showSidebar ? (
+                  <>
+                    <PanelRightClose className="w-4 h-4" />
+                    Hide Draft Panel
+                  </>
+                ) : (
+                  <>
+                    <PanelRightOpen className="w-4 h-4" />
+                    Show Draft Panel
+                  </>
+                )}
+              </button>
+              <div className={`${showSidebar ? "block" : "hidden"} h-full overflow-y-auto`}>
+                <DraftManager
                 drafts={drafts}
                 currentDraft={currentDraft}
                 setCurrentDraft={setCurrentDraft}
@@ -444,6 +465,7 @@ export function OrgChartPageClient({
                   return users;
                 })()}
               />
+              </div>
             </div>
           )}
         </div>

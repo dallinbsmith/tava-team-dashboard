@@ -10,5 +10,5 @@ export type {
 } from "./useEmployeeMutations";
 
 // Department Mutations
-export { useDeleteDepartment } from "./useDepartmentMutations";
-export type { UseDeleteDepartmentOptions } from "./useDepartmentMutations";
+export { useDeleteDepartment, useRenameDepartment } from "./useDepartmentMutations";
+export type { UseDeleteDepartmentOptions, UseRenameDepartmentOptions } from "./useDepartmentMutations";

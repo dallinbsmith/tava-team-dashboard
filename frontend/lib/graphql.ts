@@ -245,13 +245,18 @@ export async function createEmployeeGraphQL(
   const client = createProxyGraphQLClient();
 
   // Clean up input - remove empty strings, keep only truthy optional values
+  // Convert date_started to RFC3339 format for GraphQL Time scalar
+  const dateStartedRFC3339 = input.date_started?.trim()
+    ? `${input.date_started.trim()}T00:00:00Z`
+    : undefined;
+
   const cleanedInput = {
     email: input.email,
     first_name: input.first_name,
     last_name: input.last_name,
     role: input.role,
     ...(input.department?.trim() && { department: input.department.trim() }),
-    ...(input.date_started?.trim() && { date_started: input.date_started.trim() }),
+    ...(dateStartedRFC3339 && { date_started: dateStartedRFC3339 }),
     ...(input.avatar_url?.trim() && { avatar_url: input.avatar_url.trim() }),
     ...(input.supervisor_id?.trim() && { supervisor_id: input.supervisor_id.trim() }),
     ...(input.squad_ids?.length && { squad_ids: input.squad_ids.map(String) }),

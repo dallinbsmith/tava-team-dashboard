@@ -102,6 +102,9 @@ export default function TeamMembersWidget({
                       <span className="text-sm font-medium text-theme-text group-hover:text-primary-400 truncate transition-colors">
                         {member.first_name} {member.last_name}
                       </span>
+                      {member.role === "admin" && (
+                        <Shield className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                      )}
                       {member.role === "supervisor" && (
                         <Shield className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
                       )}

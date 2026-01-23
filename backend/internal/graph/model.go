@@ -46,15 +46,16 @@ type Employee struct {
 }
 
 type CreateEmployeeInput struct {
-	Email        string   `json:"email"`
-	FirstName    string   `json:"first_name"`
-	LastName     string   `json:"last_name"`
-	Role         Role     `json:"role"`
-	Title        *string  `json:"title,omitempty"`
-	Department   string   `json:"department"`
-	AvatarURL    *string  `json:"avatar_url,omitempty"`
-	SupervisorID *string  `json:"supervisor_id,omitempty"`
-	SquadIDs     []string `json:"squad_ids,omitempty"`
+	Email        string     `json:"email"`
+	FirstName    string     `json:"first_name"`
+	LastName     string     `json:"last_name"`
+	Role         Role       `json:"role"`
+	Title        *string    `json:"title,omitempty"`
+	Department   string     `json:"department"`
+	AvatarURL    *string    `json:"avatar_url,omitempty"`
+	SupervisorID *string    `json:"supervisor_id,omitempty"`
+	SquadIDs     []string   `json:"squad_ids,omitempty"`
+	DateStarted  *time.Time `json:"date_started,omitempty"`
 }
 
 type UpdateEmployeeInput struct {

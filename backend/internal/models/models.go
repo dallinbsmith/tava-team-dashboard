@@ -106,15 +106,16 @@ type Supervisor struct {
 }
 
 type CreateUserRequest struct {
-	Email        string  `json:"email"`
-	FirstName    string  `json:"first_name"`
-	LastName     string  `json:"last_name"`
-	Role         Role    `json:"role"`
-	Title        string  `json:"title"`
-	Department   string  `json:"department"`
-	SquadIDs     []int64 `json:"squad_ids,omitempty"`
-	SupervisorID *int64  `json:"supervisor_id,omitempty"`
-	AvatarURL    *string `json:"avatar_url,omitempty"`
+	Email        string     `json:"email"`
+	FirstName    string     `json:"first_name"`
+	LastName     string     `json:"last_name"`
+	Role         Role       `json:"role"`
+	Title        string     `json:"title"`
+	Department   string     `json:"department"`
+	SquadIDs     []int64    `json:"squad_ids,omitempty"`
+	SupervisorID *int64     `json:"supervisor_id,omitempty"`
+	AvatarURL    *string    `json:"avatar_url,omitempty"`
+	DateStarted  *time.Time `json:"date_started,omitempty"`
 }
 
 type UpdateUserRequest struct {

@@ -691,6 +691,201 @@ func (h *Handlers) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, map[string]string{"message": "Department deleted successfully"})
 }
 
+// RenameDepartment godoc
+// @Summary Rename a department
+// @Description Renames a department by updating all users with the old department name to the new name
+// @Tags Departments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param name path string true "Current department name"
+// @Param body body object{name=string} true "New department name"
+// @Success 200 {object} map[string]string "Success message"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /departments/{name} [put]
+func (h *Handlers) RenameDepartment(w http.ResponseWriter, r *http.Request) {
+	currentUser := requireAuth(w, r)
+	if currentUser == nil {
+		return
+	}
+
+	// Only admins and supervisors can rename departments
+	if currentUser.Role == models.RoleEmployee {
+		respondError(w, http.StatusForbidden, "Forbidden")
+		return
+	}
+
+	oldName := chi.URLParam(r, "name")
+	if oldName == "" {
+		respondError(w, http.StatusBadRequest, "Department name is required")
+		return
+	}
+
+	var req struct {
+		Name string `json:"name"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+
+	if req.Name == "" {
+		respondError(w, http.StatusBadRequest, "New department name is required")
+		return
+	}
+
+	if len(req.Name) > 255 {
+		respondError(w, http.StatusBadRequest, "Department name must be 255 characters or less")
+		return
+	}
+
+	if err := h.userRepo.RenameDepartment(r.Context(), oldName, req.Name); err != nil {
+		h.logger.LogError(r.Context(), "Failed to rename department", err, "old_name", oldName, "new_name", req.Name)
+		respondError(w, http.StatusInternalServerError, "Failed to rename department")
+		return
+	}
+
+	// Invalidate user cache since department field changed
+	h.InvalidateUserCache()
+
+	respondJSON(w, http.StatusOK, map[string]string{"message": "Department renamed successfully"})
+}
+
+// GetUsersByDepartment godoc
+// @Summary Get users in a department
+// @Description Returns all active users in a specific department
+// @Tags Departments
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param name path string true "Department name"
+// @Success 200 {array} models.User "List of users"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /departments/{name}/users [get]
+func (h *Handlers) GetUsersByDepartment(w http.ResponseWriter, r *http.Request) {
+	if requireAuth(w, r) == nil {
+		return
+	}
+
+	department := chi.URLParam(r, "name")
+	if department == "" {
+		respondError(w, http.StatusBadRequest, "Department name is required")
+		return
+	}
+
+	users, err := h.userRepo.GetUsersByDepartment(r.Context(), department)
+	if err != nil {
+		h.logger.LogError(r.Context(), "Failed to get users by department", err, "department", department)
+		respondError(w, http.StatusInternalServerError, "Failed to get users")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, models.ToUserResponses(users))
+}
+
+// RenameSquad godoc
+// @Summary Rename a squad
+// @Description Renames an existing squad
+// @Tags Squads
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Squad ID"
+// @Param body body object{name=string} true "New squad name"
+// @Success 200 {object} models.Squad "Updated squad"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 403 {object} map[string]interface{} "Forbidden"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /squads/{id} [put]
+func (h *Handlers) RenameSquad(w http.ResponseWriter, r *http.Request) {
+	currentUser := requireAuth(w, r)
+	if currentUser == nil {
+		return
+	}
+
+	// Only admins and supervisors can rename squads
+	if currentUser.Role == models.RoleEmployee {
+		respondError(w, http.StatusForbidden, "Forbidden")
+		return
+	}
+
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid squad ID")
+		return
+	}
+
+	var req struct {
+		Name string `json:"name"`
+	}
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+
+	if req.Name == "" {
+		respondError(w, http.StatusBadRequest, "Squad name is required")
+		return
+	}
+
+	if len(req.Name) > 255 {
+		respondError(w, http.StatusBadRequest, "Squad name must be 255 characters or less")
+		return
+	}
+
+	squad, err := h.squadRepo.Rename(r.Context(), id, req.Name)
+	if err != nil {
+		h.logger.LogError(r.Context(), "Failed to rename squad", err, "squad_id", id)
+		respondError(w, http.StatusInternalServerError, "Failed to rename squad")
+		return
+	}
+
+	// Invalidate squad cache on successful rename
+	h.InvalidateSquadCache()
+
+	respondJSON(w, http.StatusOK, squad)
+}
+
+// GetUsersBySquad godoc
+// @Summary Get users in a squad
+// @Description Returns all active users in a specific squad
+// @Tags Squads
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param id path int true "Squad ID"
+// @Success 200 {array} models.User "List of users"
+// @Failure 400 {object} map[string]interface{} "Invalid request"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /squads/{id}/users [get]
+func (h *Handlers) GetUsersBySquad(w http.ResponseWriter, r *http.Request) {
+	if requireAuth(w, r) == nil {
+		return
+	}
+
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid squad ID")
+		return
+	}
+
+	users, err := h.squadRepo.GetUsersBySquadID(r.Context(), id)
+	if err != nil {
+		h.logger.LogError(r.Context(), "Failed to get users by squad", err, "squad_id", id)
+		respondError(w, http.StatusInternalServerError, "Failed to get users")
+		return
+	}
+
+	respondJSON(w, http.StatusOK, models.ToUserResponses(users))
+}
+
 func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

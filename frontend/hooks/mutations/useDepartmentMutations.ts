@@ -1,7 +1,60 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteDepartment } from "@/lib/api";
+import { deleteDepartment, renameDepartment } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
+
+export interface UseRenameDepartmentOptions {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}
+
+/**
+ * Hook for renaming a department.
+ * Automatically invalidates related queries on success.
+ *
+ * @example
+ * ```tsx
+ * const { mutate: renameDept, isPending } = useRenameDepartment({
+ *   onSuccess: () => console.log('Renamed'),
+ *   onError: (err) => setError(err.message),
+ * });
+ *
+ * renameDept({ oldName: 'Engineering', newName: 'Product Engineering' });
+ * ```
+ */
+export function useRenameDepartment(options: UseRenameDepartmentOptions = {}) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ oldName, newName }: { oldName: string; newName: string }) =>
+      renameDepartment(oldName, newName),
+    onMutate: async ({ oldName, newName }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.departments.all() });
+      const previousDepartments = queryClient.getQueryData<string[]>(
+        queryKeys.departments.all()
+      );
+
+      queryClient.setQueryData<string[]>(queryKeys.departments.all(), (old) =>
+        old ? old.map((d) => (d === oldName ? newName : d)) : []
+      );
+
+      return { previousDepartments };
+    },
+    onError: (error: Error, _variables, context) => {
+      if (context?.previousDepartments) {
+        queryClient.setQueryData(
+          queryKeys.departments.all(),
+          context.previousDepartments
+        );
+      }
+      options.onError?.(error);
+    },
+    onSuccess: async () => {
+      await refetchQueries(queryClient, queryKeyGroups.departmentRelated());
+      options.onSuccess?.();
+    },
+  });
+}
 
 export interface UseDeleteDepartmentOptions {
   onSuccess?: () => void;

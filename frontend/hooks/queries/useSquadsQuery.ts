@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useCallback } from "react";
-import { getSquads, createSquad, deleteSquad } from "@/lib/api";
+import { getSquads, createSquad, deleteSquad, renameSquad } from "@/lib/api";
 import { queryKeys } from "@/lib/queryKeys";
 import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 import { Squad } from "@/shared/types/user";
@@ -25,6 +25,8 @@ export interface UseSquadsQueryResult {
   refetch: () => Promise<void>;
   /** Add a new squad */
   addSquad: (name: string) => Promise<Squad>;
+  /** Rename a squad */
+  updateSquad: (id: number, newName: string) => Promise<Squad>;
   /** Delete a squad */
   removeSquad: (id: number) => Promise<void>;
   /** Whether a mutation is in progress */
@@ -74,6 +76,30 @@ export function useSquadsQuery(
     },
   });
 
+  // Rename squad mutation
+  const renameMutation = useMutation({
+    mutationFn: ({ id, name }: { id: number; name: string }) => renameSquad(id, name),
+    onMutate: async ({ id, name }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.squads.all() });
+      const previousSquads = queryClient.getQueryData<Squad[]>(queryKeys.squads.all());
+      // Optimistic update
+      queryClient.setQueryData<Squad[]>(queryKeys.squads.all(), (old) =>
+        old ? old.map((s) => (s.id === id ? { ...s, name } : s)) : []
+      );
+      return { previousSquads };
+    },
+    onError: (_err, _variables, context) => {
+      // Rollback on error
+      if (context?.previousSquads) {
+        queryClient.setQueryData(queryKeys.squads.all(), context.previousSquads);
+      }
+    },
+    onSuccess: async () => {
+      // Force refetch related queries
+      await refetchRelatedQueries();
+    },
+  });
+
   // Delete squad mutation
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteSquad(id),
@@ -109,6 +135,13 @@ export function useSquadsQuery(
     [addMutation]
   );
 
+  const updateSquad = useCallback(
+    async (id: number, newName: string): Promise<Squad> => {
+      return renameMutation.mutateAsync({ id, name: newName });
+    },
+    [renameMutation]
+  );
+
   const removeSquad = useCallback(
     async (id: number): Promise<void> => {
       await deleteMutation.mutateAsync(id);
@@ -126,8 +159,9 @@ export function useSquadsQuery(
       : null,
     refetch,
     addSquad,
+    updateSquad,
     removeSquad,
-    isMutating: addMutation.isPending || deleteMutation.isPending,
+    isMutating: addMutation.isPending || renameMutation.isPending || deleteMutation.isPending,
   };
 }
 

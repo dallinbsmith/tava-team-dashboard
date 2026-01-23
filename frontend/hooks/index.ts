@@ -38,10 +38,12 @@ export {
   useUpdateEmployee,
   useDeactivateEmployee,
   useDeleteDepartment,
+  useRenameDepartment,
 } from "./mutations";
 export type {
   UpdateEmployeeVariables,
   UseUpdateEmployeeOptions,
   UseDeactivateEmployeeOptions,
   UseDeleteDepartmentOptions,
+  UseRenameDepartmentOptions,
 } from "./mutations";

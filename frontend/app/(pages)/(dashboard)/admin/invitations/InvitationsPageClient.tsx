@@ -250,15 +250,11 @@ export function InvitationsPageClient({
                     <div className="flex items-center gap-2 mt-1">
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${invitation.role === "admin"
-                          ? "bg-purple-900/40 text-purple-300 border-purple-500/30"
-                          : "bg-blue-900/40 text-blue-300 border-blue-500/30"
+                          ? "bg-amber-900/40 text-amber-300 border-amber-500/30"
+                          : "bg-purple-900/40 text-purple-300 border-purple-500/30"
                           }`}
                       >
-                        {invitation.role === "admin" ? (
-                          <Shield className="w-3 h-3" />
-                        ) : (
-                          <Users className="w-3 h-3" />
-                        )}
+                        <Shield className="w-3 h-3" />
                         {invitation.role}
                       </span>
                       <span

@@ -23,6 +23,8 @@ type UserRepository interface {
 	GetAllSupervisors(ctx context.Context) ([]models.User, error)
 	GetAllDepartments(ctx context.Context) ([]string, error)
 	ClearDepartment(ctx context.Context, department string) error
+	RenameDepartment(ctx context.Context, oldName, newName string) error
+	GetUsersByDepartment(ctx context.Context, department string) ([]models.User, error)
 	// Jira-related methods
 	UpdateJiraSettings(ctx context.Context, id int64, req *models.UpdateJiraSettingsRequest) error
 	ClearJiraSettings(ctx context.Context, id int64) error
@@ -38,8 +40,10 @@ type SquadRepository interface {
 	GetByUserIDs(ctx context.Context, userIDs []int64) (map[int64][]models.Squad, error)
 	GetSquadIDsByUserID(ctx context.Context, userID int64) ([]int64, error)
 	Create(ctx context.Context, name string) (*models.Squad, error)
+	Rename(ctx context.Context, id int64, newName string) (*models.Squad, error)
 	Delete(ctx context.Context, id int64) error
 	SetUserSquads(ctx context.Context, userID int64, squadIDs []int64) error
+	GetUsersBySquadID(ctx context.Context, squadID int64) ([]models.User, error)
 }
 
 // TimeOffRepository defines the interface for time-off request data access

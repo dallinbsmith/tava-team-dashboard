@@ -240,3 +240,46 @@ func (r *SquadRepository) Delete(ctx context.Context, id int64) error {
 	}
 	return nil
 }
+
+// Rename updates the name of an existing squad
+func (r *SquadRepository) Rename(ctx context.Context, id int64, newName string) (*models.Squad, error) {
+	query := `UPDATE squads SET name = $1 WHERE id = $2 RETURNING id, name, created_at`
+	var squad models.Squad
+	err := r.pool.QueryRow(ctx, query, newName, id).Scan(&squad.ID, &squad.Name, &squad.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to rename squad: %w", err)
+	}
+	return &squad, nil
+}
+
+// GetUsersBySquadID returns all active users in a specific squad
+func (r *SquadRepository) GetUsersBySquadID(ctx context.Context, squadID int64) ([]models.User, error) {
+	query := `
+		SELECT u.id, COALESCE(u.auth0_id, ''), u.email, u.first_name, u.last_name, u.role, u.title, u.department,
+			u.avatar_url, u.supervisor_id, u.date_started, u.is_active, u.created_at, u.updated_at, u.jira_account_id
+		FROM users u
+		JOIN user_squads us ON us.user_id = u.id
+		WHERE us.squad_id = $1 AND u.is_active = true
+		ORDER BY u.last_name, u.first_name
+	`
+	rows, err := r.pool.Query(ctx, query, squadID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get users by squad: %w", err)
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(
+			&user.ID, &user.Auth0ID, &user.Email, &user.FirstName, &user.LastName,
+			&user.Role, &user.Title, &user.Department, &user.AvatarURL, &user.SupervisorID,
+			&user.DateStarted, &user.IsActive, &user.CreatedAt, &user.UpdatedAt, &user.JiraAccountID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan user: %w", err)
+		}
+		users = append(users, user)
+	}
+	return users, nil
+}

@@ -100,6 +100,9 @@ export default function EmployeeTable({
                   <div>
                     <div className="font-medium text-theme-text group-hover:text-primary-400 transition-colors flex items-center gap-1.5">
                       {employee.first_name} {employee.last_name}
+                      {employee.role === "admin" && (
+                        <Shield className="w-3.5 h-3.5 text-amber-400" />
+                      )}
                       {employee.role === "supervisor" && (
                         <Shield className="w-3.5 h-3.5 text-purple-400" />
                       )}

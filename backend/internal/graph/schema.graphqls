@@ -41,6 +41,7 @@ input CreateEmployeeInput {
   avatar_url: String
   supervisor_id: ID
   squad_ids: [ID!]
+  date_started: Time
 }
 
 input UpdateEmployeeInput {

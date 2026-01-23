@@ -20,24 +20,27 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
   return (
     <Link
       href={`/employee/${employee.id}`}
-      className="block bg-theme-surface border border-theme-border hover:border-primary-500/50 hover:shadow-lg transition-all duration-300 p-6 group hover:scale-[1.02] relative overflow-hidden"
+      className="block bg-theme-surface border border-theme-border hover:border-primary-500/50 hover:shadow-lg transition-all duration-300 p-4 sm:p-6 group hover:scale-[1.02] relative overflow-hidden rounded-lg"
     >
       {/* Gradient highlight on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary-900/0 to-primary-800/0 group-hover:from-primary-900/20 group-hover:to-primary-800/10 transition-all duration-300" />
 
       <div className="relative">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
             <Avatar
               s3AvatarUrl={employee.avatar_url}
               firstName={employee.first_name}
               lastName={employee.last_name}
               size="lg"
-              className="ring-2 ring-theme-border group-hover:ring-primary-500/50 transition-all duration-300 shadow-lg shadow-primary-900/30"
+              className="ring-2 ring-theme-border group-hover:ring-primary-500/50 transition-all duration-300 shadow-lg shadow-primary-900/30 flex-shrink-0"
             />
-            <div>
-              <h3 className="font-semibold text-theme-text group-hover:text-primary-400 transition-colors flex items-center gap-2">
-                {employee.first_name} {employee.last_name}
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-theme-text group-hover:text-primary-400 transition-colors flex items-center gap-2 text-sm sm:text-base">
+                <span className="truncate">{employee.first_name} {employee.last_name}</span>
+                {employee.role === "admin" && (
+                  <Shield className="w-4 h-4 text-amber-400" aria-label="Admin" />
+                )}
                 {employee.role === "supervisor" && (
                   <Shield className="w-4 h-4 text-purple-400" aria-label="Supervisor" />
                 )}
@@ -64,24 +67,24 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
           </div>
         </div>
 
-        <div className="mt-5 space-y-2.5 pt-4 border-t border-theme-border group-hover:border-primary-500/30 transition-colors duration-300">
-          <div className="flex items-center gap-3 text-sm text-theme-text-muted group-hover:text-theme-text transition-colors">
-            <div className="w-8 h-8 bg-theme-elevated group-hover:bg-primary-900/30 flex items-center justify-center transition-colors">
-              <Mail className="w-4 h-4 text-theme-text-muted group-hover:text-primary-400 transition-colors" />
+        <div className="mt-4 sm:mt-5 space-y-2 sm:space-y-2.5 pt-3 sm:pt-4 border-t border-theme-border group-hover:border-primary-500/30 transition-colors duration-300">
+          <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-theme-text-muted group-hover:text-theme-text transition-colors">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-theme-elevated group-hover:bg-primary-900/30 flex items-center justify-center transition-colors rounded flex-shrink-0">
+              <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-theme-text-muted group-hover:text-primary-400 transition-colors" />
             </div>
             <span className="truncate">{employee.email}</span>
           </div>
           {employee.department && (
-            <div className="flex items-center gap-3 text-sm text-theme-text-muted group-hover:text-theme-text transition-colors">
-              <div className="w-8 h-8 bg-theme-elevated group-hover:bg-primary-900/30 flex items-center justify-center transition-colors">
-                <Building2 className="w-4 h-4 text-theme-text-muted group-hover:text-primary-400 transition-colors" />
+            <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-theme-text-muted group-hover:text-theme-text transition-colors">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-theme-elevated group-hover:bg-primary-900/30 flex items-center justify-center transition-colors rounded flex-shrink-0">
+                <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-theme-text-muted group-hover:text-primary-400 transition-colors" />
               </div>
-              <span>{employee.department}</span>
+              <span className="truncate">{employee.department}</span>
             </div>
           )}
-          <div className="flex items-center gap-3 text-sm text-theme-text-muted group-hover:text-theme-text transition-colors">
-            <div className="w-8 h-8 bg-theme-elevated group-hover:bg-primary-900/30 flex items-center justify-center transition-colors">
-              <Calendar className="w-4 h-4 text-theme-text-muted group-hover:text-primary-400 transition-colors" />
+          <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-theme-text-muted group-hover:text-theme-text transition-colors">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-theme-elevated group-hover:bg-primary-900/30 flex items-center justify-center transition-colors rounded flex-shrink-0">
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-theme-text-muted group-hover:text-primary-400 transition-colors" />
             </div>
             <span>Started {formattedDate}</span>
           </div>

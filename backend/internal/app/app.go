@@ -446,14 +446,18 @@ func (a *App) registerAPIRoutes(r chi.Router) {
 			// Supervisors list
 			r.Get("/supervisors", a.handlers.GetSupervisors)
 
-			// Squads list, create, delete
+			// Squads list, create, update, delete
 			r.Get("/squads", a.handlers.GetSquads)
 			r.Post("/squads", a.handlers.CreateSquad)
+			r.Put("/squads/{id}", a.handlers.RenameSquad)
 			r.Delete("/squads/{id}", a.handlers.DeleteSquad)
+			r.Get("/squads/{id}/users", a.handlers.GetUsersBySquad)
 
-			// Departments list and delete
+			// Departments list, update, delete
 			r.Get("/departments", a.handlers.GetDepartments)
+			r.Put("/departments/{name}", a.handlers.RenameDepartment)
 			r.Delete("/departments/{name}", a.handlers.DeleteDepartment)
+			r.Get("/departments/{name}/users", a.handlers.GetUsersByDepartment)
 
 			// Avatar upload
 			r.Post("/users/{id}/avatar", a.avatarHandlers.UploadAvatar)

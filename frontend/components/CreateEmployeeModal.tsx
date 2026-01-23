@@ -117,10 +117,13 @@ export function CreateEmployeeModal({
     setCreateError(null);
 
     try {
+      console.log("Creating employee with input:", newEmployee);
       const employee = await createEmployeeGraphQL(newEmployee);
+      console.log("Employee created:", employee);
       setCreatedEmployee(employee);
       onCreated(employee);
     } catch (e: unknown) {
+      console.error("Failed to create employee:", e);
       setCreateError(parseErrorMessage(e));
     } finally {
       setCreating(false);

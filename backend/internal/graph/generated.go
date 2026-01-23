@@ -3074,7 +3074,7 @@ func (ec *executionContext) unmarshalInputCreateEmployeeInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"email", "first_name", "last_name", "role", "title", "department", "avatar_url", "supervisor_id", "squad_ids"}
+	fieldsInOrder := [...]string{"email", "first_name", "last_name", "role", "title", "department", "avatar_url", "supervisor_id", "squad_ids", "date_started"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3144,6 +3144,13 @@ func (ec *executionContext) unmarshalInputCreateEmployeeInput(ctx context.Contex
 				return it, err
 			}
 			it.SquadIDs = data
+		case "date_started":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("date_started"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DateStarted = data
 		}
 	}
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 	"github.com/smith-dallin/manager-dashboard/internal/repository"
+	"github.com/smith-dallin/manager-dashboard/internal/sanitize"
 )
 
 // UserService handles user-related business logic
@@ -121,6 +122,12 @@ func (s *UserService) loadSquadsForUsers(ctx context.Context, users []models.Use
 
 // Update updates a user and optionally their squad assignments
 func (s *UserService) Update(ctx context.Context, id int64, req *models.UpdateUserRequest) (*models.User, error) {
+	// Sanitize department field if provided
+	if req.Department != nil {
+		sanitized := sanitize.Name(*req.Department, 100)
+		req.Department = &sanitized
+	}
+
 	user, err := s.userRepo.Update(ctx, id, req)
 	if err != nil {
 		return nil, err

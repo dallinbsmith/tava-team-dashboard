@@ -64,7 +64,7 @@ func scanUserWithJira(row pgx.Row) (*models.User, error) {
 // scanUsers scans multiple rows into a slice of Users
 // Note: Squads are loaded separately via SquadRepository
 func scanUsers(rows pgx.Rows) ([]models.User, error) {
-	var users []models.User
+	users := []models.User{}
 	for rows.Next() {
 		var user models.User
 		err := rows.Scan(

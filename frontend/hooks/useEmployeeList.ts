@@ -7,9 +7,9 @@ export type ViewMode = "grid" | "list" | "department";
 
 export interface EmployeeListFilters {
   searchQuery: string;
-  roleFilter: "all" | Role;
-  departmentFilter: string;
-  squadFilter: string;
+  roleFilters: Role[];
+  departmentFilters: string[];
+  squadFilters: string[];
 }
 
 export interface EmployeeListState extends EmployeeListFilters {
@@ -35,9 +35,9 @@ export interface UseEmployeeListResult {
 
   // Actions
   setSearchQuery: (query: string) => void;
-  setRoleFilter: (role: "all" | Role) => void;
-  setDepartmentFilter: (department: string) => void;
-  setSquadFilter: (squad: string) => void;
+  setRoleFilters: (roles: Role[]) => void;
+  setDepartmentFilters: (departments: string[]) => void;
+  setSquadFilters: (squads: string[]) => void;
   setShowFilters: (show: boolean) => void;
   setSortField: (field: SortField) => void;
   setSortOrder: (order: SortOrder) => void;
@@ -53,9 +53,9 @@ export const ITEMS_PER_PAGE_OPTIONS = [6, 12, 24, 48];
 export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult => {
   const employees = employeesInput || [];
   const [searchQuery, setSearchQuery] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"all" | Role>("all");
-  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
-  const [squadFilter, setSquadFilter] = useState<string>("all");
+  const [roleFilters, setRoleFilters] = useState<Role[]>([]);
+  const [departmentFilters, setDepartmentFilters] = useState<string[]>([]);
+  const [squadFilters, setSquadFilters] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
@@ -95,17 +95,17 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
         employee.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         squadNamesMatch;
 
-      const matchesRole = roleFilter === "all" || employee.role === roleFilter;
+      const matchesRole = roleFilters.length === 0 || roleFilters.includes(employee.role);
 
       const matchesDepartment =
-        departmentFilter === "all" || employee.department === departmentFilter;
+        departmentFilters.length === 0 || (employee.department && departmentFilters.includes(employee.department));
 
       const matchesSquad =
-        squadFilter === "all" || employee.squads?.some((s) => s.name === squadFilter);
+        squadFilters.length === 0 || employee.squads?.some((s) => squadFilters.includes(s.name));
 
       return matchesSearch && matchesRole && matchesDepartment && matchesSquad;
     });
-  }, [employees, searchQuery, roleFilter, departmentFilter, squadFilter]);
+  }, [employees, searchQuery, roleFilters, departmentFilters, squadFilters]);
 
   const sortedEmployees = useMemo(() => {
     const sorted = [...filteredEmployees];
@@ -157,9 +157,9 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
 
   const clearFilters = useCallback(() => {
     setSearchQuery("");
-    setRoleFilter("all");
-    setDepartmentFilter("all");
-    setSquadFilter("all");
+    setRoleFilters([]);
+    setDepartmentFilters([]);
+    setSquadFilters([]);
     setCurrentPage(1);
   }, []);
 
@@ -169,18 +169,18 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
     setCurrentPage(1);
   }, []);
 
-  const handleRoleChange = useCallback((role: "all" | Role) => {
-    setRoleFilter(role);
+  const handleRoleFiltersChange = useCallback((roles: Role[]) => {
+    setRoleFilters(roles);
     setCurrentPage(1);
   }, []);
 
-  const handleDepartmentChange = useCallback((dept: string) => {
-    setDepartmentFilter(dept);
+  const handleDepartmentFiltersChange = useCallback((depts: string[]) => {
+    setDepartmentFilters(depts);
     setCurrentPage(1);
   }, []);
 
-  const handleSquadChange = useCallback((squad: string) => {
-    setSquadFilter(squad);
+  const handleSquadFiltersChange = useCallback((squads: string[]) => {
+    setSquadFilters(squads);
     setCurrentPage(1);
   }, []);
 
@@ -197,9 +197,9 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
   return {
     state: {
       searchQuery,
-      roleFilter,
-      departmentFilter,
-      squadFilter,
+      roleFilters,
+      departmentFilters,
+      squadFilters,
       sortField,
       sortOrder,
       currentPage,
@@ -214,9 +214,9 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
     paginatedEmployees,
     totalPages,
     setSearchQuery: handleSearchChange,
-    setRoleFilter: handleRoleChange,
-    setDepartmentFilter: handleDepartmentChange,
-    setSquadFilter: handleSquadChange,
+    setRoleFilters: handleRoleFiltersChange,
+    setDepartmentFilters: handleDepartmentFiltersChange,
+    setSquadFilters: handleSquadFiltersChange,
     setShowFilters,
     setSortField,
     setSortOrder,

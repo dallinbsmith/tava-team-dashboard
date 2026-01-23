@@ -38,9 +38,9 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
 
   // Filter state
   const [filterOpen, setFilterOpen] = useState(false);
-  const [sprintFilter, setSprintFilter] = useState("all");
+  const [sprintFilters, setSprintFilters] = useState<string[]>([]);
   const [epicFilter, setEpicFilter] = useState(false);
-  const [individualFilter, setIndividualFilter] = useState("all");
+  const [individualFilters, setIndividualFilters] = useState<string[]>([]);
 
   // Expanded sections for filter accordion
   const [expandedSections, setExpandedSections] = useState({
@@ -81,10 +81,10 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
   // Filter tasks based on current filters
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
-      // Sprint filter
-      if (sprintFilter !== "all") {
+      // Sprint filter (multi-select)
+      if (sprintFilters.length > 0) {
         const taskSprint = task.sprint?.name || "No Sprint";
-        if (taskSprint !== sprintFilter) return false;
+        if (!sprintFilters.includes(taskSprint)) return false;
       }
 
       // Epic filter (only show epics)
@@ -92,26 +92,27 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
         return false;
       }
 
-      // Individual filter
-      if (individualFilter !== "all") {
-        if (task.employee.id.toString() !== individualFilter) return false;
+      // Individual filter (multi-select by name)
+      if (individualFilters.length > 0) {
+        const employeeName = `${task.employee.first_name} ${task.employee.last_name}`;
+        if (!individualFilters.includes(employeeName)) return false;
       }
 
       return true;
     });
-  }, [tasks, sprintFilter, epicFilter, individualFilter]);
+  }, [tasks, sprintFilters, epicFilter, individualFilters]);
 
   // Calculate active filter count
   const activeFilterCount = [
-    sprintFilter !== "all" ? 1 : 0,
+    sprintFilters.length,
     epicFilter ? 1 : 0,
-    individualFilter !== "all" ? 1 : 0,
+    individualFilters.length,
   ].reduce((a, b) => a + b, 0);
 
   const clearAllFilters = () => {
-    setSprintFilter("all");
+    setSprintFilters([]);
     setEpicFilter(false);
-    setIndividualFilter("all");
+    setIndividualFilters([]);
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -228,8 +229,8 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
             >
               <SearchableFilterList
                 items={["No Sprint", ...sprints]}
-                selectedValue={sprintFilter}
-                onChange={setSprintFilter}
+                selectedValues={sprintFilters}
+                onChange={setSprintFilters}
                 placeholder="Search sprints"
               />
             </FilterSection>
@@ -255,19 +256,8 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
             >
               <SearchableFilterList
                 items={individuals.map((i) => i.name)}
-                selectedValue={
-                  individualFilter === "all"
-                    ? "all"
-                    : individuals.find((i) => i.id.toString() === individualFilter)?.name || "all"
-                }
-                onChange={(name) => {
-                  if (name === "all") {
-                    setIndividualFilter("all");
-                  } else {
-                    const individual = individuals.find((i) => i.name === name);
-                    setIndividualFilter(individual?.id.toString() || "all");
-                  }
-                }}
+                selectedValues={individualFilters}
+                onChange={setIndividualFilters}
                 placeholder="Search people"
               />
             </FilterSection>

@@ -5,6 +5,7 @@ import { X, Check, ChevronDown, Settings, Calendar } from "lucide-react";
 import { User, UpdateUserRequest } from "@/shared/types/user";
 import { getSupervisors } from "@/lib/api";
 import { parseErrorMessage } from "@/lib/errors";
+import { sanitizeName } from "@/lib/sanitize";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useUpdateEmployee } from "@/hooks";
 import ManageSquadsModal from "./ManageSquadsModal";
@@ -57,8 +58,8 @@ export default function EditEmployeeModal({
   useEffect(() => {
     if (isOpen) {
       // Filter out any squad IDs that no longer exist
-      const validSquadIds = (employee.squads?.map((s) => s.id) || []).filter((id) =>
-        availableSquads.some((s) => s.id === id)
+      const validSquadIds = (employee.squads?.map((s) => s.id) || []).filter(
+        (id) => availableSquads.some((s) => s.id === id),
       );
 
       setFormData({
@@ -69,7 +70,9 @@ export default function EditEmployeeModal({
         squadIds: validSquadIds,
         role: employee.role,
         supervisor_id: employee.supervisor_id || null,
-        date_started: employee.date_started ? employee.date_started.split("T")[0] : "",
+        date_started: employee.date_started
+          ? employee.date_started.split("T")[0]
+          : "",
       });
       setError(null);
       setSquadDropdownOpen(false);
@@ -88,6 +91,9 @@ export default function EditEmployeeModal({
     e.preventDefault();
     setError(null);
 
+    // Sanitize department input
+    const sanitizedDepartment = sanitizeName(formData.department);
+
     const updateData: UpdateUserRequest = {};
 
     if (formData.first_name !== employee.first_name) {
@@ -99,8 +105,8 @@ export default function EditEmployeeModal({
     if (formData.title !== (employee.title || "")) {
       updateData.title = formData.title;
     }
-    if (formData.department !== (employee.department || "")) {
-      updateData.department = formData.department;
+    if (sanitizedDepartment !== (employee.department || "")) {
+      updateData.department = sanitizedDepartment;
     }
 
     // Compare squad IDs
@@ -116,12 +122,17 @@ export default function EditEmployeeModal({
     if (isAdmin && formData.role !== employee.role) {
       updateData.role = formData.role;
     }
-    if (isAdmin && formData.supervisor_id !== (employee.supervisor_id || null)) {
+    if (
+      isAdmin &&
+      formData.supervisor_id !== (employee.supervisor_id || null)
+    ) {
       updateData.supervisor_id = formData.supervisor_id;
     }
 
     // Check if date_started changed
-    const originalDateStarted = employee.date_started ? employee.date_started.split("T")[0] : "";
+    const originalDateStarted = employee.date_started
+      ? employee.date_started.split("T")[0]
+      : "";
     if (formData.date_started !== originalDateStarted) {
       updateData.date_started = formData.date_started || null;
     }
@@ -143,7 +154,7 @@ export default function EditEmployeeModal({
         onError: (err) => {
           setError(parseErrorMessage(err));
         },
-      }
+      },
     );
   };
 
@@ -156,11 +167,18 @@ export default function EditEmployeeModal({
     }));
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "supervisor_id" ? (value === "" ? null : parseInt(value, 10)) : value,
+      [name]:
+        name === "supervisor_id"
+          ? value === ""
+            ? null
+            : parseInt(value, 10)
+          : value,
     }));
   };
 
@@ -170,7 +188,9 @@ export default function EditEmployeeModal({
         <div className="absolute inset-0 bg-black/50" onClick={onClose} />
         <div className="relative bg-theme-surface border border-theme-border w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-between p-4 border-b border-theme-border">
-            <h2 className="text-lg font-semibold text-theme-text">Edit Employee</h2>
+            <h2 className="text-lg font-semibold text-theme-text">
+              Edit Employee
+            </h2>
             <button
               onClick={onClose}
               className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
@@ -294,7 +314,9 @@ export default function EditEmployeeModal({
 
             <div className="relative">
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-theme-text-muted">Squads</label>
+                <label className="block text-sm font-medium text-theme-text-muted">
+                  Squads
+                </label>
                 {canManage && (
                   <button
                     type="button"
@@ -352,7 +374,8 @@ export default function EditEmployeeModal({
                 <div className="absolute z-10 w-full mt-1 bg-theme-elevated border border-theme-border max-h-48 overflow-y-auto">
                   {availableSquads.length === 0 ? (
                     <div className="px-3 py-2 text-sm text-theme-text-muted">
-                      No squads available. Click &quot;Manage&quot; to create one.
+                      No squads available. Click &quot;Manage&quot; to create
+                      one.
                     </div>
                   ) : (
                     availableSquads.map((squad) => (
@@ -404,7 +427,8 @@ export default function EditEmployeeModal({
                   </select>
                 ) : (
                   <div className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text-muted">
-                    {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
+                    {formData.role.charAt(0).toUpperCase() +
+                      formData.role.slice(1)}
                   </div>
                 )}
               </div>

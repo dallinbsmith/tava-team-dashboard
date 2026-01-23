@@ -34,9 +34,9 @@ export default function EmployeeList({
     paginatedEmployees,
     totalPages,
     setSearchQuery,
-    setRoleFilter,
-    setDepartmentFilter,
-    setSquadFilter,
+    setRoleFilters,
+    setDepartmentFilters,
+    setSquadFilters,
     setShowFilters,
     handleSort,
     setCurrentPage,
@@ -70,27 +70,27 @@ export default function EmployeeList({
 
   // Get active filters for chips
   const activeFilters: { type: string; value: string; onRemove: () => void }[] = [];
-  if (state.roleFilter !== "all") {
+  state.roleFilters.forEach((role) => {
     activeFilters.push({
       type: "Role",
-      value: state.roleFilter === "supervisor" ? "Supervisor" : "Employee",
-      onRemove: () => setRoleFilter("all"),
+      value: role === "supervisor" ? "Supervisor" : "Employee",
+      onRemove: () => setRoleFilters(state.roleFilters.filter((r) => r !== role)),
     });
-  }
-  if (state.departmentFilter !== "all") {
+  });
+  state.departmentFilters.forEach((dept) => {
     activeFilters.push({
       type: "Department",
-      value: state.departmentFilter,
-      onRemove: () => setDepartmentFilter("all"),
+      value: dept,
+      onRemove: () => setDepartmentFilters(state.departmentFilters.filter((d) => d !== dept)),
     });
-  }
-  if (state.squadFilter !== "all") {
+  });
+  state.squadFilters.forEach((squad) => {
     activeFilters.push({
       type: "Squad",
-      value: state.squadFilter,
-      onRemove: () => setSquadFilter("all"),
+      value: squad,
+      onRemove: () => setSquadFilters(state.squadFilters.filter((s) => s !== squad)),
     });
-  }
+  });
 
   // Loading state
   if (isLoading) {
@@ -149,16 +149,16 @@ export default function EmployeeList({
         <div className="flex gap-2 sm:gap-3">
           <FilterButton
             isOpen={state.showFilters}
-            roleFilter={state.roleFilter}
-            departmentFilter={state.departmentFilter}
-            squadFilter={state.squadFilter}
+            roleFilters={state.roleFilters}
+            departmentFilters={state.departmentFilters}
+            squadFilters={state.squadFilters}
             departments={departments}
             squads={squads}
             onToggle={() => setShowFilters(!state.showFilters)}
             onClose={() => setShowFilters(false)}
-            onRoleChange={setRoleFilter}
-            onDepartmentChange={setDepartmentFilter}
-            onSquadChange={setSquadFilter}
+            onRoleFiltersChange={setRoleFilters}
+            onDepartmentFiltersChange={setDepartmentFilters}
+            onSquadFiltersChange={setSquadFilters}
             onClearAll={clearFilters}
           />
           {/* View Mode Toggle */}

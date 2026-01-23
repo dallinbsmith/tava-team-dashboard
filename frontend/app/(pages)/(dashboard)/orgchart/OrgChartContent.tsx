@@ -24,14 +24,22 @@ export const OrgChartContent = async ({ canEdit }: OrgChartContentProps) => {
   ]);
 
   // Handle both single tree (supervisor) and array of trees (admin)
-  const orgTrees: OrgTreeNode[] = Array.isArray(treeResult) ? treeResult : [treeResult];
+  // Also handle null/undefined responses defensively
+  let orgTrees: OrgTreeNode[];
+  if (!treeResult) {
+    orgTrees = [];
+  } else if (Array.isArray(treeResult)) {
+    orgTrees = treeResult.filter((tree): tree is OrgTreeNode => tree != null);
+  } else {
+    orgTrees = [treeResult];
+  }
 
   return (
     <OrgChartPageClient
       initialOrgTrees={orgTrees}
-      initialDrafts={drafts}
-      initialSquads={squads}
-      initialDepartments={departments}
+      initialDrafts={drafts || []}
+      initialSquads={squads || []}
+      initialDepartments={departments || []}
       canEdit={canEdit}
     />
   );

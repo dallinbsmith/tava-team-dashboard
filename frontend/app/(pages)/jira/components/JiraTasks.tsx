@@ -83,9 +83,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
   // Filter state
   const [filterOpen, setFilterOpen] = useState(false);
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>({ type: "my" });
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [epicFilter, setEpicFilter] = useState("all");
-  const [individualFilter, setIndividualFilter] = useState("all");
+  const [individualFilters, setIndividualFilters] = useState<string[]>([]);
 
   // Expanded sections for filter accordion
   const [expandedSections, setExpandedSections] = useState({
@@ -190,8 +190,8 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
   // Filter tasks based on current filters
   const filteredTasks = useMemo(() => {
     return displayTasks.filter((task) => {
-      // Status filter
-      if (statusFilter !== "all" && task.status !== statusFilter) {
+      // Status filter (multi-select)
+      if (statusFilters.length > 0 && !statusFilters.includes(task.status)) {
         return false;
       }
 
@@ -207,30 +207,33 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
         }
       }
 
-      // Individual filter (only applies to non-"my" sources)
-      if (sourceFilter.type !== "my" && individualFilter !== "all") {
-        if (task.employee?.id.toString() !== individualFilter) {
+      // Individual filter (only applies to non-"my" sources, multi-select by name)
+      if (sourceFilter.type !== "my" && individualFilters.length > 0) {
+        const employeeName = task.employee
+          ? `${task.employee.first_name} ${task.employee.last_name}`
+          : "";
+        if (!individualFilters.includes(employeeName)) {
           return false;
         }
       }
 
       return true;
     });
-  }, [displayTasks, statusFilter, epicFilter, sourceFilter, individualFilter]);
+  }, [displayTasks, statusFilters, epicFilter, sourceFilter, individualFilters]);
 
   // Calculate active filter count (include source if not default "my")
   const activeFilterCount = [
     sourceFilter.type !== "my" ? 1 : 0,
-    statusFilter !== "all" ? 1 : 0,
+    statusFilters.length,
     epicFilter !== "all" ? 1 : 0,
-    sourceFilter.type !== "my" && individualFilter !== "all" ? 1 : 0,
+    sourceFilter.type !== "my" ? individualFilters.length : 0,
   ].reduce((a, b) => a + b, 0);
 
   const clearAllFilters = () => {
     setSourceFilter({ type: "my" });
-    setStatusFilter("all");
+    setStatusFilters([]);
     setEpicFilter("all");
-    setIndividualFilter("all");
+    setIndividualFilters([]);
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -240,7 +243,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
   const handleSourceChange = (newSource: SourceFilter) => {
     setSourceFilter(newSource);
     // Reset individual filter when switching sources
-    setIndividualFilter("all");
+    setIndividualFilters([]);
   };
 
   const fetchTasks = useCallback(
@@ -469,8 +472,8 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
             >
               <SearchableFilterList
                 items={statuses}
-                selectedValue={statusFilter}
-                onChange={setStatusFilter}
+                selectedValues={statusFilters}
+                onChange={setStatusFilters}
                 placeholder="Search statuses"
               />
             </FilterSection>
@@ -532,19 +535,8 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
               >
                 <SearchableFilterList
                   items={individuals.map((i) => i.name)}
-                  selectedValue={
-                    individualFilter === "all"
-                      ? "all"
-                      : individuals.find((i) => i.id.toString() === individualFilter)?.name || "all"
-                  }
-                  onChange={(name) => {
-                    if (name === "all") {
-                      setIndividualFilter("all");
-                    } else {
-                      const individual = individuals.find((i) => i.name === name);
-                      setIndividualFilter(individual?.id.toString() || "all");
-                    }
-                  }}
+                  selectedValues={individualFilters}
+                  onChange={setIndividualFilters}
                   placeholder="Search people"
                 />
               </FilterSection>

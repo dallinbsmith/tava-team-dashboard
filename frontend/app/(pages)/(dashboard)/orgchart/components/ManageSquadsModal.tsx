@@ -1,11 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2, Pencil, Check, ChevronRight, ChevronDown } from "lucide-react";
+import {
+  X,
+  Plus,
+  Trash2,
+  Pencil,
+  Check,
+  ChevronRight,
+  ChevronDown,
+} from "lucide-react";
 import { Squad, User } from "@/shared/types/user";
 import { parseSquadErrorMessage } from "@/lib/errors";
 import { useSquadsQuery } from "@/hooks";
 import { getUsersBySquad } from "@/lib/api";
+import { sanitizeName, validateName } from "@/lib/sanitize";
 import ConfirmationModal from "@/shared/common/ConfirmationModal";
 import Avatar from "@/shared/common/Avatar";
 
@@ -32,7 +41,9 @@ export default function ManageSquadsModal({
 
   const [error, setError] = useState<string | null>(null);
   const [newSquadName, setNewSquadName] = useState("");
-  const [confirmDeleteSquad, setConfirmDeleteSquad] = useState<Squad | null>(null);
+  const [confirmDeleteSquad, setConfirmDeleteSquad] = useState<Squad | null>(
+    null,
+  );
 
   // Edit mode
   const [editingSquad, setEditingSquad] = useState<Squad | null>(null);
@@ -60,7 +71,7 @@ export default function ManageSquadsModal({
     if (selectedSquad) {
       setLoadingUsers(true);
       getUsersBySquad(selectedSquad.id)
-        .then((users) => setSquadUsers(users))
+        .then((users) => setSquadUsers(users || []))
         .catch(() => setSquadUsers([]))
         .finally(() => setLoadingUsers(false));
     } else {
@@ -69,11 +80,17 @@ export default function ManageSquadsModal({
   }, [selectedSquad]);
 
   const handleCreateSquad = async () => {
-    if (!newSquadName.trim()) return;
+    const sanitized = sanitizeName(newSquadName);
+    const validationError = validateName(sanitized, "Squad name");
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
     setError(null);
     try {
-      await addSquad(newSquadName.trim());
+      await addSquad(sanitized);
       setNewSquadName("");
       onSquadsChanged();
     } catch (err) {
@@ -115,15 +132,24 @@ export default function ManageSquadsModal({
   };
 
   const handleSaveEdit = async () => {
-    if (!editingSquad || !editedName.trim()) return;
-    if (editedName.trim() === editingSquad.name) {
+    if (!editingSquad) return;
+
+    const sanitized = sanitizeName(editedName);
+    const validationError = validateName(sanitized, "Squad name");
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    if (sanitized === editingSquad.name) {
       handleCancelEdit();
       return;
     }
 
     setError(null);
     try {
-      const updatedSquad = await updateSquad(editingSquad.id, editedName.trim());
+      const updatedSquad = await updateSquad(editingSquad.id, sanitized);
       if (selectedSquad?.id === editingSquad.id) {
         setSelectedSquad(updatedSquad);
       }
@@ -154,7 +180,9 @@ export default function ManageSquadsModal({
         <div className="absolute inset-0 bg-black/50" onClick={onClose} />
         <div className="relative bg-theme-surface border border-theme-border w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between p-4 border-b border-theme-border">
-            <h2 className="text-lg font-semibold text-theme-text">Manage Squads</h2>
+            <h2 className="text-lg font-semibold text-theme-text">
+              Manage Squads
+            </h2>
             <button
               onClick={onClose}
               className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
@@ -198,7 +226,9 @@ export default function ManageSquadsModal({
             {/* Squad list */}
             <div className="border border-theme-border">
               {squadsLoading ? (
-                <div className="p-4 text-center text-theme-text-muted">Loading squads...</div>
+                <div className="p-4 text-center text-theme-text-muted">
+                  Loading squads...
+                </div>
               ) : sortedSquads.length === 0 ? (
                 <div className="p-4 text-center text-theme-text-muted">
                   No squads yet. Create one above.
@@ -252,12 +282,17 @@ export default function ManageSquadsModal({
                               ) : (
                                 <ChevronRight className="w-4 h-4 text-theme-text-muted flex-shrink-0" />
                               )}
-                              <span className="text-theme-text truncate">{squad.name}</span>
-                              {selectedSquad?.id === squad.id && !loadingUsers && (
-                                <span className="text-xs text-theme-text-muted">
-                                  ({squadUsers.length} {squadUsers.length === 1 ? "user" : "users"})
-                                </span>
-                              )}
+                              <span className="text-theme-text truncate">
+                                {squad.name}
+                              </span>
+                              {selectedSquad?.id === squad.id &&
+                                !loadingUsers && (
+                                  <span className="text-xs text-theme-text-muted">
+                                    ({squadUsers.length}{" "}
+                                    {squadUsers.length === 1 ? "user" : "users"}
+                                    )
+                                  </span>
+                                )}
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
@@ -299,7 +334,10 @@ export default function ManageSquadsModal({
                               ) : (
                                 <ul className="divide-y divide-theme-border">
                                   {squadUsers.map((user) => (
-                                    <li key={user.id} className="flex items-center gap-3 p-3">
+                                    <li
+                                      key={user.id}
+                                      className="flex items-center gap-3 p-3"
+                                    >
                                       <Avatar
                                         s3AvatarUrl={user.avatar_url}
                                         firstName={user.first_name}

@@ -83,9 +83,9 @@ describe("useEmployeeList", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       expect(result.current.state.searchQuery).toBe("");
-      expect(result.current.state.roleFilter).toBe("all");
-      expect(result.current.state.departmentFilter).toBe("all");
-      expect(result.current.state.squadFilter).toBe("all");
+      expect(result.current.state.roleFilters).toEqual([]);
+      expect(result.current.state.departmentFilters).toEqual([]);
+      expect(result.current.state.squadFilters).toEqual([]);
       expect(result.current.state.sortField).toBe("name");
       expect(result.current.state.sortOrder).toBe("asc");
       expect(result.current.state.currentPage).toBe(1);
@@ -259,7 +259,7 @@ describe("useEmployeeList", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setRoleFilter("admin");
+        result.current.setRoleFilters(["admin"]);
       });
 
       expect(result.current.filteredEmployees.length).toBe(1);
@@ -270,7 +270,7 @@ describe("useEmployeeList", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setRoleFilter("employee");
+        result.current.setRoleFilters(["employee"]);
       });
 
       expect(result.current.filteredEmployees.length).toBe(3);
@@ -280,20 +280,30 @@ describe("useEmployeeList", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setRoleFilter("supervisor");
+        result.current.setRoleFilters(["supervisor"]);
       });
 
       expect(result.current.filteredEmployees.length).toBe(1);
     });
 
-    it("shows all when filter is 'all'", () => {
+    it("shows all when filter is empty", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setRoleFilter("all");
+        result.current.setRoleFilters([]);
       });
 
       expect(result.current.filteredEmployees.length).toBe(5);
+    });
+
+    it("filters by multiple roles", () => {
+      const { result } = renderHook(() => useEmployeeList(mockEmployees));
+
+      act(() => {
+        result.current.setRoleFilters(["employee", "supervisor"]);
+      });
+
+      expect(result.current.filteredEmployees.length).toBe(4);
     });
 
     it("resets page on role change", () => {
@@ -304,7 +314,7 @@ describe("useEmployeeList", () => {
       });
 
       act(() => {
-        result.current.setRoleFilter("admin");
+        result.current.setRoleFilters(["admin"]);
       });
 
       expect(result.current.state.currentPage).toBe(1);
@@ -316,7 +326,7 @@ describe("useEmployeeList", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setDepartmentFilter("Engineering");
+        result.current.setDepartmentFilters(["Engineering"]);
       });
 
       expect(result.current.filteredEmployees.length).toBe(2);
@@ -325,14 +335,24 @@ describe("useEmployeeList", () => {
       );
     });
 
-    it("shows all when filter is 'all'", () => {
+    it("shows all when filter is empty", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setDepartmentFilter("all");
+        result.current.setDepartmentFilters([]);
       });
 
       expect(result.current.filteredEmployees.length).toBe(5);
+    });
+
+    it("filters by multiple departments", () => {
+      const { result } = renderHook(() => useEmployeeList(mockEmployees));
+
+      act(() => {
+        result.current.setDepartmentFilters(["Engineering", "Marketing"]);
+      });
+
+      expect(result.current.filteredEmployees.length).toBe(4);
     });
 
     it("resets page on department change", () => {
@@ -343,7 +363,7 @@ describe("useEmployeeList", () => {
       });
 
       act(() => {
-        result.current.setDepartmentFilter("Engineering");
+        result.current.setDepartmentFilters(["Engineering"]);
       });
 
       expect(result.current.state.currentPage).toBe(1);
@@ -355,20 +375,30 @@ describe("useEmployeeList", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setSquadFilter("Frontend");
+        result.current.setSquadFilters(["Frontend"]);
       });
 
       expect(result.current.filteredEmployees.length).toBe(2);
     });
 
-    it("shows all when filter is 'all'", () => {
+    it("shows all when filter is empty", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setSquadFilter("all");
+        result.current.setSquadFilters([]);
       });
 
       expect(result.current.filteredEmployees.length).toBe(5);
+    });
+
+    it("filters by multiple squads", () => {
+      const { result } = renderHook(() => useEmployeeList(mockEmployees));
+
+      act(() => {
+        result.current.setSquadFilters(["Frontend", "Backend"]);
+      });
+
+      expect(result.current.filteredEmployees.length).toBe(3);
     });
 
     it("resets page on squad change", () => {
@@ -379,7 +409,7 @@ describe("useEmployeeList", () => {
       });
 
       act(() => {
-        result.current.setSquadFilter("Frontend");
+        result.current.setSquadFilters(["Frontend"]);
       });
 
       expect(result.current.state.currentPage).toBe(1);
@@ -391,8 +421,8 @@ describe("useEmployeeList", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setRoleFilter("employee");
-        result.current.setDepartmentFilter("Marketing");
+        result.current.setRoleFilters(["employee"]);
+        result.current.setDepartmentFilters(["Marketing"]);
       });
 
       expect(result.current.filteredEmployees.length).toBe(2);
@@ -402,11 +432,23 @@ describe("useEmployeeList", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
       act(() => {
-        result.current.setRoleFilter("employee");
+        result.current.setRoleFilters(["employee"]);
         result.current.setSearchQuery("Bob");
       });
 
       expect(result.current.filteredEmployees.length).toBe(1);
+    });
+
+    it("applies multiple filters across categories", () => {
+      const { result } = renderHook(() => useEmployeeList(mockEmployees));
+
+      act(() => {
+        result.current.setRoleFilters(["employee", "supervisor"]);
+        result.current.setDepartmentFilters(["Engineering"]);
+      });
+
+      expect(result.current.filteredEmployees.length).toBe(1);
+      expect(result.current.filteredEmployees[0].first_name).toBe("Charlie");
     });
   });
 
@@ -640,9 +682,9 @@ describe("useEmployeeList", () => {
 
       act(() => {
         result.current.setSearchQuery("test");
-        result.current.setRoleFilter("admin");
-        result.current.setDepartmentFilter("Engineering");
-        result.current.setSquadFilter("Frontend");
+        result.current.setRoleFilters(["admin"]);
+        result.current.setDepartmentFilters(["Engineering"]);
+        result.current.setSquadFilters(["Frontend"]);
         result.current.setCurrentPage(3);
       });
 
@@ -651,9 +693,9 @@ describe("useEmployeeList", () => {
       });
 
       expect(result.current.state.searchQuery).toBe("");
-      expect(result.current.state.roleFilter).toBe("all");
-      expect(result.current.state.departmentFilter).toBe("all");
-      expect(result.current.state.squadFilter).toBe("all");
+      expect(result.current.state.roleFilters).toEqual([]);
+      expect(result.current.state.departmentFilters).toEqual([]);
+      expect(result.current.state.squadFilters).toEqual([]);
       expect(result.current.state.currentPage).toBe(1);
     });
 

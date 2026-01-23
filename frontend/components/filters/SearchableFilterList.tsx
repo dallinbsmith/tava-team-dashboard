@@ -7,19 +7,17 @@ import FilterCheckbox from "./FilterCheckbox";
 
 export interface SearchableFilterListProps {
   items: string[];
-  selectedValue: string;
-  onChange: (value: string) => void;
+  selectedValues: string[];
+  onChange: (values: string[]) => void;
   placeholder?: string;
-  allValue?: string;
   maxHeight?: string;
 }
 
 export default function SearchableFilterList({
   items,
-  selectedValue,
+  selectedValues,
   onChange,
   placeholder = "Search...",
-  allValue = "all",
   maxHeight = "max-h-32",
 }: SearchableFilterListProps) {
   const [search, setSearch] = useState("");
@@ -29,6 +27,14 @@ export default function SearchableFilterList({
     () => items.filter((item) => item.toLowerCase().includes(debouncedSearch.toLowerCase())),
     [items, debouncedSearch]
   );
+
+  const handleToggle = (item: string, checked: boolean) => {
+    if (checked) {
+      onChange([...selectedValues, item]);
+    } else {
+      onChange(selectedValues.filter((v) => v !== item));
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -47,8 +53,8 @@ export default function SearchableFilterList({
           <FilterCheckbox
             key={item}
             label={item}
-            checked={selectedValue === item}
-            onChange={(checked) => onChange(checked ? item : allValue)}
+            checked={selectedValues.includes(item)}
+            onChange={(checked) => handleToggle(item, checked)}
           />
         ))}
         {filteredItems.length === 0 && (

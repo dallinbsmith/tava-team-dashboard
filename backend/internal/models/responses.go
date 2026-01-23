@@ -49,9 +49,10 @@ func (u *User) ToUserResponse() *UserResponse {
 }
 
 // ToUserResponses converts a slice of User models to UserResponse DTOs.
+// Always returns a non-nil slice (empty array in JSON, not null).
 func ToUserResponses(users []User) []UserResponse {
-	if users == nil {
-		return nil
+	if users == nil || len(users) == 0 {
+		return []UserResponse{}
 	}
 	responses := make([]UserResponse, len(users))
 	for i := range users {

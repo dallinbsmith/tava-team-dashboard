@@ -16,7 +16,7 @@ jest.mock("@restart/hooks/useDebouncedValue", () => ({
 describe("SearchableFilterList", () => {
   const defaultProps = {
     items: ["Apple", "Banana", "Cherry", "Date", "Elderberry"],
-    selectedValue: "all",
+    selectedValues: [] as string[],
     onChange: jest.fn(),
   };
 
@@ -109,7 +109,7 @@ describe("SearchableFilterList", () => {
 
   describe("selection behavior", () => {
     it("shows selected item as checked", () => {
-      render(<SearchableFilterList {...defaultProps} selectedValue="Banana" />);
+      render(<SearchableFilterList {...defaultProps} selectedValues={["Banana"]} />);
 
       // Find the Banana button and check if its checkbox is checked
       const bananaButton = screen.getByText("Banana").closest("button");
@@ -119,7 +119,7 @@ describe("SearchableFilterList", () => {
     });
 
     it("shows other items as unchecked", () => {
-      render(<SearchableFilterList {...defaultProps} selectedValue="Banana" />);
+      render(<SearchableFilterList {...defaultProps} selectedValues={["Banana"]} />);
 
       // Apple should be unchecked
       const appleButton = screen.getByText("Apple").closest("button");
@@ -128,42 +128,41 @@ describe("SearchableFilterList", () => {
       expect(checkbox).toHaveClass("bg-transparent");
     });
 
-    it("calls onChange with item value when item is selected", async () => {
+    it("calls onChange with item added when item is selected", async () => {
       const onChange = jest.fn();
       render(<SearchableFilterList {...defaultProps} onChange={onChange} />);
 
       // Click on Cherry
       fireEvent.click(screen.getByText("Cherry"));
 
-      expect(onChange).toHaveBeenCalledWith("Cherry");
+      expect(onChange).toHaveBeenCalledWith(["Cherry"]);
     });
 
-    it("calls onChange with allValue when item is deselected", async () => {
+    it("calls onChange with item removed when item is deselected", async () => {
       const onChange = jest.fn();
-      render(<SearchableFilterList {...defaultProps} selectedValue="Cherry" onChange={onChange} />);
+      render(<SearchableFilterList {...defaultProps} selectedValues={["Cherry"]} onChange={onChange} />);
 
       // Click on Cherry (already selected) to deselect
       fireEvent.click(screen.getByText("Cherry"));
 
-      // Should call with "all" (default allValue)
-      expect(onChange).toHaveBeenCalledWith("all");
+      // Should call with empty array (Cherry removed)
+      expect(onChange).toHaveBeenCalledWith([]);
     });
 
-    it("uses custom allValue for deselection", async () => {
+    it("supports multiple selections", async () => {
       const onChange = jest.fn();
       render(
         <SearchableFilterList
           {...defaultProps}
-          selectedValue="Cherry"
+          selectedValues={["Cherry"]}
           onChange={onChange}
-          allValue="none"
         />
       );
 
-      // Click on Cherry to deselect
-      fireEvent.click(screen.getByText("Cherry"));
+      // Click on Apple to add to selection
+      fireEvent.click(screen.getByText("Apple"));
 
-      expect(onChange).toHaveBeenCalledWith("none");
+      expect(onChange).toHaveBeenCalledWith(["Cherry", "Apple"]);
     });
   });
 

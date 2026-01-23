@@ -268,7 +268,7 @@ func (r *SquadRepository) GetUsersBySquadID(ctx context.Context, squadID int64) 
 	}
 	defer rows.Close()
 
-	var users []models.User
+	users := []models.User{}
 	for rows.Next() {
 		var user models.User
 		err := rows.Scan(

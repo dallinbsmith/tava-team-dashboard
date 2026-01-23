@@ -7,9 +7,9 @@ import { FilterDropdown, FilterSection, FilterCheckbox, SearchableFilterList } f
 export interface FilterButtonProps {
   // Filter state
   isOpen: boolean;
-  roleFilter: "all" | Role;
-  departmentFilter: string;
-  squadFilter: string;
+  roleFilters: Role[];
+  departmentFilters: string[];
+  squadFilters: string[];
 
   // Available options
   departments: string[];
@@ -18,24 +18,24 @@ export interface FilterButtonProps {
   // Actions
   onToggle: () => void;
   onClose: () => void;
-  onRoleChange: (role: "all" | Role) => void;
-  onDepartmentChange: (department: string) => void;
-  onSquadChange: (squad: string) => void;
+  onRoleFiltersChange: (roles: Role[]) => void;
+  onDepartmentFiltersChange: (departments: string[]) => void;
+  onSquadFiltersChange: (squads: string[]) => void;
   onClearAll: () => void;
 }
 
 export default function FilterButton({
   isOpen,
-  roleFilter,
-  departmentFilter,
-  squadFilter,
+  roleFilters,
+  departmentFilters,
+  squadFilters,
   departments,
   squads,
   onToggle,
   onClose,
-  onRoleChange,
-  onDepartmentChange,
-  onSquadChange,
+  onRoleFiltersChange,
+  onDepartmentFiltersChange,
+  onSquadFiltersChange,
   onClearAll,
 }: FilterButtonProps) {
   // Accordion state for filter sections
@@ -50,11 +50,15 @@ export default function FilterButton({
   };
 
   // Calculate active filter count
-  const activeFilterCount = [
-    roleFilter !== "all" ? 1 : 0,
-    departmentFilter !== "all" ? 1 : 0,
-    squadFilter !== "all" ? 1 : 0,
-  ].reduce((a, b) => a + b, 0);
+  const activeFilterCount = roleFilters.length + departmentFilters.length + squadFilters.length;
+
+  const handleRoleToggle = (role: Role, checked: boolean) => {
+    if (checked) {
+      onRoleFiltersChange([...roleFilters, role]);
+    } else {
+      onRoleFiltersChange(roleFilters.filter((r) => r !== role));
+    }
+  };
 
   return (
     <FilterDropdown
@@ -73,13 +77,13 @@ export default function FilterButton({
         <div className="space-y-1">
           <FilterCheckbox
             label="Supervisor"
-            checked={roleFilter === "supervisor"}
-            onChange={(checked) => onRoleChange(checked ? "supervisor" : "all")}
+            checked={roleFilters.includes("supervisor")}
+            onChange={(checked) => handleRoleToggle("supervisor", checked)}
           />
           <FilterCheckbox
             label="Employee"
-            checked={roleFilter === "employee"}
-            onChange={(checked) => onRoleChange(checked ? "employee" : "all")}
+            checked={roleFilters.includes("employee")}
+            onChange={(checked) => handleRoleToggle("employee", checked)}
           />
         </div>
       </FilterSection>
@@ -92,8 +96,8 @@ export default function FilterButton({
       >
         <SearchableFilterList
           items={departments}
-          selectedValue={departmentFilter}
-          onChange={onDepartmentChange}
+          selectedValues={departmentFilters}
+          onChange={onDepartmentFiltersChange}
           placeholder="Search departments"
         />
       </FilterSection>
@@ -106,8 +110,8 @@ export default function FilterButton({
       >
         <SearchableFilterList
           items={squads}
-          selectedValue={squadFilter}
-          onChange={onSquadChange}
+          selectedValues={squadFilters}
+          onChange={onSquadFiltersChange}
           placeholder="Search squads"
         />
       </FilterSection>

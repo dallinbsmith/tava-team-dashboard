@@ -11,6 +11,7 @@ import (
 	"github.com/smith-dallin/manager-dashboard/internal/middleware"
 	"github.com/smith-dallin/manager-dashboard/internal/models"
 	"github.com/smith-dallin/manager-dashboard/internal/repository"
+	"github.com/smith-dallin/manager-dashboard/internal/sanitize"
 	"github.com/smith-dallin/manager-dashboard/internal/services"
 )
 
@@ -601,17 +602,14 @@ func (h *Handlers) CreateSquad(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate name
-	if req.Name == "" {
-		respondError(w, http.StatusBadRequest, "Squad name is required")
-		return
-	}
-	if len(req.Name) > 255 {
-		respondError(w, http.StatusBadRequest, "Squad name must be 255 characters or less")
+	// Sanitize and validate name
+	sanitizedName, validationErr := sanitize.SanitizeAndValidate(req.Name, "Squad name", 1, 100)
+	if validationErr != "" {
+		respondError(w, http.StatusBadRequest, validationErr)
 		return
 	}
 
-	squad, err := h.squadRepo.Create(r.Context(), req.Name)
+	squad, err := h.squadRepo.Create(r.Context(), sanitizedName)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "Failed to create squad")
 		return
@@ -731,18 +729,15 @@ func (h *Handlers) RenameDepartment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Name == "" {
-		respondError(w, http.StatusBadRequest, "New department name is required")
+	// Sanitize and validate new name
+	sanitizedName, validationErr := sanitize.SanitizeAndValidate(req.Name, "Department name", 1, 100)
+	if validationErr != "" {
+		respondError(w, http.StatusBadRequest, validationErr)
 		return
 	}
 
-	if len(req.Name) > 255 {
-		respondError(w, http.StatusBadRequest, "Department name must be 255 characters or less")
-		return
-	}
-
-	if err := h.userRepo.RenameDepartment(r.Context(), oldName, req.Name); err != nil {
-		h.logger.LogError(r.Context(), "Failed to rename department", err, "old_name", oldName, "new_name", req.Name)
+	if err := h.userRepo.RenameDepartment(r.Context(), oldName, sanitizedName); err != nil {
+		h.logger.LogError(r.Context(), "Failed to rename department", err, "old_name", oldName, "new_name", sanitizedName)
 		respondError(w, http.StatusInternalServerError, "Failed to rename department")
 		return
 	}
@@ -828,17 +823,14 @@ func (h *Handlers) RenameSquad(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Name == "" {
-		respondError(w, http.StatusBadRequest, "Squad name is required")
+	// Sanitize and validate name
+	sanitizedName, validationErr := sanitize.SanitizeAndValidate(req.Name, "Squad name", 1, 100)
+	if validationErr != "" {
+		respondError(w, http.StatusBadRequest, validationErr)
 		return
 	}
 
-	if len(req.Name) > 255 {
-		respondError(w, http.StatusBadRequest, "Squad name must be 255 characters or less")
-		return
-	}
-
-	squad, err := h.squadRepo.Rename(r.Context(), id, req.Name)
+	squad, err := h.squadRepo.Rename(r.Context(), id, sanitizedName)
 	if err != nil {
 		h.logger.LogError(r.Context(), "Failed to rename squad", err, "squad_id", id)
 		respondError(w, http.StatusInternalServerError, "Failed to rename squad")

@@ -1,12 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Trash2, Pencil, Check, ChevronRight, ChevronDown } from "lucide-react";
+import {
+  X,
+  Trash2,
+  Pencil,
+  Check,
+  ChevronRight,
+  ChevronDown,
+} from "lucide-react";
 import { parseErrorMessage } from "@/lib/errors";
 import ConfirmationModal from "@/shared/common/ConfirmationModal";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useDeleteDepartment, useRenameDepartment } from "@/hooks";
 import { getUsersByDepartment } from "@/lib/api";
+import { sanitizeName, validateName } from "@/lib/sanitize";
 import { User } from "@/shared/types/user";
 import Avatar from "@/shared/common/Avatar";
 
@@ -29,14 +37,20 @@ export default function ManageDepartmentsModal({
   const renameDepartmentMutation = useRenameDepartment();
 
   const [error, setError] = useState<string | null>(null);
-  const [confirmDeleteDepartment, setConfirmDeleteDepartment] = useState<string | null>(null);
+  const [confirmDeleteDepartment, setConfirmDeleteDepartment] = useState<
+    string | null
+  >(null);
 
   // Edit mode
-  const [editingDepartment, setEditingDepartment] = useState<string | null>(null);
+  const [editingDepartment, setEditingDepartment] = useState<string | null>(
+    null,
+  );
   const [editedName, setEditedName] = useState("");
 
   // Users view
-  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(
+    null,
+  );
   const [departmentUsers, setDepartmentUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 
@@ -56,7 +70,7 @@ export default function ManageDepartmentsModal({
     if (selectedDepartment) {
       setLoadingUsers(true);
       getUsersByDepartment(selectedDepartment)
-        .then((users) => setDepartmentUsers(users))
+        .then((users) => setDepartmentUsers(users || []))
         .catch(() => setDepartmentUsers([]))
         .finally(() => setLoadingUsers(false));
     } else {
@@ -99,19 +113,28 @@ export default function ManageDepartmentsModal({
   };
 
   const handleSaveEdit = async () => {
-    if (!editingDepartment || !editedName.trim()) return;
-    if (editedName.trim() === editingDepartment) {
+    if (!editingDepartment) return;
+
+    const sanitized = sanitizeName(editedName);
+    const validationError = validateName(sanitized, "Department name");
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    if (sanitized === editingDepartment) {
       handleCancelEdit();
       return;
     }
 
     setError(null);
     renameDepartmentMutation.mutate(
-      { oldName: editingDepartment, newName: editedName.trim() },
+      { oldName: editingDepartment, newName: sanitized },
       {
         onSuccess: () => {
           if (selectedDepartment === editingDepartment) {
-            setSelectedDepartment(editedName.trim());
+            setSelectedDepartment(sanitized);
           }
           handleCancelEdit();
           onDepartmentsChanged();
@@ -119,7 +142,7 @@ export default function ManageDepartmentsModal({
         onError: (err) => {
           setError(parseErrorMessage(err));
         },
-      }
+      },
     );
   };
 
@@ -131,7 +154,8 @@ export default function ManageDepartmentsModal({
     }
   };
 
-  const isMutating = deleteDepartmentMutation.isPending || renameDepartmentMutation.isPending;
+  const isMutating =
+    deleteDepartmentMutation.isPending || renameDepartmentMutation.isPending;
 
   if (!isOpen) return null;
 
@@ -144,7 +168,9 @@ export default function ManageDepartmentsModal({
         <div className="absolute inset-0 bg-black/50" onClick={onClose} />
         <div className="relative bg-theme-surface border border-theme-border w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between p-4 border-b border-theme-border">
-            <h2 className="text-lg font-semibold text-theme-text">Manage Departments</h2>
+            <h2 className="text-lg font-semibold text-theme-text">
+              Manage Departments
+            </h2>
             <button
               onClick={onClose}
               className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
@@ -163,18 +189,21 @@ export default function ManageDepartmentsModal({
             {/* Add new department section - informational */}
             <div className="space-y-2">
               <p className="text-sm text-theme-text-muted">
-                Departments are created by assigning them to employees. Use the employee edit form
-                to add new departments.
+                Departments are created by assigning them to employees. Use the
+                employee edit form to add new departments.
               </p>
             </div>
 
             {/* Department list */}
             <div className="border border-theme-border">
               {loading ? (
-                <div className="p-4 text-center text-theme-text-muted">Loading departments...</div>
+                <div className="p-4 text-center text-theme-text-muted">
+                  Loading departments...
+                </div>
               ) : sortedDepartments.length === 0 ? (
                 <div className="p-4 text-center text-theme-text-muted">
-                  No departments yet. Assign a department to an employee to create one.
+                  No departments yet. Assign a department to an employee to
+                  create one.
                 </div>
               ) : (
                 <ul className="divide-y divide-theme-border">
@@ -225,13 +254,19 @@ export default function ManageDepartmentsModal({
                               ) : (
                                 <ChevronRight className="w-4 h-4 text-theme-text-muted flex-shrink-0" />
                               )}
-                              <span className="text-theme-text truncate">{department}</span>
-                              {selectedDepartment === department && !loadingUsers && (
-                                <span className="text-xs text-theme-text-muted">
-                                  ({departmentUsers.length}{" "}
-                                  {departmentUsers.length === 1 ? "user" : "users"})
-                                </span>
-                              )}
+                              <span className="text-theme-text truncate">
+                                {department}
+                              </span>
+                              {selectedDepartment === department &&
+                                !loadingUsers && (
+                                  <span className="text-xs text-theme-text-muted">
+                                    ({departmentUsers.length}{" "}
+                                    {departmentUsers.length === 1
+                                      ? "user"
+                                      : "users"}
+                                    )
+                                  </span>
+                                )}
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
@@ -273,7 +308,10 @@ export default function ManageDepartmentsModal({
                               ) : (
                                 <ul className="divide-y divide-theme-border">
                                   {departmentUsers.map((user) => (
-                                    <li key={user.id} className="flex items-center gap-3 p-3">
+                                    <li
+                                      key={user.id}
+                                      className="flex items-center gap-3 p-3"
+                                    >
                                       <Avatar
                                         s3AvatarUrl={user.avatar_url}
                                         firstName={user.first_name}

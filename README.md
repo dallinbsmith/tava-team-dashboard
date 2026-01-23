@@ -4,11 +4,22 @@ A full-stack employee management dashboard with Auth0 authentication, built with
 
 ## Tech Stack
 
-- **Backend**: Go with Chi router
-- **Frontend**: Next.js 15 with App Router (Server-Side Rendering)
+### Backend
+- **Framework**: Go 1.24 with Chi router
+- **API**: REST + GraphQL (gqlgen)
 - **Database**: PostgreSQL 16
-- **Authentication**: Auth0
-- **Styling**: Tailwind CSS + Lucide icons
+- **Authentication**: Auth0 JWT validation
+- **Storage**: AWS S3 for file uploads
+- **Email**: Resend for transactional emails
+- **Monitoring**: Prometheus metrics
+
+### Frontend
+- **Framework**: Next.js 15 with App Router (SSR)
+- **State Management**: TanStack React Query
+- **Authentication**: Auth0 Next.js SDK
+- **Styling**: Tailwind CSS + custom theme system
+- **Icons**: Lucide React
+- **Testing**: Jest + React Testing Library (1500+ tests)
 
 ## Prerequisites
 
@@ -222,16 +233,21 @@ You should see:
 │   └── internal/
 │       ├── app/               # Application setup and routing
 │       ├── apperrors/         # Custom error types
+│       ├── auth0/             # Auth0 Management API client
+│       ├── cache/             # In-memory caching layer
 │       ├── database/          # PostgreSQL connection & repositories
 │       │   └── migrations/    # SQL migration files (golang-migrate)
+│       ├── graph/             # GraphQL schema and resolvers
 │       ├── handlers/          # REST API handlers
+│       ├── jira/              # Jira integration client
 │       ├── logger/            # Structured logging with slog
 │       ├── middleware/        # Auth0 JWT validation, logging, rate limiting
 │       ├── models/            # User/Employee data models
 │       ├── oauth/             # OAuth state management
 │       ├── repository/        # Repository interfaces for testing
 │       │   └── mocks/         # Mock implementations
-│       └── services/          # Business logic layer
+│       ├── services/          # Business logic layer
+│       └── storage/           # S3 file storage service
 │
 ├── frontend/                   # Next.js application
 │   ├── app/                   # Next.js App Router
@@ -245,6 +261,7 @@ You should see:
 │   │   │       │   └── hooks.ts
 │   │   │       ├── time-off/  # Time off page (co-located)
 │   │   │       ├── orgchart/  # Org chart page (co-located)
+│   │   │       ├── teams/     # Teams management page
 │   │   │       └── settings/  # Settings page
 │   │   └── api/               # API routes (Auth0, proxy)
 │   │
@@ -253,12 +270,21 @@ You should see:
 │   │   └── common/            # Shared UI components (Avatar, Pagination, etc.)
 │   │
 │   ├── components/            # Global UI components (BaseModal, Button, etc.)
+│   │   └── __tests__/         # Component unit tests
 │   ├── hooks/                 # Global React hooks
+│   │   ├── queries/           # React Query hooks
+│   │   ├── mutations/         # Mutation hooks
+│   │   └── __tests__/         # Hook tests
 │   ├── lib/                   # Utilities
 │   │   ├── api.ts             # Client-side API utilities
+│   │   ├── graphql.ts         # GraphQL client and queries
+│   │   ├── styles.ts          # Reusable Tailwind style constants
+│   │   ├── utils.ts           # Utility functions (cn, formatters)
 │   │   ├── server-actions.ts  # Shared Server Action utilities
-│   │   └── auth0.ts           # Auth0 client configuration
-│   └── providers/             # React context providers
+│   │   └── __tests__/         # Utility tests
+│   ├── providers/             # React context providers
+│   │   └── __tests__/         # Provider tests
+│   └── test-utils/            # Testing utilities and wrappers
 │
 ├── docker-compose.yml         # PostgreSQL container config
 └── README.md
@@ -373,6 +399,49 @@ const CalendarWidget = lazy(() => import("./components/CalendarWidget"));
 | Suspense boundaries | Non-blocking UI, progressive loading |
 | Code splitting | Lazy-loaded widgets, smaller initial bundle |
 | Route-level loading states | Instant navigation feedback |
+
+### Style System
+
+The frontend uses a centralized style system for consistent theming:
+
+#### `cn()` Utility (`lib/utils.ts`)
+
+Combines `clsx` and `tailwind-merge` for intelligent class name handling:
+
+```typescript
+import { cn } from "@/lib/utils";
+
+// Merge classes with conflict resolution
+<div className={cn("p-4 bg-blue-500", isActive && "bg-green-500")} />
+```
+
+#### Style Constants (`lib/styles.ts`)
+
+Reusable Tailwind style constants for consistent UI:
+
+```typescript
+import { button, badge, cardBase, widgetContainer } from "@/lib/styles";
+
+// Buttons
+<button className={cn(button, "w-full")}>Submit</button>
+
+// Badges
+<span className={badgePrimary}>Active</span>
+<span className={badgeSupervisor}>Supervisor</span>
+
+// Cards and containers
+<div className={cn(cardBase, "rounded-lg p-4")}>Content</div>
+<div className={widgetContainer}>Widget</div>
+```
+
+Available style categories:
+- **Buttons**: `button`, `buttonDanger`, `buttonGhost`, `buttonIcon`
+- **Badges**: `badge`, `badgePrimary`, `badgeSupervisor`, `badgeAdmin`
+- **Pills**: `pillSupervisor`, `pillAdmin`, `pillEmployee`
+- **Cards**: `cardBase`, `cardHover`, `cardInteractive`
+- **Containers**: `widgetContainer`, `widgetHeader`, `widgetFooter`
+- **Tables**: `tableHeader`, `tableHeaderSortable`
+- **Form inputs**: `input`, `inputError`
 
 ---
 
@@ -590,4 +659,69 @@ SELECT id FROM users WHERE email = 'supervisor@example.com';
 
 -- Then assign that supervisor to another user (employee or supervisor)
 UPDATE users SET supervisor_id = <supervisor_id> WHERE email = 'employee@example.com';
+```
+
+---
+
+## Testing
+
+The frontend has comprehensive test coverage with 1500+ tests across 60+ test files.
+
+### Running Tests
+
+```bash
+cd frontend
+
+# Run all tests
+npm test
+
+# Run tests in watch mode (for development)
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests in CI mode
+npm run test:ci
+```
+
+### Test Structure
+
+Tests are co-located with the code they test:
+
+```
+frontend/
+├── components/__tests__/      # Component tests
+├── hooks/__tests__/           # Hook tests
+├── lib/__tests__/             # Utility tests
+├── providers/__tests__/       # Provider tests
+└── test-utils/                # Testing utilities
+    ├── index.ts               # Barrel exports
+    ├── render.tsx             # Custom render with providers
+    └── query-wrapper.tsx      # React Query test wrapper
+```
+
+### Test Utilities
+
+Custom test utilities are provided in `test-utils/`:
+
+```typescript
+import { render, createQueryWrapper } from "@/test-utils";
+
+// Render with all providers (Auth0, React Query, etc.)
+render(<MyComponent />);
+
+// Create a React Query wrapper for hook testing
+const wrapper = createQueryWrapper();
+const { result } = renderHook(() => useMyHook(), { wrapper });
+```
+
+### Code Quality
+
+```bash
+# Run linter
+npm run lint
+
+# Format code with Prettier
+npx prettier --write .
 ```

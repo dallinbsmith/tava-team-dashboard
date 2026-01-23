@@ -1,6 +1,62 @@
-# Supervisor Dashboard
 
-A full-stack employee management dashboard with Auth0 authentication, built with Go and Next.js. Supports hierarchical supervisor/employee relationships where supervisors can manage both employees and other supervisors.
+What: 
+A management dashboard for employees and supervisors alike. 
+
+Highlights:
+  Frontend — Next.js 15 on Vercel                                                  
+  - App router with Auth0 authentication via middleware                           
+  - Server-side proxy routes (/api/proxy/*) inject access tokens before forwarding to the backend — keeps tokens out of client JavaScript                             
+  - React Query for data fetching, context providers for user/org state                                                                                                   
+
+  Backend — Go API on AWS ECS Fargate                                              
+  - RESTful API plus a GraphQL endpoint                                            
+  - PostgreSQL on RDS with golang-migrate for schema management                    
+  - JWT validation against Auth0                                                   
+  - Sits behind an ALB with CloudFront for SSL termination on a custom domain                                                                                              
+
+  Infrastructure                                                                   
+  - ECR for container images                                                       
+  - S3 for avatar storage                                                         
+  - Vercel handles frontend CDN/deploys via git push
+  - Cloudfront SSL/HTTPS termination in front of the HTTP-only ALB                                                                                                           
+
+  Core Features                                                                    
+  - Employee/team management with org chart                                       
+  - Calendar (tasks, meetings, time-off requests)                                  
+  - Jira integration for ticket sync                                               
+  - Invitation-based onboarding flow  
+
+Why:
+After finding out the task, I figured I'd use the time as an opportunity to build a tool I'd use based on past pain points. 
+
+  Two major things that would help me:
+  - At my last stop, I was incredibly accurate roadmapping. However, I would be off when there would be employees that would take large blocks of time off that didn't get recorded somewhere. 
+  - Org charts seemed to live in Figma files that changed constantly and drafts were only visible to a couple supervisors.
+
+AI usage:
+If you look at the Github lines committed (312,586++ 216,953--) you're probably wondering how I got all that code committed in a weeks time. Simply put, I'm a strong believer that modern Developers need to have a healthy workflow with AI. So what that means in practice, developers should not be writing all code by hand, they also should definitely not just accept everything spit out point blank. I have an AI approach that takes basic storming and norming patterns and develop closely with multiple models. Generally I have a personally coding or verfication step followed by 2 AI steps (implementation step then best practices filter).  
+
+  Guardrails:
+  - Claude user rules
+  - Claude.md repo rules
+  - Verifying against multiple models
+
+  What this looks like in Practice:
+  Architecting personally => rough AI Architecting => Basic technology implementation => Check implemenation against AI => Architecting best practices prompts => Rough component hand coding => Check implemenation against AI => Follow up for common best practices. New feature rough coding, ...repeat.
+
+  Admittedly, the backend I relied heavily on AI. More on that below in lessons.
+
+Some developers might frown on that pattern because there is a lot of back and forth with AI in my development and in some circles can be scoffed at as Vibecoding. However, I take patterns and code quality very seriously as well as the flow of data to keep the codebase clean and keep everything from spiraling out into spaghetti code.
+
+Difficulties:
+- Wiring up all the different integrations was wildly time consuming (S3, ECS, Vercel, Cloudfront, Jira, Auth0) and it's incredibly time consuming to get all env vars wired up properly, and data flowing properly. 
+- Stale data. Balancing Auth tokens, GraphQL, Server Side components, refresh, local storage was a thorn throughout the project. This was the most recurring bug during the build.
+- Jira complexities. While wiring up Jira was fun, Atlassian can be hyper tailored to each individual organization. Accommodating all those complexities became overwhelming.
+
+Lessons:
+- Stick with either REST or GraphQL and minimize overlap. GraphQL was implemented because I figured items like events/tasks could be used at larger levels and more granular levels. Looking back I should have just stuck with rest. Bouncing back and forth between postman and GraphQL playgroud slowed up the process.
+- I bit off a big bite to chew on this one which caused a litany of edge cases to accommodate. Going into it I was hopeful to do a lot of learning in Go because I know Tava is moving that direction and I figured this would be a good opportunity to start getting my feet wet and expanding my learning. But due to self inflicted scope explosion, I spent significantly less time in the backend than I had hoped.  
+
 
 ## Tech Stack
 

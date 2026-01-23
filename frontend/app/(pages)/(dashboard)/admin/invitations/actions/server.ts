@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Invitation, CreateInvitationRequest } from "./types";
+import { Invitation, CreateInvitationRequest } from "../types";
 import {
   ActionResult,
   authPost,
@@ -11,9 +11,6 @@ import {
   failure,
 } from "@/lib/server-actions";
 
-/**
- * Server Action: Create a new invitation
- */
 export const createInvitationAction = async (
   data: CreateInvitationRequest
 ): Promise<ActionResult<Invitation>> => {
@@ -34,9 +31,6 @@ export const createInvitationAction = async (
   }
 };
 
-/**
- * Server Action: Revoke an invitation
- */
 export const revokeInvitationAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/invitations/${id}`);

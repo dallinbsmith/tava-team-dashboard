@@ -130,7 +130,6 @@ export const CalendarPageClient = ({ initialCurrentUser }: CalendarPageClientPro
         onCreated={closeAndRefresh}
       />
 
-      {/* View Modals */}
       {viewTaskId && (
         <ViewTaskModal
           isOpen={activeModal === "viewTask"}

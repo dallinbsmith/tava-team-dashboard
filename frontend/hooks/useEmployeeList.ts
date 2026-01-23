@@ -163,7 +163,6 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
     setCurrentPage(1);
   }, []);
 
-  // Wrap setters to reset page on filter change
   const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
     setCurrentPage(1);

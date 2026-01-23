@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteDepartment, renameDepartment } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
-import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
+import { queryKeys } from "@/lib/query-keys";
+import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 
 export interface UseRenameDepartmentOptions {
   onSuccess?: () => void;

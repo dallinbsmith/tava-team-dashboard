@@ -1,7 +1,6 @@
 export const CalendarWidgetSkeleton = () => {
   return (
     <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col h-full animate-pulse">
-      {/* Header */}
       <div className="px-4 py-3 border-b border-theme-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-theme-elevated rounded" />
@@ -13,9 +12,7 @@ export const CalendarWidgetSkeleton = () => {
         </div>
       </div>
 
-      {/* Mini calendar grid */}
       <div className="p-4">
-        {/* Month header */}
         <div className="flex items-center justify-between mb-3">
           <div className="h-5 w-24 bg-theme-elevated rounded" />
           <div className="flex gap-1">
@@ -24,14 +21,12 @@ export const CalendarWidgetSkeleton = () => {
           </div>
         </div>
 
-        {/* Day headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-4 bg-theme-elevated rounded" />
           ))}
         </div>
 
-        {/* Calendar days - 5 rows */}
         <div className="grid grid-cols-7 gap-1">
           {Array.from({ length: 35 }).map((_, i) => (
             <div key={i} className="aspect-square bg-theme-elevated rounded p-1">
@@ -41,7 +36,6 @@ export const CalendarWidgetSkeleton = () => {
         </div>
       </div>
 
-      {/* Upcoming events section */}
       <div className="flex-1 border-t border-theme-border">
         <div className="px-4 py-2 border-b border-theme-border">
           <div className="h-4 w-28 bg-theme-elevated rounded" />
@@ -59,7 +53,6 @@ export const CalendarWidgetSkeleton = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="px-4 py-3 border-t border-theme-border bg-theme-elevated">
         <div className="h-3 w-24 bg-theme-muted rounded" />
       </div>

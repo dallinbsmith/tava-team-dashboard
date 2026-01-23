@@ -19,6 +19,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/react-query": "^5.90.19",
     "@types/react-big-calendar": "^1.16.3",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "graphql": "^16.12.0",
     "graphql-request": "^7.4.0",
@@ -28,7 +29,8 @@
     "react": "^19.0.0",
     "react-big-calendar": "^1.19.4",
     "react-dom": "^19.0.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

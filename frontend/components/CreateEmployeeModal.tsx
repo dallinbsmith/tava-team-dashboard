@@ -6,6 +6,17 @@ import { createEmployeeGraphQL, CreateEmployeeInput } from "@/lib/graphql";
 import { parseErrorMessage, parseSquadErrorMessage } from "@/lib/errors";
 import { User, Squad } from "@/shared/types/user";
 import { sanitizeName, validateName } from "@/lib/sanitize";
+import { cn } from "@/lib/utils";
+import {
+  inputStyles,
+  selectTriggerStyles,
+  buttonPrimary,
+  buttonSecondary,
+  labelStyles,
+  dropdownMenu,
+  dropdownItem,
+  errorAlert,
+} from "@/lib/styles";
 import {
   CheckCircle,
   ChevronDown,
@@ -171,10 +182,7 @@ export const CreateEmployeeModal = ({
           </p>
         </div>
 
-        <button
-          onClick={handleClose}
-          className="w-full px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 transition-colors"
-        >
+        <button onClick={handleClose} className={cn(buttonPrimary, "w-full")}>
           Done
         </button>
       </BaseModal>
@@ -185,16 +193,14 @@ export const CreateEmployeeModal = ({
     <BaseModal isOpen={isOpen} onClose={handleClose} title="Add New Employee">
       <form onSubmit={handleCreateEmployee}>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-theme-text mb-1">
-            Email Address
-          </label>
+          <label className={labelStyles}>Email Address</label>
           <input
             type="email"
             value={newEmployee.email}
             onChange={(e) =>
               setNewEmployee({ ...newEmployee, email: e.target.value })
             }
-            className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className={inputStyles}
             placeholder="employee@company.com"
             required
           />
@@ -202,40 +208,35 @@ export const CreateEmployeeModal = ({
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-theme-text mb-1">
-              First Name
-            </label>
+            <label className={labelStyles}>First Name</label>
             <input
               type="text"
               value={newEmployee.first_name}
               onChange={(e) =>
                 setNewEmployee({ ...newEmployee, first_name: e.target.value })
               }
-              className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className={inputStyles}
               placeholder="John"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-theme-text mb-1">
-              Last Name
-            </label>
+            <label className={labelStyles}>Last Name</label>
             <input
               type="text"
               value={newEmployee.last_name}
               onChange={(e) =>
                 setNewEmployee({ ...newEmployee, last_name: e.target.value })
               }
-              className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className={inputStyles}
               placeholder="Doe"
               required
             />
           </div>
         </div>
 
-        {/* Start Date */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-theme-text mb-1">
+          <label className={labelStyles}>
             <Calendar className="w-4 h-4 inline mr-1" />
             Start Date
           </label>
@@ -245,13 +246,12 @@ export const CreateEmployeeModal = ({
             onChange={(e) =>
               setNewEmployee({ ...newEmployee, date_started: e.target.value })
             }
-            className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className={inputStyles}
           />
         </div>
 
-        {/* Department Dropdown */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-theme-text mb-1">
+          <label className={labelStyles}>
             <Building2 className="w-4 h-4 inline mr-1" />
             Department
           </label>
@@ -259,7 +259,7 @@ export const CreateEmployeeModal = ({
             <button
               type="button"
               onClick={() => setDepartmentDropdownOpen(!departmentDropdownOpen)}
-              className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text text-left flex items-center justify-between focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className={selectTriggerStyles}
             >
               <span
                 className={
@@ -271,12 +271,15 @@ export const CreateEmployeeModal = ({
                 {newEmployee.department || "Select department..."}
               </span>
               <ChevronDown
-                className={`w-4 h-4 ml-2 shrink-0 transition-transform ${departmentDropdownOpen ? "rotate-180" : ""}`}
+                className={cn(
+                  "w-4 h-4 ml-2 shrink-0 transition-transform",
+                  departmentDropdownOpen && "rotate-180"
+                )}
               />
             </button>
 
             {departmentDropdownOpen && (
-              <div className="absolute z-10 w-full mt-1 bg-theme-surface border border-theme-border shadow-lg max-h-60 overflow-auto">
+              <div className={dropdownMenu}>
                 <div className="p-2 border-b border-theme-border">
                   <input
                     type="text"
@@ -301,7 +304,11 @@ export const CreateEmployeeModal = ({
                         setDepartmentDropdownOpen(false);
                         setDepartmentSearch("");
                       }}
-                      className={`w-full px-3 py-2 text-left hover:bg-theme-elevated ${newEmployee.department === dept ? "bg-primary-600/20 text-primary-400" : "text-theme-text"}`}
+                      className={cn(
+                        dropdownItem,
+                        newEmployee.department === dept &&
+                          "bg-primary-600/20 text-primary-400"
+                      )}
                     >
                       {dept}
                     </button>
@@ -330,7 +337,10 @@ export const CreateEmployeeModal = ({
                         setDepartmentDropdownOpen(false);
                         setDepartmentSearch("");
                       }}
-                      className="w-full px-3 py-2 text-left hover:bg-theme-elevated text-primary-400 border-t border-theme-border flex items-center gap-2"
+                      className={cn(
+                        dropdownItem,
+                        "text-primary-400 border-t border-theme-border flex items-center gap-2"
+                      )}
                     >
                       <Plus className="w-4 h-4" />
                       Create &quot;{sanitizeName(departmentSearch)}&quot;
@@ -347,9 +357,8 @@ export const CreateEmployeeModal = ({
           </div>
         </div>
 
-        {/* Squads Multi-Select */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-theme-text mb-1">
+          <label className={labelStyles}>
             <Users className="w-4 h-4 inline mr-1" />
             Squads
           </label>
@@ -378,7 +387,7 @@ export const CreateEmployeeModal = ({
             <button
               type="button"
               onClick={() => setSquadDropdownOpen(!squadDropdownOpen)}
-              className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text text-left flex items-center justify-between focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className={selectTriggerStyles}
             >
               <span className="text-theme-text-muted">
                 {getSelectedSquads().length === 0
@@ -386,12 +395,15 @@ export const CreateEmployeeModal = ({
                   : `${getSelectedSquads().length} squad(s) selected`}
               </span>
               <ChevronDown
-                className={`w-4 h-4 ml-2 shrink-0 transition-transform ${squadDropdownOpen ? "rotate-180" : ""}`}
+                className={cn(
+                  "w-4 h-4 ml-2 shrink-0 transition-transform",
+                  squadDropdownOpen && "rotate-180"
+                )}
               />
             </button>
 
             {squadDropdownOpen && (
-              <div className="absolute z-10 w-full mt-1 bg-theme-surface border border-theme-border shadow-lg max-h-60 overflow-auto">
+              <div className={dropdownMenu}>
                 {squads.map((squad) => (
                   <label
                     key={squad.id}
@@ -440,37 +452,37 @@ export const CreateEmployeeModal = ({
           </p>
         </div>
 
-        {/* Role Radio Buttons */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-theme-text mb-2">
-            Role
-          </label>
+          <label className={cn(labelStyles, "mb-2")}>Role</label>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() =>
                 setNewEmployee({ ...newEmployee, role: "employee" })
               }
-              className={`p-3 border text-left transition-colors ${
+              className={cn(
+                "p-3 border text-left transition-colors",
                 newEmployee.role === "employee"
                   ? "border-primary-500 bg-primary-500/10"
                   : "border-theme-border bg-theme-elevated hover:border-theme-text-muted"
-              }`}
+              )}
             >
               <div className="flex items-center gap-2 mb-1">
                 <UserIcon
-                  className={`w-4 h-4 ${
+                  className={cn(
+                    "w-4 h-4",
                     newEmployee.role === "employee"
                       ? "text-primary-400"
                       : "text-theme-text-muted"
-                  }`}
+                  )}
                 />
                 <span
-                  className={`font-medium ${
+                  className={cn(
+                    "font-medium",
                     newEmployee.role === "employee"
                       ? "text-primary-400"
                       : "text-theme-text"
-                  }`}
+                  )}
                 >
                   Employee
                 </span>
@@ -485,26 +497,29 @@ export const CreateEmployeeModal = ({
               onClick={() =>
                 setNewEmployee({ ...newEmployee, role: "supervisor" })
               }
-              className={`p-3 border text-left transition-colors ${
+              className={cn(
+                "p-3 border text-left transition-colors",
                 newEmployee.role === "supervisor"
                   ? "border-primary-500 bg-primary-500/10"
                   : "border-theme-border bg-theme-elevated hover:border-theme-text-muted"
-              }`}
+              )}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Shield
-                  className={`w-4 h-4 ${
+                  className={cn(
+                    "w-4 h-4",
                     newEmployee.role === "supervisor"
                       ? "text-primary-400"
                       : "text-theme-text-muted"
-                  }`}
+                  )}
                 />
                 <span
-                  className={`font-medium ${
+                  className={cn(
+                    "font-medium",
                     newEmployee.role === "supervisor"
                       ? "text-primary-400"
                       : "text-theme-text"
-                  }`}
+                  )}
                 >
                   Supervisor
                 </span>
@@ -517,23 +532,21 @@ export const CreateEmployeeModal = ({
         </div>
 
         {createError && (
-          <div className="mb-4 p-3 bg-red-900/30 border border-red-500/30">
-            <p className="text-sm text-red-400">{createError}</p>
-          </div>
+          <div className={cn(errorAlert, "mb-4")}>{createError}</div>
         )}
 
         <div className="flex gap-3">
           <button
             type="button"
             onClick={handleClose}
-            className="flex-1 px-4 py-2 border border-theme-border text-theme-text hover:bg-theme-elevated transition-colors"
+            className={cn(buttonSecondary, "flex-1")}
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={creating}
-            className="flex-1 px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 transition-colors disabled:opacity-50"
+            className={cn(buttonPrimary, "flex-1")}
           >
             {creating ? "Creating..." : "Add Employee"}
           </button>

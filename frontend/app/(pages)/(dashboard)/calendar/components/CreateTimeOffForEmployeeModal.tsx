@@ -1,18 +1,26 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { TimeOffType, TIME_OFF_TYPE_LABELS, CreateTimeOffRequest } from "../../time-off/types";
-import { createTimeOffRequest } from "../../time-off/api";
+import { createTimeOffRequest } from "../../time-off/actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { useOrganization } from "@/providers/OrganizationProvider";
-import { BaseModal } from "@/components";
-import { Loader2 } from "lucide-react";
+import { BaseModal, Button, FormError, CenteredSpinner } from "@/components";
 import { format, addDays } from "date-fns";
 
 interface CreateTimeOffForEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated: () => void;
+}
+
+interface TimeOffFormData {
+  selectedUserId: number | undefined;
+  requestType: TimeOffType;
+  startDate: string;
+  endDate: string;
+  reason: string;
+  autoApprove: boolean;
 }
 
 const TIME_OFF_TYPES: TimeOffType[] = [
@@ -24,6 +32,15 @@ const TIME_OFF_TYPES: TimeOffType[] = [
   "other",
 ];
 
+const getInitialFormData = (): TimeOffFormData => ({
+  selectedUserId: undefined,
+  requestType: "vacation",
+  startDate: format(addDays(new Date(), 1), "yyyy-MM-dd"),
+  endDate: format(addDays(new Date(), 1), "yyyy-MM-dd"),
+  reason: "",
+  autoApprove: true,
+});
+
 export default function CreateTimeOffForEmployeeModal({
   isOpen,
   onClose,
@@ -32,15 +49,17 @@ export default function CreateTimeOffForEmployeeModal({
   const { currentUser, isSupervisor, isAdmin } = useCurrentUser();
   const { allUsers, allUsersLoading } = useOrganization();
 
-  const [selectedUserId, setSelectedUserId] = useState<number | undefined>();
-  const [requestType, setRequestType] = useState<TimeOffType>("vacation");
-  const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
-  const [endDate, setEndDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
-  const [reason, setReason] = useState("");
-  const [autoApprove, setAutoApprove] = useState(true);
-
+  const [formData, setFormData] = useState<TimeOffFormData>(getInitialFormData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Helper to update individual form fields
+  const updateField = useCallback(<K extends keyof TimeOffFormData>(
+    field: K,
+    value: TimeOffFormData[K]
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
   // Filter users based on current user's role
   // Supervisors see their direct reports, admins see all users
@@ -57,24 +76,21 @@ export default function CreateTimeOffForEmployeeModal({
     return [];
   }, [allUsers, currentUser, isSupervisor, isAdmin]);
 
-  const resetForm = () => {
-    setSelectedUserId(undefined);
-    setRequestType("vacation");
-    setStartDate(format(addDays(new Date(), 1), "yyyy-MM-dd"));
-    setEndDate(format(addDays(new Date(), 1), "yyyy-MM-dd"));
-    setReason("");
-    setAutoApprove(true);
+  const resetForm = useCallback(() => {
+    setFormData(getInitialFormData());
     setError(null);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     resetForm();
     onClose();
-  };
+  }, [resetForm, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const { selectedUserId, startDate, endDate, requestType, reason, autoApprove } = formData;
 
     if (!selectedUserId) {
       setError("Please select an employee");
@@ -127,9 +143,7 @@ export default function CreateTimeOffForEmployeeModal({
       maxWidth="max-w-md"
     >
       {allUsersLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-        </div>
+        <CenteredSpinner />
       ) : users.length === 0 ? (
         <div className="p-6 text-center text-theme-text-muted">
           <p>No employees available.</p>
@@ -141,11 +155,7 @@ export default function CreateTimeOffForEmployeeModal({
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 bg-red-900/30 border border-red-500/30 text-red-400 text-sm rounded">
-              {error}
-            </div>
-          )}
+          <FormError error={error} />
 
           <div>
             <label htmlFor="employee" className="block text-sm font-medium text-theme-text mb-1">
@@ -153,9 +163,9 @@ export default function CreateTimeOffForEmployeeModal({
             </label>
             <select
               id="employee"
-              value={selectedUserId || ""}
+              value={formData.selectedUserId || ""}
               onChange={(e) =>
-                setSelectedUserId(e.target.value ? parseInt(e.target.value) : undefined)
+                updateField("selectedUserId", e.target.value ? parseInt(e.target.value) : undefined)
               }
               className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
@@ -174,8 +184,8 @@ export default function CreateTimeOffForEmployeeModal({
             </label>
             <select
               id="requestType"
-              value={requestType}
-              onChange={(e) => setRequestType(e.target.value as TimeOffType)}
+              value={formData.requestType}
+              onChange={(e) => updateField("requestType", e.target.value as TimeOffType)}
               className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               {TIME_OFF_TYPES.map((type) => (
@@ -194,8 +204,8 @@ export default function CreateTimeOffForEmployeeModal({
               <input
                 type="date"
                 id="startDate"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                value={formData.startDate}
+                onChange={(e) => updateField("startDate", e.target.value)}
                 className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
@@ -206,9 +216,9 @@ export default function CreateTimeOffForEmployeeModal({
               <input
                 type="date"
                 id="endDate"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={startDate}
+                value={formData.endDate}
+                onChange={(e) => updateField("endDate", e.target.value)}
+                min={formData.startDate}
                 className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
@@ -220,8 +230,8 @@ export default function CreateTimeOffForEmployeeModal({
             </label>
             <textarea
               id="reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              value={formData.reason}
+              onChange={(e) => updateField("reason", e.target.value)}
               rows={2}
               className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Optional reason"
@@ -232,8 +242,8 @@ export default function CreateTimeOffForEmployeeModal({
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                checked={autoApprove}
-                onChange={(e) => setAutoApprove(e.target.checked)}
+                checked={formData.autoApprove}
+                onChange={(e) => updateField("autoApprove", e.target.checked)}
                 className="w-4 h-4 text-primary-600 border-theme-border bg-theme-elevated focus:ring-primary-500 rounded"
               />
               <span className="text-sm font-medium text-theme-text">Auto-approve this request</span>
@@ -244,21 +254,17 @@ export default function CreateTimeOffForEmployeeModal({
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-theme-border">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium text-theme-text bg-theme-elevated border border-theme-border rounded hover:bg-theme-surface transition-colors"
-            >
+            <Button type="button" variant="secondary" onClick={handleClose}>
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={loading || !selectedUserId}
-              className="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50 rounded transition-colors flex items-center gap-2"
+              variant="primary"
+              loading={loading}
+              disabled={!formData.selectedUserId}
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {autoApprove ? "Create & Approve" : "Create Request"}
-            </button>
+              {formData.autoApprove ? "Create & Approve" : "Create Request"}
+            </Button>
           </div>
         </form>
       )}

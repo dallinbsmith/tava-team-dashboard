@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { Meeting, UpdateMeetingRequest, ResponseStatus } from "../types";
-import { getMeeting } from "../api";
+import { getMeeting } from "../actions";
 import { updateMeetingAction, deleteMeetingAction, respondToMeetingAction } from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
@@ -430,7 +430,6 @@ export default function ViewMeetingModal({
             </div>
           )}
 
-          {/* Response buttons for attendees */}
           {isAttendee && (
             <div className="pt-4 border-t border-theme-border">
               <p className="text-sm font-medium text-theme-text mb-3">Your Response</p>

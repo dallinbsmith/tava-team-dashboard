@@ -12,7 +12,7 @@ import CreateTimeOffForEmployeeModal from "./calendar/components/CreateTimeOffFo
 import ViewTaskModal from "./calendar/components/ViewTaskModal";
 import ViewMeetingModal from "./calendar/components/ViewMeetingModal";
 import ViewTimeOffModal from "./calendar/components/ViewTimeOffModal";
-import { CreateEmployeeModal } from "@/components";
+import { CreateEmployeeModal, ErrorAlert } from "@/components";
 import StatsCards from "./dashboard-stats/StatsCards";
 import SquadBreakdown from "./dashboard-stats/SquadBreakdown";
 import { UserPlus } from "lucide-react";
@@ -103,15 +103,15 @@ export const DashboardPageClient = ({
   if (userError && !effectiveUser) {
     const isDev = process.env.NODE_ENV === "development";
     return (
-      <div className="bg-red-900/30 border border-red-500/30 p-4 mb-6">
-        <p className="text-red-400">
+      <div className="mb-6">
+        <ErrorAlert title={isDev ? "Development Error" : undefined}>
           {isDev ? userError : "Unable to load your profile. Please try again later."}
-        </p>
-        {isDev && (
-          <p className="text-sm text-red-300 mt-1">
-            Make sure your Go backend is running on port 8080 and PostgreSQL is started.
-          </p>
-        )}
+          {isDev && (
+            <p className="text-sm mt-1">
+              Make sure your Go backend is running on port 8080 and PostgreSQL is started.
+            </p>
+          )}
+        </ErrorAlert>
       </div>
     );
   }

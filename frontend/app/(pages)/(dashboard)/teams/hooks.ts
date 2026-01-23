@@ -6,8 +6,8 @@ import { useCallback, useMemo } from "react";
 import { User } from "@/shared/types/user";
 import { TimeOffRequest } from "@/app/(pages)/(dashboard)/time-off/types";
 import { TeamTask } from "@/app/(pages)/jira/types";
-import { getTeamTimeOff } from "@/app/(pages)/(dashboard)/time-off/api";
-import { getTeamJiraTasks } from "@/app/(pages)/jira/api";
+import { getTeamTimeOff } from "@/app/(pages)/(dashboard)/time-off/actions";
+import { getTeamJiraTasks } from "@/app/(pages)/jira/actions";
 import {
   SelectionType,
   filterTimeOffByTeam,

@@ -15,7 +15,7 @@ import { parseSquadErrorMessage } from "@/lib/errors";
 import { useSquadsQuery } from "@/hooks";
 import { getUsersBySquad } from "@/lib/api";
 import { sanitizeName, validateName } from "@/lib/sanitize";
-import ConfirmationModal from "@/shared/common/ConfirmationModal";
+import { ConfirmModal, FormError } from "@/components";
 import Avatar from "@/shared/common/Avatar";
 
 interface ManageSquadsModalProps {
@@ -192,13 +192,8 @@ export default function ManageSquadsModal({
           </div>
 
           <div className="p-4 space-y-4 overflow-y-auto flex-1">
-            {error && (
-              <div className="bg-red-900/30 border border-red-500/30 p-3 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
+            <FormError error={error} />
 
-            {/* Add new squad */}
             <div className="flex gap-2">
               <input
                 type="text"
@@ -223,7 +218,6 @@ export default function ManageSquadsModal({
               </button>
             </div>
 
-            {/* Squad list */}
             <div className="border border-theme-border">
               {squadsLoading ? (
                 <div className="p-4 text-center text-theme-text-muted">
@@ -320,7 +314,6 @@ export default function ManageSquadsModal({
                             </div>
                           </div>
 
-                          {/* Users list (expandable) */}
                           {selectedSquad?.id === squad.id && (
                             <div className="bg-theme-elevated border-t border-theme-border">
                               {loadingUsers ? (
@@ -380,7 +373,7 @@ export default function ManageSquadsModal({
         </div>
       </div>
 
-      <ConfirmationModal
+      <ConfirmModal
         isOpen={!!confirmDeleteSquad}
         onClose={() => setConfirmDeleteSquad(null)}
         onConfirm={executeDeleteSquad}

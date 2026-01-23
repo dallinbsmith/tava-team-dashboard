@@ -9,7 +9,7 @@ import {
   validateInvitation,
   acceptInvitation,
   ValidateInvitationResponse,
-} from "@/app/(pages)/(dashboard)/admin/invitations/api";
+} from "@/app/(pages)/(dashboard)/admin/invitations/actions";
 import {
   Mail,
   Shield,

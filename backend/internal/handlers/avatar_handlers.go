@@ -59,7 +59,7 @@ func (h *AvatarHandlers) checkAvatarPermission(w http.ResponseWriter, r *http.Re
 	}
 
 	if !currentUser.CanManage(targetUser) {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: you can only upload avatars for yourself or your direct reports")
 		return nil, false
 	}
 

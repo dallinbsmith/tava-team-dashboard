@@ -1,13 +1,5 @@
 import React from "react";
 
-/**
- * Shared utility functions for Jira task formatting
- * Used across JiraTasks, TeamJiraTasks, TeamTasksWidget, and other components
- */
-
-/**
- * Returns Tailwind classes for Jira task status badges
- */
 export const getStatusColor = (status: string): string => {
   const statusLower = status.toLowerCase();
 
@@ -23,9 +15,6 @@ export const getStatusColor = (status: string): string => {
   return "bg-yellow-900/40 text-yellow-300";
 };
 
-/**
- * Returns Tailwind text color class for Jira task priority
- */
 export const getPriorityColor = (priority: string): string => {
   const priorityLower = priority.toLowerCase();
 
@@ -41,9 +30,6 @@ export const getPriorityColor = (priority: string): string => {
   return "text-gray-500";
 };
 
-/**
- * Calculates the difference in days between a date and now
- */
 export const getDueDateDiffDays = (dateString: string): number => {
   const date = new Date(dateString);
   const now = new Date();
@@ -51,9 +37,6 @@ export const getDueDateDiffDays = (dateString: string): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-/**
- * Returns formatted due date info with color and text
- */
 export const getDueDateInfo = (dateString: string): {
   text: string;
   colorClass: string;
@@ -103,9 +86,6 @@ export const getDueDateInfo = (dateString: string): {
   };
 };
 
-/**
- * Returns a compact version of due date text (for tight spaces)
- */
 export const getDueDateInfoCompact = (dateString: string): {
   text: string;
   colorClass: string;
@@ -143,10 +123,6 @@ export const getDueDateInfoCompact = (dateString: string): {
   };
 };
 
-/**
- * React component for rendering formatted due dates
- * Use this when you need a JSX element directly
- */
 export const DueDateDisplay = ({
   dueDate,
   compact = false,
@@ -164,9 +140,6 @@ export const DueDateDisplay = ({
   );
 };
 
-/**
- * React component for rendering task status badges
- */
 export const TaskStatusBadge = ({
   status,
   className = "",

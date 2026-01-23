@@ -10,9 +10,9 @@ import {
   getJiraUsers,
   autoMatchJiraUsers,
   updateUserJiraMapping,
-} from "@/lib/api";
+} from "@/app/(pages)/jira/actions";
 import { useAsyncOperation } from "@/hooks";
-import ConfirmationModal from "@/shared/common/ConfirmationModal";
+import { ConfirmModal, ErrorAlert } from "@/components";
 import Avatar from "@/shared/common/Avatar";
 import {
   Settings,
@@ -131,7 +131,8 @@ export const SettingsPageClient = ({
       const timer = setTimeout(() => updateMappingOp.clearSuccess(), 2000);
       return () => clearTimeout(timer);
     }
-  }, [updateMappingOp.success, updateMappingOp]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run when success changes, not on every object reference change
+  }, [updateMappingOp.success]);
 
   const handleConnectJiraOAuth = async () => {
     setConnecting(true);
@@ -175,11 +176,8 @@ export const SettingsPageClient = ({
       </div>
 
       {error && (
-        <div className="bg-red-900/30 border border-red-500/30 p-4 mb-6">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-red-400" />
-            <p className="text-red-400">{error}</p>
-          </div>
+        <div className="mb-6">
+          <ErrorAlert>{error}</ErrorAlert>
         </div>
       )}
 
@@ -192,7 +190,6 @@ export const SettingsPageClient = ({
         </div>
       )}
 
-      {/* Jira Integration Section */}
       <div className="bg-theme-surface border border-theme-border overflow-hidden mb-6">
         <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -327,7 +324,6 @@ export const SettingsPageClient = ({
         </div>
       </div>
 
-      {/* User Mapping Section - Admin only, when connected */}
       {isAdmin && isConnected && (
         <div className="bg-theme-surface border border-theme-border overflow-hidden">
           <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
@@ -362,7 +358,6 @@ export const SettingsPageClient = ({
           </div>
 
           <div className="p-6">
-            {/* Search */}
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted" />
               <input
@@ -451,7 +446,7 @@ export const SettingsPageClient = ({
         </div>
       )}
 
-      <ConfirmationModal
+      <ConfirmModal
         isOpen={showDisconnectModal}
         onClose={() => setShowDisconnectModal(false)}
         onConfirm={() => disconnectJiraOp.execute()}

@@ -140,21 +140,18 @@ export default function AvatarUpload({
           </div>
         )}
 
-        {/* Overlay for edit mode */}
         {canEdit && !isUploading && (
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <Camera className="w-8 h-8 text-white" />
           </div>
         )}
 
-        {/* Loading spinner */}
         {isUploading && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <Loader2 className="w-8 h-8 text-white animate-spin" />
           </div>
         )}
 
-        {/* Success indicator */}
         {success && !isUploading && (
           <div className="absolute inset-0 bg-green-500/50 flex items-center justify-center animate-pulse">
             <Check className="w-8 h-8 text-white" />
@@ -162,7 +159,6 @@ export default function AvatarUpload({
         )}
       </div>
 
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -172,7 +168,6 @@ export default function AvatarUpload({
         disabled={!canEdit || isUploading}
       />
 
-      {/* Upload button */}
       {canEdit && !isUploading && (
         <button
           type="button"
@@ -184,7 +179,6 @@ export default function AvatarUpload({
         </button>
       )}
 
-      {/* Error message */}
       {error && (
         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1 bg-red-100 text-red-700 text-xs whitespace-nowrap flex items-center gap-1">
           <span>{error}</span>
@@ -194,7 +188,6 @@ export default function AvatarUpload({
         </div>
       )}
 
-      {/* Drag indicator */}
       {isDragging && canEdit && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-28 h-28 rounded-full border-2 border-dashed border-primary-400 animate-pulse" />

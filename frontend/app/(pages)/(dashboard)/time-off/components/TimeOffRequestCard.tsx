@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { format } from "date-fns";
 import {
   TimeOffRequest,
@@ -24,7 +25,7 @@ const statusColors: Record<TimeOffStatus, { bg: string; text: string; border: st
   cancelled: { bg: "bg-gray-500/10", text: "text-gray-400", border: "border-gray-500/20" },
 };
 
-export default function TimeOffRequestCard({
+const TimeOffRequestCard = memo(function TimeOffRequestCard({
   request,
   onCancel,
   onReview,
@@ -129,4 +130,6 @@ export default function TimeOffRequestCard({
       </div>
     </div>
   );
-}
+});
+
+export default TimeOffRequestCard;

@@ -45,7 +45,6 @@ const parseResponse = async (
   }
 };
 
-/** Proxies a request to the Go backend with server-side token handling. */
 export const proxyToBackend = async (
   request: NextRequest,
   options: ProxyOptions = {}
@@ -63,7 +62,6 @@ export const proxyToBackend = async (
     const headers: HeadersInit = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    // Forward impersonation header if present
     const impersonateHeader = request.headers.get("X-Impersonate-User-Id");
     if (impersonateHeader) headers["X-Impersonate-User-Id"] = impersonateHeader;
 
@@ -75,7 +73,6 @@ export const proxyToBackend = async (
     });
     console.log(`Proxy: Backend responded with status ${res.status}`);
 
-    // Handle 204 No Content responses - return empty response with no body
     if (res.status === 204) {
       return new NextResponse(null, { status: 204 });
     }
@@ -99,9 +96,6 @@ export const proxyToBackend = async (
   }
 };
 
-/**
- * Creates a simple proxy handler for a specific backend path pattern.
- */
 export const createProxyHandler = (options: ProxyOptions = {}) => {
   return async (request: NextRequest) => {
     return proxyToBackend(request, options);

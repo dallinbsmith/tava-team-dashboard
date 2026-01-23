@@ -86,7 +86,6 @@ export default function TeamsPageClient() {
 
   return (
     <>
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-theme-text">Teams</h1>
@@ -101,14 +100,12 @@ export default function TeamsPageClient() {
         />
       </div>
 
-      {/* Content */}
       {!selectedId ? (
         <div className="text-center py-16 bg-theme-surface border border-theme-border">
           <p className="text-theme-text-muted">Select a team or department to view details</p>
         </div>
       ) : (
         <>
-          {/* Top row: Time Off and Tasks */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <TeamTimeOffWidget
               selectionType={selectionType}
@@ -122,7 +119,6 @@ export default function TeamsPageClient() {
             />
           </div>
 
-          {/* Bottom row: Team Members */}
           <TeamMembersWidget
             selectionType={selectionType}
             selectedId={selectedId}

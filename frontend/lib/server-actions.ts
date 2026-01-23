@@ -1,33 +1,9 @@
-/**
- * Shared utilities for Server Actions
- * Consolidates common patterns: auth, error handling, and typed results
- *
- * Note: This file does NOT use "use server" because it contains both
- * async utilities and sync helpers. The async functions are server-side
- * utilities called BY Server Actions, not client-callable actions themselves.
- */
-
 import { auth0 } from "./auth0";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 
-// ============================================
-// Type Definitions
-// ============================================
-
-/**
- * Type-safe action result - use this for all server action returns
- */
 export type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
-// ============================================
-// Auth Utilities
-// ============================================
-
-/**
- * Get Auth0 access token for server actions
- * @throws Error if user is not authenticated
- */
 export const getAccessToken = async (): Promise<string> => {
   const result = await auth0.getAccessToken();
   if (!result?.token) {
@@ -36,14 +12,6 @@ export const getAccessToken = async (): Promise<string> => {
   return result.token;
 };
 
-// ============================================
-// Error Handling
-// ============================================
-
-/**
- * Extract error message from backend response
- * Tries JSON first, then text, falls back to provided message
- */
 export const extractErrorMessage = async (res: Response, fallback: string): Promise<string> => {
   try {
     const data = await res.json();
@@ -58,19 +26,11 @@ export const extractErrorMessage = async (res: Response, fallback: string): Prom
   }
 };
 
-// ============================================
-// Authenticated Fetch Helpers
-// ============================================
-
 interface FetchOptions {
   method: "GET" | "POST" | "PUT" | "DELETE";
   body?: unknown;
 }
 
-/**
- * Make an authenticated request to the backend
- * Handles token acquisition and JSON serialization
- */
 const authenticatedFetch = async (path: string, options: FetchOptions): Promise<Response> => {
   const token = await getAccessToken();
 
@@ -89,67 +49,14 @@ const authenticatedFetch = async (path: string, options: FetchOptions): Promise<
   return fetch(`${BACKEND_URL}${path}`, fetchOptions);
 };
 
-/**
- * POST request with authentication
- */
-export const authPost = async (path: string, body?: unknown): Promise<Response> => {
-  return authenticatedFetch(path, { method: "POST", body });
-};
+export const authPost = (path: string, body?: unknown) =>
+  authenticatedFetch(path, { method: "POST", body });
 
-/**
- * PUT request with authentication
- */
-export const authPut = async (path: string, body?: unknown): Promise<Response> => {
-  return authenticatedFetch(path, { method: "PUT", body });
-};
+export const authPut = (path: string, body?: unknown) =>
+  authenticatedFetch(path, { method: "PUT", body });
 
-/**
- * DELETE request with authentication
- */
-export const authDelete = async (path: string): Promise<Response> => {
-  return authenticatedFetch(path, { method: "DELETE" });
-};
+export const authDelete = (path: string) => authenticatedFetch(path, { method: "DELETE" });
 
-/**
- * GET request with authentication
- */
-export const authGet = async (path: string): Promise<Response> => {
-  return authenticatedFetch(path, { method: "GET" });
-};
+export const success = <T>(data: T): ActionResult<T> => ({ success: true, data });
 
-// ============================================
-// Action Helpers
-// ============================================
-
-/**
- * Execute an action with standard error handling
- * Wraps the action in try/catch and returns ActionResult
- */
-export const executeAction = async <T>(
-  action: () => Promise<ActionResult<T>>,
-  errorPrefix: string
-): Promise<ActionResult<T>> => {
-  try {
-    return await action();
-  } catch (e) {
-    console.error(`${errorPrefix} error:`, e);
-    return {
-      success: false,
-      error: e instanceof Error ? e.message : errorPrefix,
-    };
-  }
-};
-
-/**
- * Create a successful action result
- */
-export const success = <T>(data: T): ActionResult<T> => {
-  return { success: true, data };
-};
-
-/**
- * Create a failed action result
- */
-export const failure = <T>(error: string): ActionResult<T> => {
-  return { success: false, error };
-};
+export const failure = <T>(error: string): ActionResult<T> => ({ success: false, error });

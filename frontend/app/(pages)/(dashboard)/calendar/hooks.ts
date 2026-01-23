@@ -13,7 +13,7 @@ import {
   updateMeeting,
   deleteMeeting,
   respondToMeeting,
-} from "./api";
+} from "./actions";
 import {
   CreateTaskRequest,
   UpdateTaskRequest,
@@ -21,7 +21,7 @@ import {
   UpdateMeetingRequest,
   ResponseStatus,
 } from "./types";
-import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
+import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 
 export const calendarKeys = {
   all: ["calendar"] as const,

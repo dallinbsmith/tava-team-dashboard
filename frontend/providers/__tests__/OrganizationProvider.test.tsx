@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { OrganizationProvider, useOrganization } from "../OrganizationProvider";
 import * as hooks from "@/hooks";
-import * as queryUtils from "@/lib/queryUtils";
+import * as queryUtils from "@/lib/query-utils";
 
 // Mock Auth0
 jest.mock("@auth0/nextjs-auth0/client");
@@ -24,7 +24,7 @@ jest.mock("@/hooks", () => ({
 }));
 
 // Mock queryUtils
-jest.mock("@/lib/queryUtils", () => ({
+jest.mock("@/lib/query-utils", () => ({
   refetchQueries: jest.fn().mockResolvedValue(undefined),
   queryKeyGroups: {
     organization: jest

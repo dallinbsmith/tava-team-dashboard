@@ -1,4 +1,4 @@
-import { TimeOffRequest, TimeOffStatus, CreateTimeOffRequest, ReviewTimeOffRequest } from "./types";
+import { TimeOffRequest, TimeOffStatus, CreateTimeOffRequest, ReviewTimeOffRequest } from "../types";
 import { fetchWithProxy, handleResponse } from "@/lib/api";
 
 export const createTimeOffRequest = async (data: CreateTimeOffRequest): Promise<TimeOffRequest> => {

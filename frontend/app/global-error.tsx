@@ -59,7 +59,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 </svg>
                 Try Again
               </button>
-              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- Link unavailable in global error boundary */}
               <a
                 href="/"
                 className="inline-flex items-center gap-2 px-4 py-2 border border-gray-600 text-gray-300 hover:bg-gray-700 transition-colors rounded"

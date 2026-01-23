@@ -33,6 +33,11 @@ type Auth0TicketResponse struct {
 	Ticket string
 }
 
+// EmailClient defines the interface for email operations needed by EmployeeService.
+type EmailClient interface {
+	SendPasswordReset(ctx context.Context, email, resetLink string) error
+}
+
 // CreateEmployeeInput contains all the data needed to create a new employee.
 type CreateEmployeeInput struct {
 	Email        string
@@ -60,17 +65,19 @@ type EmployeeService struct {
 	squadRepo   repository.SquadRepository
 	orgJiraRepo repository.OrgJiraRepository
 	auth0Client Auth0Client
+	emailClient EmailClient
 	frontendURL string
 	logger      *logger.Logger
 }
 
 // NewEmployeeService creates a new employee service.
-// auth0Client and orgJiraRepo can be nil if those integrations are not configured.
+// auth0Client, emailClient, and orgJiraRepo can be nil if those integrations are not configured.
 func NewEmployeeService(
 	userRepo repository.UserRepository,
 	squadRepo repository.SquadRepository,
 	orgJiraRepo repository.OrgJiraRepository,
 	auth0Client Auth0Client,
+	emailClient EmailClient,
 	frontendURL string,
 	log *logger.Logger,
 ) *EmployeeService {
@@ -79,6 +86,7 @@ func NewEmployeeService(
 		squadRepo:   squadRepo,
 		orgJiraRepo: orgJiraRepo,
 		auth0Client: auth0Client,
+		emailClient: emailClient,
 		frontendURL: frontendURL,
 		logger:      log.WithComponent("employee_service"),
 	}
@@ -148,7 +156,7 @@ func (s *EmployeeService) createAuth0User(ctx context.Context, input CreateEmplo
 	return auth0User.UserID, nil
 }
 
-// createPasswordChangeTicket creates a password reset ticket for a new user.
+// createPasswordChangeTicket creates a password reset ticket for a new user and sends it via email.
 // Errors are logged but don't fail the operation (user can use "forgot password" flow).
 func (s *EmployeeService) createPasswordChangeTicket(ctx context.Context, auth0UserID, email string) {
 	resultURL := s.frontendURL + "/login"
@@ -157,8 +165,20 @@ func (s *EmployeeService) createPasswordChangeTicket(ctx context.Context, auth0U
 		s.logger.Warn("Failed to create password change ticket", "user_id", auth0UserID, "error", err)
 		return
 	}
-	// TODO: Send this ticket URL to the user via email
-	s.logger.Info("Password reset ticket created", "email", email, "ticket", ticket.Ticket)
+
+	// Send the password reset email if email client is configured
+	if s.emailClient != nil {
+		if err := s.emailClient.SendPasswordReset(ctx, email, ticket.Ticket); err != nil {
+			s.logger.Warn("Failed to send password reset email", "email", email, "error", err)
+			// Log the ticket URL as fallback so admin can manually share it if needed
+			s.logger.Info("Password reset ticket created (email failed)", "email", email, "ticket", ticket.Ticket)
+			return
+		}
+		s.logger.Info("Password reset email sent", "email", email)
+	} else {
+		// No email client configured, just log the ticket
+		s.logger.Info("Password reset ticket created (no email configured)", "email", email, "ticket", ticket.Ticket)
+	}
 }
 
 // generatePlaceholderAuth0ID generates a placeholder Auth0 ID when Auth0 is not configured.

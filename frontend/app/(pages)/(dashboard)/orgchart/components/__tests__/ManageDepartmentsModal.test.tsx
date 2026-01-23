@@ -45,9 +45,10 @@ jest.mock("@/shared/common/Avatar", () => {
   };
 });
 
-// Mock ConfirmationModal
-jest.mock("@/shared/common/ConfirmationModal", () => {
-  return function MockConfirmationModal({
+// Mock ConfirmModal
+jest.mock("@/components", () => ({
+  ...jest.requireActual("@/components"),
+  ConfirmModal: ({
     isOpen,
     onClose,
     onConfirm,
@@ -59,7 +60,7 @@ jest.mock("@/shared/common/ConfirmationModal", () => {
     onConfirm: () => void;
     title: string;
     message: string;
-  }) {
+  }) => {
     if (!isOpen) return null;
     return (
       <div data-testid="confirmation-modal">
@@ -69,8 +70,8 @@ jest.mock("@/shared/common/ConfirmationModal", () => {
         <button onClick={onConfirm}>Confirm</button>
       </div>
     );
-  };
-});
+  },
+}));
 
 // Test fixtures
 const mockDepartments = ["Engineering", "Product", "Design"];

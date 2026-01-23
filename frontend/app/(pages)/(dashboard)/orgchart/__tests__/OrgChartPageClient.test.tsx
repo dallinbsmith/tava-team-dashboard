@@ -17,6 +17,15 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
+// Mock Toast/useToast
+jest.mock("@/components/ui/Toast", () => ({
+  useToast: () => ({
+    showToast: jest.fn(),
+    showSuccess: jest.fn(),
+    showError: jest.fn(),
+  }),
+}));
+
 // Mock OrganizationProvider
 jest.mock("@/providers/OrganizationProvider", () => ({
   useOrganization: () => ({
@@ -81,12 +90,6 @@ jest.mock("../components/ManageDepartmentsModal", () => {
 jest.mock("../components/DraftEditModal", () => {
   return function MockDraftEditModal({ isOpen }: { isOpen: boolean }) {
     return isOpen ? <div data-testid="draft-edit-modal">Draft Edit Modal</div> : null;
-  };
-});
-
-jest.mock("../components/ConfirmationModal", () => {
-  return function MockConfirmationModal({ isOpen }: { isOpen: boolean }) {
-    return isOpen ? <div data-testid="confirmation-modal">Confirmation Modal</div> : null;
   };
 });
 

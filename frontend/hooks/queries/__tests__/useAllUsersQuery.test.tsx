@@ -10,7 +10,7 @@ import React, { ReactNode } from "react";
 import { useAllUsersQuery, useDepartmentsQuery } from "../useAllUsersQuery";
 import * as api from "@/lib/api";
 import { User } from "@/shared/types/user";
-import { queryKeys } from "@/lib/queryKeys";
+import { queryKeys } from "@/lib/query-keys";
 
 // Mock the Auth0 hook
 jest.mock("@auth0/nextjs-auth0/client");

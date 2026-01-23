@@ -32,8 +32,7 @@ export interface DraftManagerProps {
 
 type Tab = "drafts" | "changes";
 
-// Helper component for showing before/after values
-function ChangeRow({
+const ChangeRow = ({
   label,
   icon: Icon,
   oldValue,
@@ -45,7 +44,7 @@ function ChangeRow({
   oldValue?: string | null;
   newValue?: string | null;
   type?: "text" | "badge";
-}) {
+}) => {
   const hasOld = oldValue && oldValue.length > 0;
   const hasNew = newValue && newValue.length > 0;
 
@@ -85,10 +84,9 @@ function ChangeRow({
       </div>
     </div>
   );
-}
+};
 
-// Helper component for showing squad changes with multiple badges
-function SquadChangeRow({
+const SquadChangeRow = ({
   originalSquadIds,
   newSquadIds,
   squads,
@@ -96,7 +94,7 @@ function SquadChangeRow({
   originalSquadIds?: number[];
   newSquadIds?: number[];
   squads: Squad[];
-}) {
+}) => {
   const squadMap = new Map(squads.map((s) => [s.id, s]));
 
   const originalIds = new Set(originalSquadIds || []);
@@ -153,7 +151,7 @@ function SquadChangeRow({
       </div>
     </div>
   );
-}
+};
 
 export default function DraftManager({
   drafts,
@@ -210,7 +208,6 @@ export default function DraftManager({
 
   return (
     <div className="bg-theme-surface border border-theme-border h-full flex flex-col">
-      {/* Tabs - only show Changes tab when a draft is selected */}
       <div className="flex border-b border-theme-border">
         <button
           onClick={() => setActiveTab("drafts")}
@@ -259,7 +256,6 @@ export default function DraftManager({
         )}
       </div>
 
-      {/* Tab Content */}
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === "drafts" ? (
           /* Drafts Tab */
@@ -431,7 +427,6 @@ export default function DraftManager({
         )}
       </div>
 
-      {/* Footer Actions */}
       <div className="p-4 border-t border-theme-border space-y-2">
         {activeTab === "drafts" && !showCreateForm && (
           <button

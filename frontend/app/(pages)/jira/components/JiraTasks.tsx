@@ -5,7 +5,7 @@ import Link from "next/link";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { JiraIssue, JiraSettings, TeamTask } from "../types";
 import { TimeOffImpact } from "@/app/(pages)/(dashboard)/time-off/types";
-import { getMyJiraTasks, getTeamJiraTasks, getJiraSettings } from "../api";
+import { getMyJiraTasks, getTeamJiraTasks, getJiraSettings } from "../actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import Avatar from "@/shared/common/Avatar";
@@ -363,22 +363,20 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {/* Filter Button */}
           <FilterDropdown
             isOpen={filterOpen}
             onToggle={() => setFilterOpen(!filterOpen)}
             onClose={() => setFilterOpen(false)}
             activeFilterCount={activeFilterCount}
             onClearAll={clearAllFilters}
+            position="left"
           >
-            {/* Source Section */}
             <FilterSection
               title="Source"
               isExpanded={expandedSections.source}
               onToggle={() => toggleSection("source")}
             >
               <div className="space-y-1 max-h-64 overflow-y-auto">
-                {/* My Tasks */}
                 <button
                   onClick={() => handleSourceChange({ type: "my" })}
                   className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
@@ -394,7 +392,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                   )}
                 </button>
 
-                {/* All Team Tasks */}
                 <button
                   onClick={() => handleSourceChange({ type: "team" })}
                   className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
@@ -410,7 +407,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                   )}
                 </button>
 
-                {/* Departments */}
                 {departments.length > 0 && (
                   <>
                     <div className="px-3 py-1.5 text-xs font-medium text-theme-text-subtle uppercase tracking-wide border-t border-theme-border mt-2 pt-2">
@@ -436,7 +432,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                   </>
                 )}
 
-                {/* Squads */}
                 {squads.length > 0 && (
                   <>
                     <div className="px-3 py-1.5 text-xs font-medium text-theme-text-subtle uppercase tracking-wide border-t border-theme-border mt-2 pt-2">
@@ -464,7 +459,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
               </div>
             </FilterSection>
 
-            {/* Status Section */}
             <FilterSection
               title="Status"
               isExpanded={expandedSections.status}
@@ -478,7 +472,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
               />
             </FilterSection>
 
-            {/* Epic Section */}
             <FilterSection
               title="Epic"
               isExpanded={expandedSections.epic}
@@ -526,7 +519,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
               </div>
             </FilterSection>
 
-            {/* Individual Section - only show for non-my sources */}
             {sourceFilter.type !== "my" && individuals.length > 0 && (
               <FilterSection
                 title="Individual"
@@ -543,7 +535,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
             )}
           </FilterDropdown>
 
-          {/* View Mode Toggle */}
           <div className="flex border border-theme-border overflow-hidden bg-theme-elevated">
             <button
               onClick={() => setViewMode("grid")}
@@ -647,7 +638,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
               rel="noopener noreferrer"
               className="block p-4 bg-theme-elevated border border-theme-border hover:border-primary-500/50 hover:shadow-lg transition-all group"
             >
-              {/* Employee info for team tasks */}
               {task.employee && (
                 <div className="flex items-center gap-2 mb-3">
                   <Avatar
@@ -703,7 +693,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-4 py-2 hover:bg-theme-elevated transition-colors"
             >
-              {/* Employee avatar for team tasks */}
               {task.employee && (
                 <Avatar
                   s3AvatarUrl={task.employee.avatar_url}
@@ -714,7 +703,6 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                 />
               )}
               <div className="flex-1 min-w-0 flex items-center gap-2">
-                {/* Employee name for team tasks */}
                 {task.employee && (
                   <span className="text-xs text-theme-text-muted whitespace-nowrap">
                     {task.employee.first_name[0]}. {task.employee.last_name}

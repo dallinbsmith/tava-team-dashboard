@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { Task, UpdateTaskRequest, TaskStatus, AssignmentType } from "../types";
-import { getTask } from "../api";
+import { getTask } from "../actions";
 import { updateTaskAction, deleteTaskAction } from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";

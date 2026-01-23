@@ -187,7 +187,6 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
         animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}
     >
-      {/* Header */}
       <div className="px-4 py-3 border-b border-theme-border flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-primary-500 flex-shrink-0" />
@@ -199,7 +198,6 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
           )}
         </div>
 
-        {/* Tabs */}
         <div className="flex border border-theme-border">
           <button
             onClick={() => handleTabChange("upcoming")}
@@ -250,9 +248,7 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1">
-        {/* Bulk actions for supervisors/admins on pending tab */}
         {isSupervisorOrAdmin && activeTab === "pending" && pendingRequests.length > 0 && (
           <div className="flex items-center gap-2 px-4 py-2" role="group" aria-label="Bulk actions">
             <button
@@ -307,7 +303,6 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
           </ErrorAlert>
         )}
 
-        {/* Content */}
         {isLoading ? (
           <div className="text-center py-8 px-4 text-theme-text-muted">
             <div className="w-6 h-6 border-2 border-theme-border border-t-primary-500 rounded-full animate-spin mx-auto mb-2" />
@@ -366,7 +361,6 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
                         : "hover:bg-theme-elevated/50"
                   } ${isProcessing ? "opacity-50" : ""}`}
                 >
-                  {/* Checkbox for supervisors/admins on pending tab */}
                   {isSupervisorOrAdmin && activeTab === "pending" && (
                     <input
                       type="checkbox"
@@ -378,7 +372,6 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
                     />
                   )}
 
-                  {/* Avatar */}
                   {isSupervisorOrAdmin && request.user ? (
                     <Avatar
                       s3AvatarUrl={request.user.avatar_url}
@@ -418,7 +411,6 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
                     </div>
                   </div>
 
-                  {/* Actions - only for pending tab */}
                   {activeTab === "pending" && (
                     <div className="flex items-center gap-1">
                       {isSupervisorOrAdmin ? (
@@ -459,7 +451,6 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
         )}
       </div>
 
-      {/* Footer - always anchored to bottom */}
       <div className="flex items-center justify-between px-4 py-3 border-t border-theme-border bg-theme-elevated mt-auto">
         <Link
           href="/time-off"

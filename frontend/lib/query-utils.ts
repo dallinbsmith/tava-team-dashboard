@@ -1,5 +1,5 @@
 import { QueryClient, QueryKey } from "@tanstack/react-query";
-import { queryKeys } from "./queryKeys";
+import { queryKeys } from "./query-keys";
 
 /**
  * Refetch multiple queries safely, preventing one failure from breaking others.

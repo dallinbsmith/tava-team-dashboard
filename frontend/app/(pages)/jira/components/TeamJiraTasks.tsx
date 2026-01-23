@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { TeamTask, JiraSettings } from "../types";
-import { getTeamJiraTasks, getJiraSettings } from "../api";
+import { getTeamJiraTasks, getJiraSettings } from "../actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import Avatar from "@/shared/common/Avatar";
 import { getStatusColor, DueDateDisplay } from "@/lib/jira-utils";
@@ -213,15 +213,14 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {/* Filter Button */}
           <FilterDropdown
             isOpen={filterOpen}
             onToggle={() => setFilterOpen(!filterOpen)}
             onClose={() => setFilterOpen(false)}
             activeFilterCount={activeFilterCount}
             onClearAll={clearAllFilters}
+            position="left"
           >
-            {/* Sprint Section */}
             <FilterSection
               title="Sprint"
               isExpanded={expandedSections.sprint}
@@ -235,7 +234,6 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
               />
             </FilterSection>
 
-            {/* Epic Section */}
             <FilterSection
               title="Epic"
               isExpanded={expandedSections.epic}
@@ -248,7 +246,6 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
               />
             </FilterSection>
 
-            {/* Individual Section */}
             <FilterSection
               title="Individual"
               isExpanded={expandedSections.individual}
@@ -263,7 +260,6 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
             </FilterSection>
           </FilterDropdown>
 
-          {/* View Mode Toggle */}
           <div className="flex border border-theme-border overflow-hidden bg-theme-elevated">
             <button
               onClick={() => setViewMode("grid")}

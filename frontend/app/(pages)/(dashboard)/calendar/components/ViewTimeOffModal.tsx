@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { TimeOffRequest, TIME_OFF_TYPE_LABELS, TIME_OFF_STATUS_LABELS } from "../../time-off/types";
-import { getTimeOffRequest, cancelTimeOffRequest, reviewTimeOffRequest } from "@/lib/api";
+import { getTimeOffRequest, cancelTimeOffRequest, reviewTimeOffRequest } from "../../time-off/actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal } from "@/components";
 import { Loader2, Palmtree, Calendar, User, Clock, X, Check, MessageSquare } from "lucide-react";
@@ -306,7 +306,6 @@ export default function ViewTimeOffModal({
             </div>
           )}
 
-          {/* Review info */}
           {(timeOff.status === "approved" || timeOff.status === "rejected") && timeOff.reviewer && (
             <div className="p-3 bg-theme-elevated rounded-lg">
               <p className="text-xs text-theme-text-muted mb-1">
@@ -333,7 +332,6 @@ export default function ViewTimeOffModal({
             Requested {format(new Date(timeOff.created_at), "MMM d, yyyy 'at' h:mm a")}
           </div>
 
-          {/* Action buttons */}
           {(canCancel || canReview) && (
             <div className="flex justify-between pt-4 border-t border-theme-border">
               {canCancel && (

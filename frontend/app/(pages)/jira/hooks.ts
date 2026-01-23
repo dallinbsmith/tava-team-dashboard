@@ -14,7 +14,7 @@ import {
   getJiraUsers,
   autoMatchJiraUsers,
   updateUserJiraMapping,
-} from "./api";
+} from "./actions";
 
 export const jiraKeys = {
   all: ["jira"] as const,

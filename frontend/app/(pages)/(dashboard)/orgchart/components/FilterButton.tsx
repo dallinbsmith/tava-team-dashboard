@@ -68,7 +68,6 @@ export default function FilterButton({
       activeFilterCount={activeFilterCount}
       onClearAll={onClearAll}
     >
-      {/* Role Section */}
       <FilterSection
         title="Role"
         isExpanded={expandedSections.role}
@@ -88,7 +87,6 @@ export default function FilterButton({
         </div>
       </FilterSection>
 
-      {/* Department Section */}
       <FilterSection
         title="Department"
         isExpanded={expandedSections.department}
@@ -102,7 +100,6 @@ export default function FilterButton({
         />
       </FilterSection>
 
-      {/* Squad Section */}
       <FilterSection
         title="Squad"
         isExpanded={expandedSections.squad}

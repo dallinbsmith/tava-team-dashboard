@@ -15,10 +15,9 @@ export default async function OrgChartPage() {
   );
 }
 
-function OrgChartLoadingSkeleton({ canEdit }: { canEdit: boolean }) {
+const OrgChartLoadingSkeleton = ({ canEdit }: { canEdit: boolean }) => {
   return (
     <div className="h-full">
-      {/* Header skeleton */}
       <div className="mb-4 sm:mb-6 animate-pulse">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -34,7 +33,6 @@ function OrgChartLoadingSkeleton({ canEdit }: { canEdit: boolean }) {
         </div>
       </div>
 
-      {/* Draft manager skeleton */}
       {canEdit && (
         <div className="mb-4 sm:mb-6 animate-pulse">
           <div className="bg-theme-elevated border border-theme-border p-3 sm:p-4 rounded">
@@ -52,10 +50,8 @@ function OrgChartLoadingSkeleton({ canEdit }: { canEdit: boolean }) {
         </div>
       )}
 
-      {/* Org chart tree skeleton */}
       <OrgChartTreeSkeleton />
 
-      {/* Legend skeleton */}
       <div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-4 sm:gap-6 text-sm animate-pulse">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex items-center gap-2">
@@ -66,4 +62,4 @@ function OrgChartLoadingSkeleton({ canEdit }: { canEdit: boolean }) {
       </div>
     </div>
   );
-}
+};

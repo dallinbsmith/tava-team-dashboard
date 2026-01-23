@@ -20,12 +20,12 @@ type Resolver struct {
 	EmployeeService *services.EmployeeService
 }
 
-func NewResolver(userRepo *database.UserRepository, squadRepo *database.SquadRepository, orgJiraRepo *database.OrgJiraRepository, auth0Client *auth0.ManagementClient, frontendURL string, log *logger.Logger) *Resolver {
+func NewResolver(userRepo *database.UserRepository, squadRepo *database.SquadRepository, orgJiraRepo *database.OrgJiraRepository, auth0Client *auth0.ManagementClient, emailService *services.EmailService, frontendURL string, log *logger.Logger) *Resolver {
 	// Create auth0 adapter for EmployeeService
 	auth0Adapter := services.NewAuth0ManagementAdapter(auth0Client)
 
 	// Create EmployeeService with proper dependency injection
-	employeeService := services.NewEmployeeService(userRepo, squadRepo, orgJiraRepo, auth0Adapter, frontendURL, log)
+	employeeService := services.NewEmployeeService(userRepo, squadRepo, orgJiraRepo, auth0Adapter, emailService, frontendURL, log)
 
 	return &Resolver{
 		UserRepo:        userRepo,

@@ -8,9 +8,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { ReactNode } from "react";
 import { useUpdateEmployee, useDeactivateEmployee } from "../useEmployeeMutations";
 import * as api from "@/lib/api";
-import * as queryUtils from "@/lib/queryUtils";
+import * as queryUtils from "@/lib/query-utils";
 import { User } from "@/shared/types/user";
-import { queryKeys } from "@/lib/queryKeys";
+import { queryKeys } from "@/lib/query-keys";
 
 // Mock the API
 jest.mock("@/lib/api", () => ({
@@ -21,7 +21,7 @@ const mockUpdateUser = api.updateUser as jest.MockedFunction<typeof api.updateUs
 const mockDeactivateUser = api.deactivateUser as jest.MockedFunction<typeof api.deactivateUser>;
 
 // Mock queryUtils
-jest.mock("@/lib/queryUtils", () => ({
+jest.mock("@/lib/query-utils", () => ({
   refetchQueries: jest.fn().mockResolvedValue(undefined),
   queryKeyGroups: {
     employeeRelated: jest.fn().mockReturnValue([["employees"], ["allUsers"]]),

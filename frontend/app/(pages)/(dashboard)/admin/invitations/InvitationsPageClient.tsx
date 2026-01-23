@@ -5,7 +5,7 @@ import { Invitation, CreateInvitationRequest } from "./types";
 import { createInvitationAction, revokeInvitationAction } from "./actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { parseSquadErrorMessage } from "@/lib/errors";
-import ConfirmationModal from "@/shared/common/ConfirmationModal";
+import { ConfirmModal, ErrorAlert, FormError } from "@/components";
 import { Squad } from "@/shared/types/user";
 import {
   Mail,
@@ -189,12 +189,11 @@ export const InvitationsPageClient = ({
       </div>
 
       {error && (
-        <div className="bg-red-900/30 border border-red-500/30 p-4 mb-6">
-          <p className="text-red-400">{error}</p>
+        <div className="mb-6">
+          <ErrorAlert>{error}</ErrorAlert>
         </div>
       )}
 
-      {/* Invitations List */}
       <div className="bg-theme-surface border border-theme-border overflow-hidden">
         <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
           <h2 className="text-lg font-semibold text-theme-text">
@@ -285,7 +284,6 @@ export const InvitationsPageClient = ({
         )}
       </div>
 
-      {/* Create Invitation Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-theme-surface shadow-xl max-w-md w-full mx-4">
@@ -383,7 +381,6 @@ export const InvitationsPageClient = ({
 
                     {departmentDropdownOpen && (
                       <div className="absolute z-10 w-full mt-1 bg-theme-surface border border-theme-border shadow-lg max-h-48 overflow-y-auto">
-                        {/* Option to clear selection */}
                         <button
                           type="button"
                           onClick={() => {
@@ -423,7 +420,6 @@ export const InvitationsPageClient = ({
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-theme-text mb-1">Squads</label>
 
-                  {/* Selected squads */}
                   {getSelectedSquads().length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-2">
                       {getSelectedSquads().map((squad) => (
@@ -445,7 +441,6 @@ export const InvitationsPageClient = ({
                     </div>
                   )}
 
-                  {/* Squad dropdown */}
                   <div className="relative">
                     <button
                       type="button"
@@ -500,7 +495,6 @@ export const InvitationsPageClient = ({
                           </button>
                         ))}
 
-                        {/* Create new squad */}
                         <div className="border-t border-theme-border p-2">
                           <div className="flex gap-2">
                             <input
@@ -534,11 +528,7 @@ export const InvitationsPageClient = ({
                   </p>
                 </div>
 
-                {error && (
-                  <div className="mb-4 p-3 bg-red-900/30 border border-red-500/30">
-                    <p className="text-sm text-red-400">{error}</p>
-                  </div>
-                )}
+                <FormError error={error} className="mb-4" />
 
                 <div className="flex gap-3">
                   <button
@@ -568,7 +558,7 @@ export const InvitationsPageClient = ({
         </div>
       )}
 
-      <ConfirmationModal
+      <ConfirmModal
         isOpen={!!confirmRevokeId}
         onClose={() => setConfirmRevokeId(null)}
         onConfirm={executeRevokeInvitation}

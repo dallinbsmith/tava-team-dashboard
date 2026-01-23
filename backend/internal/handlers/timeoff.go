@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/smith-dallin/manager-dashboard/internal/models"
@@ -148,7 +149,7 @@ func (h *TimeOffHandlers) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	// Check permission: owner, supervisor, or admin
 	if !h.canViewTimeOff(currentUser, timeOff) {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: you don't have permission to view this time off request")
 		return
 	}
 
@@ -170,7 +171,7 @@ func (h *TimeOffHandlers) Cancel(w http.ResponseWriter, r *http.Request) {
 
 	err = h.timeOffRepo.Cancel(r.Context(), id, currentUser.ID)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "Failed to cancel time off request")
+		respondError(w, http.StatusBadRequest, fmt.Sprintf("Failed to cancel time off request: %v", err))
 		return
 	}
 
@@ -272,7 +273,7 @@ func (h *TimeOffHandlers) Review(w http.ResponseWriter, r *http.Request) {
 
 	err = h.timeOffRepo.Review(r.Context(), id, currentUser.ID, &req)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "Failed to review time off request")
+		respondError(w, http.StatusBadRequest, fmt.Sprintf("Failed to review time off request: %v", err))
 		return
 	}
 

@@ -243,7 +243,7 @@ func (a *App) initHandlers() error {
 }
 
 func (a *App) initGraphQL() error {
-	graphResolver := graph.NewResolver(a.userRepo, a.squadRepo, a.orgJiraRepo, a.auth0Client, a.Config.FrontendURL, a.Logger)
+	graphResolver := graph.NewResolver(a.userRepo, a.squadRepo, a.orgJiraRepo, a.auth0Client, a.emailService, a.Config.FrontendURL, a.Logger)
 	a.graphServer = handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: graphResolver}))
 	return nil
 }

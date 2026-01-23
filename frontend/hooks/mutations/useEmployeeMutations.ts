@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUser, deactivateUser } from "@/lib/api";
-import { queryKeys } from "@/lib/queryKeys";
-import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
+import { queryKeys } from "@/lib/query-keys";
+import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 import { UpdateUserRequest, User } from "@/shared/types/user";
 
 export interface UpdateEmployeeVariables {

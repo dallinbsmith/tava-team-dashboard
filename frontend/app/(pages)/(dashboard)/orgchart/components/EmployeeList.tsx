@@ -123,9 +123,7 @@ export default function EmployeeList({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-        {/* Search Input */}
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted" />
           <input
@@ -145,7 +143,6 @@ export default function EmployeeList({
           )}
         </div>
 
-        {/* Filter and View Toggle - row on mobile */}
         <div className="flex gap-2 sm:gap-3">
           <FilterButton
             isOpen={state.showFilters}
@@ -161,7 +158,6 @@ export default function EmployeeList({
             onSquadFiltersChange={setSquadFilters}
             onClearAll={clearFilters}
           />
-          {/* View Mode Toggle */}
           <div className="flex border border-theme-border rounded-full overflow-hidden bg-theme-elevated">
             <button
               onClick={() => setViewMode("grid")}
@@ -200,7 +196,6 @@ export default function EmployeeList({
         </div>
       </div>
 
-      {/* Active Filter Chips */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {activeFilters.map((filter, index) => {
@@ -224,7 +219,6 @@ export default function EmployeeList({
         </div>
       )}
 
-      {/* Results Info */}
       <div className="flex items-center justify-between text-xs text-theme-text-muted px-1">
         <span className="truncate">
           {sortedEmployees.length} {sortedEmployees.length === 1 ? "employee" : "employees"}
@@ -245,8 +239,6 @@ export default function EmployeeList({
         </div>
       </div>
 
-      {/* Content */}
-      {/* Check for empty results based on view mode */}
       {(
         state.viewMode === "department"
           ? allDepartmentsWithEmployees.length === 0

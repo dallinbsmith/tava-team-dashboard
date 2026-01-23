@@ -96,7 +96,6 @@ export default function DraftEditModal({
           </div>
 
           <div className="space-y-4">
-            {/* Department Dropdown */}
             <div>
               <label className="block text-sm font-medium text-theme-text mb-1">Department</label>
               {isCreatingDepartment ? (
@@ -142,7 +141,6 @@ export default function DraftEditModal({
               )}
             </div>
 
-            {/* Squads Multi-Select */}
             <div>
               <label className="block text-sm font-medium text-theme-text mb-1">Squads</label>
               <div className="border border-theme-border rounded bg-theme-elevated p-2 max-h-40 overflow-y-auto">
@@ -172,7 +170,6 @@ export default function DraftEditModal({
               )}
             </div>
 
-            {/* Role Selector */}
             <div>
               <label className="block text-sm font-medium text-theme-text mb-1">Role</label>
               <div className="flex gap-3">

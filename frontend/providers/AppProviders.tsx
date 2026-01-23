@@ -6,6 +6,7 @@ import { QueryProvider } from "./QueryProvider";
 import { ImpersonationProvider } from "./ImpersonationProvider";
 import { CurrentUserProvider } from "./CurrentUserProvider";
 import { OrganizationProvider } from "./OrganizationProvider";
+import { ToastProvider } from "@/components";
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -18,7 +19,9 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
         <NuqsAdapter>
           <ImpersonationProvider>
             <CurrentUserProvider>
-              <OrganizationProvider>{children}</OrganizationProvider>
+              <OrganizationProvider>
+                <ToastProvider>{children}</ToastProvider>
+              </OrganizationProvider>
             </CurrentUserProvider>
           </ImpersonationProvider>
         </NuqsAdapter>

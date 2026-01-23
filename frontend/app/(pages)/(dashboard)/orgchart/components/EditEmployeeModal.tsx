@@ -8,6 +8,18 @@ import { parseErrorMessage } from "@/lib/errors";
 import { sanitizeName } from "@/lib/sanitize";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useUpdateEmployee } from "@/hooks";
+import { cn } from "@/lib/utils";
+import {
+  inputStyles,
+  selectTriggerStyles,
+  labelStyles,
+  errorAlert,
+  modalOverlay,
+  modalBackdrop,
+  modalHeader,
+  modalTitle,
+} from "@/lib/styles";
+import { Button } from "@/components";
 import ManageSquadsModal from "./ManageSquadsModal";
 import ManageDepartmentsModal from "./ManageDepartmentsModal";
 
@@ -184,13 +196,11 @@ export default function EditEmployeeModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className={modalOverlay}>
+        <div className={modalBackdrop} onClick={onClose} />
         <div className="relative bg-theme-surface border border-theme-border w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-4 border-b border-theme-border">
-            <h2 className="text-lg font-semibold text-theme-text">
-              Edit Employee
-            </h2>
+          <div className={modalHeader}>
+            <h2 className={modalTitle}>Edit Employee</h2>
             <button
               onClick={onClose}
               className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
@@ -200,18 +210,11 @@ export default function EditEmployeeModal({
           </div>
 
           <form onSubmit={handleSubmit} className="p-4 space-y-4">
-            {error && (
-              <div className="bg-red-900/30 border border-red-500/30 p-3 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
+            {error && <div className={errorAlert}>{error}</div>}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label
-                  htmlFor="first_name"
-                  className="block text-sm font-medium text-theme-text-muted mb-1"
-                >
+                <label htmlFor="first_name" className={labelStyles}>
                   First Name
                 </label>
                 <input
@@ -221,15 +224,12 @@ export default function EditEmployeeModal({
                   value={formData.first_name}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className={inputStyles}
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="last_name"
-                  className="block text-sm font-medium text-theme-text-muted mb-1"
-                >
+                <label htmlFor="last_name" className={labelStyles}>
                   Last Name
                 </label>
                 <input
@@ -239,16 +239,13 @@ export default function EditEmployeeModal({
                   value={formData.last_name}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className={inputStyles}
                 />
               </div>
             </div>
 
             <div>
-              <label
-                htmlFor="title"
-                className="block text-sm font-medium text-theme-text-muted mb-1"
-              >
+              <label htmlFor="title" className={labelStyles}>
                 Title
               </label>
               <input
@@ -258,15 +255,12 @@ export default function EditEmployeeModal({
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="e.g., Software Engineer"
-                className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className={inputStyles}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="date_started"
-                className="block text-sm font-medium text-theme-text-muted mb-1"
-              >
+              <label htmlFor="date_started" className={labelStyles}>
                 Start Date
               </label>
               <div className="relative">
@@ -277,7 +271,7 @@ export default function EditEmployeeModal({
                   name="date_started"
                   value={formData.date_started}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className={cn(inputStyles, "pl-10")}
                 />
               </div>
             </div>
@@ -308,7 +302,7 @@ export default function EditEmployeeModal({
                 value={formData.department}
                 onChange={handleChange}
                 placeholder="e.g., Engineering"
-                className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className={inputStyles}
               />
             </div>
 
@@ -329,7 +323,6 @@ export default function EditEmployeeModal({
                 )}
               </div>
 
-              {/* Selected squads chips */}
               <div className="flex flex-wrap gap-1 mb-2 min-h-[24px]">
                 {formData.squadIds.map((squadId) => {
                   const squad = availableSquads.find((s) => s.id === squadId);
@@ -351,11 +344,10 @@ export default function EditEmployeeModal({
                 })}
               </div>
 
-              {/* Dropdown toggle */}
               <button
                 type="button"
                 onClick={() => setSquadDropdownOpen(!squadDropdownOpen)}
-                className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text text-left flex items-center justify-between hover:border-theme-text-muted transition-colors"
+                className={cn(selectTriggerStyles, "hover:border-theme-text-muted")}
               >
                 <span className="text-theme-text-muted">
                   {formData.squadIds.length === 0
@@ -363,13 +355,13 @@ export default function EditEmployeeModal({
                     : `${formData.squadIds.length} squad${formData.squadIds.length !== 1 ? "s" : ""} selected`}
                 </span>
                 <ChevronDown
-                  className={`w-4 h-4 ml-2 shrink-0 text-theme-text-muted transition-transform ${
-                    squadDropdownOpen ? "rotate-180" : ""
-                  }`}
+                  className={cn(
+                    "w-4 h-4 ml-2 shrink-0 text-theme-text-muted transition-transform",
+                    squadDropdownOpen && "rotate-180"
+                  )}
                 />
               </button>
 
-              {/* Dropdown menu */}
               {squadDropdownOpen && (
                 <div className="absolute z-10 w-full mt-1 bg-theme-elevated border border-theme-border max-h-48 overflow-y-auto">
                   {availableSquads.length === 0 ? (
@@ -386,11 +378,12 @@ export default function EditEmployeeModal({
                         className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-theme-surface transition-colors"
                       >
                         <div
-                          className={`w-4 h-4 border flex items-center justify-center ${
+                          className={cn(
+                            "w-4 h-4 border flex items-center justify-center",
                             formData.squadIds.includes(squad.id)
                               ? "bg-primary-500 border-primary-500"
                               : "border-theme-border"
-                          }`}
+                          )}
                         >
                           {formData.squadIds.includes(squad.id) && (
                             <Check className="w-3 h-3 text-white" />
@@ -404,13 +397,9 @@ export default function EditEmployeeModal({
               )}
             </div>
 
-            {/* Role field - editable by admins for other users, read-only otherwise */}
             {!isEditingSelf && (
               <div>
-                <label
-                  htmlFor="role"
-                  className="block text-sm font-medium text-theme-text-muted mb-1"
-                >
+                <label htmlFor="role" className={labelStyles}>
                   Role
                 </label>
                 {isAdmin ? (
@@ -419,7 +408,7 @@ export default function EditEmployeeModal({
                     name="role"
                     value={formData.role}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className={inputStyles}
                   >
                     <option value="employee">Employee</option>
                     <option value="supervisor">Supervisor</option>
@@ -434,13 +423,9 @@ export default function EditEmployeeModal({
               </div>
             )}
 
-            {/* Supervisor field - only admins can change */}
             {isAdmin && !isEditingSelf && (
               <div>
-                <label
-                  htmlFor="supervisor_id"
-                  className="block text-sm font-medium text-theme-text-muted mb-1"
-                >
+                <label htmlFor="supervisor_id" className={labelStyles}>
                   Supervisor
                 </label>
                 <select
@@ -448,7 +433,7 @@ export default function EditEmployeeModal({
                   name="supervisor_id"
                   value={formData.supervisor_id || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className={inputStyles}
                 >
                   <option value="">No Supervisor</option>
                   {supervisors.map((sup) => (
@@ -461,27 +446,17 @@ export default function EditEmployeeModal({
             )}
 
             <div className="flex justify-end gap-3 pt-4 border-t border-theme-border">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isLoading}
-                className="px-4 py-2 text-sm font-medium text-theme-text-muted hover:text-theme-text transition-colors"
-              >
+              <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
                 Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="px-4 py-2 text-sm font-medium bg-primary-500 text-white hover:bg-primary-600 transition-colors disabled:opacity-50"
-              >
-                {isLoading ? "Saving..." : "Save Changes"}
-              </button>
+              </Button>
+              <Button type="submit" variant="primary" loading={isLoading}>
+                Save Changes
+              </Button>
             </div>
           </form>
         </div>
       </div>
 
-      {/* Management Modals - mutations handle cache invalidation automatically */}
       <ManageSquadsModal
         isOpen={manageSquadsOpen}
         onClose={() => setManageSquadsOpen(false)}

@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getInvitations, createInvitation, revokeInvitation } from "./api";
+import { getInvitations, createInvitation, revokeInvitation } from "./actions";
 import { CreateInvitationRequest } from "./types";
-import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
+import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 
 export const invitationKeys = {
   all: ["invitations"] as const,

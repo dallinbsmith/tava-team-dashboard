@@ -2,23 +2,18 @@ export const OrgChartTreeSkeleton = () => {
   return (
     <div className="bg-theme-surface border border-theme-border p-8 overflow-x-auto animate-pulse">
       <div className="flex flex-col items-center min-w-max">
-        {/* Root node */}
         <div className="flex flex-col items-center">
           <OrgNodeSkeleton isRoot />
 
-          {/* Connector line */}
           <div className="w-px h-8 bg-theme-border" />
 
-          {/* Horizontal connector */}
           <div className="h-px w-64 bg-theme-border" />
 
-          {/* Level 2 - Direct reports */}
           <div className="flex gap-16 mt-8">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center">
                 <OrgNodeSkeleton />
 
-                {/* Sub-tree for middle node */}
                 {i === 1 && (
                   <>
                     <div className="w-px h-6 bg-theme-border mt-2" />
@@ -39,7 +34,6 @@ export const OrgChartTreeSkeleton = () => {
                   </>
                 )}
 
-                {/* Sub-tree for last node */}
                 {i === 2 && (
                   <>
                     <div className="w-px h-6 bg-theme-border mt-2" />
@@ -70,14 +64,11 @@ const OrgNodeSkeleton = ({
       className={`${width} ${padding} bg-theme-elevated border border-theme-border rounded-lg shadow-sm`}
     >
       <div className="flex items-center gap-3">
-        {/* Avatar */}
         <div
           className={`${isSmall ? "w-8 h-8" : "w-12 h-12"} bg-theme-muted rounded-full shrink-0`}
         />
         <div className="flex-1 min-w-0">
-          {/* Name */}
           <div className={`${isSmall ? "h-4 w-20" : "h-5 w-28"} bg-theme-muted rounded mb-1.5`} />
-          {/* Title */}
           <div className={`${isSmall ? "h-3 w-16" : "h-4 w-24"} bg-theme-muted rounded`} />
         </div>
       </div>

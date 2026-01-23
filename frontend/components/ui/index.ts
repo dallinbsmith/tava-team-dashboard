@@ -33,3 +33,6 @@ export type {
 
 export { ErrorAlert, FormError } from "./ErrorAlert";
 export type { ErrorAlertProps, AlertVariant, FormErrorProps } from "./ErrorAlert";
+
+export { ToastProvider, useToast } from "./Toast";
+export type { ToastVariant } from "./Toast";

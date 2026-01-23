@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Palmtree, RefreshCw, AlertCircle, Calendar, User as UserIcon } from "lucide-react";
+import { Palmtree, RefreshCw, Calendar, User as UserIcon } from "lucide-react";
+import { ErrorAlert } from "@/components";
 import { User } from "@/shared/types/user";
 import { TimeOffRequest, TIME_OFF_TYPE_LABELS } from "@/app/(pages)/(dashboard)/time-off/types";
 import { SelectionType } from "../types";
@@ -54,7 +55,6 @@ export default function TeamTimeOffWidget({
 
   return (
     <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col">
-      {/* Header */}
       <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Palmtree className="w-5 h-5 text-amber-500" />
@@ -75,17 +75,12 @@ export default function TeamTimeOffWidget({
         </button>
       </div>
 
-      {/* Error state */}
       {error && (
-        <div className="px-6 py-4 bg-red-900/30 border-b border-red-500/30">
-          <div className="flex items-center gap-2 text-red-400">
-            <AlertCircle className="w-4 h-4" />
-            <p className="text-sm">{error}</p>
-          </div>
+        <div className="px-6 py-4">
+          <ErrorAlert>{error}</ErrorAlert>
         </div>
       )}
 
-      {/* Content */}
       {totalCount === 0 ? (
         <div className="flex-1 px-6 py-12 text-center text-theme-text-muted">
           <Palmtree className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
@@ -96,7 +91,6 @@ export default function TeamTimeOffWidget({
         </div>
       ) : (
         <div className="flex-1 overflow-auto max-h-80">
-          {/* Currently on leave section */}
           {currentlyOnLeave.length > 0 && (
             <div>
               <div className="px-4 py-2 text-xs font-semibold text-green-400 uppercase tracking-wider bg-green-900/20 border-b border-green-500/20">
@@ -110,7 +104,6 @@ export default function TeamTimeOffWidget({
             </div>
           )}
 
-          {/* Upcoming section */}
           {upcoming.length > 0 && (
             <div>
               <div className="px-4 py-2 text-xs font-semibold text-amber-400 uppercase tracking-wider bg-amber-900/20 border-b border-amber-500/20">
@@ -131,7 +124,6 @@ export default function TeamTimeOffWidget({
         </div>
       )}
 
-      {/* Footer */}
       <div className="px-6 py-3 bg-theme-elevated border-t border-theme-border mt-auto">
         <Link
           href="/time-off"
@@ -149,7 +141,7 @@ interface TimeOffItemProps {
   request: TimeOffRequest;
 }
 
-function TimeOffItem({ request }: TimeOffItemProps) {
+const TimeOffItem = ({ request }: TimeOffItemProps) => {
   const startDate = new Date(request.start_date);
   const endDate = new Date(request.end_date);
   const isSameDay = startDate.toDateString() === endDate.toDateString();
@@ -189,4 +181,4 @@ function TimeOffItem({ request }: TimeOffItemProps) {
       </div>
     </div>
   );
-}
+};

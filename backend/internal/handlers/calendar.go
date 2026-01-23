@@ -123,7 +123,7 @@ func (h *CalendarHandlers) GetTask(w http.ResponseWriter, r *http.Request) {
 
 	// Check visibility - user must be creator, assignee, or admin
 	if !h.canViewTask(currentUser, task) {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: you don't have permission to view this task")
 		return
 	}
 
@@ -244,7 +244,7 @@ func (h *CalendarHandlers) GetMeeting(w http.ResponseWriter, r *http.Request) {
 
 	// Check visibility - user must be creator, attendee, or admin
 	if !h.canViewMeeting(r.Context(), currentUser, meeting) {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: you don't have permission to view this meeting")
 		return
 	}
 

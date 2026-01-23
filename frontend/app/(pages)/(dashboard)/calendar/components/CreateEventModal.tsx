@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CreateTaskRequest } from "../types";
-import { createTask } from "../api";
+import { createTask } from "../actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal, InputField, TextareaField, Button, FormError } from "@/components";
 import { format, addDays } from "date-fns";
@@ -163,7 +163,6 @@ export default function CreateEventModal({ isOpen, onClose, onCreated }: CreateE
           </label>
         </div>
 
-        {/* Start Date/Time */}
         <div className="grid grid-cols-2 gap-3">
           <InputField
             label="Start Date"
@@ -183,7 +182,6 @@ export default function CreateEventModal({ isOpen, onClose, onCreated }: CreateE
           )}
         </div>
 
-        {/* End Date/Time */}
         <div className="grid grid-cols-2 gap-3">
           <InputField
             label="End Date"

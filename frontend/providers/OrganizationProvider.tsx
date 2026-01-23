@@ -4,34 +4,24 @@ import { createContext, useContext, ReactNode, useCallback } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEmployeesQuery, useAllUsersQuery, useSquadsQuery, useDepartmentsQuery } from "@/hooks";
-import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
+import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 import { User, Squad } from "@/shared/types/user";
+import { asyncNoop } from "@/lib/constants";
 
 interface OrganizationContextType {
-  // Employees (direct reports for supervisors, all for admins)
   employees: User[];
   employeesLoading: boolean;
   refetchEmployees: () => Promise<void>;
-
-  // All users (for dropdowns, assignments)
   allUsers: User[];
   allUsersLoading: boolean;
   refetchAllUsers: () => Promise<void>;
-
-  // Squads
   squads: Squad[];
   squadsLoading: boolean;
   refetchSquads: () => Promise<void>;
   addSquad: (name: string) => Promise<Squad>;
   removeSquad: (id: number) => Promise<void>;
-
-  // Departments (derived from employees)
   departments: string[];
-
-  // Combined loading state
   loading: boolean;
-
-  // Force refetch ALL organization data
   refetchAll: () => Promise<void>;
 }
 
@@ -99,18 +89,18 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
 const defaultOrganizationContext: OrganizationContextType = {
   employees: [],
   employeesLoading: true,
-  refetchEmployees: async () => {},
+  refetchEmployees: asyncNoop,
   allUsers: [],
   allUsersLoading: true,
-  refetchAllUsers: async () => {},
+  refetchAllUsers: asyncNoop,
   squads: [],
   squadsLoading: true,
-  refetchSquads: async () => {},
+  refetchSquads: asyncNoop,
   addSquad: async () => ({ id: 0, name: "", members: [] }),
-  removeSquad: async () => {},
+  removeSquad: asyncNoop,
   departments: [],
   loading: true,
-  refetchAll: async () => {},
+  refetchAll: asyncNoop,
 };
 
 export const useOrganization = () => {

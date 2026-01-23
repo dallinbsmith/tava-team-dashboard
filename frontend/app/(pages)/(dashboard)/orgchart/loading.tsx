@@ -1,7 +1,6 @@
 export default function OrgChartLoading() {
   return (
     <div className="space-y-6 animate-pulse">
-      {/* Header skeleton */}
       <div className="flex justify-between items-start">
         <div>
           <div className="h-8 w-48 bg-theme-elevated rounded" />
@@ -13,7 +12,6 @@ export default function OrgChartLoading() {
         </div>
       </div>
 
-      {/* Drafts banner skeleton */}
       <div className="bg-theme-elevated border border-theme-border p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -24,28 +22,22 @@ export default function OrgChartLoading() {
         </div>
       </div>
 
-      {/* Org chart tree skeleton */}
       <div className="bg-theme-surface border border-theme-border p-8 overflow-x-auto">
         <div className="flex flex-col items-center min-w-max">
-          {/* Root node */}
           <div className="flex flex-col items-center">
             <OrgNodeSkeleton isRoot />
 
-            {/* Connector line */}
             <div className="w-px h-8 bg-theme-border" />
 
-            {/* Level 2 - Direct reports */}
             <div className="flex gap-12">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="flex flex-col items-center">
                   <OrgNodeSkeleton />
 
-                  {/* Connector line for some nodes */}
                   {i === 1 && (
                     <>
                       <div className="w-px h-8 bg-theme-border" />
 
-                      {/* Level 3 */}
                       <div className="flex gap-8">
                         {Array.from({ length: 2 }).map((_, j) => (
                           <OrgNodeSkeleton key={j} isSmall />
@@ -60,7 +52,6 @@ export default function OrgChartLoading() {
         </div>
       </div>
 
-      {/* Legend skeleton */}
       <div className="flex items-center gap-6 text-sm">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="flex items-center gap-2">
@@ -73,27 +64,24 @@ export default function OrgChartLoading() {
   );
 }
 
-function OrgNodeSkeleton({
+const OrgNodeSkeleton = ({
   isRoot = false,
   isSmall = false,
 }: {
   isRoot?: boolean;
   isSmall?: boolean;
-}) {
+}) => {
   const size = isSmall ? "w-40" : isRoot ? "w-56" : "w-48";
   const padding = isSmall ? "p-3" : "p-4";
 
   return (
     <div className={`${size} ${padding} bg-theme-elevated border border-theme-border rounded-lg`}>
       <div className="flex items-center gap-3">
-        {/* Avatar */}
         <div
           className={`${isSmall ? "w-8 h-8" : "w-10 h-10"} bg-theme-muted rounded-full shrink-0`}
         />
         <div className="flex-1 min-w-0">
-          {/* Name */}
           <div className={`${isSmall ? "h-4 w-20" : "h-5 w-24"} bg-theme-muted rounded mb-1`} />
-          {/* Title */}
           <div className={`${isSmall ? "h-3 w-16" : "h-4 w-20"} bg-theme-muted rounded`} />
         </div>
       </div>
@@ -104,4 +92,4 @@ function OrgNodeSkeleton({
       )}
     </div>
   );
-}
+};

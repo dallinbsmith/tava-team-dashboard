@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { getOrgTree, getOrgChartDrafts, getOrgChartDraft, getDepartments } from "@/lib/api";
+import { useState, useTransition, useMemo } from "react";
 import {
+  getOrgTree,
+  getOrgChartDrafts,
+  getOrgChartDraft,
+  getDepartments,
   createDraftAction,
   deleteDraftAction,
   publishDraftAction,
@@ -14,7 +17,7 @@ import ManageSquadsModal from "./components/ManageSquadsModal";
 import ManageDepartmentsModal from "./components/ManageDepartmentsModal";
 import DraftManager from "./components/DraftManager";
 import DraftEditModal from "./components/DraftEditModal";
-import ConfirmationModal from "./components/ConfirmationModal";
+import { ConfirmModal, ErrorAlert, useToast } from "@/components";
 import {
   OrgTreeRenderer,
   DragOverlayCard,
@@ -57,6 +60,7 @@ export const OrgChartPageClient = ({
   canEdit,
 }: OrgChartPageClientProps) => {
   const { refetchSquads } = useOrganization();
+  const toast = useToast();
 
   const [orgTrees, setOrgTrees] = useState<OrgTreeNode[]>(initialOrgTrees || []);
   const [drafts, setDrafts] = useState<OrgChartDraft[]>(initialDrafts || []);
@@ -213,7 +217,7 @@ export const OrgChartPageClient = ({
   // Add a change (move employee)
   const handleMoveEmployee = async (userId: number, newSupervisorId: number) => {
     if (!currentDraft) {
-      alert("Please create or select a draft first to make changes.");
+      toast.warning("Please create or select a draft first to make changes.");
       return;
     }
 
@@ -258,7 +262,7 @@ export const OrgChartPageClient = ({
     newRole?: "employee" | "supervisor"
   ) => {
     if (!currentDraft) {
-      alert("Please create or select a draft first to make changes.");
+      toast.warning("Please create or select a draft first to make changes.");
       return;
     }
 
@@ -285,6 +289,17 @@ export const OrgChartPageClient = ({
     });
   };
 
+  // Collect all users from org trees
+  const allUsers = useMemo(() => {
+    const users: User[] = [];
+    const collectUsers = (node: OrgTreeNode) => {
+      users.push(node.user);
+      node.children.forEach(collectUsers);
+    };
+    orgTrees.forEach(collectUsers);
+    return users;
+  }, [orgTrees]);
+
   // Toggle expand/collapse
   const toggleExpand = (userId: number) => {
     setExpandedNodes((prev) => {
@@ -309,11 +324,7 @@ export const OrgChartPageClient = ({
   };
 
   if (error) {
-    return (
-      <div className="bg-red-900/30 border border-red-500/30 p-4 rounded">
-        <p className="text-red-400">{error}</p>
-      </div>
-    );
+    return <ErrorAlert>{error}</ErrorAlert>;
   }
 
   const isDraftMode = canEdit && currentDraft !== null;
@@ -373,7 +384,6 @@ export const OrgChartPageClient = ({
         )}
 
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-auto lg:h-[calc(100vh-220px)]">
-          {/* Org Tree */}
           <div
             className={`flex-1 min-h-[400px] lg:min-h-0 p-3 sm:p-4 overflow-y-auto rounded transition-all ${
               isDraftMode
@@ -420,12 +430,10 @@ export const OrgChartPageClient = ({
             )}
           </div>
 
-          {/* Sidebar - only show for users who can edit */}
           {canEdit && (
             <div
               className={`${showSidebar ? "w-full lg:w-96 xl:w-[420px]" : "w-0 overflow-hidden"} transition-all duration-300 flex-shrink-0`}
             >
-              {/* Mobile sidebar toggle */}
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
                 className="lg:hidden mb-3 flex items-center gap-2 px-3 py-2 text-sm font-medium text-theme-text-muted hover:text-theme-text border border-theme-border rounded-lg hover:bg-theme-elevated transition-colors w-full justify-center"
@@ -454,15 +462,7 @@ export const OrgChartPageClient = ({
                   onRemoveChange={handleRemoveChange}
                   isLoading={actionLoading}
                   squads={squads}
-                  allUsers={(() => {
-                    const users: User[] = [];
-                    const collectUsers = (node: OrgTreeNode) => {
-                      users.push(node.user);
-                      node.children.forEach(collectUsers);
-                    };
-                    orgTrees.forEach(collectUsers);
-                    return users;
-                  })()}
+                  allUsers={allUsers}
                 />
               </div>
             </div>
@@ -497,7 +497,7 @@ export const OrgChartPageClient = ({
         onSquadsChanged={refetchSquads}
       />
 
-      <ConfirmationModal
+      <ConfirmModal
         isOpen={confirmAction !== null}
         title={confirmAction?.type === "delete" ? "Delete Draft" : "Publish Draft"}
         message={
@@ -505,10 +505,10 @@ export const OrgChartPageClient = ({
             ? "Are you sure you want to delete this draft? This action cannot be undone."
             : "Are you sure you want to publish this draft? All changes will be applied immediately."
         }
-        confirmLabel={confirmAction?.type === "delete" ? "Delete" : "Publish"}
-        confirmVariant={confirmAction?.type === "delete" ? "danger" : "success"}
+        confirmText={confirmAction?.type === "delete" ? "Delete" : "Publish"}
+        variant={confirmAction?.type === "delete" ? "danger" : "success"}
         onConfirm={handleConfirmAction}
-        onCancel={() => setConfirmAction(null)}
+        onClose={() => setConfirmAction(null)}
         isLoading={actionLoading}
       />
     </DndContext>

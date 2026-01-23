@@ -1,36 +1,20 @@
 import { GraphQLClient, gql } from "graphql-request";
 import { User } from "@/shared/types/user";
 
-// GraphQL uses the server-side proxy which handles token management
-// This keeps access tokens secure and never exposes them to client JavaScript
-// graphql-request requires an absolute URL, so we construct it from window.location.origin
 const getGraphQLProxyURL = (): string => {
   if (typeof window !== "undefined") {
     return `${window.location.origin}/api/graphql`;
   }
-  // Fallback for server-side rendering (though this should primarily be used client-side)
   return "http://localhost:3000/api/graphql";
 };
 
-/**
- * Creates a GraphQL client that uses the server-side proxy.
- * The proxy automatically adds the Auth0 access token from the session.
- */
 export const createProxyGraphQLClient = () => {
   return new GraphQLClient(getGraphQLProxyURL(), {
-    credentials: "same-origin", // Include cookies for session
+    credentials: "same-origin",
   });
 };
 
-// =============================================================================
-// GraphQL Fragments - DRY reusable field definitions
-// =============================================================================
-
-/**
- * Core employee fields used across all queries/mutations.
- * This is the single source of truth for employee field selection.
- */
-export const EMPLOYEE_CORE_FIELDS = gql`
+const EMPLOYEE_CORE_FIELDS = gql`
   fragment EmployeeCoreFields on Employee {
     id
     auth0_id
@@ -52,10 +36,7 @@ export const EMPLOYEE_CORE_FIELDS = gql`
   }
 `;
 
-/**
- * Basic supervisor/user reference fields for nested objects.
- */
-export const SUPERVISOR_REF_FIELDS = gql`
+const SUPERVISOR_REF_FIELDS = gql`
   fragment SupervisorRefFields on Employee {
     id
     first_name
@@ -64,10 +45,7 @@ export const SUPERVISOR_REF_FIELDS = gql`
   }
 `;
 
-/**
- * Direct report fields for supervisor views.
- */
-export const DIRECT_REPORT_FIELDS = gql`
+const DIRECT_REPORT_FIELDS = gql`
   fragment DirectReportFields on Employee {
     id
     first_name
@@ -77,10 +55,6 @@ export const DIRECT_REPORT_FIELDS = gql`
     title
   }
 `;
-
-// =============================================================================
-// GraphQL Queries
-// =============================================================================
 
 export const GET_EMPLOYEES = gql`
   ${EMPLOYEE_CORE_FIELDS}
@@ -121,10 +95,6 @@ export const GET_ME = gql`
   }
 `;
 
-// =============================================================================
-// GraphQL Mutations
-// =============================================================================
-
 export const CREATE_EMPLOYEE = gql`
   ${EMPLOYEE_CORE_FIELDS}
   mutation CreateEmployee($input: CreateEmployeeInput!) {
@@ -149,7 +119,6 @@ export const DELETE_EMPLOYEE = gql`
   }
 `;
 
-// Response types for GraphQL
 interface GraphQLSquad {
   id: string;
   name: string;
@@ -175,7 +144,6 @@ interface GraphQLEmployee {
   direct_reports?: GraphQLEmployee[] | null;
 }
 
-// Convert GraphQL employee to User type
 const toUser = (employee: GraphQLEmployee): User => {
   return {
     id: parseInt(employee.id, 10),
@@ -193,14 +161,11 @@ const toUser = (employee: GraphQLEmployee): User => {
     avatar_url: employee.avatar_url || undefined,
     supervisor_id: employee.supervisor_id ? parseInt(employee.supervisor_id, 10) : undefined,
     date_started: employee.date_started || undefined,
-    is_active: employee.is_active ?? true, // Default to true for GraphQL (queries filter active users)
+    is_active: employee.is_active ?? true,
     created_at: employee.created_at,
     updated_at: employee.updated_at,
   };
 };
-
-// API functions using GraphQL
-// The proxy handles token management server-side.
 
 export const getEmployeesGraphQL = async (): Promise<User[]> => {
   const client = createProxyGraphQLClient();
@@ -237,7 +202,6 @@ export interface CreateEmployeeInput {
 export const createEmployeeGraphQL = async (input: CreateEmployeeInput): Promise<User> => {
   const client = createProxyGraphQLClient();
 
-  // Clean up input - remove empty strings, keep only truthy optional values
   // Convert date_started to RFC3339 format for GraphQL Time scalar
   const dateStartedRFC3339 = input.date_started?.trim()
     ? `${input.date_started.trim()}T00:00:00Z`

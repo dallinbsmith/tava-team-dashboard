@@ -9,7 +9,7 @@ import {
   CreateMeetingRequest,
   UpdateMeetingRequest,
   ResponseStatus,
-} from "./types";
+} from "../types";
 import {
   ActionResult,
   authPost,
@@ -20,13 +20,6 @@ import {
   failure,
 } from "@/lib/server-actions";
 
-// ============================================
-// Task Actions
-// ============================================
-
-/**
- * Server Action: Create a new task
- */
 export const createTaskAction = async (data: CreateTaskRequest): Promise<ActionResult<Task>> => {
   try {
     const res = await authPost("/api/calendar/tasks", data);
@@ -46,9 +39,6 @@ export const createTaskAction = async (data: CreateTaskRequest): Promise<ActionR
   }
 };
 
-/**
- * Server Action: Update a task
- */
 export const updateTaskAction = async (
   id: number,
   data: UpdateTaskRequest
@@ -71,9 +61,6 @@ export const updateTaskAction = async (
   }
 };
 
-/**
- * Server Action: Delete a task
- */
 export const deleteTaskAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/calendar/tasks/${id}`);
@@ -92,13 +79,6 @@ export const deleteTaskAction = async (id: number): Promise<ActionResult<void>> 
   }
 };
 
-// ============================================
-// Meeting Actions
-// ============================================
-
-/**
- * Server Action: Create a new meeting
- */
 export const createMeetingAction = async (
   data: CreateMeetingRequest
 ): Promise<ActionResult<Meeting>> => {
@@ -120,9 +100,6 @@ export const createMeetingAction = async (
   }
 };
 
-/**
- * Server Action: Update a meeting
- */
 export const updateMeetingAction = async (
   id: number,
   data: UpdateMeetingRequest
@@ -145,9 +122,6 @@ export const updateMeetingAction = async (
   }
 };
 
-/**
- * Server Action: Delete a meeting
- */
 export const deleteMeetingAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/calendar/meetings/${id}`);
@@ -166,9 +140,6 @@ export const deleteMeetingAction = async (id: number): Promise<ActionResult<void
   }
 };
 
-/**
- * Server Action: Respond to a meeting invitation
- */
 export const respondToMeetingAction = async (
   meetingId: number,
   response: ResponseStatus

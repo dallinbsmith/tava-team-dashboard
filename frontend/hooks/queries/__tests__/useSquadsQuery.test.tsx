@@ -9,9 +9,9 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import React, { ReactNode } from "react";
 import { useSquadsQuery } from "../useSquadsQuery";
 import * as api from "@/lib/api";
-import * as queryUtils from "@/lib/queryUtils";
+import * as queryUtils from "@/lib/query-utils";
 import { Squad } from "@/shared/types/user";
-import { queryKeys } from "@/lib/queryKeys";
+import { queryKeys } from "@/lib/query-keys";
 
 // Mock the Auth0 hook
 jest.mock("@auth0/nextjs-auth0/client");
@@ -30,7 +30,7 @@ const mockRenameSquad = api.renameSquad as jest.MockedFunction<typeof api.rename
 const mockDeleteSquad = api.deleteSquad as jest.MockedFunction<typeof api.deleteSquad>;
 
 // Mock the queryUtils
-jest.mock("@/lib/queryUtils", () => ({
+jest.mock("@/lib/query-utils", () => ({
   refetchQueries: jest.fn().mockResolvedValue(undefined),
   queryKeyGroups: {
     squadRelated: jest.fn().mockReturnValue([["squads"], ["employees"]]),

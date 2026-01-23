@@ -5,6 +5,8 @@ import { OrgTreeNode, DraftChange } from "../types";
 import Avatar from "@/shared/common/Avatar";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { ChevronDown, ChevronRight, GripVertical, Shield, AlertCircle, Pencil } from "lucide-react";
+import { badgeRounded, cardBase } from "@/lib/styles";
+import { cn } from "@/lib/utils";
 
 // Helper function to apply draft changes to the org tree for preview
 export const applyDraftChangesToTree = (
@@ -124,15 +126,14 @@ export const DraggableEmployeeCard = ({
     <div
       ref={setNodeRef}
       onClick={handleClick}
-      className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-theme-surface border transition-all rounded-lg ${
-        hasChange
-          ? "border-purple-400 ring-2 ring-purple-500/30"
-          : isDraftMode
-            ? "border-theme-border hover:border-primary-400 hover:shadow-sm cursor-pointer"
-            : "border-theme-border"
-      } ${isDragging || isBeingDragged ? "opacity-50" : ""}`}
+      className={cn(
+        cardBase,
+        "flex items-center gap-2 sm:gap-3 p-2 sm:p-3 transition-all rounded-lg",
+        hasChange && "border-purple-400 ring-2 ring-purple-500/30",
+        !hasChange && isDraftMode && "hover:border-primary-400 hover:shadow-sm cursor-pointer",
+        (isDragging || isBeingDragged) && "opacity-50"
+      )}
     >
-      {/* Drag handle - only show in draft mode */}
       {isDraftMode && (
         <div
           {...attributes}
@@ -143,7 +144,6 @@ export const DraggableEmployeeCard = ({
         </div>
       )}
 
-      {/* Avatar */}
       <Avatar
         s3AvatarUrl={node.user.avatar_url}
         firstName={node.user.first_name}
@@ -152,7 +152,6 @@ export const DraggableEmployeeCard = ({
         className="rounded-full"
       />
 
-      {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
           <span className="font-medium text-theme-text truncate text-sm sm:text-base">
@@ -172,14 +171,10 @@ export const DraggableEmployeeCard = ({
             </>
           )}
         </div>
-        {/* Squad display - simple list, detailed changes shown in Pending Changes panel */}
         {node.user.squads && node.user.squads.length > 0 && (
           <div className="hidden sm:flex flex-wrap gap-1 mt-1">
             {node.user.squads.map((squad) => (
-              <span
-                key={squad.id}
-                className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border rounded"
-              >
+              <span key={squad.id} className={cn(badgeRounded, "px-1.5")}>
                 {squad.name}
               </span>
             ))}
@@ -187,7 +182,6 @@ export const DraggableEmployeeCard = ({
         )}
       </div>
 
-      {/* Pending change indicator */}
       {hasChange && (
         <div className="flex items-center gap-1 text-xs bg-purple-900/40 text-purple-300 px-1.5 sm:px-2 py-1 rounded flex-shrink-0">
           <AlertCircle className="w-3 h-3" />
@@ -195,7 +189,6 @@ export const DraggableEmployeeCard = ({
         </div>
       )}
 
-      {/* Edit button - only show in draft mode */}
       {isDraftMode && (
         <div className="p-1.5 text-theme-text-muted hover:text-primary-400 hover:bg-primary-900/30 rounded transition-colors">
           <Pencil className="w-4 h-4" />
@@ -242,17 +235,16 @@ export const DroppableSupervisorZone = ({
 
   return (
     <div
-      className={`${level > 0 ? "ml-3 sm:ml-6 border-l-2 border-theme-border pl-2 sm:pl-4" : ""}`}
+      className={cn(level > 0 && "ml-3 sm:ml-6 border-l-2 border-theme-border pl-2 sm:pl-4")}
     >
-      {/* Supervisor header with drop zone */}
       <div
         ref={setNodeRef}
-        className={`rounded-lg transition-all ${
-          isOver && canReceiveDrop ? "ring-2 ring-primary-500 ring-offset-2 bg-primary-900/30" : ""
-        }`}
+        className={cn(
+          "rounded-lg transition-all",
+          isOver && canReceiveDrop && "ring-2 ring-primary-500 ring-offset-2 bg-primary-900/30"
+        )}
       >
         <div className="flex items-center gap-2 mb-2">
-          {/* Expand/Collapse */}
           {hasChildren ? (
             <button onClick={onToggleExpand} className="p-1 hover:bg-theme-elevated rounded">
               {isExpanded ? (
@@ -265,7 +257,6 @@ export const DroppableSupervisorZone = ({
             <div className="w-6" />
           )}
 
-          {/* The supervisor's own card is also draggable */}
           <div className="flex-1">
             <DraggableEmployeeCard
               node={node}
@@ -277,21 +268,20 @@ export const DroppableSupervisorZone = ({
           </div>
         </div>
 
-        {/* Drop hint when dragging - only show in draft mode */}
         {canReceiveDrop && (
           <div
-            className={`ml-6 p-2 border-2 border-dashed rounded text-center text-sm transition-all ${
+            className={cn(
+              "ml-6 p-2 border-2 border-dashed rounded text-center text-sm transition-all",
               isOver
                 ? "border-primary-500 bg-primary-900/30 text-primary-300"
                 : "border-theme-border text-theme-text-muted"
-            }`}
+            )}
           >
             Drop here to move under {node.user.first_name}
           </div>
         )}
       </div>
 
-      {/* Children */}
       {hasChildren && isExpanded && <div className="mt-2 space-y-2">{children}</div>}
     </div>
   );
@@ -350,7 +340,7 @@ export const OrgTreeRenderer = ({
 // Drag overlay - shows the card being dragged
 export const DragOverlayCard = ({ user }: { user: User }) => {
   return (
-    <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-theme-surface border border-primary-400 shadow-xl rounded-lg opacity-90 max-w-xs sm:max-w-sm">
+    <div className={cn(cardBase, "flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border-primary-400 shadow-xl rounded-lg opacity-90 max-w-xs sm:max-w-sm")}>
       <GripVertical className="w-4 sm:w-5 h-4 sm:h-5 text-theme-text-muted flex-shrink-0" />
       <Avatar
         s3AvatarUrl={user.avatar_url}

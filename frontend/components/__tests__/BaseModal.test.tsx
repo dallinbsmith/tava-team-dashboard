@@ -364,15 +364,15 @@ describe("ConfirmModal", () => {
   });
 
   describe("loading state", () => {
-    it("shows 'Loading...' text when isLoading is true", () => {
+    it("shows 'Processing...' text when isLoading is true", () => {
       render(<ConfirmModal {...defaultProps} isLoading={true} />);
-      expect(screen.getByText("Loading...")).toBeInTheDocument();
+      expect(screen.getByText("Processing...")).toBeInTheDocument();
       expect(screen.queryByText("Confirm")).not.toBeInTheDocument();
     });
 
     it("disables confirm button when isLoading is true", () => {
       render(<ConfirmModal {...defaultProps} isLoading={true} />);
-      expect(screen.getByText("Loading...")).toBeDisabled();
+      expect(screen.getByText("Processing...")).toBeDisabled();
     });
 
     it("disables cancel button when isLoading is true", () => {
@@ -383,7 +383,7 @@ describe("ConfirmModal", () => {
     it("shows confirmText when isLoading is false", () => {
       render(<ConfirmModal {...defaultProps} isLoading={false} confirmText="Delete" />);
       expect(screen.getByText("Delete")).toBeInTheDocument();
-      expect(screen.queryByText("Loading...")).not.toBeInTheDocument();
+      expect(screen.queryByText("Processing...")).not.toBeInTheDocument();
     });
   });
 
@@ -395,14 +395,14 @@ describe("ConfirmModal", () => {
       expect(confirmButton).toHaveClass("hover:bg-primary-700");
     });
 
-    it("uses primary styling when confirmVariant is primary", () => {
-      render(<ConfirmModal {...defaultProps} confirmVariant="primary" />);
+    it("uses primary styling when variant is primary", () => {
+      render(<ConfirmModal {...defaultProps} variant="primary" />);
       const confirmButton = screen.getByText("Confirm");
       expect(confirmButton).toHaveClass("bg-primary-600");
     });
 
-    it("uses danger styling when confirmVariant is danger", () => {
-      render(<ConfirmModal {...defaultProps} confirmVariant="danger" />);
+    it("uses danger styling when variant is danger", () => {
+      render(<ConfirmModal {...defaultProps} variant="danger" />);
       const confirmButton = screen.getByText("Confirm");
       expect(confirmButton).toHaveClass("bg-red-600");
       expect(confirmButton).toHaveClass("hover:bg-red-700");

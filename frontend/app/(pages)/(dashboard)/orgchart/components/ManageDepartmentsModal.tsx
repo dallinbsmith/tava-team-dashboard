@@ -10,7 +10,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { parseErrorMessage } from "@/lib/errors";
-import ConfirmationModal from "@/shared/common/ConfirmationModal";
+import { ConfirmModal, FormError } from "@/components";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useDeleteDepartment, useRenameDepartment } from "@/hooks";
 import { getUsersByDepartment } from "@/lib/api";
@@ -180,13 +180,8 @@ export default function ManageDepartmentsModal({
           </div>
 
           <div className="p-4 space-y-4 overflow-y-auto flex-1">
-            {error && (
-              <div className="bg-red-900/30 border border-red-500/30 p-3 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
+            <FormError error={error} />
 
-            {/* Add new department section - informational */}
             <div className="space-y-2">
               <p className="text-sm text-theme-text-muted">
                 Departments are created by assigning them to employees. Use the
@@ -194,7 +189,6 @@ export default function ManageDepartmentsModal({
               </p>
             </div>
 
-            {/* Department list */}
             <div className="border border-theme-border">
               {loading ? (
                 <div className="p-4 text-center text-theme-text-muted">
@@ -294,7 +288,6 @@ export default function ManageDepartmentsModal({
                             </div>
                           </div>
 
-                          {/* Users list (expandable) */}
                           {selectedDepartment === department && (
                             <div className="bg-theme-elevated border-t border-theme-border">
                               {loadingUsers ? (
@@ -354,7 +347,7 @@ export default function ManageDepartmentsModal({
         </div>
       </div>
 
-      <ConfirmationModal
+      <ConfirmModal
         isOpen={!!confirmDeleteDepartment}
         onClose={() => setConfirmDeleteDepartment(null)}
         onConfirm={executeDeleteDepartment}

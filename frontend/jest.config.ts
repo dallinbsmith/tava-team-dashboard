@@ -41,7 +41,7 @@ const config: Config = {
       lines: 100,
       statements: 100,
     },
-    "lib/queryKeys.ts": {
+    "lib/query-keys.ts": {
       branches: 100,
       functions: 100,
       lines: 100,
@@ -210,12 +210,6 @@ const config: Config = {
       functions: 100,
       lines: 95,
       statements: 95,
-    },
-    "shared/common/ConfirmationModal.tsx": {
-      branches: 55,
-      functions: 80,
-      lines: 60,
-      statements: 60,
     },
     // UI components
     "components/ui/EmptyState.tsx": {

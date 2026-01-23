@@ -4,8 +4,7 @@ import { useState, useTransition } from "react";
 import { CreateMeetingRequest, RecurrenceType } from "../types";
 import { createMeetingAction } from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
-import { BaseModal } from "@/components";
-import { Loader2 } from "lucide-react";
+import { BaseModal, Button, FormError, CenteredSpinner } from "@/components";
 import { format, addHours, addDays, setHours, setMinutes, startOfHour } from "date-fns";
 
 interface CreateMeetingModalProps {
@@ -127,16 +126,10 @@ export default function CreateMeetingModal({
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} title="Create Meeting" maxWidth="max-w-lg">
       {allUsersLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-        </div>
+        <CenteredSpinner />
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 bg-red-900/30 border border-red-500/30 text-red-400 text-sm rounded">
-              {error}
-            </div>
-          )}
+          <FormError error={error} />
 
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-theme-text mb-1">
@@ -282,21 +275,12 @@ export default function CreateMeetingModal({
           )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-theme-border">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium text-theme-text bg-theme-elevated border border-theme-border rounded hover:bg-theme-surface transition-colors"
-            >
+            <Button type="button" variant="secondary" onClick={handleClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="px-4 py-2 text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-50 rounded transition-colors flex items-center gap-2"
-            >
-              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+            </Button>
+            <Button type="submit" variant="primary" loading={isPending}>
               Create Meeting
-            </button>
+            </Button>
           </div>
         </form>
       )}

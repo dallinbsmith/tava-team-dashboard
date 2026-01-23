@@ -1,13 +1,16 @@
+import { memo } from "react";
 import Link from "next/link";
 import { User } from "@/shared/types/user";
 import Avatar from "@/shared/common/Avatar";
 import { Mail, Building2, Calendar, ChevronRight, Shield } from "lucide-react";
+import { badge, iconContainerHover, cardInteractive } from "@/lib/styles";
+import { cn } from "@/lib/utils";
 
 interface EmployeeCardProps {
   employee: User;
 }
 
-export default function EmployeeCard({ employee }: EmployeeCardProps) {
+const EmployeeCard = memo(function EmployeeCard({ employee }: EmployeeCardProps) {
   const formattedDate = employee.date_started
     ? new Date(employee.date_started).toLocaleDateString("en-US", {
         month: "short",
@@ -19,9 +22,8 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
   return (
     <Link
       href={`/employee/${employee.id}`}
-      className="block bg-theme-surface border border-theme-border hover:border-primary-500/50 hover:shadow-lg transition-all duration-300 p-4 sm:p-6 group hover:scale-[1.02] relative overflow-hidden rounded-lg"
+      className={cn(cardInteractive, "block p-4 sm:p-6 group relative overflow-hidden rounded-lg")}
     >
-      {/* Gradient highlight on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary-900/0 to-primary-800/0 group-hover:from-primary-900/20 group-hover:to-primary-800/10 transition-all duration-300" />
 
       <div className="relative">
@@ -50,10 +52,7 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
               {(employee.squads?.length ?? 0) > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {(employee.squads ?? []).map((squad) => (
-                    <span
-                      key={squad.id}
-                      className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border"
-                    >
+                    <span key={squad.id} className={badge}>
                       {squad.name}
                     </span>
                   ))}
@@ -68,21 +67,21 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
 
         <div className="mt-4 sm:mt-5 space-y-2 sm:space-y-2.5 pt-3 sm:pt-4 border-t border-theme-border group-hover:border-primary-500/30 transition-colors duration-300">
           <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-theme-text-muted group-hover:text-theme-text transition-colors">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-theme-elevated group-hover:bg-primary-900/30 flex items-center justify-center transition-colors rounded flex-shrink-0">
+            <div className={iconContainerHover}>
               <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-theme-text-muted group-hover:text-primary-400 transition-colors" />
             </div>
             <span className="truncate">{employee.email}</span>
           </div>
           {employee.department && (
             <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-theme-text-muted group-hover:text-theme-text transition-colors">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-theme-elevated group-hover:bg-primary-900/30 flex items-center justify-center transition-colors rounded flex-shrink-0">
+              <div className={iconContainerHover}>
                 <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-theme-text-muted group-hover:text-primary-400 transition-colors" />
               </div>
               <span className="truncate">{employee.department}</span>
             </div>
           )}
           <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-theme-text-muted group-hover:text-theme-text transition-colors">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-theme-elevated group-hover:bg-primary-900/30 flex items-center justify-center transition-colors rounded flex-shrink-0">
+            <div className={iconContainerHover}>
               <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-theme-text-muted group-hover:text-primary-400 transition-colors" />
             </div>
             <span>Started {formattedDate}</span>
@@ -91,4 +90,6 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
       </div>
     </Link>
   );
-}
+});
+
+export default EmployeeCard;

@@ -6,7 +6,7 @@ import {
   JiraUserWithMapping,
   AutoMatchResult,
   TeamTask,
-} from "./types";
+} from "../types";
 import { fetchWithProxy, handleResponse } from "@/lib/api";
 
 // Settings

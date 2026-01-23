@@ -5,7 +5,6 @@ import { parseAsStringLiteral, useQueryState } from "nuqs";
 import {
   CheckSquare,
   RefreshCw,
-  AlertCircle,
   Clock,
   ExternalLink,
   LayoutGrid,
@@ -19,6 +18,7 @@ import { TeamTask } from "@/app/(pages)/jira/types";
 import { SelectionType, TaskCategory } from "../types";
 import { useTeamTasks } from "../hooks";
 import Avatar from "@/shared/common/Avatar";
+import { ErrorAlert } from "@/components";
 import TimeOffIndicator from "@/app/(pages)/(dashboard)/time-off/components/TimeOffIndicator";
 import { TaskStatusBadge, DueDateDisplay } from "@/lib/jira-utils";
 
@@ -94,7 +94,6 @@ export default function TeamTasksWidget({
 
   return (
     <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col">
-      {/* Header */}
       <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CheckSquare className="w-5 h-5 text-blue-500" />
@@ -106,26 +105,23 @@ export default function TeamTasksWidget({
           )}
         </div>
         <div className="flex items-center gap-2">
-          {/* View Mode Toggle */}
           <div className="flex border border-theme-border overflow-hidden bg-theme-elevated">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 transition-colors ${
-                viewMode === "grid"
-                  ? "bg-primary-500 text-white"
-                  : "text-theme-text-muted hover:bg-theme-surface"
-              }`}
+              className={`p-1.5 transition-colors ${viewMode === "grid"
+                ? "bg-primary-500 text-white"
+                : "text-theme-text-muted hover:bg-theme-surface"
+                }`}
               title="Grid view"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-1.5 border-l border-theme-border transition-colors ${
-                viewMode === "list"
-                  ? "bg-primary-500 text-white"
-                  : "text-theme-text-muted hover:bg-theme-surface"
-              }`}
+              className={`p-1.5 border-l border-theme-border transition-colors ${viewMode === "list"
+                ? "bg-primary-500 text-white"
+                : "text-theme-text-muted hover:bg-theme-surface"
+                }`}
               title="List view"
             >
               <List className="w-3.5 h-3.5" />
@@ -142,7 +138,6 @@ export default function TeamTasksWidget({
         </div>
       </div>
 
-      {/* Category Tabs */}
       <div className="flex border-b border-theme-border">
         {taskCategories.map((category) => {
           const config = categoryConfig[category];
@@ -154,19 +149,17 @@ export default function TeamTasksWidget({
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
-                isActive
-                  ? `bg-theme-elevated ${config.color} border-b-2 border-current -mb-px`
-                  : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated/50"
-              }`}
+              className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${isActive
+                ? `bg-theme-elevated ${config.color} border-b-2 border-current -mb-px`
+                : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated/50"
+                }`}
             >
               <Icon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{config.label}</span>
               {count > 0 && (
                 <span
-                  className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${
-                    isActive ? "bg-current/20" : "bg-theme-elevated"
-                  }`}
+                  className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${isActive ? "bg-current/20" : "bg-theme-elevated"
+                    }`}
                 >
                   {count}
                 </span>
@@ -176,17 +169,12 @@ export default function TeamTasksWidget({
         })}
       </div>
 
-      {/* Error state */}
       {error && (
-        <div className="px-6 py-4 bg-red-900/30 border-b border-red-500/30">
-          <div className="flex items-center gap-2 text-red-400">
-            <AlertCircle className="w-4 h-4" />
-            <p className="text-sm">{error}</p>
-          </div>
+        <div className="px-6 py-4">
+          <ErrorAlert>{error}</ErrorAlert>
         </div>
       )}
 
-      {/* Content */}
       {activeTasks.length === 0 ? (
         <div className="flex-1 px-6 py-12 text-center text-theme-text-muted">
           <CategoryIcon className={`w-12 h-12 mx-auto mb-4 ${categoryInfo.color} opacity-50`} />
@@ -206,7 +194,6 @@ export default function TeamTasksWidget({
         </div>
       )}
 
-      {/* Show more indicator */}
       {activeTasks.length > (viewMode === "grid" ? 6 : 8) && (
         <div className="px-4 py-2 text-xs text-center text-theme-text-muted bg-theme-elevated border-t border-theme-border">
           +{activeTasks.length - (viewMode === "grid" ? 6 : 8)} more tasks
@@ -220,7 +207,7 @@ interface TaskGridCardProps {
   task: TeamTask;
 }
 
-function TaskGridCard({ task }: TaskGridCardProps) {
+const TaskGridCard = ({ task }: TaskGridCardProps) => {
   return (
     <a
       href={task.url}
@@ -261,13 +248,13 @@ function TaskGridCard({ task }: TaskGridCardProps) {
       )}
     </a>
   );
-}
+};
 
 interface TaskListItemProps {
   task: TeamTask;
 }
 
-function TaskListItem({ task }: TaskListItemProps) {
+const TaskListItem = ({ task }: TaskListItemProps) => {
   return (
     <a
       href={task.url}
@@ -302,4 +289,4 @@ function TaskListItem({ task }: TaskListItemProps) {
       <ExternalLink className="w-3.5 h-3.5 text-theme-text-muted flex-shrink-0" />
     </a>
   );
-}
+};

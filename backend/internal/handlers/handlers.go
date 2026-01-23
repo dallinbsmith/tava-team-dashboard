@@ -230,7 +230,7 @@ func (h *Handlers) GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 	// Employees can only view themselves
 	if currentUser.Role == models.RoleEmployee && currentUser.ID != id {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: employees can only view their own profile")
 		return
 	}
 
@@ -243,7 +243,7 @@ func (h *Handlers) GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 	// Supervisors can only view their own direct reports
 	if currentUser.Role == models.RoleSupervisor && user.SupervisorID != nil && *user.SupervisorID != currentUser.ID && user.ID != currentUser.ID {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: supervisors can only view their own direct reports")
 		return
 	}
 
@@ -267,7 +267,7 @@ func (h *Handlers) GetUserByID(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) CreateUser(w http.ResponseWriter, r *http.Request) {
 	currentUser := middleware.GetUserFromContext(r.Context())
 	if currentUser == nil || currentUser.Role != models.RoleSupervisor {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: only supervisors can create users")
 		return
 	}
 
@@ -328,12 +328,12 @@ func (h *Handlers) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Employees can only update themselves (limited fields)
 	// Supervisors can update their direct reports
 	if currentUser.Role == models.RoleEmployee && currentUser.ID != id {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: employees can only update their own profile")
 		return
 	}
 
 	if currentUser.Role == models.RoleSupervisor && targetUser.SupervisorID != nil && *targetUser.SupervisorID != currentUser.ID && targetUser.ID != currentUser.ID {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: supervisors can only update their own direct reports")
 		return
 	}
 
@@ -386,7 +386,7 @@ func (h *Handlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	currentUser := middleware.GetUserFromContext(r.Context())
 	if currentUser == nil || currentUser.Role != models.RoleSupervisor {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: only supervisors can delete users")
 		return
 	}
 
@@ -442,7 +442,7 @@ func (h *Handlers) DeactivateUser(w http.ResponseWriter, r *http.Request) {
 
 	// Only admins and supervisors can deactivate users
 	if currentUser.Role == models.RoleEmployee {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: only admins and supervisors can deactivate users")
 		return
 	}
 
@@ -591,7 +591,7 @@ func (h *Handlers) CreateSquad(w http.ResponseWriter, r *http.Request) {
 
 	// Only admins and supervisors can create squads
 	if currentUser.Role == models.RoleEmployee {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: only admins and supervisors can create squads")
 		return
 	}
 
@@ -639,7 +639,7 @@ func (h *Handlers) DeleteSquad(w http.ResponseWriter, r *http.Request) {
 
 	// Only admins and supervisors can delete squads
 	if currentUser.Role == models.RoleEmployee {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: only admins and supervisors can delete squads")
 		return
 	}
 
@@ -670,7 +670,7 @@ func (h *Handlers) DeleteDepartment(w http.ResponseWriter, r *http.Request) {
 
 	// Only admins and supervisors can delete departments
 	if currentUser.Role == models.RoleEmployee {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: only admins and supervisors can delete departments")
 		return
 	}
 
@@ -712,7 +712,7 @@ func (h *Handlers) RenameDepartment(w http.ResponseWriter, r *http.Request) {
 
 	// Only admins and supervisors can rename departments
 	if currentUser.Role == models.RoleEmployee {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: only admins and supervisors can rename departments")
 		return
 	}
 
@@ -805,7 +805,7 @@ func (h *Handlers) RenameSquad(w http.ResponseWriter, r *http.Request) {
 
 	// Only admins and supervisors can rename squads
 	if currentUser.Role == models.RoleEmployee {
-		respondError(w, http.StatusForbidden, "Forbidden")
+		respondError(w, http.StatusForbidden, "Forbidden: only admins and supervisors can rename squads")
 		return
 	}
 

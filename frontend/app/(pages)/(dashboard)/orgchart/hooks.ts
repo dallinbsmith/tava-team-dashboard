@@ -16,9 +16,9 @@ import {
   deleteSquad,
   getDepartments,
   deleteDepartment,
-} from "./api";
+} from "./actions";
 import { CreateDraftRequest, UpdateDraftRequest, AddDraftChangeRequest } from "./types";
-import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
+import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 
 export const orgChartKeys = {
   all: ["orgChart"] as const,

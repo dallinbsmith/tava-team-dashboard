@@ -8,9 +8,9 @@ import {
   createTimeOffRequest,
   cancelTimeOffRequest,
   reviewTimeOffRequest,
-} from "./api";
+} from "./actions";
 import { TimeOffStatus, CreateTimeOffRequest, ReviewTimeOffRequest } from "./types";
-import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
+import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 
 // Query keys for this feature
 export const timeOffKeys = {

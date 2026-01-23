@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { TimeOffRequest, CreateTimeOffRequest, ReviewTimeOffRequest } from "./types";
+import { TimeOffRequest, CreateTimeOffRequest, ReviewTimeOffRequest } from "../types";
 import {
   ActionResult,
   authPost,
@@ -12,9 +12,6 @@ import {
   failure,
 } from "@/lib/server-actions";
 
-/**
- * Server Action: Create a new time off request
- */
 export const createTimeOffRequestAction = async (
   data: CreateTimeOffRequest
 ): Promise<ActionResult<TimeOffRequest>> => {
@@ -28,7 +25,7 @@ export const createTimeOffRequestAction = async (
 
     const request = await res.json();
     revalidatePath("/time-off");
-    revalidatePath("/"); // Dashboard also shows time off
+    revalidatePath("/");
     return success(request);
   } catch (e) {
     console.error("createTimeOffRequestAction error:", e);
@@ -36,9 +33,6 @@ export const createTimeOffRequestAction = async (
   }
 };
 
-/**
- * Server Action: Cancel a time off request
- */
 export const cancelTimeOffRequestAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/time-off/${id}`);
@@ -57,9 +51,6 @@ export const cancelTimeOffRequestAction = async (id: number): Promise<ActionResu
   }
 };
 
-/**
- * Server Action: Review (approve/reject) a time off request
- */
 export const reviewTimeOffRequestAction = async (
   id: number,
   review: ReviewTimeOffRequest

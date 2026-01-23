@@ -8,7 +8,7 @@ import {
   CreateMeetingRequest,
   UpdateMeetingRequest,
   ResponseStatus,
-} from "./types";
+} from "../types";
 import { fetchWithProxy, handleResponse } from "@/lib/api";
 
 // Calendar Events

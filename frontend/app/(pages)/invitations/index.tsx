@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
-import { validateInvitation, acceptInvitation, ValidateInvitationResponse } from "@/lib/api";
+import {
+  validateInvitation,
+  acceptInvitation,
+  ValidateInvitationResponse,
+} from "@/app/(pages)/(dashboard)/admin/invitations/actions";
 import {
   Mail,
   Shield,

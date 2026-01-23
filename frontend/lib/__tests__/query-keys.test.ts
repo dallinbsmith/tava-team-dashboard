@@ -1,9 +1,9 @@
 /**
- * Tests for lib/queryKeys.ts
+ * Tests for lib/query-keys.ts
  * Query key factory for React Query
  */
 
-import { queryKeys } from "../queryKeys";
+import { queryKeys } from "../query-keys";
 
 describe("queryKeys", () => {
   describe("entity helper pattern", () => {

@@ -7,7 +7,7 @@ import {
   CreateDraftRequest,
   UpdateDraftRequest,
   AddDraftChangeRequest,
-} from "./types";
+} from "../types";
 import { Squad } from "@/shared/types/user";
 import {
   ActionResult,
@@ -19,13 +19,6 @@ import {
   failure,
 } from "@/lib/server-actions";
 
-// ============================================
-// Draft Management Actions
-// ============================================
-
-/**
- * Server Action: Create a new org chart draft
- */
 export const createDraftAction = async (
   data: CreateDraftRequest
 ): Promise<ActionResult<OrgChartDraft>> => {
@@ -46,9 +39,6 @@ export const createDraftAction = async (
   }
 };
 
-/**
- * Server Action: Update an org chart draft
- */
 export const updateDraftAction = async (
   id: number,
   data: UpdateDraftRequest
@@ -70,9 +60,6 @@ export const updateDraftAction = async (
   }
 };
 
-/**
- * Server Action: Delete an org chart draft
- */
 export const deleteDraftAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/orgchart/drafts/${id}`);
@@ -90,9 +77,6 @@ export const deleteDraftAction = async (id: number): Promise<ActionResult<void>>
   }
 };
 
-/**
- * Server Action: Publish an org chart draft (apply all changes)
- */
 export const publishDraftAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authPost(`/api/orgchart/drafts/${id}/publish`);
@@ -103,7 +87,7 @@ export const publishDraftAction = async (id: number): Promise<ActionResult<void>
     }
 
     revalidatePath("/orgchart");
-    revalidatePath("/"); // Dashboard may show org info
+    revalidatePath("/");
     return success(undefined);
   } catch (e) {
     console.error("publishDraftAction error:", e);
@@ -111,13 +95,6 @@ export const publishDraftAction = async (id: number): Promise<ActionResult<void>
   }
 };
 
-// ============================================
-// Draft Change Actions
-// ============================================
-
-/**
- * Server Action: Add a change to a draft
- */
 export const addDraftChangeAction = async (
   draftId: number,
   change: AddDraftChangeRequest
@@ -139,9 +116,6 @@ export const addDraftChangeAction = async (
   }
 };
 
-/**
- * Server Action: Remove a change from a draft
- */
 export const removeDraftChangeAction = async (
   draftId: number,
   userId: number
@@ -162,13 +136,6 @@ export const removeDraftChangeAction = async (
   }
 };
 
-// ============================================
-// Squad Actions
-// ============================================
-
-/**
- * Server Action: Create a new squad
- */
 export const createSquadAction = async (name: string): Promise<ActionResult<Squad>> => {
   try {
     const res = await authPost("/api/squads", { name });
@@ -187,9 +154,6 @@ export const createSquadAction = async (name: string): Promise<ActionResult<Squa
   }
 };
 
-/**
- * Server Action: Delete a squad
- */
 export const deleteSquadAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/squads/${id}`);
@@ -207,13 +171,6 @@ export const deleteSquadAction = async (id: number): Promise<ActionResult<void>>
   }
 };
 
-// ============================================
-// Department Actions
-// ============================================
-
-/**
- * Server Action: Delete a department
- */
 export const deleteDepartmentAction = async (name: string): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/departments/${encodeURIComponent(name)}`);

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { CalendarEvent, ResponseStatus } from "../types";
-import { getCalendarEvents, respondToMeeting } from "../api";
+import { getCalendarEvents, respondToMeeting } from "../actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import {
   Calendar as CalendarIcon,
@@ -22,6 +22,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { format, startOfDay, endOfDay, addDays, isToday, isTomorrow } from "date-fns";
+import { dropdownItemButton, widgetContainer, widgetFooter, cardBase } from "@/lib/styles";
+import { cn } from "@/lib/utils";
 
 interface CalendarWidgetProps {
   onCreateTask?: () => void;
@@ -187,7 +189,7 @@ export default function CalendarWidget({
 
   if (loading) {
     return (
-      <div className="bg-theme-surface border border-theme-border overflow-hidden">
+      <div className={cn(cardBase, "overflow-hidden")}>
         <div className="px-6 py-4 border-b border-theme-border flex items-center gap-3">
           <CalendarIcon className="w-5 h-5 text-theme-text-muted" />
           <h2 className="text-lg font-semibold text-theme-text">Upcoming Events</h2>
@@ -200,7 +202,7 @@ export default function CalendarWidget({
   }
 
   return (
-    <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col">
+    <div className={widgetContainer}>
       <div className="px-4 py-3 border-b border-theme-border flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-primary-500 flex-shrink-0" />
@@ -225,48 +227,33 @@ export default function CalendarWidget({
                 />
               </button>
               {addMenuOpen && (
-                <div className="absolute right-0 mt-1 w-48 bg-theme-surface border border-theme-border rounded-lg shadow-lg z-50 overflow-hidden">
+                <div className={cn(cardBase, "absolute right-0 mt-1 w-48 rounded-lg shadow-lg z-50 overflow-hidden")}>
                   {onCreateTask && (
-                    <button
-                      onClick={() => handleAction(onCreateTask)}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                    >
+                    <button onClick={() => handleAction(onCreateTask)} className={dropdownItemButton}>
                       <CheckSquare className="w-4 h-4 text-green-400" />
                       Task
                     </button>
                   )}
                   {onCreateEvent && (
-                    <button
-                      onClick={() => handleAction(onCreateEvent)}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                    >
+                    <button onClick={() => handleAction(onCreateEvent)} className={dropdownItemButton}>
                       <CalendarIcon className="w-4 h-4 text-blue-400" />
                       Event
                     </button>
                   )}
                   {onCreateMeeting && (
-                    <button
-                      onClick={() => handleAction(onCreateMeeting)}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                    >
+                    <button onClick={() => handleAction(onCreateMeeting)} className={dropdownItemButton}>
                       <Users className="w-4 h-4 text-purple-400" />
                       Meeting
                     </button>
                   )}
                   {onRequestTimeOff && (
-                    <button
-                      onClick={() => handleAction(onRequestTimeOff)}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                    >
+                    <button onClick={() => handleAction(onRequestTimeOff)} className={dropdownItemButton}>
                       <Palmtree className="w-4 h-4 text-amber-400" />
                       Request Time Off
                     </button>
                   )}
                   {onCreateTimeOffForEmployee && (
-                    <button
-                      onClick={() => handleAction(onCreateTimeOffForEmployee)}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                    >
+                    <button onClick={() => handleAction(onCreateTimeOffForEmployee)} className={dropdownItemButton}>
                       <UserPlus className="w-4 h-4 text-amber-400" />
                       Time Off for Employee
                     </button>
@@ -358,7 +345,6 @@ export default function CalendarWidget({
                   </span>
                 </div>
 
-                {/* Meeting response buttons - inline like Pending Time Off */}
                 {showMeetingResponse && event.meeting && (
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
@@ -407,7 +393,7 @@ export default function CalendarWidget({
         </div>
       )}
 
-      <div className="px-6 py-3 bg-theme-elevated border-t border-theme-border">
+      <div className={widgetFooter}>
         <Link
           href="/calendar"
           className="text-sm text-primary-400 hover:underline flex items-center gap-1"

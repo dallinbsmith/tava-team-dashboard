@@ -5,8 +5,7 @@ import { CreateTaskRequest, AssignmentType } from "../types";
 import { createTaskAction } from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
-import { BaseModal } from "@/components";
-import { Loader2 } from "lucide-react";
+import { BaseModal, Button, FormError, CenteredSpinner } from "@/components";
 import { format, addDays } from "date-fns";
 
 interface CreateTaskModalProps {
@@ -92,16 +91,10 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
   return (
     <BaseModal isOpen={isOpen} onClose={handleClose} title="Create Task" maxWidth="max-w-lg">
       {allUsersLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-        </div>
+        <CenteredSpinner />
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 bg-red-900/30 border border-red-500/30 text-red-400 text-sm">
-              {error}
-            </div>
-          )}
+          <FormError error={error} />
 
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-theme-text mb-1">
@@ -217,21 +210,12 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
           )}
 
           <div className="flex justify-end gap-3 pt-4 border-t border-theme-border">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium text-theme-text bg-theme-elevated border border-theme-border hover:bg-theme-surface transition-colors"
-            >
+            <Button type="button" variant="secondary" onClick={handleClose}>
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition-colors flex items-center gap-2"
-            >
-              {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+            </Button>
+            <Button type="submit" variant="success" loading={isPending}>
               Create Task
-            </button>
+            </Button>
           </div>
         </form>
       )}

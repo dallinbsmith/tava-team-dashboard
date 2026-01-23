@@ -8,8 +8,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { ReactNode } from "react";
 import { useDeleteDepartment, useRenameDepartment } from "../useDepartmentMutations";
 import * as api from "@/lib/api";
-import * as queryUtils from "@/lib/queryUtils";
-import { queryKeys } from "@/lib/queryKeys";
+import * as queryUtils from "@/lib/query-utils";
+import { queryKeys } from "@/lib/query-keys";
 
 // Mock the API
 jest.mock("@/lib/api", () => ({
@@ -24,7 +24,7 @@ const mockRenameDepartment = api.renameDepartment as jest.MockedFunction<
 >;
 
 // Mock queryUtils
-jest.mock("@/lib/queryUtils", () => ({
+jest.mock("@/lib/query-utils", () => ({
   refetchQueries: jest.fn().mockResolvedValue(undefined),
   queryKeyGroups: {
     departmentRelated: jest.fn().mockReturnValue([["departments"], ["employees"]]),

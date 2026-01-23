@@ -5,7 +5,7 @@ import {
   UpdateDraftRequest,
   AddDraftChangeRequest,
   OrgTreeNode,
-} from "./types";
+} from "../types";
 import { Squad } from "@/shared/types/user";
 import { fetchWithProxy, handleResponse } from "@/lib/api";
 

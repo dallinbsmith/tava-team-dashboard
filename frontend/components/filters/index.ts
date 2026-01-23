@@ -5,5 +5,5 @@ export { default as SearchableFilterList } from "./SearchableFilterList";
 
 export type { FilterSectionProps } from "./FilterSection";
 export type { FilterCheckboxProps } from "./FilterCheckbox";
-export type { FilterDropdownProps } from "./FilterDropdown";
+export type { FilterDropdownProps, DropdownPosition } from "./FilterDropdown";
 export type { SearchableFilterListProps } from "./SearchableFilterList";

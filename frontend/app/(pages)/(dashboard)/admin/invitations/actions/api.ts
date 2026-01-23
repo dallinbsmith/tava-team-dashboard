@@ -1,4 +1,4 @@
-import { Invitation, CreateInvitationRequest } from "./types";
+import { Invitation, CreateInvitationRequest } from "../types";
 import { User } from "@/shared/types/user";
 import { fetchWithProxy, handleResponse } from "@/lib/api";
 import { extractErrorMessage } from "@/lib/api-utils";

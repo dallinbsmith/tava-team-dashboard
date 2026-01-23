@@ -4,6 +4,8 @@ import { useRef, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Filter } from "lucide-react";
 
+export type DropdownPosition = "auto" | "above" | "below" | "left" | "right";
+
 export interface FilterDropdownProps {
   isOpen: boolean;
   onToggle: () => void;
@@ -12,6 +14,7 @@ export interface FilterDropdownProps {
   onClearAll: () => void;
   children: React.ReactNode;
   title?: string;
+  position?: DropdownPosition;
 }
 
 export default function FilterDropdown({
@@ -22,6 +25,7 @@ export default function FilterDropdown({
   onClearAll,
   children,
   title = "Filters",
+  position = "auto",
 }: FilterDropdownProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -75,10 +79,16 @@ export default function FilterDropdown({
         scrollListenerActive = true;
       }, 100);
 
-      const handleScroll = () => {
-        if (scrollListenerActive) {
-          onClose();
+      const handleScroll = (event: Event) => {
+        if (!scrollListenerActive) return;
+
+        // Don't close if scrolling inside the dropdown panel
+        const target = event.target as Node;
+        if (panelRef.current && panelRef.current.contains(target)) {
+          return;
         }
+
+        onClose();
       };
 
       window.addEventListener("scroll", handleScroll, true);
@@ -94,11 +104,10 @@ export default function FilterDropdown({
       <button
         ref={buttonRef}
         onClick={onToggle}
-        className={`relative p-2 transition-colors ${
-          isOpen || activeFilterCount > 0
-            ? "bg-primary-500 text-white"
-            : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-        }`}
+        className={`relative p-2 transition-colors ${isOpen || activeFilterCount > 0
+          ? "bg-primary-500 text-white"
+          : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
+          }`}
         title={title}
       >
         <Filter className="w-4 h-4" />
@@ -119,6 +128,7 @@ export default function FilterDropdown({
             activeFilterCount={activeFilterCount}
             onClearAll={onClearAll}
             title={title}
+            position={position}
           >
             {children}
           </DropdownPanel>,
@@ -128,13 +138,14 @@ export default function FilterDropdown({
   );
 }
 
-function DropdownPanel({
+const DropdownPanel = ({
   buttonRect,
   panelRef,
   activeFilterCount,
   onClearAll,
   title,
   children,
+  position: preferredPosition,
 }: {
   buttonRect: DOMRect;
   panelRef: React.RefObject<HTMLDivElement | null>;
@@ -142,19 +153,83 @@ function DropdownPanel({
   onClearAll: () => void;
   title: string;
   children: React.ReactNode;
-}) {
-  const position = {
-    top: buttonRect.bottom + 8,
-    left: Math.min(buttonRect.left, window.innerWidth - 288 - 16),
-  };
+  position: DropdownPosition;
+}) => {
+  const estimatedPanelHeight = 350;
+  const panelWidth = 288; // w-72 = 18rem = 288px
+  const gap = 8;
+  const viewportPadding = 16;
+
+  // Calculate available space above/below for auto positioning
+  const spaceBelow = window.innerHeight - buttonRect.bottom - gap;
+  const spaceAbove = buttonRect.top - gap;
+
+  // Determine actual position based on preference and available space
+  let actualPosition: "above" | "below" | "left" | "right";
+
+  if (preferredPosition === "auto") {
+    // Auto: prefer below, fall back to above if not enough space
+    actualPosition = spaceBelow < estimatedPanelHeight && spaceAbove > spaceBelow ? "above" : "below";
+  } else {
+    actualPosition = preferredPosition;
+  }
+
+  // Calculate position coordinates based on actual position
+  let top: number;
+  let left: number;
+  let maxHeight: number;
+
+  switch (actualPosition) {
+    case "above":
+      top = Math.max(viewportPadding, buttonRect.top - estimatedPanelHeight - gap);
+      left = Math.min(
+        Math.max(viewportPadding, buttonRect.left),
+        window.innerWidth - panelWidth - viewportPadding
+      );
+      maxHeight = buttonRect.top - gap - viewportPadding;
+      break;
+
+    case "below":
+      top = buttonRect.bottom + gap;
+      left = Math.min(
+        Math.max(viewportPadding, buttonRect.left),
+        window.innerWidth - panelWidth - viewportPadding
+      );
+      maxHeight = window.innerHeight - buttonRect.bottom - gap - viewportPadding;
+      break;
+
+    case "left":
+      // Position to the left of the button, vertically centered or aligned to top
+      top = Math.min(
+        Math.max(viewportPadding, buttonRect.top),
+        window.innerHeight - estimatedPanelHeight - viewportPadding
+      );
+      left = Math.max(viewportPadding, buttonRect.left - panelWidth - gap);
+      maxHeight = window.innerHeight - viewportPadding * 2;
+      break;
+
+    case "right":
+      // Position to the right of the button, vertically centered or aligned to top
+      top = Math.min(
+        Math.max(viewportPadding, buttonRect.top),
+        window.innerHeight - estimatedPanelHeight - viewportPadding
+      );
+      left = Math.min(
+        buttonRect.right + gap,
+        window.innerWidth - panelWidth - viewportPadding
+      );
+      maxHeight = window.innerHeight - viewportPadding * 2;
+      break;
+  }
 
   return (
     <div
       ref={panelRef}
-      className="fixed w-72 bg-theme-surface border border-theme-border rounded-lg shadow-xl z-[9999]"
+      className="fixed w-72 bg-theme-surface border border-theme-border rounded-lg shadow-xl z-[9999] overflow-auto"
       style={{
-        top: position.top,
-        left: position.left,
+        top,
+        left,
+        maxHeight: Math.min(maxHeight, estimatedPanelHeight),
       }}
     >
       <div className="p-4">
@@ -173,4 +248,4 @@ function DropdownPanel({
       </div>
     </div>
   );
-}
+};

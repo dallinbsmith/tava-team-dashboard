@@ -18,14 +18,18 @@ export const middleware = async (request: NextRequest) => {
   const authResponse = await auth0.middleware(request);
 
   // If Auth0 middleware handled the request (auth routes), return its response
-  if (authResponse.status !== 200 || request.nextUrl.pathname.startsWith("/auth")) {
+  if (
+    authResponse.status !== 200 ||
+    request.nextUrl.pathname.startsWith("/auth")
+  ) {
     return authResponse;
   }
 
   // Check if this is a protected route
   const isProtectedRoute = protectedRoutes.some(
     (route) =>
-      request.nextUrl.pathname === route || request.nextUrl.pathname.startsWith(route + "/")
+      request.nextUrl.pathname === route ||
+      request.nextUrl.pathname.startsWith(route + "/"),
   );
 
   if (isProtectedRoute) {

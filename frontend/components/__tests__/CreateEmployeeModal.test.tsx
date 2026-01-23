@@ -20,8 +20,10 @@ const mockCreateEmployee = graphql.createEmployeeGraphQL as jest.MockedFunction<
 
 // Mock the error parsing
 jest.mock("@/lib/errors", () => ({
-  parseErrorMessage: (e: unknown) => (e instanceof Error ? e.message : String(e)),
-  parseSquadErrorMessage: (e: unknown) => (e instanceof Error ? e.message : String(e)),
+  parseErrorMessage: (e: unknown) =>
+    e instanceof Error ? e.message : String(e),
+  parseSquadErrorMessage: (e: unknown) =>
+    e instanceof Error ? e.message : String(e),
 }));
 
 // Test fixtures
@@ -83,7 +85,9 @@ describe("CreateEmployeeModal", () => {
     it("renders form fields", () => {
       render(<CreateEmployeeModal {...defaultProps} />);
 
-      expect(screen.getByPlaceholderText("employee@company.com")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("employee@company.com"),
+      ).toBeInTheDocument();
       expect(screen.getByPlaceholderText("John")).toBeInTheDocument();
       expect(screen.getByPlaceholderText("Doe")).toBeInTheDocument();
       expect(screen.getByText(/start date/i)).toBeInTheDocument();
@@ -131,7 +135,9 @@ describe("CreateEmployeeModal", () => {
 
     it("updates start date field", async () => {
       const { container } = render(<CreateEmployeeModal {...defaultProps} />);
-      const dateInput = container.querySelector('input[type="date"]') as HTMLInputElement;
+      const dateInput = container.querySelector(
+        'input[type="date"]',
+      ) as HTMLInputElement;
 
       fireEvent.change(dateInput, { target: { value: "2024-01-15" } });
       expect(dateInput).toHaveValue("2024-01-15");
@@ -162,7 +168,7 @@ describe("CreateEmployeeModal", () => {
 
       // Dropdown options should not be visible (search input is only in dropdown)
       expect(
-        screen.queryByPlaceholderText("Search or create department...")
+        screen.queryByPlaceholderText("Search or create department..."),
       ).not.toBeInTheDocument();
     });
 
@@ -173,12 +179,16 @@ describe("CreateEmployeeModal", () => {
       fireEvent.click(screen.getByText("Select department..."));
 
       // Search for "Eng"
-      const searchInput = screen.getByPlaceholderText("Search or create department...");
+      const searchInput = screen.getByPlaceholderText(
+        "Search or create department...",
+      );
       await userEvent.type(searchInput, "Eng");
 
       // Should show Engineering, not others
       expect(screen.getByText("Engineering")).toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: "Product" })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Product" }),
+      ).not.toBeInTheDocument();
     });
 
     it("shows create option for new department", async () => {
@@ -188,7 +198,9 @@ describe("CreateEmployeeModal", () => {
       fireEvent.click(screen.getByText("Select department..."));
 
       // Type new department name
-      const searchInput = screen.getByPlaceholderText("Search or create department...");
+      const searchInput = screen.getByPlaceholderText(
+        "Search or create department...",
+      );
       await userEvent.type(searchInput, "HR");
 
       // Should show create option
@@ -202,7 +214,9 @@ describe("CreateEmployeeModal", () => {
       fireEvent.click(screen.getByText("Select department..."));
 
       // Type new department name
-      const searchInput = screen.getByPlaceholderText("Search or create department...");
+      const searchInput = screen.getByPlaceholderText(
+        "Search or create department...",
+      );
       await userEvent.type(searchInput, "HR");
 
       // Click create option
@@ -246,7 +260,9 @@ describe("CreateEmployeeModal", () => {
       fireEvent.click(screen.getByText("Select squads..."));
 
       // Select Frontend Team
-      const frontendLabel = screen.getAllByText("Frontend Team").find((el) => el.closest("label"));
+      const frontendLabel = screen
+        .getAllByText("Frontend Team")
+        .find((el) => el.closest("label"));
       fireEvent.click(frontendLabel!);
 
       // Close dropdown
@@ -262,7 +278,9 @@ describe("CreateEmployeeModal", () => {
     });
 
     it("creates new squad", async () => {
-      const onAddSquad = jest.fn().mockResolvedValue({ id: 5, name: "New Team" });
+      const onAddSquad = jest
+        .fn()
+        .mockResolvedValue({ id: 5, name: "New Team" });
       render(<CreateEmployeeModal {...defaultProps} onAddSquad={onAddSquad} />);
 
       // Open dropdown
@@ -277,7 +295,8 @@ describe("CreateEmployeeModal", () => {
         .getAllByRole("button")
         .find(
           (btn) =>
-            btn.querySelector("svg")?.classList.contains("lucide-plus") && btn.closest(".border-t")
+            btn.querySelector("svg")?.classList.contains("lucide-plus") &&
+            btn.closest(".border-t"),
         );
       fireEvent.click(addButton!);
 
@@ -287,7 +306,9 @@ describe("CreateEmployeeModal", () => {
     });
 
     it("creates new squad on Enter key", async () => {
-      const onAddSquad = jest.fn().mockResolvedValue({ id: 5, name: "Team Alpha" });
+      const onAddSquad = jest
+        .fn()
+        .mockResolvedValue({ id: 5, name: "Team Alpha" });
       render(<CreateEmployeeModal {...defaultProps} onAddSquad={onAddSquad} />);
 
       // Open dropdown
@@ -347,7 +368,10 @@ describe("CreateEmployeeModal", () => {
       render(<CreateEmployeeModal {...defaultProps} />);
 
       // Fill out form
-      await userEvent.type(screen.getByPlaceholderText("employee@company.com"), "new@example.com");
+      await userEvent.type(
+        screen.getByPlaceholderText("employee@company.com"),
+        "new@example.com",
+      );
       await userEvent.type(screen.getByPlaceholderText("John"), "New");
       await userEvent.type(screen.getByPlaceholderText("Doe"), "Employee");
 
@@ -361,20 +385,26 @@ describe("CreateEmployeeModal", () => {
             first_name: "New",
             last_name: "Employee",
             role: "employee",
-          })
+          }),
         );
       });
     });
 
     it("shows loading state while creating", async () => {
       mockCreateEmployee.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(createMockUser()), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(createMockUser()), 100),
+          ),
       );
 
       render(<CreateEmployeeModal {...defaultProps} />);
 
       // Fill out required fields
-      await userEvent.type(screen.getByPlaceholderText("employee@company.com"), "test@example.com");
+      await userEvent.type(
+        screen.getByPlaceholderText("employee@company.com"),
+        "test@example.com",
+      );
       await userEvent.type(screen.getByPlaceholderText("John"), "Test");
       await userEvent.type(screen.getByPlaceholderText("Doe"), "User");
 
@@ -398,7 +428,10 @@ describe("CreateEmployeeModal", () => {
       render(<CreateEmployeeModal {...defaultProps} onCreated={onCreated} />);
 
       // Fill out form
-      await userEvent.type(screen.getByPlaceholderText("employee@company.com"), "test@example.com");
+      await userEvent.type(
+        screen.getByPlaceholderText("employee@company.com"),
+        "test@example.com",
+      );
       await userEvent.type(screen.getByPlaceholderText("John"), "Test");
       await userEvent.type(screen.getByPlaceholderText("Doe"), "User");
 
@@ -420,7 +453,10 @@ describe("CreateEmployeeModal", () => {
       render(<CreateEmployeeModal {...defaultProps} />);
 
       // Fill out form
-      await userEvent.type(screen.getByPlaceholderText("employee@company.com"), "test@example.com");
+      await userEvent.type(
+        screen.getByPlaceholderText("employee@company.com"),
+        "test@example.com",
+      );
       await userEvent.type(screen.getByPlaceholderText("John"), "John");
       await userEvent.type(screen.getByPlaceholderText("Doe"), "Doe");
 
@@ -443,7 +479,10 @@ describe("CreateEmployeeModal", () => {
       render(<CreateEmployeeModal {...defaultProps} onClose={onClose} />);
 
       // Fill out form and submit
-      await userEvent.type(screen.getByPlaceholderText("employee@company.com"), "test@example.com");
+      await userEvent.type(
+        screen.getByPlaceholderText("employee@company.com"),
+        "test@example.com",
+      );
       await userEvent.type(screen.getByPlaceholderText("John"), "Test");
       await userEvent.type(screen.getByPlaceholderText("Doe"), "User");
       fireEvent.click(screen.getByText("Add Employee"));
@@ -466,7 +505,7 @@ describe("CreateEmployeeModal", () => {
       // Fill out form
       await userEvent.type(
         screen.getByPlaceholderText("employee@company.com"),
-        "existing@example.com"
+        "existing@example.com",
       );
       await userEvent.type(screen.getByPlaceholderText("John"), "Test");
       await userEvent.type(screen.getByPlaceholderText("Doe"), "User");
@@ -480,7 +519,9 @@ describe("CreateEmployeeModal", () => {
     });
 
     it("shows error message on squad creation failure", async () => {
-      const onAddSquad = jest.fn().mockRejectedValue(new Error("Squad already exists"));
+      const onAddSquad = jest
+        .fn()
+        .mockRejectedValue(new Error("Squad already exists"));
       render(<CreateEmployeeModal {...defaultProps} onAddSquad={onAddSquad} />);
 
       // Open dropdown
@@ -509,7 +550,10 @@ describe("CreateEmployeeModal", () => {
       const { rerender } = render(<CreateEmployeeModal {...defaultProps} />);
 
       // Fill out some fields
-      await userEvent.type(screen.getByPlaceholderText("employee@company.com"), "test@example.com");
+      await userEvent.type(
+        screen.getByPlaceholderText("employee@company.com"),
+        "test@example.com",
+      );
       await userEvent.type(screen.getByPlaceholderText("John"), "Test");
 
       // Close modal
@@ -520,7 +564,9 @@ describe("CreateEmployeeModal", () => {
       rerender(<CreateEmployeeModal {...defaultProps} isOpen={true} />);
 
       // Fields should be empty
-      expect(screen.getByPlaceholderText("employee@company.com")).toHaveValue("");
+      expect(screen.getByPlaceholderText("employee@company.com")).toHaveValue(
+        "",
+      );
       expect(screen.getByPlaceholderText("John")).toHaveValue("");
     });
 
@@ -530,7 +576,10 @@ describe("CreateEmployeeModal", () => {
       const { rerender } = render(<CreateEmployeeModal {...defaultProps} />);
 
       // Trigger error
-      await userEvent.type(screen.getByPlaceholderText("employee@company.com"), "test@example.com");
+      await userEvent.type(
+        screen.getByPlaceholderText("employee@company.com"),
+        "test@example.com",
+      );
       await userEvent.type(screen.getByPlaceholderText("John"), "Test");
       await userEvent.type(screen.getByPlaceholderText("Doe"), "User");
       fireEvent.click(screen.getByText("Add Employee"));
@@ -582,7 +631,9 @@ describe("CreateEmployeeModal", () => {
       // Open department dropdown
       fireEvent.click(screen.getByText("Select department..."));
 
-      expect(screen.getByText("Type to create a new department")).toBeInTheDocument();
+      expect(
+        screen.getByText("Type to create a new department"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -594,8 +645,12 @@ describe("CreateEmployeeModal", () => {
       fireEvent.click(screen.getByText("Select squads..."));
 
       // Select two squads
-      const frontendLabel = screen.getAllByText("Frontend Team").find((el) => el.closest("label"));
-      const backendLabel = screen.getAllByText("Backend Team").find((el) => el.closest("label"));
+      const frontendLabel = screen
+        .getAllByText("Frontend Team")
+        .find((el) => el.closest("label"));
+      const backendLabel = screen
+        .getAllByText("Backend Team")
+        .find((el) => el.closest("label"));
 
       fireEvent.click(frontendLabel!);
       fireEvent.click(backendLabel!);

@@ -159,7 +159,9 @@ const toUser = (employee: GraphQLEmployee): User => {
       name: s.name,
     })),
     avatar_url: employee.avatar_url || undefined,
-    supervisor_id: employee.supervisor_id ? parseInt(employee.supervisor_id, 10) : undefined,
+    supervisor_id: employee.supervisor_id
+      ? parseInt(employee.supervisor_id, 10)
+      : undefined,
     date_started: employee.date_started || undefined,
     is_active: employee.is_active ?? true,
     created_at: employee.created_at,
@@ -169,15 +171,20 @@ const toUser = (employee: GraphQLEmployee): User => {
 
 export const getEmployeesGraphQL = async (): Promise<User[]> => {
   const client = createProxyGraphQLClient();
-  const data = await client.request<{ employees: GraphQLEmployee[] }>(GET_EMPLOYEES);
+  const data = await client.request<{ employees: GraphQLEmployee[] }>(
+    GET_EMPLOYEES,
+  );
   return data.employees.map(toUser);
 };
 
 export const getEmployeeGraphQL = async (id: number): Promise<User> => {
   const client = createProxyGraphQLClient();
-  const data = await client.request<{ employee: GraphQLEmployee }>(GET_EMPLOYEE, {
-    id: id.toString(),
-  });
+  const data = await client.request<{ employee: GraphQLEmployee }>(
+    GET_EMPLOYEE,
+    {
+      id: id.toString(),
+    },
+  );
   return toUser(data.employee);
 };
 
@@ -199,7 +206,9 @@ export interface CreateEmployeeInput {
   date_started?: string;
 }
 
-export const createEmployeeGraphQL = async (input: CreateEmployeeInput): Promise<User> => {
+export const createEmployeeGraphQL = async (
+  input: CreateEmployeeInput,
+): Promise<User> => {
   const client = createProxyGraphQLClient();
 
   // Convert date_started to RFC3339 format for GraphQL Time scalar
@@ -215,13 +224,18 @@ export const createEmployeeGraphQL = async (input: CreateEmployeeInput): Promise
     ...(input.department?.trim() && { department: input.department.trim() }),
     ...(dateStartedRFC3339 && { date_started: dateStartedRFC3339 }),
     ...(input.avatar_url?.trim() && { avatar_url: input.avatar_url.trim() }),
-    ...(input.supervisor_id?.trim() && { supervisor_id: input.supervisor_id.trim() }),
+    ...(input.supervisor_id?.trim() && {
+      supervisor_id: input.supervisor_id.trim(),
+    }),
     ...(input.squad_ids?.length && { squad_ids: input.squad_ids.map(String) }),
   };
 
-  const data = await client.request<{ createEmployee: GraphQLEmployee }>(CREATE_EMPLOYEE, {
-    input: cleanedInput,
-  });
+  const data = await client.request<{ createEmployee: GraphQLEmployee }>(
+    CREATE_EMPLOYEE,
+    {
+      input: cleanedInput,
+    },
+  );
   return toUser(data.createEmployee);
 };
 
@@ -234,19 +248,28 @@ export interface UpdateEmployeeInput {
   supervisor_id?: string;
 }
 
-export const updateEmployeeGraphQL = async (id: number, input: UpdateEmployeeInput): Promise<User> => {
+export const updateEmployeeGraphQL = async (
+  id: number,
+  input: UpdateEmployeeInput,
+): Promise<User> => {
   const client = createProxyGraphQLClient();
-  const data = await client.request<{ updateEmployee: GraphQLEmployee }>(UPDATE_EMPLOYEE, {
-    id: id.toString(),
-    input,
-  });
+  const data = await client.request<{ updateEmployee: GraphQLEmployee }>(
+    UPDATE_EMPLOYEE,
+    {
+      id: id.toString(),
+      input,
+    },
+  );
   return toUser(data.updateEmployee);
 };
 
 export const deleteEmployeeGraphQL = async (id: number): Promise<boolean> => {
   const client = createProxyGraphQLClient();
-  const data = await client.request<{ deleteEmployee: boolean }>(DELETE_EMPLOYEE, {
-    id: id.toString(),
-  });
+  const data = await client.request<{ deleteEmployee: boolean }>(
+    DELETE_EMPLOYEE,
+    {
+      id: id.toString(),
+    },
+  );
   return data.deleteEmployee;
 };

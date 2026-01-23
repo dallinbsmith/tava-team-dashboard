@@ -13,7 +13,7 @@
  */
 export const extractErrorMessage = async (
   response: Response,
-  fallbackMessage: string
+  fallbackMessage: string,
 ): Promise<string> => {
   try {
     const text = await response.text();

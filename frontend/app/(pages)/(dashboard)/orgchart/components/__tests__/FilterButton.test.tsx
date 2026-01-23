@@ -24,7 +24,11 @@ jest.mock("@/components", () => ({
     activeFilterCount: number;
     onClearAll: () => void;
   }) => (
-    <div data-testid="filter-dropdown" data-is-open={isOpen} data-count={activeFilterCount}>
+    <div
+      data-testid="filter-dropdown"
+      data-is-open={isOpen}
+      data-count={activeFilterCount}
+    >
       <button onClick={onToggle} data-testid="toggle-button">
         Toggle
       </button>
@@ -48,7 +52,10 @@ jest.mock("@/components", () => ({
     isExpanded: boolean;
     onToggle: () => void;
   }) => (
-    <div data-testid={`filter-section-${title.toLowerCase()}`} data-expanded={isExpanded}>
+    <div
+      data-testid={`filter-section-${title.toLowerCase()}`}
+      data-expanded={isExpanded}
+    >
       <button onClick={onToggle} data-testid={`toggle-${title.toLowerCase()}`}>
         {title}
       </button>
@@ -65,7 +72,11 @@ jest.mock("@/components", () => ({
     onChange: (checked: boolean) => void;
   }) => (
     <label data-testid={`checkbox-${label.toLowerCase()}`}>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
       {label}
     </label>
   ),
@@ -80,7 +91,9 @@ jest.mock("@/components", () => ({
     onChange: (values: string[]) => void;
     placeholder: string;
   }) => (
-    <div data-testid={`searchable-list-${placeholder.toLowerCase().replace(/\s+/g, "-")}`}>
+    <div
+      data-testid={`searchable-list-${placeholder.toLowerCase().replace(/\s+/g, "-")}`}
+    >
       <input placeholder={placeholder} data-testid="search-input" />
       {items.map((item) => (
         <label key={item}>
@@ -136,7 +149,9 @@ describe("FilterButton", () => {
 
     it("renders department section", () => {
       render(<FilterButton {...defaultProps} />);
-      expect(screen.getByTestId("filter-section-department")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("filter-section-department"),
+      ).toBeInTheDocument();
     });
 
     it("renders squad section", () => {
@@ -146,19 +161,28 @@ describe("FilterButton", () => {
 
     it("passes isOpen to dropdown", () => {
       render(<FilterButton {...defaultProps} isOpen={false} />);
-      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute("data-is-open", "false");
+      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute(
+        "data-is-open",
+        "false",
+      );
     });
 
     it("passes isOpen true to dropdown", () => {
       render(<FilterButton {...defaultProps} isOpen={true} />);
-      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute("data-is-open", "true");
+      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute(
+        "data-is-open",
+        "true",
+      );
     });
   });
 
   describe("role section", () => {
     it("is expanded by default", () => {
       render(<FilterButton {...defaultProps} />);
-      expect(screen.getByTestId("filter-section-role")).toHaveAttribute("data-expanded", "true");
+      expect(screen.getByTestId("filter-section-role")).toHaveAttribute(
+        "data-expanded",
+        "true",
+      );
     });
 
     it("renders supervisor checkbox", () => {
@@ -173,21 +197,32 @@ describe("FilterButton", () => {
 
     it("supervisor checkbox is checked when roleFilters includes supervisor", () => {
       render(<FilterButton {...defaultProps} roleFilters={["supervisor"]} />);
-      const checkbox = screen.getByTestId("checkbox-supervisor").querySelector("input");
+      const checkbox = screen
+        .getByTestId("checkbox-supervisor")
+        .querySelector("input");
       expect(checkbox).toBeChecked();
     });
 
     it("employee checkbox is checked when roleFilters includes employee", () => {
       render(<FilterButton {...defaultProps} roleFilters={["employee"]} />);
-      const checkbox = screen.getByTestId("checkbox-employee").querySelector("input");
+      const checkbox = screen
+        .getByTestId("checkbox-employee")
+        .querySelector("input");
       expect(checkbox).toBeChecked();
     });
 
     it("calls onRoleFiltersChange with supervisor added when supervisor checked", () => {
       const onRoleFiltersChange = jest.fn();
-      render(<FilterButton {...defaultProps} onRoleFiltersChange={onRoleFiltersChange} />);
+      render(
+        <FilterButton
+          {...defaultProps}
+          onRoleFiltersChange={onRoleFiltersChange}
+        />,
+      );
 
-      const checkbox = screen.getByTestId("checkbox-supervisor").querySelector("input")!;
+      const checkbox = screen
+        .getByTestId("checkbox-supervisor")
+        .querySelector("input")!;
       fireEvent.click(checkbox);
 
       expect(onRoleFiltersChange).toHaveBeenCalledWith(["supervisor"]);
@@ -196,10 +231,16 @@ describe("FilterButton", () => {
     it("calls onRoleFiltersChange with supervisor removed when supervisor unchecked", () => {
       const onRoleFiltersChange = jest.fn();
       render(
-        <FilterButton {...defaultProps} roleFilters={["supervisor"]} onRoleFiltersChange={onRoleFiltersChange} />
+        <FilterButton
+          {...defaultProps}
+          roleFilters={["supervisor"]}
+          onRoleFiltersChange={onRoleFiltersChange}
+        />,
       );
 
-      const checkbox = screen.getByTestId("checkbox-supervisor").querySelector("input")!;
+      const checkbox = screen
+        .getByTestId("checkbox-supervisor")
+        .querySelector("input")!;
       fireEvent.click(checkbox);
 
       expect(onRoleFiltersChange).toHaveBeenCalledWith([]);
@@ -212,7 +253,10 @@ describe("FilterButton", () => {
       fireEvent.click(toggleButton);
 
       // After clicking, it should collapse
-      expect(screen.getByTestId("filter-section-role")).toHaveAttribute("data-expanded", "false");
+      expect(screen.getByTestId("filter-section-role")).toHaveAttribute(
+        "data-expanded",
+        "false",
+      );
     });
   });
 
@@ -221,7 +265,7 @@ describe("FilterButton", () => {
       render(<FilterButton {...defaultProps} />);
       expect(screen.getByTestId("filter-section-department")).toHaveAttribute(
         "data-expanded",
-        "false"
+        "false",
       );
     });
 
@@ -231,12 +275,19 @@ describe("FilterButton", () => {
       // Expand the department section
       fireEvent.click(screen.getByTestId("toggle-department"));
 
-      expect(screen.getByTestId("searchable-list-search-departments")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("searchable-list-search-departments"),
+      ).toBeInTheDocument();
     });
 
     it("calls onDepartmentFiltersChange when department selected", () => {
       const onDepartmentFiltersChange = jest.fn();
-      render(<FilterButton {...defaultProps} onDepartmentFiltersChange={onDepartmentFiltersChange} />);
+      render(
+        <FilterButton
+          {...defaultProps}
+          onDepartmentFiltersChange={onDepartmentFiltersChange}
+        />,
+      );
 
       // Expand department section
       fireEvent.click(screen.getByTestId("toggle-department"));
@@ -251,7 +302,10 @@ describe("FilterButton", () => {
   describe("squad section", () => {
     it("is collapsed by default", () => {
       render(<FilterButton {...defaultProps} />);
-      expect(screen.getByTestId("filter-section-squad")).toHaveAttribute("data-expanded", "false");
+      expect(screen.getByTestId("filter-section-squad")).toHaveAttribute(
+        "data-expanded",
+        "false",
+      );
     });
 
     it("shows squad list when expanded", () => {
@@ -260,12 +314,19 @@ describe("FilterButton", () => {
       // Expand the squad section
       fireEvent.click(screen.getByTestId("toggle-squad"));
 
-      expect(screen.getByTestId("searchable-list-search-squads")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("searchable-list-search-squads"),
+      ).toBeInTheDocument();
     });
 
     it("calls onSquadFiltersChange when squad selected", () => {
       const onSquadFiltersChange = jest.fn();
-      render(<FilterButton {...defaultProps} onSquadFiltersChange={onSquadFiltersChange} />);
+      render(
+        <FilterButton
+          {...defaultProps}
+          onSquadFiltersChange={onSquadFiltersChange}
+        />,
+      );
 
       // Expand squad section
       fireEvent.click(screen.getByTestId("toggle-squad"));
@@ -280,22 +341,36 @@ describe("FilterButton", () => {
   describe("active filter count", () => {
     it("shows 0 when no filters active", () => {
       render(<FilterButton {...defaultProps} />);
-      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute("data-count", "0");
+      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute(
+        "data-count",
+        "0",
+      );
     });
 
     it("shows 1 when one role filter active", () => {
       render(<FilterButton {...defaultProps} roleFilters={["employee"]} />);
-      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute("data-count", "1");
+      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute(
+        "data-count",
+        "1",
+      );
     });
 
     it("shows 1 when one department filter active", () => {
-      render(<FilterButton {...defaultProps} departmentFilters={["Engineering"]} />);
-      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute("data-count", "1");
+      render(
+        <FilterButton {...defaultProps} departmentFilters={["Engineering"]} />,
+      );
+      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute(
+        "data-count",
+        "1",
+      );
     });
 
     it("shows 1 when one squad filter active", () => {
       render(<FilterButton {...defaultProps} squadFilters={["Frontend"]} />);
-      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute("data-count", "1");
+      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute(
+        "data-count",
+        "1",
+      );
     });
 
     it("shows 3 when one of each filter active", () => {
@@ -305,9 +380,12 @@ describe("FilterButton", () => {
           roleFilters={["employee"]}
           departmentFilters={["Engineering"]}
           squadFilters={["Frontend"]}
-        />
+        />,
       );
-      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute("data-count", "3");
+      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute(
+        "data-count",
+        "3",
+      );
     });
 
     it("shows 5 when multiple filters active across categories", () => {
@@ -317,9 +395,12 @@ describe("FilterButton", () => {
           roleFilters={["employee", "supervisor"]}
           departmentFilters={["Engineering", "Marketing"]}
           squadFilters={["Frontend"]}
-        />
+        />,
       );
-      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute("data-count", "5");
+      expect(screen.getByTestId("filter-dropdown")).toHaveAttribute(
+        "data-count",
+        "5",
+      );
     });
   });
 
@@ -361,10 +442,13 @@ describe("FilterButton", () => {
       rerender(<FilterButton {...defaultProps} roleFilters={["employee"]} />);
 
       // Section states should be maintained
-      expect(screen.getByTestId("filter-section-role")).toHaveAttribute("data-expanded", "false");
+      expect(screen.getByTestId("filter-section-role")).toHaveAttribute(
+        "data-expanded",
+        "false",
+      );
       expect(screen.getByTestId("filter-section-department")).toHaveAttribute(
         "data-expanded",
-        "true"
+        "true",
       );
     });
   });

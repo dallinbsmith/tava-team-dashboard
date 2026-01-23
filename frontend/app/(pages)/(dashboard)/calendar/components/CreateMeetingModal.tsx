@@ -5,7 +5,14 @@ import { CreateMeetingRequest, RecurrenceType } from "../types";
 import { createMeetingAction } from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { BaseModal, Button, FormError, CenteredSpinner } from "@/components";
-import { format, addHours, addDays, setHours, setMinutes, startOfHour } from "date-fns";
+import {
+  format,
+  addHours,
+  addDays,
+  setHours,
+  setMinutes,
+  startOfHour,
+} from "date-fns";
 
 interface CreateMeetingModalProps {
   isOpen: boolean;
@@ -20,18 +27,24 @@ export default function CreateMeetingModal({
 }: CreateMeetingModalProps) {
   const { allUsers, allUsersLoading } = useOrganization();
 
-  const defaultStartTime = setMinutes(setHours(startOfHour(addDays(new Date(), 1)), 10), 0);
+  const defaultStartTime = setMinutes(
+    setHours(startOfHour(addDays(new Date(), 1)), 10),
+    0,
+  );
   const defaultEndTime = addHours(defaultStartTime, 1);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [startDate, setStartDate] = useState(format(defaultStartTime, "yyyy-MM-dd"));
+  const [startDate, setStartDate] = useState(
+    format(defaultStartTime, "yyyy-MM-dd"),
+  );
   const [startTime, setStartTime] = useState(format(defaultStartTime, "HH:mm"));
   const [endDate, setEndDate] = useState(format(defaultEndTime, "yyyy-MM-dd"));
   const [endTime, setEndTime] = useState(format(defaultEndTime, "HH:mm"));
   const [attendeeIds, setAttendeeIds] = useState<number[]>([]);
   const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrenceType, setRecurrenceType] = useState<RecurrenceType>("weekly");
+  const [recurrenceType, setRecurrenceType] =
+    useState<RecurrenceType>("weekly");
   const [recurrenceInterval, setRecurrenceInterval] = useState(1);
   const [recurrenceEndDate, setRecurrenceEndDate] = useState("");
 
@@ -60,7 +73,9 @@ export default function CreateMeetingModal({
 
   const toggleAttendee = (userId: number) => {
     setAttendeeIds((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
     );
   };
 
@@ -124,7 +139,12 @@ export default function CreateMeetingModal({
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Create Meeting" maxWidth="max-w-lg">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Create Meeting"
+      maxWidth="max-w-lg"
+    >
       {allUsersLoading ? (
         <CenteredSpinner />
       ) : (
@@ -132,7 +152,10 @@ export default function CreateMeetingModal({
           <FormError error={error} />
 
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-theme-text mb-1">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-theme-text mb-1"
+            >
               Title *
             </label>
             <input
@@ -146,7 +169,10 @@ export default function CreateMeetingModal({
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-theme-text mb-1">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-theme-text mb-1"
+            >
               Description
             </label>
             <textarea
@@ -161,7 +187,9 @@ export default function CreateMeetingModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">Start *</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Start *
+              </label>
               <div className="space-y-2">
                 <input
                   type="date"
@@ -179,7 +207,9 @@ export default function CreateMeetingModal({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">End *</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                End *
+              </label>
               <div className="space-y-2">
                 <input
                   type="date"
@@ -219,7 +249,9 @@ export default function CreateMeetingModal({
                   <span className="ml-2 text-sm text-theme-text">
                     {user.first_name} {user.last_name}
                   </span>
-                  <span className="ml-auto text-xs text-theme-text-muted">{user.department}</span>
+                  <span className="ml-auto text-xs text-theme-text-muted">
+                    {user.department}
+                  </span>
                 </label>
               ))}
             </div>
@@ -233,25 +265,33 @@ export default function CreateMeetingModal({
                 onChange={(e) => setIsRecurring(e.target.checked)}
                 className="w-4 h-4 text-primary-600 border-theme-border bg-theme-elevated focus:ring-primary-500"
               />
-              <span className="text-sm font-medium text-theme-text">Recurring meeting</span>
+              <span className="text-sm font-medium text-theme-text">
+                Recurring meeting
+              </span>
             </label>
           </div>
 
           {isRecurring && (
             <div className="pl-6 space-y-3 border-l-2 border-primary-500/30">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-theme-text-muted">Repeat every</span>
+                <span className="text-sm text-theme-text-muted">
+                  Repeat every
+                </span>
                 <input
                   type="number"
                   min={1}
                   max={12}
                   value={recurrenceInterval}
-                  onChange={(e) => setRecurrenceInterval(parseInt(e.target.value) || 1)}
+                  onChange={(e) =>
+                    setRecurrenceInterval(parseInt(e.target.value) || 1)
+                  }
                   className="w-16 px-2 py-1 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center"
                 />
                 <select
                   value={recurrenceType}
-                  onChange={(e) => setRecurrenceType(e.target.value as RecurrenceType)}
+                  onChange={(e) =>
+                    setRecurrenceType(e.target.value as RecurrenceType)
+                  }
                   className="px-3 py-1 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="daily">day(s)</option>

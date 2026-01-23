@@ -33,15 +33,19 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               </svg>
             </div>
 
-            <h2 className="text-lg font-semibold text-white mb-2">Application Error</h2>
+            <h2 className="text-lg font-semibold text-white mb-2">
+              Application Error
+            </h2>
 
             <p className="text-gray-400 mb-6">
-              A critical error occurred. Please try again or contact support if the problem
-              persists.
+              A critical error occurred. Please try again or contact support if
+              the problem persists.
             </p>
 
             {error.digest && (
-              <p className="text-xs text-gray-500 mb-4 font-mono">Error ID: {error.digest}</p>
+              <p className="text-xs text-gray-500 mb-4 font-mono">
+                Error ID: {error.digest}
+              </p>
             )}
 
             <div className="flex gap-3 justify-center">
@@ -49,7 +53,12 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 onClick={reset}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 transition-colors rounded"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -64,7 +73,12 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 href="/"
                 className="inline-flex items-center gap-2 px-4 py-2 border border-gray-600 text-gray-300 hover:bg-gray-700 transition-colors rounded"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

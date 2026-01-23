@@ -4,7 +4,8 @@ import { useImpersonation } from "@/providers/ImpersonationProvider";
 import { Eye, X } from "lucide-react";
 
 export default function ImpersonationBanner() {
-  const { isImpersonating, impersonatedUser, endImpersonation } = useImpersonation();
+  const { isImpersonating, impersonatedUser, endImpersonation } =
+    useImpersonation();
 
   if (!isImpersonating || !impersonatedUser) {
     return null;

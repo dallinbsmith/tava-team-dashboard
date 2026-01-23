@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { TimeOffRequest, CreateTimeOffRequest, ReviewTimeOffRequest } from "../types";
+import {
+  TimeOffRequest,
+  CreateTimeOffRequest,
+  ReviewTimeOffRequest,
+} from "../types";
 import {
   ActionResult,
   authPost,
@@ -13,13 +17,16 @@ import {
 } from "@/lib/server-actions";
 
 export const createTimeOffRequestAction = async (
-  data: CreateTimeOffRequest
+  data: CreateTimeOffRequest,
 ): Promise<ActionResult<TimeOffRequest>> => {
   try {
     const res = await authPost("/api/time-off", data);
 
     if (!res.ok) {
-      const error = await extractErrorMessage(res, "Failed to create time off request");
+      const error = await extractErrorMessage(
+        res,
+        "Failed to create time off request",
+      );
       return failure(error);
     }
 
@@ -29,16 +36,23 @@ export const createTimeOffRequestAction = async (
     return success(request);
   } catch (e) {
     console.error("createTimeOffRequestAction error:", e);
-    return failure(e instanceof Error ? e.message : "Failed to create time off request");
+    return failure(
+      e instanceof Error ? e.message : "Failed to create time off request",
+    );
   }
 };
 
-export const cancelTimeOffRequestAction = async (id: number): Promise<ActionResult<void>> => {
+export const cancelTimeOffRequestAction = async (
+  id: number,
+): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/time-off/${id}`);
 
     if (!res.ok) {
-      const error = await extractErrorMessage(res, "Failed to cancel time off request");
+      const error = await extractErrorMessage(
+        res,
+        "Failed to cancel time off request",
+      );
       return failure(error);
     }
 
@@ -47,19 +61,24 @@ export const cancelTimeOffRequestAction = async (id: number): Promise<ActionResu
     return success(undefined);
   } catch (e) {
     console.error("cancelTimeOffRequestAction error:", e);
-    return failure(e instanceof Error ? e.message : "Failed to cancel time off request");
+    return failure(
+      e instanceof Error ? e.message : "Failed to cancel time off request",
+    );
   }
 };
 
 export const reviewTimeOffRequestAction = async (
   id: number,
-  review: ReviewTimeOffRequest
+  review: ReviewTimeOffRequest,
 ): Promise<ActionResult<TimeOffRequest>> => {
   try {
     const res = await authPut(`/api/time-off/${id}/review`, review);
 
     if (!res.ok) {
-      const error = await extractErrorMessage(res, "Failed to review time off request");
+      const error = await extractErrorMessage(
+        res,
+        "Failed to review time off request",
+      );
       return failure(error);
     }
 
@@ -69,6 +88,8 @@ export const reviewTimeOffRequestAction = async (
     return success(request);
   } catch (e) {
     console.error("reviewTimeOffRequestAction error:", e);
-    return failure(e instanceof Error ? e.message : "Failed to review time off request");
+    return failure(
+      e instanceof Error ? e.message : "Failed to review time off request",
+    );
   }
 };

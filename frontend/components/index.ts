@@ -1,10 +1,19 @@
 export { ErrorBoundary, QueryErrorFallback } from "./ErrorBoundary";
 export { BaseModal, ConfirmModal } from "./BaseModal";
-export type { BaseModalProps, ConfirmModalProps, ConfirmModalVariant } from "./BaseModal";
+export type {
+  BaseModalProps,
+  ConfirmModalProps,
+  ConfirmModalVariant,
+} from "./BaseModal";
 export { CreateEmployeeModal } from "./CreateEmployeeModal";
 
 // Filter Components
-export { FilterSection, FilterCheckbox, FilterDropdown, SearchableFilterList } from "./filters";
+export {
+  FilterSection,
+  FilterCheckbox,
+  FilterDropdown,
+  SearchableFilterList,
+} from "./filters";
 
 export type {
   FilterSectionProps,

@@ -19,7 +19,9 @@ import { UserPlus } from "lucide-react";
 import { User, Squad } from "@/shared/types/user";
 
 const JiraTasks = lazy(() => import("@/app/(pages)/jira/components/JiraTasks"));
-const CalendarWidget = lazy(() => import("./calendar/components/CalendarWidget"));
+const CalendarWidget = lazy(
+  () => import("./calendar/components/CalendarWidget"),
+);
 const TimeOffWidget = lazy(() => import("./dashboard-stats/TimeOffWidget"));
 
 import { JiraTasksSkeleton } from "@/app/(pages)/jira/components/JiraTasksSkeleton";
@@ -60,10 +62,16 @@ export const DashboardPageClient = ({
     refetchEmployees,
   } = useOrganization();
   const effectiveUser = currentUser ?? initialCurrentUser;
-  const employees = employeesFromProvider?.length > 0 ? employeesFromProvider : initialEmployees;
-  const squads = squadsFromProvider?.length > 0 ? squadsFromProvider : initialSquads;
+  const employees =
+    employeesFromProvider?.length > 0
+      ? employeesFromProvider
+      : initialEmployees;
+  const squads =
+    squadsFromProvider?.length > 0 ? squadsFromProvider : initialSquads;
   const departments =
-    departmentsFromProvider?.length > 0 ? departmentsFromProvider : initialDepartments;
+    departmentsFromProvider?.length > 0
+      ? departmentsFromProvider
+      : initialDepartments;
   const effectiveIsSupervisorOrAdmin =
     effectiveUser?.role === "supervisor" || effectiveUser?.role === "admin";
   const [activeModal, setActiveModal] = useState<ModalType>(null);
@@ -105,10 +113,13 @@ export const DashboardPageClient = ({
     return (
       <div className="mb-6">
         <ErrorAlert title={isDev ? "Development Error" : undefined}>
-          {isDev ? userError : "Unable to load your profile. Please try again later."}
+          {isDev
+            ? userError
+            : "Unable to load your profile. Please try again later."}
           {isDev && (
             <p className="text-sm mt-1">
-              Make sure your Go backend is running on port 8080 and PostgreSQL is started.
+              Make sure your Go backend is running on port 8080 and PostgreSQL
+              is started.
             </p>
           )}
         </ErrorAlert>
@@ -185,7 +196,9 @@ export const DashboardPageClient = ({
             onCreateMeeting={() => setActiveModal("meeting")}
             onRequestTimeOff={() => setActiveModal("timeOff")}
             onCreateTimeOffForEmployee={
-              effectiveIsSupervisorOrAdmin ? () => setActiveModal("timeOffForEmployee") : undefined
+              effectiveIsSupervisorOrAdmin
+                ? () => setActiveModal("timeOffForEmployee")
+                : undefined
             }
             onViewTask={handleViewTask}
             onViewMeeting={handleViewMeeting}

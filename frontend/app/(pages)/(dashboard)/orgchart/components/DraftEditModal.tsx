@@ -11,7 +11,11 @@ interface DraftEditModalProps {
   departments: string[];
   isOpen: boolean;
   onClose: () => void;
-  onSave: (newDepartment: string, squadIds: number[], newRole?: "employee" | "supervisor") => void;
+  onSave: (
+    newDepartment: string,
+    squadIds: number[],
+    newRole?: "employee" | "supervisor",
+  ) => void;
 }
 
 export default function DraftEditModal({
@@ -24,10 +28,10 @@ export default function DraftEditModal({
 }: DraftEditModalProps) {
   const [department, setDepartment] = useState(employee.department || "");
   const [selectedSquadIds, setSelectedSquadIds] = useState<number[]>(
-    employee.squads?.map((s) => s.id) || []
+    employee.squads?.map((s) => s.id) || [],
   );
   const [role, setRole] = useState<"employee" | "supervisor">(
-    employee.role === "admin" ? "supervisor" : employee.role
+    employee.role === "admin" ? "supervisor" : employee.role,
   );
   const [isCreatingDepartment, setIsCreatingDepartment] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState("");
@@ -41,7 +45,8 @@ export default function DraftEditModal({
   const originalRole = employee.role === "admin" ? "supervisor" : employee.role;
   const roleChanged = role !== originalRole;
 
-  const hasChanges = department !== (employee.department || "") || squadsChanged || roleChanged;
+  const hasChanges =
+    department !== (employee.department || "") || squadsChanged || roleChanged;
 
   if (!isOpen) return null;
 
@@ -57,7 +62,9 @@ export default function DraftEditModal({
 
   const toggleSquad = (squadId: number) => {
     setSelectedSquadIds((prev) =>
-      prev.includes(squadId) ? prev.filter((id) => id !== squadId) : [...prev, squadId]
+      prev.includes(squadId)
+        ? prev.filter((id) => id !== squadId)
+        : [...prev, squadId],
     );
   };
 
@@ -73,8 +80,13 @@ export default function DraftEditModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-theme-surface border border-theme-border rounded-lg w-full max-w-md mx-4 shadow-2xl">
         <div className="p-4 border-b border-theme-border flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-theme-text">Edit Employee</h2>
-          <button onClick={onClose} className="p-1 text-theme-text-muted hover:text-theme-text">
+          <h2 className="text-lg font-semibold text-theme-text">
+            Edit Employee
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-1 text-theme-text-muted hover:text-theme-text"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -91,13 +103,17 @@ export default function DraftEditModal({
               <div className="font-medium text-theme-text">
                 {employee.first_name} {employee.last_name}
               </div>
-              <div className="text-sm text-theme-text-muted">{employee.title || employee.role}</div>
+              <div className="text-sm text-theme-text-muted">
+                {employee.title || employee.role}
+              </div>
             </div>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">Department</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Department
+              </label>
               {isCreatingDepartment ? (
                 <div className="flex gap-2">
                   <input
@@ -136,16 +152,22 @@ export default function DraftEditModal({
                       {d}
                     </option>
                   ))}
-                  <option value="__create_new__">+ Create new department</option>
+                  <option value="__create_new__">
+                    + Create new department
+                  </option>
                 </select>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">Squads</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Squads
+              </label>
               <div className="border border-theme-border rounded bg-theme-elevated p-2 max-h-40 overflow-y-auto">
                 {squads.length === 0 ? (
-                  <p className="text-sm text-theme-text-muted p-2">No squads available</p>
+                  <p className="text-sm text-theme-text-muted p-2">
+                    No squads available
+                  </p>
                 ) : (
                   squads.map((squad, index) => (
                     <label
@@ -158,20 +180,25 @@ export default function DraftEditModal({
                         onChange={() => toggleSquad(squad.id)}
                         className="w-4 h-4 text-primary-500 border-theme-border rounded focus:ring-primary-500"
                       />
-                      <span className="text-sm text-theme-text">{squad.name}</span>
+                      <span className="text-sm text-theme-text">
+                        {squad.name}
+                      </span>
                     </label>
                   ))
                 )}
               </div>
               {selectedSquadIds.length > 0 && (
                 <p className="text-xs text-theme-text-muted mt-1">
-                  {selectedSquadIds.length} squad{selectedSquadIds.length !== 1 ? "s" : ""} selected
+                  {selectedSquadIds.length} squad
+                  {selectedSquadIds.length !== 1 ? "s" : ""} selected
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">Role</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Role
+              </label>
               <div className="flex gap-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -218,7 +245,13 @@ export default function DraftEditModal({
             Cancel
           </button>
           <button
-            onClick={() => onSave(department, selectedSquadIds, roleChanged ? role : undefined)}
+            onClick={() =>
+              onSave(
+                department,
+                selectedSquadIds,
+                roleChanged ? role : undefined,
+              )
+            }
             disabled={!hasChanges}
             className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >

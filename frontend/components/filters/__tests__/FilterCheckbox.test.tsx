@@ -80,7 +80,13 @@ describe("FilterCheckbox", () => {
   describe("onChange behavior", () => {
     it("calls onChange with true when clicking unchecked checkbox", () => {
       const onChange = jest.fn();
-      render(<FilterCheckbox {...defaultProps} checked={false} onChange={onChange} />);
+      render(
+        <FilterCheckbox
+          {...defaultProps}
+          checked={false}
+          onChange={onChange}
+        />,
+      );
 
       fireEvent.click(screen.getByRole("button"));
 
@@ -90,7 +96,9 @@ describe("FilterCheckbox", () => {
 
     it("calls onChange with false when clicking checked checkbox", () => {
       const onChange = jest.fn();
-      render(<FilterCheckbox {...defaultProps} checked={true} onChange={onChange} />);
+      render(
+        <FilterCheckbox {...defaultProps} checked={true} onChange={onChange} />,
+      );
 
       fireEvent.click(screen.getByRole("button"));
 
@@ -101,7 +109,11 @@ describe("FilterCheckbox", () => {
     it("toggles value on each click", () => {
       const onChange = jest.fn();
       const { rerender } = render(
-        <FilterCheckbox {...defaultProps} checked={false} onChange={onChange} />
+        <FilterCheckbox
+          {...defaultProps}
+          checked={false}
+          onChange={onChange}
+        />,
       );
 
       // First click: unchecked -> should call with true
@@ -109,7 +121,9 @@ describe("FilterCheckbox", () => {
       expect(onChange).toHaveBeenLastCalledWith(true);
 
       // Simulate state change
-      rerender(<FilterCheckbox {...defaultProps} checked={true} onChange={onChange} />);
+      rerender(
+        <FilterCheckbox {...defaultProps} checked={true} onChange={onChange} />,
+      );
 
       // Second click: checked -> should call with false
       fireEvent.click(screen.getByRole("button"));
@@ -160,10 +174,10 @@ describe("FilterCheckbox", () => {
         <FilterCheckbox
           {...defaultProps}
           label="This is a very long filter label that might wrap"
-        />
+        />,
       );
       expect(
-        screen.getByText("This is a very long filter label that might wrap")
+        screen.getByText("This is a very long filter label that might wrap"),
       ).toBeInTheDocument();
     });
 

@@ -51,7 +51,12 @@ jest.mock("@/shared/common/Avatar", () => {
     firstName: string;
     lastName: string;
   }) {
-    return <div data-testid="avatar">{firstName[0]}{lastName[0]}</div>;
+    return (
+      <div data-testid="avatar">
+        {firstName[0]}
+        {lastName[0]}
+      </div>
+    );
   };
 });
 
@@ -93,7 +98,9 @@ jest.mock("date-fns", () => {
 
 describe("TimeOffWidget", () => {
   // Use dates relative to mockToday (2024-12-15)
-  const createMockRequest = (overrides: Partial<TimeOffRequest> = {}): TimeOffRequest => ({
+  const createMockRequest = (
+    overrides: Partial<TimeOffRequest> = {},
+  ): TimeOffRequest => ({
     id: 1,
     user_id: 1,
     request_type: "vacation",
@@ -192,7 +199,7 @@ describe("TimeOffWidget", () => {
     });
 
     it("shows empty state for pending when no requests", () => {
-      mockUseMyTimeOffRequests.mockImplementation((status) => ({
+      mockUseMyTimeOffRequests.mockImplementation(() => ({
         data: [],
         isLoading: false,
       }));
@@ -226,7 +233,10 @@ describe("TimeOffWidget", () => {
   describe("pending tab", () => {
     it("switches to pending tab when clicked", () => {
       mockUseMyTimeOffRequests.mockImplementation((status) => ({
-        data: status === "pending" ? [createMockRequest({ status: "pending" })] : [],
+        data:
+          status === "pending"
+            ? [createMockRequest({ status: "pending" })]
+            : [],
         isLoading: false,
       }));
 
@@ -239,7 +249,10 @@ describe("TimeOffWidget", () => {
 
     it("shows cancel button for employee pending requests", async () => {
       mockUseMyTimeOffRequests.mockImplementation((status) => ({
-        data: status === "pending" ? [createMockRequest({ status: "pending" })] : [],
+        data:
+          status === "pending"
+            ? [createMockRequest({ status: "pending" })]
+            : [],
         isLoading: false,
       }));
 
@@ -257,7 +270,10 @@ describe("TimeOffWidget", () => {
       });
 
       mockUseMyTimeOffRequests.mockImplementation((status) => ({
-        data: status === "pending" ? [createMockRequest({ id: 42, status: "pending" })] : [],
+        data:
+          status === "pending"
+            ? [createMockRequest({ id: 42, status: "pending" })]
+            : [],
         isLoading: false,
       }));
 
@@ -403,7 +419,7 @@ describe("TimeOffWidget", () => {
   describe("pagination", () => {
     it("shows pagination when more than one page", () => {
       const manyRequests = Array.from({ length: 10 }, (_, i) =>
-        createMockRequest({ id: i + 1 })
+        createMockRequest({ id: i + 1 }),
       );
 
       mockUseMyTimeOffRequests.mockImplementation((status) => ({

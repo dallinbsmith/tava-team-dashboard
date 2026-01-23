@@ -36,7 +36,7 @@ describe("ErrorBoundary", () => {
       render(
         <ErrorBoundary>
           <ThrowError shouldThrow={false} />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByTestId("child-content")).toBeInTheDocument();
@@ -47,7 +47,7 @@ describe("ErrorBoundary", () => {
         <ErrorBoundary>
           <div data-testid="child-1">Child 1</div>
           <div data-testid="child-2">Child 2</div>
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByTestId("child-1")).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe("ErrorBoundary", () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
@@ -71,7 +71,7 @@ describe("ErrorBoundary", () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText("Test error message")).toBeInTheDocument();
@@ -81,31 +81,40 @@ describe("ErrorBoundary", () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
-      expect(screen.getByText("An unexpected error occurred")).toBeInTheDocument();
+      expect(
+        screen.getByText("An unexpected error occurred"),
+      ).toBeInTheDocument();
     });
 
     it("shows 'Try Again' button", () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
-      expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /try again/i }),
+      ).toBeInTheDocument();
     });
 
     it("shows 'Go Home' link", () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
-      expect(screen.getByRole("link", { name: /go home/i })).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /go home/i })).toHaveAttribute("href", "/");
+      expect(
+        screen.getByRole("link", { name: /go home/i }),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /go home/i })).toHaveAttribute(
+        "href",
+        "/",
+      );
     });
   });
 
@@ -123,7 +132,7 @@ describe("ErrorBoundary", () => {
       const { rerender } = render(
         <ErrorBoundary>
           <ControlledThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
@@ -138,7 +147,7 @@ describe("ErrorBoundary", () => {
       rerender(
         <ErrorBoundary>
           <ControlledThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByTestId("recovered")).toBeInTheDocument();
@@ -148,22 +157,28 @@ describe("ErrorBoundary", () => {
   describe("custom fallback", () => {
     it("renders custom fallback element", () => {
       render(
-        <ErrorBoundary fallback={<div data-testid="custom-fallback">Custom error UI</div>}>
+        <ErrorBoundary
+          fallback={<div data-testid="custom-fallback">Custom error UI</div>}
+        >
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByTestId("custom-fallback")).toBeInTheDocument();
-      expect(screen.queryByText("Something went wrong")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Something went wrong"),
+      ).not.toBeInTheDocument();
     });
 
     it("renders custom fallback function with error", () => {
       render(
         <ErrorBoundary
-          fallback={(error) => <div data-testid="custom-fallback">Error: {error.message}</div>}
+          fallback={(error) => (
+            <div data-testid="custom-fallback">Error: {error.message}</div>
+          )}
         >
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByTestId("custom-fallback")).toBeInTheDocument();
@@ -189,7 +204,7 @@ describe("ErrorBoundary", () => {
           )}
         >
           <ControlledThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText("Error occurred")).toBeInTheDocument();
@@ -207,7 +222,7 @@ describe("ErrorBoundary", () => {
           )}
         >
           <ControlledThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByTestId("recovered")).toBeInTheDocument();
@@ -219,19 +234,23 @@ describe("ErrorBoundary", () => {
       render(
         <ErrorBoundary minimal>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText("Something went wrong")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
-      expect(screen.queryByRole("link", { name: /go home/i })).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /try again/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /go home/i }),
+      ).not.toBeInTheDocument();
     });
 
     it("minimal mode has compact styling", () => {
       const { container } = render(
         <ErrorBoundary minimal>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       const wrapper = container.firstChild;
@@ -250,7 +269,7 @@ describe("ErrorBoundary", () => {
       const { rerender } = render(
         <ErrorBoundary minimal>
           <ControlledThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       shouldThrow = false;
@@ -259,7 +278,7 @@ describe("ErrorBoundary", () => {
       rerender(
         <ErrorBoundary minimal>
           <ControlledThrow />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByTestId("recovered")).toBeInTheDocument();
@@ -273,7 +292,7 @@ describe("ErrorBoundary", () => {
       render(
         <ErrorBoundary onError={onError}>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(onError).toHaveBeenCalledTimes(1);
@@ -281,7 +300,7 @@ describe("ErrorBoundary", () => {
         expect.any(Error),
         expect.objectContaining({
           componentStack: expect.any(String),
-        })
+        }),
       );
     });
 
@@ -291,7 +310,7 @@ describe("ErrorBoundary", () => {
       render(
         <ErrorBoundary onError={onError}>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       const [error] = onError.mock.calls[0];
@@ -304,18 +323,23 @@ describe("ErrorBoundary", () => {
       const { container } = render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       const wrapper = container.firstChild;
-      expect(wrapper).toHaveClass("min-h-[300px]", "flex", "items-center", "justify-center");
+      expect(wrapper).toHaveClass(
+        "min-h-[300px]",
+        "flex",
+        "items-center",
+        "justify-center",
+      );
     });
 
     it("has proper card styling", () => {
       const { container } = render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       const card = container.querySelector(".bg-theme-surface");
@@ -326,7 +350,7 @@ describe("ErrorBoundary", () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       const errorMessage = screen.getByText("Test error message");
@@ -339,7 +363,7 @@ describe("ErrorBoundary", () => {
       const { container } = render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       const iconContainer = container.querySelector(".bg-red-900\\/40");
@@ -363,7 +387,9 @@ describe("QueryErrorFallback", () => {
     });
 
     it("renders alert icon", () => {
-      const { container } = render(<QueryErrorFallback error={new Error("Test")} />);
+      const { container } = render(
+        <QueryErrorFallback error={new Error("Test")} />,
+      );
 
       const iconContainer = container.querySelector(".bg-red-900\\/40");
       expect(iconContainer).toBeInTheDocument();
@@ -372,15 +398,24 @@ describe("QueryErrorFallback", () => {
 
   describe("retry button", () => {
     it("renders retry button when resetErrorBoundary provided", () => {
-      render(<QueryErrorFallback error={new Error("Test error")} resetErrorBoundary={jest.fn()} />);
+      render(
+        <QueryErrorFallback
+          error={new Error("Test error")}
+          resetErrorBoundary={jest.fn()}
+        />,
+      );
 
-      expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /retry/i }),
+      ).toBeInTheDocument();
     });
 
     it("does not render retry button when resetErrorBoundary not provided", () => {
       render(<QueryErrorFallback error={new Error("Test error")} />);
 
-      expect(screen.queryByRole("button", { name: /retry/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /retry/i }),
+      ).not.toBeInTheDocument();
     });
 
     it("calls resetErrorBoundary when retry clicked", () => {
@@ -390,7 +425,7 @@ describe("QueryErrorFallback", () => {
         <QueryErrorFallback
           error={new Error("Test error")}
           resetErrorBoundary={resetErrorBoundary}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByRole("button", { name: /retry/i }));
@@ -400,19 +435,32 @@ describe("QueryErrorFallback", () => {
 
   describe("styling", () => {
     it("has surface background", () => {
-      const { container } = render(<QueryErrorFallback error={new Error("Test")} />);
+      const { container } = render(
+        <QueryErrorFallback error={new Error("Test")} />,
+      );
 
-      expect(container.firstChild).toHaveClass("bg-theme-surface", "border", "border-theme-border");
+      expect(container.firstChild).toHaveClass(
+        "bg-theme-surface",
+        "border",
+        "border-theme-border",
+      );
     });
 
     it("has proper padding", () => {
-      const { container } = render(<QueryErrorFallback error={new Error("Test")} />);
+      const { container } = render(
+        <QueryErrorFallback error={new Error("Test")} />,
+      );
 
       expect(container.firstChild).toHaveClass("p-6");
     });
 
     it("retry button has primary text color", () => {
-      render(<QueryErrorFallback error={new Error("Test error")} resetErrorBoundary={jest.fn()} />);
+      render(
+        <QueryErrorFallback
+          error={new Error("Test error")}
+          resetErrorBoundary={jest.fn()}
+        />,
+      );
 
       const button = screen.getByRole("button", { name: /retry/i });
       expect(button).toHaveClass("text-primary-400");

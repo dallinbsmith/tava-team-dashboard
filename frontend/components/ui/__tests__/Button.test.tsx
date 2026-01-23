@@ -12,7 +12,9 @@ describe("Button", () => {
   describe("rendering", () => {
     it("renders children text", () => {
       render(<Button>Click me</Button>);
-      expect(screen.getByRole("button", { name: "Click me" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Click me" }),
+      ).toBeInTheDocument();
     });
 
     it("renders as a button element", () => {
@@ -32,7 +34,13 @@ describe("Button", () => {
   });
 
   describe("variants", () => {
-    const variants: ButtonVariant[] = ["primary", "secondary", "danger", "ghost", "success"];
+    const variants: ButtonVariant[] = [
+      "primary",
+      "secondary",
+      "danger",
+      "ghost",
+      "success",
+    ];
 
     it.each(variants)("renders %s variant with correct classes", (variant) => {
       render(<Button variant={variant}>Button</Button>);
@@ -90,7 +98,7 @@ describe("Button", () => {
       render(
         <Button loading icon={Plus}>
           Add Item
-        </Button>
+        </Button>,
       );
 
       const button = screen.getByRole("button");
@@ -114,14 +122,17 @@ describe("Button", () => {
     it("applies disabled styles", () => {
       render(<Button disabled>Disabled</Button>);
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("disabled:opacity-50", "disabled:cursor-not-allowed");
+      expect(button).toHaveClass(
+        "disabled:opacity-50",
+        "disabled:cursor-not-allowed",
+      );
     });
 
     it("is disabled when both disabled and loading are true", () => {
       render(
         <Button disabled loading>
           Submit
-        </Button>
+        </Button>,
       );
       expect(screen.getByRole("button")).toBeDisabled();
     });
@@ -149,7 +160,7 @@ describe("Button", () => {
       render(
         <Button icon={Plus} iconAfter={ChevronRight}>
           Action
-        </Button>
+        </Button>,
       );
 
       const button = screen.getByRole("button");
@@ -161,7 +172,7 @@ describe("Button", () => {
       render(
         <Button loading iconAfter={ChevronRight}>
           Loading
-        </Button>
+        </Button>,
       );
 
       const button = screen.getByRole("button");
@@ -175,7 +186,7 @@ describe("Button", () => {
       const { rerender } = render(
         <Button size="sm" icon={Plus}>
           Small
-        </Button>
+        </Button>,
       );
 
       let svg = screen.getByRole("button").querySelector("svg");
@@ -184,7 +195,7 @@ describe("Button", () => {
       rerender(
         <Button size="md" icon={Plus}>
           Medium
-        </Button>
+        </Button>,
       );
       svg = screen.getByRole("button").querySelector("svg");
       expect(svg).toHaveClass("w-4", "h-4");
@@ -192,7 +203,7 @@ describe("Button", () => {
       rerender(
         <Button size="lg" icon={Plus}>
           Large
-        </Button>
+        </Button>,
       );
       svg = screen.getByRole("button").querySelector("svg");
       expect(svg).toHaveClass("w-5", "h-5");
@@ -225,7 +236,7 @@ describe("Button", () => {
       render(
         <Button disabled onClick={handleClick}>
           Disabled
-        </Button>
+        </Button>,
       );
 
       fireEvent.click(screen.getByRole("button"));
@@ -237,7 +248,7 @@ describe("Button", () => {
       render(
         <Button loading onClick={handleClick}>
           Loading
-        </Button>
+        </Button>,
       );
 
       fireEvent.click(screen.getByRole("button"));
@@ -264,7 +275,10 @@ describe("Button", () => {
 
     it("passes through aria attributes", () => {
       render(<Button aria-label="Close dialog">X</Button>);
-      expect(screen.getByRole("button")).toHaveAttribute("aria-label", "Close dialog");
+      expect(screen.getByRole("button")).toHaveAttribute(
+        "aria-label",
+        "Close dialog",
+      );
     });
 
     it("passes through data attributes", () => {
@@ -297,7 +311,10 @@ describe("IconButton", () => {
     it("requires aria-label prop", () => {
       // This test verifies the component is accessible
       render(<IconButton icon={Plus} aria-label="Add item" />);
-      expect(screen.getByRole("button")).toHaveAttribute("aria-label", "Add item");
+      expect(screen.getByRole("button")).toHaveAttribute(
+        "aria-label",
+        "Add item",
+      );
     });
   });
 
@@ -311,7 +328,9 @@ describe("IconButton", () => {
     });
 
     it("supports other variants", () => {
-      render(<IconButton icon={Settings} aria-label="Settings" variant="primary" />);
+      render(
+        <IconButton icon={Settings} aria-label="Settings" variant="primary" />,
+      );
       const button = screen.getByRole("button");
 
       expect(button).toHaveClass("bg-primary-600");
@@ -320,7 +339,9 @@ describe("IconButton", () => {
 
   describe("sizes", () => {
     it("applies correct padding for each size", () => {
-      const { rerender } = render(<IconButton icon={Settings} aria-label="Settings" size="sm" />);
+      const { rerender } = render(
+        <IconButton icon={Settings} aria-label="Settings" size="sm" />,
+      );
       expect(screen.getByRole("button")).toHaveClass("p-1");
 
       rerender(<IconButton icon={Settings} aria-label="Settings" size="md" />);
@@ -334,7 +355,13 @@ describe("IconButton", () => {
   describe("event handling", () => {
     it("calls onClick when clicked", () => {
       const handleClick = jest.fn();
-      render(<IconButton icon={Settings} aria-label="Settings" onClick={handleClick} />);
+      render(
+        <IconButton
+          icon={Settings}
+          aria-label="Settings"
+          onClick={handleClick}
+        />,
+      );
 
       fireEvent.click(screen.getByRole("button"));
       expect(handleClick).toHaveBeenCalledTimes(1);

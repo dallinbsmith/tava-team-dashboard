@@ -2,7 +2,9 @@ interface JiraTasksSkeletonProps {
   compact?: boolean;
 }
 
-export const JiraTasksSkeleton = ({ compact = false }: JiraTasksSkeletonProps) => {
+export const JiraTasksSkeleton = ({
+  compact = false,
+}: JiraTasksSkeletonProps) => {
   const itemCount = compact ? 4 : 6;
 
   return (
@@ -32,7 +34,9 @@ export const JiraTasksSkeleton = ({ compact = false }: JiraTasksSkeletonProps) =
                 <div className="flex items-center gap-2">
                   <div className="h-5 w-20 bg-theme-elevated rounded" />
                   <div className="h-5 w-16 bg-theme-elevated rounded" />
-                  {!compact && <div className="h-5 w-24 bg-theme-elevated rounded" />}
+                  {!compact && (
+                    <div className="h-5 w-24 bg-theme-elevated rounded" />
+                  )}
                 </div>
               </div>
               <div className="w-4 h-4 bg-theme-elevated rounded flex-shrink-0" />

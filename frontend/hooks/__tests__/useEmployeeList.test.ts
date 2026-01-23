@@ -106,7 +106,9 @@ describe("useEmployeeList", () => {
     });
 
     it("handles undefined employees input", () => {
-      const { result } = renderHook(() => useEmployeeList(undefined as unknown as User[]));
+      const { result } = renderHook(() =>
+        useEmployeeList(undefined as unknown as User[]),
+      );
 
       expect(result.current.filteredEmployees).toEqual([]);
       expect(result.current.departments).toEqual([]);
@@ -125,7 +127,11 @@ describe("useEmployeeList", () => {
     it("sorts departments alphabetically", () => {
       const { result } = renderHook(() => useEmployeeList(mockEmployees));
 
-      expect(result.current.departments).toEqual(["Design", "Engineering", "Marketing"]);
+      expect(result.current.departments).toEqual([
+        "Design",
+        "Engineering",
+        "Marketing",
+      ]);
     });
 
     it("excludes employees without department", () => {
@@ -330,9 +336,11 @@ describe("useEmployeeList", () => {
       });
 
       expect(result.current.filteredEmployees.length).toBe(2);
-      expect(result.current.filteredEmployees.every((e) => e.department === "Engineering")).toBe(
-        true
-      );
+      expect(
+        result.current.filteredEmployees.every(
+          (e) => e.department === "Engineering",
+        ),
+      ).toBe(true);
     });
 
     it("shows all when filter is empty", () => {
@@ -461,7 +469,9 @@ describe("useEmployeeList", () => {
         result.current.setSortOrder("asc");
       });
 
-      const names = result.current.sortedEmployees.map((e) => `${e.first_name} ${e.last_name}`);
+      const names = result.current.sortedEmployees.map(
+        (e) => `${e.first_name} ${e.last_name}`,
+      );
       expect(names[0]).toBe("Alice Anderson");
     });
 
@@ -473,7 +483,9 @@ describe("useEmployeeList", () => {
         result.current.setSortOrder("desc");
       });
 
-      const names = result.current.sortedEmployees.map((e) => `${e.first_name} ${e.last_name}`);
+      const names = result.current.sortedEmployees.map(
+        (e) => `${e.first_name} ${e.last_name}`,
+      );
       expect(names[0]).toBe("Eve Evans");
     });
 

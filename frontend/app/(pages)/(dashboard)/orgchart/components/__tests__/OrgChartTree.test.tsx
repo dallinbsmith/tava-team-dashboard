@@ -29,7 +29,11 @@ jest.mock("@/shared/common/Avatar", () => {
     className?: string;
   }) {
     return (
-      <div data-testid="avatar" data-firstname={firstName} data-lastname={lastName}>
+      <div
+        data-testid="avatar"
+        data-firstname={firstName}
+        data-lastname={lastName}
+      >
         Avatar
       </div>
     );
@@ -68,7 +72,10 @@ describe("OrgChartTree", () => {
     ...overrides,
   });
 
-  const createMockNode = (user: User, children: OrgTreeNode[] = []): OrgTreeNode => ({
+  const createMockNode = (
+    user: User,
+    children: OrgTreeNode[] = [],
+  ): OrgTreeNode => ({
     user,
     children,
   });
@@ -76,22 +83,34 @@ describe("OrgChartTree", () => {
   describe("DraggableEmployeeCard", () => {
     describe("rendering", () => {
       it("renders employee name", () => {
-        const node = createMockNode(createMockUser({ first_name: "Jane", last_name: "Smith" }));
+        const node = createMockNode(
+          createMockUser({ first_name: "Jane", last_name: "Smith" }),
+        );
         render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         expect(screen.getByText("Jane Smith")).toBeInTheDocument();
       });
 
       it("renders employee title", () => {
-        const node = createMockNode(createMockUser({ title: "Senior Developer" }));
+        const node = createMockNode(
+          createMockUser({ title: "Senior Developer" }),
+        );
         render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         expect(screen.getByText("Senior Developer")).toBeInTheDocument();
@@ -101,8 +120,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         expect(screen.getByTestId("avatar")).toBeInTheDocument();
@@ -122,7 +145,7 @@ describe("OrgChartTree", () => {
               isBeingDragged={false}
               isDraftMode={true}
             />
-          </DndContext>
+          </DndContext>,
         );
 
         // On mobile, only the icon shows; on desktop, "Changed" text shows
@@ -134,8 +157,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser({ role: "supervisor" }));
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         const shieldIcons = container.querySelectorAll("svg.lucide-shield");
@@ -146,8 +173,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser({ role: "admin" }));
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         const shieldIcons = container.querySelectorAll("svg.lucide-shield");
@@ -160,8 +191,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         const card = container.firstChild as HTMLElement;
@@ -172,8 +207,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         const card = container.firstChild as HTMLElement;
@@ -184,8 +223,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         const card = container.firstChild as HTMLElement;
@@ -196,8 +239,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         const name = screen.getByText("John Doe");
@@ -208,8 +255,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser({ title: "Engineer" }));
         render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         const title = screen.getByText("Engineer");
@@ -220,12 +271,16 @@ describe("OrgChartTree", () => {
         const node = createMockNode(
           createMockUser({
             squads: [{ id: 1, name: "Frontend Team" }],
-          })
+          }),
         );
         render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         const squadBadge = screen.getByText("Frontend Team");
@@ -238,8 +293,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={true} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={true}
+            />
+          </DndContext>,
         );
 
         const gripIcon = container.querySelector("svg.lucide-grip-vertical");
@@ -250,8 +309,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={false}
+            />
+          </DndContext>,
         );
 
         const gripIcon = container.querySelector("svg.lucide-grip-vertical");
@@ -262,8 +325,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={true} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={true}
+            />
+          </DndContext>,
         );
 
         const pencilIcon = container.querySelector("svg.lucide-pencil");
@@ -274,8 +341,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={true} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={false}
+              isDraftMode={true}
+            />
+          </DndContext>,
         );
 
         const card = container.firstChild as HTMLElement;
@@ -288,8 +359,12 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard node={node} isBeingDragged={true} isDraftMode={true} />
-          </DndContext>
+            <DraggableEmployeeCard
+              node={node}
+              isBeingDragged={true}
+              isDraftMode={true}
+            />
+          </DndContext>,
         );
 
         const card = container.firstChild as HTMLElement;
@@ -315,7 +390,7 @@ describe("OrgChartTree", () => {
             >
               <div>Children</div>
             </DroppableSupervisorZone>
-          </DndContext>
+          </DndContext>,
         );
 
         const wrapper = container.firstChild as HTMLElement;
@@ -337,7 +412,7 @@ describe("OrgChartTree", () => {
             >
               <div>Children</div>
             </DroppableSupervisorZone>
-          </DndContext>
+          </DndContext>,
         );
 
         const wrapper = container.firstChild as HTMLElement;
@@ -348,7 +423,9 @@ describe("OrgChartTree", () => {
     describe("expand/collapse", () => {
       it("shows expand icon when collapsed with children", () => {
         const childNode = createMockNode(createMockUser({ id: 2 }));
-        const node = createMockNode(createMockUser({ role: "supervisor" }), [childNode]);
+        const node = createMockNode(createMockUser({ role: "supervisor" }), [
+          childNode,
+        ]);
         const { container } = render(
           <DndContext>
             <DroppableSupervisorZone
@@ -362,16 +439,20 @@ describe("OrgChartTree", () => {
             >
               <div>Children</div>
             </DroppableSupervisorZone>
-          </DndContext>
+          </DndContext>,
         );
 
-        const chevronRight = container.querySelector("svg.lucide-chevron-right");
+        const chevronRight = container.querySelector(
+          "svg.lucide-chevron-right",
+        );
         expect(chevronRight).toBeInTheDocument();
       });
 
       it("shows collapse icon when expanded with children", () => {
         const childNode = createMockNode(createMockUser({ id: 2 }));
-        const node = createMockNode(createMockUser({ role: "supervisor" }), [childNode]);
+        const node = createMockNode(createMockUser({ role: "supervisor" }), [
+          childNode,
+        ]);
         const { container } = render(
           <DndContext>
             <DroppableSupervisorZone
@@ -385,7 +466,7 @@ describe("OrgChartTree", () => {
             >
               <div>Children</div>
             </DroppableSupervisorZone>
-          </DndContext>
+          </DndContext>,
         );
 
         const chevronDown = container.querySelector("svg.lucide-chevron-down");
@@ -466,7 +547,9 @@ describe("OrgChartTree", () => {
     it("applies department change", () => {
       const user = createMockUser({ department: "Engineering" });
       const trees = [createMockNode(user)];
-      const changes: DraftChange[] = [{ user_id: 1, new_department: "Product" }];
+      const changes: DraftChange[] = [
+        { user_id: 1, new_department: "Product" },
+      ];
 
       const result = applyDraftChangesToTree(trees, changes);
 
@@ -552,7 +635,9 @@ describe("OrgChartTree", () => {
     it("does not modify original trees", () => {
       const user = createMockUser({ department: "Engineering" });
       const trees = [createMockNode(user)];
-      const changes: DraftChange[] = [{ user_id: 1, new_department: "Product" }];
+      const changes: DraftChange[] = [
+        { user_id: 1, new_department: "Product" },
+      ];
 
       applyDraftChangesToTree(trees, changes);
 
@@ -575,15 +660,20 @@ describe("OrgChartTree", () => {
             draggedUserId={null}
             isDraftMode={false}
           />
-        </DndContext>
+        </DndContext>,
       );
 
       expect(screen.getByText("John Doe")).toBeInTheDocument();
     });
 
     it("renders children when expanded", () => {
-      const childNode = createMockNode(createMockUser({ id: 2, first_name: "Jane" }));
-      const node = createMockNode(createMockUser({ id: 1, role: "supervisor" }), [childNode]);
+      const childNode = createMockNode(
+        createMockUser({ id: 2, first_name: "Jane" }),
+      );
+      const node = createMockNode(
+        createMockUser({ id: 1, role: "supervisor" }),
+        [childNode],
+      );
 
       render(
         <DndContext>
@@ -596,15 +686,20 @@ describe("OrgChartTree", () => {
             draggedUserId={null}
             isDraftMode={false}
           />
-        </DndContext>
+        </DndContext>,
       );
 
       expect(screen.getByText("Jane Doe")).toBeInTheDocument();
     });
 
     it("does not render children when collapsed", () => {
-      const childNode = createMockNode(createMockUser({ id: 2, first_name: "Jane" }));
-      const node = createMockNode(createMockUser({ id: 1, role: "supervisor" }), [childNode]);
+      const childNode = createMockNode(
+        createMockUser({ id: 2, first_name: "Jane" }),
+      );
+      const node = createMockNode(
+        createMockUser({ id: 1, role: "supervisor" }),
+        [childNode],
+      );
 
       render(
         <DndContext>
@@ -617,7 +712,7 @@ describe("OrgChartTree", () => {
             draggedUserId={null}
             isDraftMode={false}
           />
-        </DndContext>
+        </DndContext>,
       );
 
       expect(screen.queryByText("Jane Doe")).not.toBeInTheDocument();

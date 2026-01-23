@@ -52,7 +52,8 @@ export const EmployeePageClient = ({
     employee.is_active &&
     currentUser?.id !== employee.id &&
     (currentUser?.role === "admin" ||
-      (currentUser?.role === "supervisor" && employee.supervisor_id === currentUser?.id));
+      (currentUser?.role === "supervisor" &&
+        employee.supervisor_id === currentUser?.id));
 
   const handleImpersonate = () => {
     startImpersonation(employee);
@@ -67,7 +68,9 @@ export const EmployeePageClient = ({
       setIsRemoveModalOpen(false);
       router.push("/");
     } catch (err) {
-      setRemoveError(err instanceof Error ? err.message : "Failed to remove user");
+      setRemoveError(
+        err instanceof Error ? err.message : "Failed to remove user",
+      );
     } finally {
       setIsRemoving(false);
     }
@@ -85,7 +88,8 @@ export const EmployeePageClient = ({
   const canEdit =
     currentUser?.id === employee.id ||
     currentUser?.role === "admin" ||
-    (currentUser?.role === "supervisor" && employee.supervisor_id === currentUser?.id);
+    (currentUser?.role === "supervisor" &&
+      employee.supervisor_id === currentUser?.id);
 
   return (
     <div className="max-w-4xl">
@@ -123,7 +127,9 @@ export const EmployeePageClient = ({
       {!employee.is_active && (
         <div className="mb-4 px-4 py-3 bg-red-900/30 border border-red-500/30 flex items-center gap-3">
           <UserX className="w-5 h-5 text-red-400" />
-          <span className="text-red-300 font-medium">This user has been deactivated</span>
+          <span className="text-red-300 font-medium">
+            This user has been deactivated
+          </span>
         </div>
       )}
 
@@ -151,7 +157,9 @@ export const EmployeePageClient = ({
                     </div>
                     <div>
                       <p className="text-sm text-theme-text-muted">Email</p>
-                      <p className="font-medium text-theme-text">{employee.email}</p>
+                      <p className="font-medium text-theme-text">
+                        {employee.email}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -164,10 +172,14 @@ export const EmployeePageClient = ({
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-theme-elevated flex items-center justify-center">
-                      <Building2 className={`w-5 h-5 font-medium text-theme-text`} />
+                      <Building2
+                        className={`w-5 h-5 font-medium text-theme-text`}
+                      />
                     </div>
                     <div>
-                      <p className="text-sm text-theme-text-muted">Department</p>
+                      <p className="text-sm text-theme-text-muted">
+                        Department
+                      </p>
                       <p className={`font-medium font-medium text-theme-text`}>
                         {employee.department || "Not assigned"}
                       </p>
@@ -191,7 +203,9 @@ export const EmployeePageClient = ({
                           ))}
                         </div>
                       ) : (
-                        <p className="font-medium text-theme-text">Not assigned</p>
+                        <p className="font-medium text-theme-text">
+                          Not assigned
+                        </p>
                       )}
                     </div>
                   </div>
@@ -203,7 +217,8 @@ export const EmployeePageClient = ({
                       <p className="text-sm text-theme-text-muted">Title</p>
                       <p className="font-medium text-theme-text">
                         {employee.title ||
-                          employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
+                          employee.role.charAt(0).toUpperCase() +
+                            employee.role.slice(1)}
                       </p>
                     </div>
                   </div>
@@ -222,8 +237,12 @@ export const EmployeePageClient = ({
                       <Calendar className="w-5 h-5 text-theme-text-muted" />
                     </div>
                     <div>
-                      <p className="text-sm text-theme-text-muted">Start Date</p>
-                      <p className="font-medium text-theme-text">{formattedDate}</p>
+                      <p className="text-sm text-theme-text-muted">
+                        Start Date
+                      </p>
+                      <p className="font-medium text-theme-text">
+                        {formattedDate}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -235,17 +254,25 @@ export const EmployeePageClient = ({
                 </h2>
                 <div className="bg-theme-elevated p-4 space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-theme-text-muted">User ID</span>
-                    <span className="text-sm font-mono text-theme-text">{employee.id}</span>
+                    <span className="text-sm text-theme-text-muted">
+                      User ID
+                    </span>
+                    <span className="text-sm font-mono text-theme-text">
+                      {employee.id}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-theme-text-muted">Created</span>
+                    <span className="text-sm text-theme-text-muted">
+                      Created
+                    </span>
                     <span className="text-sm text-theme-text">
                       {new Date(employee.created_at).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-theme-text-muted">Last Updated</span>
+                    <span className="text-sm text-theme-text-muted">
+                      Last Updated
+                    </span>
                     <span className="text-sm text-theme-text">
                       {new Date(employee.updated_at).toLocaleDateString()}
                     </span>

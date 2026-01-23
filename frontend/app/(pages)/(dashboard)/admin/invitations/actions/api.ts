@@ -11,7 +11,9 @@ export const getInvitations = async (): Promise<Invitation[]> => {
   return handleResponse<Invitation[]>(response, "Failed to fetch invitations");
 };
 
-export const createInvitation = async (data: CreateInvitationRequest): Promise<Invitation> => {
+export const createInvitation = async (
+  data: CreateInvitationRequest,
+): Promise<Invitation> => {
   const response = await fetchWithProxy("/invitations", {
     method: "POST",
     body: JSON.stringify(data),
@@ -20,7 +22,9 @@ export const createInvitation = async (data: CreateInvitationRequest): Promise<I
 };
 
 export const revokeInvitation = async (id: number): Promise<void> => {
-  const response = await fetchWithProxy(`/invitations/${id}`, { method: "DELETE" });
+  const response = await fetchWithProxy(`/invitations/${id}`, {
+    method: "DELETE",
+  });
   if (!response.ok) throw new Error("Failed to revoke invitation");
 };
 
@@ -39,22 +43,31 @@ export interface AcceptInvitationRequest {
   last_name: string;
 }
 
-export const validateInvitation = async (token: string): Promise<ValidateInvitationResponse> => {
-  const response = await fetch(`${BACKEND_URL}/api/invitations/validate/${token}`);
+export const validateInvitation = async (
+  token: string,
+): Promise<ValidateInvitationResponse> => {
+  const response = await fetch(
+    `${BACKEND_URL}/api/invitations/validate/${token}`,
+  );
   if (!response.ok) throw new Error("Invalid invitation");
   return response.json();
 };
 
 export const acceptInvitation = async (
   token: string,
-  data: AcceptInvitationRequest
+  data: AcceptInvitationRequest,
 ): Promise<User> => {
-  const response = await fetch(`${BACKEND_URL}/api/invitations/accept/${token}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  const response = await fetch(
+    `${BACKEND_URL}/api/invitations/accept/${token}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    },
+  );
   if (!response.ok)
-    throw new Error(await extractErrorMessage(response, "Failed to accept invitation"));
+    throw new Error(
+      await extractErrorMessage(response, "Failed to accept invitation"),
+    );
   return response.json();
 };

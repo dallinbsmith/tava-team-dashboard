@@ -97,7 +97,12 @@ export default {
       fontFamily: {
         sans: ["var(--font-manrope)", "Manrope", "system-ui", "sans-serif"],
         primary: ["var(--font-manrope)", "Manrope", "system-ui", "sans-serif"],
-        secondary: ["var(--font-manrope)", "Manrope", "system-ui", "sans-serif"],
+        secondary: [
+          "var(--font-manrope)",
+          "Manrope",
+          "system-ui",
+          "sans-serif",
+        ],
         mono: ["var(--font-mono)"],
       },
       fontWeight: {

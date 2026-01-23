@@ -16,7 +16,9 @@ jest.mock("@/providers/OrganizationProvider", () => ({
   useOrganization: jest.fn(),
 }));
 import { useOrganization } from "@/providers/OrganizationProvider";
-const mockUseOrganization = useOrganization as jest.MockedFunction<typeof useOrganization>;
+const mockUseOrganization = useOrganization as jest.MockedFunction<
+  typeof useOrganization
+>;
 
 jest.mock("@/hooks", () => ({
   useDeleteDepartment: jest.fn(),
@@ -34,9 +36,10 @@ const mockUseRenameDepartment = useRenameDepartment as jest.MockedFunction<
 jest.mock("@/lib/api", () => ({
   getUsersByDepartment: jest.fn(),
 }));
-const mockGetUsersByDepartment = api.getUsersByDepartment as jest.MockedFunction<
-  typeof api.getUsersByDepartment
->;
+const mockGetUsersByDepartment =
+  api.getUsersByDepartment as jest.MockedFunction<
+    typeof api.getUsersByDepartment
+  >;
 
 // Mock Avatar component
 jest.mock("@/shared/common/Avatar", () => {
@@ -93,8 +96,18 @@ const createMockUser = (overrides: Partial<User> = {}): User => ({
 });
 
 const mockUsers: User[] = [
-  createMockUser({ id: 1, first_name: "John", last_name: "Doe", title: "Senior Engineer" }),
-  createMockUser({ id: 2, first_name: "Jane", last_name: "Smith", title: "Engineer" }),
+  createMockUser({
+    id: 1,
+    first_name: "John",
+    last_name: "Doe",
+    title: "Senior Engineer",
+  }),
+  createMockUser({
+    id: 2,
+    first_name: "Jane",
+    last_name: "Smith",
+    title: "Engineer",
+  }),
 ];
 
 // Create QueryClient for tests
@@ -247,7 +260,9 @@ describe("ManageDepartmentsModal", () => {
         wrapper: createWrapper(queryClient),
       });
       expect(
-        screen.getByText(/Departments are created by assigning them to employees/)
+        screen.getByText(
+          /Departments are created by assigning them to employees/,
+        ),
       ).toBeInTheDocument();
     });
   });
@@ -266,11 +281,16 @@ describe("ManageDepartmentsModal", () => {
 
     it("calls onClose when backdrop clicked", () => {
       const onClose = jest.fn();
-      const { container } = render(<ManageDepartmentsModal {...defaultProps} onClose={onClose} />, {
-        wrapper: createWrapper(queryClient),
-      });
+      const { container } = render(
+        <ManageDepartmentsModal {...defaultProps} onClose={onClose} />,
+        {
+          wrapper: createWrapper(queryClient),
+        },
+      );
 
-      const backdrop = container.querySelector(".absolute.inset-0.bg-black\\/50");
+      const backdrop = container.querySelector(
+        ".absolute.inset-0.bg-black\\/50",
+      );
       fireEvent.click(backdrop!);
       expect(onClose).toHaveBeenCalled();
     });
@@ -287,7 +307,9 @@ describe("ManageDepartmentsModal", () => {
       fireEvent.click(deleteButtons[1]); // Engineering is second after Design
 
       expect(screen.getByTestId("confirmation-modal")).toBeInTheDocument();
-      expect(screen.getByText(/Are you sure you want to delete "Engineering"/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Are you sure you want to delete "Engineering"/),
+      ).toBeInTheDocument();
     });
 
     it("calls delete mutation when confirmed", async () => {
@@ -322,7 +344,10 @@ describe("ManageDepartmentsModal", () => {
       // Confirm deletion
       fireEvent.click(screen.getByText("Confirm"));
 
-      expect(mockMutate).toHaveBeenCalledWith("Engineering", expect.any(Object));
+      expect(mockMutate).toHaveBeenCalledWith(
+        "Engineering",
+        expect.any(Object),
+      );
     });
   });
 
@@ -380,7 +405,7 @@ describe("ManageDepartmentsModal", () => {
 
       expect(mockMutate).toHaveBeenCalledWith(
         { oldName: "Engineering", newName: "Product Engineering" },
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -508,13 +533,16 @@ describe("ManageDepartmentsModal", () => {
       fireEvent.click(screen.getByText("Engineering"));
 
       await waitFor(() => {
-        expect(screen.getByText("No users in this department")).toBeInTheDocument();
+        expect(
+          screen.getByText("No users in this department"),
+        ).toBeInTheDocument();
       });
     });
 
     it("shows loading state while fetching users", async () => {
       mockGetUsersByDepartment.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockUsers), 100))
+        () =>
+          new Promise((resolve) => setTimeout(() => resolve(mockUsers), 100)),
       );
 
       render(<ManageDepartmentsModal {...defaultProps} />, {

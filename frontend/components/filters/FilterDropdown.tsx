@@ -104,10 +104,11 @@ export default function FilterDropdown({
       <button
         ref={buttonRef}
         onClick={onToggle}
-        className={`relative p-2 transition-colors ${isOpen || activeFilterCount > 0
-          ? "bg-primary-500 text-white"
-          : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-          }`}
+        className={`relative p-2 transition-colors ${
+          isOpen || activeFilterCount > 0
+            ? "bg-primary-500 text-white"
+            : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
+        }`}
         title={title}
       >
         <Filter className="w-4 h-4" />
@@ -132,7 +133,7 @@ export default function FilterDropdown({
           >
             {children}
           </DropdownPanel>,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -169,7 +170,10 @@ const DropdownPanel = ({
 
   if (preferredPosition === "auto") {
     // Auto: prefer below, fall back to above if not enough space
-    actualPosition = spaceBelow < estimatedPanelHeight && spaceAbove > spaceBelow ? "above" : "below";
+    actualPosition =
+      spaceBelow < estimatedPanelHeight && spaceAbove > spaceBelow
+        ? "above"
+        : "below";
   } else {
     actualPosition = preferredPosition;
   }
@@ -181,10 +185,13 @@ const DropdownPanel = ({
 
   switch (actualPosition) {
     case "above":
-      top = Math.max(viewportPadding, buttonRect.top - estimatedPanelHeight - gap);
+      top = Math.max(
+        viewportPadding,
+        buttonRect.top - estimatedPanelHeight - gap,
+      );
       left = Math.min(
         Math.max(viewportPadding, buttonRect.left),
-        window.innerWidth - panelWidth - viewportPadding
+        window.innerWidth - panelWidth - viewportPadding,
       );
       maxHeight = buttonRect.top - gap - viewportPadding;
       break;
@@ -193,16 +200,17 @@ const DropdownPanel = ({
       top = buttonRect.bottom + gap;
       left = Math.min(
         Math.max(viewportPadding, buttonRect.left),
-        window.innerWidth - panelWidth - viewportPadding
+        window.innerWidth - panelWidth - viewportPadding,
       );
-      maxHeight = window.innerHeight - buttonRect.bottom - gap - viewportPadding;
+      maxHeight =
+        window.innerHeight - buttonRect.bottom - gap - viewportPadding;
       break;
 
     case "left":
       // Position to the left of the button, vertically centered or aligned to top
       top = Math.min(
         Math.max(viewportPadding, buttonRect.top),
-        window.innerHeight - estimatedPanelHeight - viewportPadding
+        window.innerHeight - estimatedPanelHeight - viewportPadding,
       );
       left = Math.max(viewportPadding, buttonRect.left - panelWidth - gap);
       maxHeight = window.innerHeight - viewportPadding * 2;
@@ -212,11 +220,11 @@ const DropdownPanel = ({
       // Position to the right of the button, vertically centered or aligned to top
       top = Math.min(
         Math.max(viewportPadding, buttonRect.top),
-        window.innerHeight - estimatedPanelHeight - viewportPadding
+        window.innerHeight - estimatedPanelHeight - viewportPadding,
       );
       left = Math.min(
         buttonRect.right + gap,
-        window.innerWidth - panelWidth - viewportPadding
+        window.innerWidth - panelWidth - viewportPadding,
       );
       maxHeight = window.innerHeight - viewportPadding * 2;
       break;

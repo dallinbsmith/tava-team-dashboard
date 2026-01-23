@@ -8,8 +8,13 @@ import { queryKeys } from "./query-keys";
  * @param queryClient - The React Query client
  * @param keys - Array of query keys to refetch
  */
-export const refetchQueries = async (queryClient: QueryClient, keys: QueryKey[]): Promise<void> => {
-  await Promise.allSettled(keys.map((queryKey) => queryClient.refetchQueries({ queryKey })));
+export const refetchQueries = async (
+  queryClient: QueryClient,
+  keys: QueryKey[],
+): Promise<void> => {
+  await Promise.allSettled(
+    keys.map((queryKey) => queryClient.refetchQueries({ queryKey })),
+  );
 };
 
 /**
@@ -19,8 +24,13 @@ export const refetchQueries = async (queryClient: QueryClient, keys: QueryKey[])
  * @param queryClient - The React Query client
  * @param keys - Array of query keys to invalidate
  */
-export const invalidateQueries = async (queryClient: QueryClient, keys: QueryKey[]): Promise<void> => {
-  await Promise.allSettled(keys.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
+export const invalidateQueries = async (
+  queryClient: QueryClient,
+  keys: QueryKey[],
+): Promise<void> => {
+  await Promise.allSettled(
+    keys.map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+  );
 };
 
 /**
@@ -28,7 +38,11 @@ export const invalidateQueries = async (queryClient: QueryClient, keys: QueryKey
  */
 export const queryKeyGroups = {
   /** All user-related queries */
-  users: () => [queryKeys.employees.all(), queryKeys.allUsers.all(), queryKeys.supervisors.all()],
+  users: () => [
+    queryKeys.employees.all(),
+    queryKeys.allUsers.all(),
+    queryKeys.supervisors.all(),
+  ],
 
   /** All organization structure queries */
   organization: () => [

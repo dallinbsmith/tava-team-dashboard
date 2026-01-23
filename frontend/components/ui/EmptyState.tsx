@@ -60,10 +60,16 @@ export const EmptyState = ({
       <Icon className="w-12 h-12 mx-auto mb-3 text-theme-text-muted opacity-50" />
       <h3 className="text-lg font-medium text-theme-text mb-1">{title}</h3>
       {description && (
-        <p className="text-sm text-theme-text-muted mb-4 max-w-sm mx-auto">{description}</p>
+        <p className="text-sm text-theme-text-muted mb-4 max-w-sm mx-auto">
+          {description}
+        </p>
       )}
       {action && (
-        <Button variant={action.variant || "primary"} icon={action.icon} onClick={action.onClick}>
+        <Button
+          variant={action.variant || "primary"}
+          icon={action.icon}
+          onClick={action.onClick}
+        >
           {action.label}
         </Button>
       )}
@@ -78,7 +84,11 @@ export interface NoResultsProps {
   className?: string;
 }
 
-export const NoResults = ({ query, onClearFilters, className = "" }: NoResultsProps) => {
+export const NoResults = ({
+  query,
+  onClearFilters,
+  className = "",
+}: NoResultsProps) => {
   return (
     <EmptyState
       title="No results found"

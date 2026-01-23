@@ -40,7 +40,8 @@ export default function OrgChartError({ error, reset }: ErrorProps) {
         <p className="text-theme-text-muted mb-4">
           {isDataError
             ? "We couldn't load the organization data. This might be a temporary connection issue."
-            : error.message || "An unexpected error occurred while loading the organization chart."}
+            : error.message ||
+              "An unexpected error occurred while loading the organization chart."}
         </p>
 
         {isDataError && (
@@ -57,7 +58,9 @@ export default function OrgChartError({ error, reset }: ErrorProps) {
         )}
 
         {error.digest && (
-          <p className="text-xs text-theme-text-muted mb-4 font-mono">Error ID: {error.digest}</p>
+          <p className="text-xs text-theme-text-muted mb-4 font-mono">
+            Error ID: {error.digest}
+          </p>
         )}
 
         <div className="flex gap-3 justify-center">
@@ -80,7 +83,10 @@ export default function OrgChartError({ error, reset }: ErrorProps) {
         <div className="mt-6 pt-4 border-t border-theme-border">
           <p className="text-xs text-theme-text-muted">
             Need help? Contact your administrator or try viewing the{" "}
-            <a href="/teams" className="text-primary-400 hover:text-primary-300">
+            <a
+              href="/teams"
+              className="text-primary-400 hover:text-primary-300"
+            >
               Teams page
             </a>{" "}
             instead.

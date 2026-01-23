@@ -57,12 +57,18 @@ jest.mock("../components/TimeOffRequestList", () => {
           <div key={r.id} data-testid={`request-${r.id}`}>
             {r.request_type} - {r.status}
             {onCancel && (
-              <button onClick={() => onCancel(r.id)} data-testid={`cancel-${r.id}`}>
+              <button
+                onClick={() => onCancel(r.id)}
+                data-testid={`cancel-${r.id}`}
+              >
                 Cancel
               </button>
             )}
             {onReview && (
-              <button onClick={() => onReview(r.id)} data-testid={`review-${r.id}`}>
+              <button
+                onClick={() => onReview(r.id)}
+                data-testid={`review-${r.id}`}
+              >
                 Review
               </button>
             )}
@@ -85,8 +91,12 @@ jest.mock("../components/TimeOffRequestForm", () => {
   }) {
     return (
       <div data-testid="request-form">
-        <button onClick={onSuccess} data-testid="form-submit">Submit</button>
-        <button onClick={onCancel} data-testid="form-cancel">Cancel</button>
+        <button onClick={onSuccess} data-testid="form-submit">
+          Submit
+        </button>
+        <button onClick={onCancel} data-testid="form-cancel">
+          Cancel
+        </button>
       </div>
     );
   };
@@ -106,8 +116,12 @@ jest.mock("../components/TimeOffReviewModal", () => {
     return (
       <div data-testid="review-modal">
         <div data-testid="review-request-id">{request.id}</div>
-        <button onClick={onClose} data-testid="modal-close">Close</button>
-        <button onClick={onSuccess} data-testid="modal-success">Submit</button>
+        <button onClick={onClose} data-testid="modal-close">
+          Close
+        </button>
+        <button onClick={onSuccess} data-testid="modal-success">
+          Submit
+        </button>
       </div>
     );
   };
@@ -118,7 +132,8 @@ const mockCancelTimeOffRequestAction = jest.fn();
 const mockGetMyTimeOffRequests = jest.fn();
 const mockGetPendingTimeOffRequests = jest.fn();
 jest.mock("../actions", () => ({
-  cancelTimeOffRequestAction: (id: number) => mockCancelTimeOffRequestAction(id),
+  cancelTimeOffRequestAction: (id: number) =>
+    mockCancelTimeOffRequestAction(id),
   getMyTimeOffRequests: () => mockGetMyTimeOffRequests(),
   getPendingTimeOffRequests: () => mockGetPendingTimeOffRequests(),
 }));
@@ -140,7 +155,9 @@ describe("TimeOffPageClient", () => {
     ...overrides,
   });
 
-  const createMockRequest = (overrides: Partial<TimeOffRequest> = {}): TimeOffRequest => ({
+  const createMockRequest = (
+    overrides: Partial<TimeOffRequest> = {},
+  ): TimeOffRequest => ({
     id: 1,
     user_id: 1,
     request_type: "vacation",
@@ -256,7 +273,7 @@ describe("TimeOffPageClient", () => {
           {...defaultProps}
           isSupervisorOrAdmin={true}
           initialPendingRequests={[createMockRequest({ id: 2, user_id: 2 })]}
-        />
+        />,
       );
 
       expect(screen.getByText("Pending Approvals")).toBeInTheDocument();
@@ -268,7 +285,7 @@ describe("TimeOffPageClient", () => {
           {...defaultProps}
           isSupervisorOrAdmin={true}
           initialPendingRequests={[createMockRequest({ id: 2, user_id: 2 })]}
-        />
+        />,
       );
 
       expect(screen.getByText("1")).toBeInTheDocument();
@@ -276,10 +293,7 @@ describe("TimeOffPageClient", () => {
 
     it("shows 'Time Off Requests' header for supervisors", () => {
       render(
-        <TimeOffPageClient
-          {...defaultProps}
-          isSupervisorOrAdmin={true}
-        />
+        <TimeOffPageClient {...defaultProps} isSupervisorOrAdmin={true} />,
       );
 
       expect(screen.getByText("Time Off Requests")).toBeInTheDocument();
@@ -291,7 +305,7 @@ describe("TimeOffPageClient", () => {
           {...defaultProps}
           isSupervisorOrAdmin={true}
           initialPendingRequests={[createMockRequest({ id: 2, user_id: 2 })]}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByTestId("review-2"));
@@ -307,7 +321,7 @@ describe("TimeOffPageClient", () => {
           {...defaultProps}
           isSupervisorOrAdmin={true}
           initialPendingRequests={[createMockRequest({ id: 2, user_id: 2 })]}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByTestId("review-2"));

@@ -5,7 +5,10 @@
 
 import React from "react";
 import { render } from "@testing-library/react";
-import { OrgChartTreeSkeleton, DraftsBannerSkeleton } from "../OrgChartTreeSkeleton";
+import {
+  OrgChartTreeSkeleton,
+  DraftsBannerSkeleton,
+} from "../OrgChartTreeSkeleton";
 
 describe("OrgChartTreeSkeleton", () => {
   describe("rendering", () => {
@@ -21,7 +24,11 @@ describe("OrgChartTreeSkeleton", () => {
 
     it("has surface background and border", () => {
       const { container } = render(<OrgChartTreeSkeleton />);
-      expect(container.firstChild).toHaveClass("bg-theme-surface", "border", "border-theme-border");
+      expect(container.firstChild).toHaveClass(
+        "bg-theme-surface",
+        "border",
+        "border-theme-border",
+      );
     });
 
     it("has overflow-x-auto for horizontal scrolling", () => {
@@ -96,7 +103,9 @@ describe("OrgChartTreeSkeleton", () => {
   describe("layout", () => {
     it("has flex layout for centering", () => {
       const { container } = render(<OrgChartTreeSkeleton />);
-      const flexContainer = container.querySelector(".flex.flex-col.items-center");
+      const flexContainer = container.querySelector(
+        ".flex.flex-col.items-center",
+      );
       expect(flexContainer).toBeInTheDocument();
     });
 
@@ -134,7 +143,9 @@ describe("DraftsBannerSkeleton", () => {
   describe("structure", () => {
     it("has flex layout with space-between", () => {
       const { container } = render(<DraftsBannerSkeleton />);
-      const flexContainer = container.querySelector(".flex.items-center.justify-between");
+      const flexContainer = container.querySelector(
+        ".flex.items-center.justify-between",
+      );
       expect(flexContainer).toBeInTheDocument();
     });
 
@@ -165,7 +176,8 @@ describe("DraftsBannerSkeleton", () => {
 
     it("placeholder elements have amber background", () => {
       const { container } = render(<DraftsBannerSkeleton />);
-      const amberPlaceholders = container.querySelectorAll(".bg-amber-500\\/30");
+      const amberPlaceholders =
+        container.querySelectorAll(".bg-amber-500\\/30");
       expect(amberPlaceholders.length).toBeGreaterThan(0);
     });
   });

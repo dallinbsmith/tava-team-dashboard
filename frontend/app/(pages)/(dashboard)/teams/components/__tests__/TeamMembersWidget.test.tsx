@@ -56,7 +56,9 @@ jest.mock("@/shared/common/Pagination", () => {
         <span data-testid="current-page">{currentPage}</span>
         <span data-testid="total-pages">{totalPages}</span>
         {currentPage > 1 && (
-          <button onClick={() => onPageChange(currentPage - 1)}>Previous</button>
+          <button onClick={() => onPageChange(currentPage - 1)}>
+            Previous
+          </button>
         )}
         {currentPage < totalPages && (
           <button onClick={() => onPageChange(currentPage + 1)}>Next</button>
@@ -95,11 +97,36 @@ describe("TeamMembersWidget", () => {
   // Page 1: John Doe (supervisor), Alice Johnson, Bob Wilson, Charlie Brown
   // Page 2: Jane Smith
   const mockUsers: User[] = [
-    createMockUser({ id: 1, first_name: "John", last_name: "Doe", role: "supervisor" }),
-    createMockUser({ id: 2, first_name: "Jane", last_name: "Smith", role: "employee" }),
-    createMockUser({ id: 3, first_name: "Bob", last_name: "Wilson", role: "employee" }),
-    createMockUser({ id: 4, first_name: "Alice", last_name: "Johnson", role: "employee" }),
-    createMockUser({ id: 5, first_name: "Charlie", last_name: "Brown", role: "employee" }),
+    createMockUser({
+      id: 1,
+      first_name: "John",
+      last_name: "Doe",
+      role: "supervisor",
+    }),
+    createMockUser({
+      id: 2,
+      first_name: "Jane",
+      last_name: "Smith",
+      role: "employee",
+    }),
+    createMockUser({
+      id: 3,
+      first_name: "Bob",
+      last_name: "Wilson",
+      role: "employee",
+    }),
+    createMockUser({
+      id: 4,
+      first_name: "Alice",
+      last_name: "Johnson",
+      role: "employee",
+    }),
+    createMockUser({
+      id: 5,
+      first_name: "Charlie",
+      last_name: "Brown",
+      role: "employee",
+    }),
   ];
 
   const defaultProps = {
@@ -119,7 +146,9 @@ describe("TeamMembersWidget", () => {
       render(<TeamMembersWidget {...defaultProps} />);
       // selectedLabel is shown in the header
       const header = screen.getByText("Team Members").closest("div");
-      expect(within(header!.parentElement!).getByText("Frontend Team")).toBeInTheDocument();
+      expect(
+        within(header!.parentElement!).getByText("Frontend Team"),
+      ).toBeInTheDocument();
     });
 
     it("renders member count badge", () => {
@@ -175,8 +204,15 @@ describe("TeamMembersWidget", () => {
       render(
         <TeamMembersWidget
           {...defaultProps}
-          allUsers={[createMockUser({ id: 1, first_name: "Admin", last_name: "User", role: "admin" })]}
-        />
+          allUsers={[
+            createMockUser({
+              id: 1,
+              first_name: "Admin",
+              last_name: "User",
+              role: "admin",
+            }),
+          ]}
+        />,
       );
 
       expect(screen.getByText("Admin User")).toBeInTheDocument();
@@ -186,8 +222,15 @@ describe("TeamMembersWidget", () => {
       render(
         <TeamMembersWidget
           {...defaultProps}
-          allUsers={[createMockUser({ id: 1, first_name: "Super", last_name: "Visor", role: "supervisor" })]}
-        />
+          allUsers={[
+            createMockUser({
+              id: 1,
+              first_name: "Super",
+              last_name: "Visor",
+              role: "supervisor",
+            }),
+          ]}
+        />,
       );
 
       expect(screen.getByText("Super Visor")).toBeInTheDocument();
@@ -199,9 +242,11 @@ describe("TeamMembersWidget", () => {
       render(<TeamMembersWidget {...defaultProps} />);
 
       // Each member card has a squad badge link
-      const squadLinks = screen.getAllByRole("link").filter(
-        (link) => link.getAttribute("href")?.includes("/teams?type=squad")
-      );
+      const squadLinks = screen
+        .getAllByRole("link")
+        .filter((link) =>
+          link.getAttribute("href")?.includes("/teams?type=squad"),
+        );
       expect(squadLinks.length).toBeGreaterThan(0);
     });
   });
@@ -219,7 +264,7 @@ describe("TeamMembersWidget", () => {
         <TeamMembersWidget
           {...defaultProps}
           allUsers={mockUsers.slice(0, 3)}
-        />
+        />,
       );
 
       expect(screen.queryByTestId("pagination")).not.toBeInTheDocument();
@@ -265,10 +310,12 @@ describe("TeamMembersWidget", () => {
           selectionType="department"
           selectedId="NonExistentDept"
           allUsers={[]}
-        />
+        />,
       );
 
-      expect(screen.getByText(/No members in this department/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/No members in this department/),
+      ).toBeInTheDocument();
     });
   });
 
@@ -277,9 +324,9 @@ describe("TeamMembersWidget", () => {
       render(<TeamMembersWidget {...defaultProps} />);
 
       // John Doe (id: 1) should have a link to /employee/1
-      const profileLinks = screen.getAllByRole("link").filter(
-        (link) => link.getAttribute("href") === "/employee/1"
-      );
+      const profileLinks = screen
+        .getAllByRole("link")
+        .filter((link) => link.getAttribute("href") === "/employee/1");
       expect(profileLinks.length).toBeGreaterThan(0);
     });
   });
@@ -289,7 +336,9 @@ describe("TeamMembersWidget", () => {
       render(<TeamMembersWidget {...defaultProps} />);
 
       // All mock users have title "Software Engineer"
-      expect(screen.getAllByText("Software Engineer").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Software Engineer").length).toBeGreaterThan(
+        0,
+      );
     });
   });
 });

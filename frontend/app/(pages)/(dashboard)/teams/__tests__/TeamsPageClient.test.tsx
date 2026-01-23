@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import TeamsPageClient from "../TeamsPageClient";
 import { User, Squad } from "@/shared/types/user";
 
@@ -351,7 +351,9 @@ describe("TeamsPageClient", () => {
 
       render(<TeamsPageClient />);
 
-      expect(screen.getByText("Select a team or department to view details")).toBeInTheDocument();
+      expect(
+        screen.getByText("Select a team or department to view details"),
+      ).toBeInTheDocument();
     });
   });
 

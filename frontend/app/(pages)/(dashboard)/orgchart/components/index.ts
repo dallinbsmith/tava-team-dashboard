@@ -16,4 +16,7 @@ export {
   OrgTreeRenderer,
   DragOverlayCard,
 } from "./OrgChartTree";
-export { OrgChartTreeSkeleton, DraftsBannerSkeleton } from "./OrgChartTreeSkeleton";
+export {
+  OrgChartTreeSkeleton,
+  DraftsBannerSkeleton,
+} from "./OrgChartTreeSkeleton";

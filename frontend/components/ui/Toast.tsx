@@ -109,15 +109,27 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         dismissToast(id);
       }, TOAST_DURATION);
     },
-    [dismissToast]
+    [dismissToast],
   );
 
   const contextValue: ToastContextType = {
     toast: addToast,
-    success: useCallback((message: string) => addToast(message, "success"), [addToast]),
-    error: useCallback((message: string) => addToast(message, "error"), [addToast]),
-    warning: useCallback((message: string) => addToast(message, "warning"), [addToast]),
-    info: useCallback((message: string) => addToast(message, "info"), [addToast]),
+    success: useCallback(
+      (message: string) => addToast(message, "success"),
+      [addToast],
+    ),
+    error: useCallback(
+      (message: string) => addToast(message, "error"),
+      [addToast],
+    ),
+    warning: useCallback(
+      (message: string) => addToast(message, "warning"),
+      [addToast],
+    ),
+    info: useCallback(
+      (message: string) => addToast(message, "info"),
+      [addToast],
+    ),
   };
 
   return (

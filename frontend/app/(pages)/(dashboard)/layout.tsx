@@ -7,7 +7,11 @@ import Sidebar from "@/shared/common/Sidebar";
 import ImpersonationBanner from "@/shared/common/ImpersonationBanner";
 import { Menu } from "lucide-react";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user: auth0User, isLoading: authLoading } = useUser();
   const { currentUser, loading, isImpersonating } = useCurrentUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);

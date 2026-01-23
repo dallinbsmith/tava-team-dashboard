@@ -22,7 +22,9 @@ interface CurrentUserContextType {
   refetch: () => Promise<void>;
 }
 
-const CurrentUserContext = createContext<CurrentUserContextType | undefined>(undefined);
+const CurrentUserContext = createContext<CurrentUserContextType | undefined>(
+  undefined,
+);
 
 export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
   const { user: auth0User, isLoading: authLoading } = useUser();
@@ -45,12 +47,14 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
     refetch,
   } = useCurrentUserQuery();
 
-  const { data: fetchedImpersonatedUser, isLoading: impersonatedUserLoading } = useQuery({
-    queryKey: ["impersonatedUser", impersonatedUserId],
-    queryFn: () => getUserById(impersonatedUserId!),
-    enabled: isAuthenticated && impersonatedUserId !== null && !impersonatedUser,
-    staleTime: STALE_TIMES.STANDARD,
-  });
+  const { data: fetchedImpersonatedUser, isLoading: impersonatedUserLoading } =
+    useQuery({
+      queryKey: ["impersonatedUser", impersonatedUserId],
+      queryFn: () => getUserById(impersonatedUserId!),
+      enabled:
+        isAuthenticated && impersonatedUserId !== null && !impersonatedUser,
+      staleTime: STALE_TIMES.STANDARD,
+    });
 
   useEffect(() => {
     if (fetchedImpersonatedUser && impersonatedUserId !== null) {
@@ -65,7 +69,8 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
   }, [realUser, isImpersonating, endImpersonation]);
 
   const isSupervisorOrAdmin = isAdmin || isSupervisor;
-  const effectiveUser = isImpersonating && impersonatedUser ? impersonatedUser : realUser;
+  const effectiveUser =
+    isImpersonating && impersonatedUser ? impersonatedUser : realUser;
   const effectiveIsSupervisorOrAdmin =
     effectiveUser?.role === "admin" || effectiveUser?.role === "supervisor";
 
@@ -82,7 +87,11 @@ export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
     refetch,
   };
 
-  return <CurrentUserContext.Provider value={value}>{children}</CurrentUserContext.Provider>;
+  return (
+    <CurrentUserContext.Provider value={value}>
+      {children}
+    </CurrentUserContext.Provider>
+  );
 };
 
 const defaultCurrentUserContext: CurrentUserContextType = {

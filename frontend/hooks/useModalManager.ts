@@ -81,7 +81,7 @@ export const useModalManager = <
     (modal: NonNullable<T>) => {
       return active === modal;
     },
-    [active]
+    [active],
   );
 
   const toggle = useCallback(
@@ -92,7 +92,7 @@ export const useModalManager = <
         open(modal, modalData);
       }
     },
-    [active, close, open]
+    [active, close, open],
   );
 
   return useMemo(
@@ -104,7 +104,7 @@ export const useModalManager = <
       isOpen,
       toggle,
     }),
-    [active, data, open, close, isOpen, toggle]
+    [active, data, open, close, isOpen, toggle],
   );
 };
 

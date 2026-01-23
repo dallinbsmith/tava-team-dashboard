@@ -1,11 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { TimeOffRequest, TIME_OFF_TYPE_LABELS, TIME_OFF_STATUS_LABELS } from "../../time-off/types";
-import { getTimeOffRequest, cancelTimeOffRequest, reviewTimeOffRequest } from "../../time-off/actions";
+import {
+  TimeOffRequest,
+  TIME_OFF_TYPE_LABELS,
+  TIME_OFF_STATUS_LABELS,
+} from "../../time-off/types";
+import {
+  getTimeOffRequest,
+  cancelTimeOffRequest,
+  reviewTimeOffRequest,
+} from "../../time-off/actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal } from "@/components";
-import { Loader2, Palmtree, Calendar, User, Clock, X, Check, MessageSquare } from "lucide-react";
+import {
+  Loader2,
+  Palmtree,
+  Calendar,
+  User,
+  Clock,
+  X,
+  Check,
+  MessageSquare,
+} from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 
 interface ViewTimeOffModalProps {
@@ -65,7 +82,10 @@ export default function ViewTimeOffModal({
     }
   }, [isOpen, timeOffId]);
 
-  const canCancel = timeOff && timeOff.user_id === currentUser?.id && timeOff.status === "pending";
+  const canCancel =
+    timeOff &&
+    timeOff.user_id === currentUser?.id &&
+    timeOff.status === "pending";
 
   // Can review if supervisor/admin and request is pending (and not their own)
   const canReview =
@@ -121,7 +141,12 @@ export default function ViewTimeOffModal({
 
   const getDuration = () => {
     if (!timeOff) return 0;
-    return differenceInDays(new Date(timeOff.end_date), new Date(timeOff.start_date)) + 1;
+    return (
+      differenceInDays(
+        new Date(timeOff.end_date),
+        new Date(timeOff.start_date),
+      ) + 1
+    );
   };
 
   const getRequestorName = () => {
@@ -135,7 +160,12 @@ export default function ViewTimeOffModal({
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Time Off Request" maxWidth="max-w-lg">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Time Off Request"
+      maxWidth="max-w-lg"
+    >
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
@@ -151,7 +181,9 @@ export default function ViewTimeOffModal({
             <p className="text-red-300 font-medium">
               Are you sure you want to cancel this request?
             </p>
-            <p className="text-red-400 text-sm mt-1">This action cannot be undone.</p>
+            <p className="text-red-400 text-sm mt-1">
+              This action cannot be undone.
+            </p>
           </div>
 
           <div className="flex justify-end gap-3">
@@ -175,7 +207,9 @@ export default function ViewTimeOffModal({
         // Review form
         <div className="space-y-4">
           <div className="p-4 bg-theme-elevated rounded-lg">
-            <p className="text-sm text-theme-text-muted mb-1">Reviewing request from</p>
+            <p className="text-sm text-theme-text-muted mb-1">
+              Reviewing request from
+            </p>
             <p className="font-medium text-theme-text">{getRequestorName()}</p>
             <p className="text-sm text-theme-text-muted mt-2">
               {format(new Date(timeOff.start_date), "MMM d")} -{" "}
@@ -249,7 +283,9 @@ export default function ViewTimeOffModal({
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className={`text-lg font-semibold ${TYPE_COLORS[timeOff.request_type]}`}>
+                <h3
+                  className={`text-lg font-semibold ${TYPE_COLORS[timeOff.request_type]}`}
+                >
                   {TIME_OFF_TYPE_LABELS[timeOff.request_type]}
                 </h3>
                 <span
@@ -306,30 +342,40 @@ export default function ViewTimeOffModal({
             </div>
           )}
 
-          {(timeOff.status === "approved" || timeOff.status === "rejected") && timeOff.reviewer && (
-            <div className="p-3 bg-theme-elevated rounded-lg">
-              <p className="text-xs text-theme-text-muted mb-1">
-                {timeOff.status === "approved" ? "Approved" : "Rejected"} by
-              </p>
-              <p className="text-sm font-medium text-theme-text">{getReviewerName()}</p>
-              {timeOff.reviewed_at && (
-                <p className="text-xs text-theme-text-muted mt-1">
-                  on {format(new Date(timeOff.reviewed_at), "MMM d, yyyy 'at' h:mm a")}
+          {(timeOff.status === "approved" || timeOff.status === "rejected") &&
+            timeOff.reviewer && (
+              <div className="p-3 bg-theme-elevated rounded-lg">
+                <p className="text-xs text-theme-text-muted mb-1">
+                  {timeOff.status === "approved" ? "Approved" : "Rejected"} by
                 </p>
-              )}
-              {timeOff.reviewer_notes && (
-                <div className="mt-2 pt-2 border-t border-theme-border">
-                  <div className="flex items-start gap-2">
-                    <MessageSquare className="w-4 h-4 text-theme-text-muted mt-0.5" />
-                    <p className="text-sm text-theme-text">{timeOff.reviewer_notes}</p>
+                <p className="text-sm font-medium text-theme-text">
+                  {getReviewerName()}
+                </p>
+                {timeOff.reviewed_at && (
+                  <p className="text-xs text-theme-text-muted mt-1">
+                    on{" "}
+                    {format(
+                      new Date(timeOff.reviewed_at),
+                      "MMM d, yyyy 'at' h:mm a",
+                    )}
+                  </p>
+                )}
+                {timeOff.reviewer_notes && (
+                  <div className="mt-2 pt-2 border-t border-theme-border">
+                    <div className="flex items-start gap-2">
+                      <MessageSquare className="w-4 h-4 text-theme-text-muted mt-0.5" />
+                      <p className="text-sm text-theme-text">
+                        {timeOff.reviewer_notes}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
 
           <div className="text-xs text-theme-text-muted">
-            Requested {format(new Date(timeOff.created_at), "MMM d, yyyy 'at' h:mm a")}
+            Requested{" "}
+            {format(new Date(timeOff.created_at), "MMM d, yyyy 'at' h:mm a")}
           </div>
 
           {(canCancel || canReview) && (

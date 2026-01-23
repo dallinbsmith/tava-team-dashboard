@@ -19,7 +19,9 @@ export interface UseAllUsersQueryResult {
   invalidate: () => Promise<void>;
 }
 
-export const useAllUsersQuery = (options: UseAllUsersQueryOptions = {}): UseAllUsersQueryResult => {
+export const useAllUsersQuery = (
+  options: UseAllUsersQueryOptions = {},
+): UseAllUsersQueryResult => {
   const { staleTime = STALE_TIMES.STANDARD } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
@@ -72,7 +74,7 @@ export interface UseDepartmentsQueryResult {
 }
 
 export const useDepartmentsQuery = (
-  options: UseDepartmentsQueryOptions = {}
+  options: UseDepartmentsQueryOptions = {},
 ): UseDepartmentsQueryResult => {
   const { staleTime = STALE_TIMES.STANDARD } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();

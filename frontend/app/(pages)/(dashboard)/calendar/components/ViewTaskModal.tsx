@@ -33,7 +33,12 @@ const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string }[] = [
   { value: "cancelled", label: "Cancelled", color: "bg-gray-500" },
 ];
 
-export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: ViewTaskModalProps) {
+export default function ViewTaskModal({
+  isOpen,
+  onClose,
+  taskId,
+  onUpdated,
+}: ViewTaskModalProps) {
   const { allUsers, squads, departments } = useOrganization();
   const { currentUser, effectiveIsSupervisorOrAdmin } = useCurrentUser();
 
@@ -80,7 +85,9 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
     }
   }, [isOpen, taskId]);
 
-  const canEdit = task && (task.created_by_id === currentUser?.id || currentUser?.role === "admin");
+  const canEdit =
+    task &&
+    (task.created_by_id === currentUser?.id || currentUser?.role === "admin");
 
   const handleClose = () => {
     setIsEditing(false);
@@ -176,7 +183,12 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
   const statusInfo = STATUS_OPTIONS.find((s) => s.value === task?.status);
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Task Details" maxWidth="max-w-lg">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Task Details"
+      maxWidth="max-w-lg"
+    >
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
@@ -195,7 +207,9 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
           )}
 
           <div>
-            <label className="block text-sm font-medium text-theme-text mb-1">Title *</label>
+            <label className="block text-sm font-medium text-theme-text mb-1">
+              Title *
+            </label>
             <input
               type="text"
               value={title}
@@ -205,7 +219,9 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-theme-text mb-1">Description</label>
+            <label className="block text-sm font-medium text-theme-text mb-1">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -216,7 +232,9 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">Status</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Status
+              </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as TaskStatus)}
@@ -231,7 +249,9 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">Due Date</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Due Date
+              </label>
               <input
                 type="date"
                 value={dueDate}
@@ -243,29 +263,35 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
 
           {effectiveIsSupervisorOrAdmin && (
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">Assign To</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Assign To
+              </label>
               <div className="flex gap-2 mb-3">
-                {(["user", "squad", "department"] as AssignmentType[]).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setAssignmentType(type)}
-                    className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                      assignmentType === type
-                        ? "bg-primary-600 text-white"
-                        : "bg-theme-elevated text-theme-text-muted border border-theme-border hover:bg-theme-surface"
-                    }`}
-                  >
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </button>
-                ))}
+                {(["user", "squad", "department"] as AssignmentType[]).map(
+                  (type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setAssignmentType(type)}
+                      className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                        assignmentType === type
+                          ? "bg-primary-600 text-white"
+                          : "bg-theme-elevated text-theme-text-muted border border-theme-border hover:bg-theme-surface"
+                      }`}
+                    >
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </button>
+                  ),
+                )}
               </div>
 
               {assignmentType === "user" && (
                 <select
                   value={assignedUserId || ""}
                   onChange={(e) =>
-                    setAssignedUserId(e.target.value ? parseInt(e.target.value) : undefined)
+                    setAssignedUserId(
+                      e.target.value ? parseInt(e.target.value) : undefined,
+                    )
                   }
                   className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
@@ -282,7 +308,9 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
                 <select
                   value={assignedSquadId || ""}
                   onChange={(e) =>
-                    setAssignedSquadId(e.target.value ? parseInt(e.target.value) : undefined)
+                    setAssignedSquadId(
+                      e.target.value ? parseInt(e.target.value) : undefined,
+                    )
                   }
                   className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
@@ -334,8 +362,12 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
         // Delete confirmation
         <div className="space-y-4">
           <div className="p-4 bg-red-900/30 border border-red-500/30 rounded">
-            <p className="text-red-300 font-medium">Are you sure you want to delete this task?</p>
-            <p className="text-red-400 text-sm mt-1">This action cannot be undone.</p>
+            <p className="text-red-300 font-medium">
+              Are you sure you want to delete this task?
+            </p>
+            <p className="text-red-400 text-sm mt-1">
+              This action cannot be undone.
+            </p>
           </div>
 
           <div className="flex justify-end gap-3">
@@ -369,8 +401,12 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
               <CheckSquare className="w-6 h-6 text-green-400" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-theme-text">{task.title}</h3>
-              {task.description && <p className="text-theme-text-muted mt-1">{task.description}</p>}
+              <h3 className="text-lg font-semibold text-theme-text">
+                {task.title}
+              </h3>
+              {task.description && (
+                <p className="text-theme-text-muted mt-1">{task.description}</p>
+              )}
             </div>
           </div>
 
@@ -379,7 +415,9 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
               <p className="text-xs text-theme-text-muted mb-1">Status</p>
               <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full ${statusInfo?.color}`} />
-                <span className="text-sm font-medium text-theme-text">{statusInfo?.label}</span>
+                <span className="text-sm font-medium text-theme-text">
+                  {statusInfo?.label}
+                </span>
               </div>
             </div>
 
@@ -398,14 +436,21 @@ export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: Vi
             <p className="text-xs text-theme-text-muted mb-1">Assigned To</p>
             <div className="flex items-center gap-2">
               {getAssignmentIcon()}
-              <span className="text-sm font-medium text-theme-text">{getAssignmentDisplay()}</span>
+              <span className="text-sm font-medium text-theme-text">
+                {getAssignmentDisplay()}
+              </span>
             </div>
           </div>
 
           <div className="text-xs text-theme-text-muted">
-            Created {format(new Date(task.created_at), "MMM d, yyyy 'at' h:mm a")}
+            Created{" "}
+            {format(new Date(task.created_at), "MMM d, yyyy 'at' h:mm a")}
             {task.updated_at !== task.created_at && (
-              <> &middot; Updated {format(new Date(task.updated_at), "MMM d, yyyy 'at' h:mm a")}</>
+              <>
+                {" "}
+                &middot; Updated{" "}
+                {format(new Date(task.updated_at), "MMM d, yyyy 'at' h:mm a")}
+              </>
             )}
           </div>
 

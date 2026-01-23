@@ -42,9 +42,14 @@ export interface UseAsyncOperationReturn<T, Args extends unknown[]> {
  */
 export const useAsyncOperation = <T, Args extends unknown[] = []>(
   operation: (...args: Args) => Promise<T>,
-  options: UseAsyncOperationOptions<T> = {}
+  options: UseAsyncOperationOptions<T> = {},
 ): UseAsyncOperationReturn<T, Args> => {
-  const { onSuccess, onError, successMessage, resetErrorOnStart = true } = options;
+  const {
+    onSuccess,
+    onError,
+    successMessage,
+    resetErrorOnStart = true,
+  } = options;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +74,9 @@ export const useAsyncOperation = <T, Args extends unknown[] = []>(
         const result = await operation(...args);
         if (successMessage) {
           const message =
-            typeof successMessage === "function" ? successMessage(result) : successMessage;
+            typeof successMessage === "function"
+              ? successMessage(result)
+              : successMessage;
           setSuccess(message);
         }
 
@@ -85,7 +92,7 @@ export const useAsyncOperation = <T, Args extends unknown[] = []>(
         setLoading(false);
       }
     },
-    [operation, onSuccess, onError, successMessage, resetErrorOnStart]
+    [operation, onSuccess, onError, successMessage, resetErrorOnStart],
   );
 
   return {
@@ -114,7 +121,7 @@ export const useAsyncOperation = <T, Args extends unknown[] = []>(
  * ```
  */
 export const useAsyncLoading = <T, Args extends unknown[] = []>(
-  operation: (...args: Args) => Promise<T>
+  operation: (...args: Args) => Promise<T>,
 ): {
   execute: (...args: Args) => Promise<T | undefined>;
   loading: boolean;
@@ -133,7 +140,7 @@ export const useAsyncLoading = <T, Args extends unknown[] = []>(
         setLoading(false);
       }
     },
-    [operation]
+    [operation],
   );
 
   return { execute, loading };

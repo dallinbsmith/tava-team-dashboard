@@ -6,7 +6,10 @@
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { ReactNode } from "react";
-import { useDeleteDepartment, useRenameDepartment } from "../useDepartmentMutations";
+import {
+  useDeleteDepartment,
+  useRenameDepartment,
+} from "../useDepartmentMutations";
 import * as api from "@/lib/api";
 import * as queryUtils from "@/lib/query-utils";
 import { queryKeys } from "@/lib/query-keys";
@@ -27,7 +30,9 @@ const mockRenameDepartment = api.renameDepartment as jest.MockedFunction<
 jest.mock("@/lib/query-utils", () => ({
   refetchQueries: jest.fn().mockResolvedValue(undefined),
   queryKeyGroups: {
-    departmentRelated: jest.fn().mockReturnValue([["departments"], ["employees"]]),
+    departmentRelated: jest
+      .fn()
+      .mockReturnValue([["departments"], ["employees"]]),
   },
 }));
 const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<
@@ -121,7 +126,9 @@ describe("useDeleteDepartment", () => {
 
     it("rolls back on error", async () => {
       // Pre-populate cache
-      queryClient.setQueryData(queryKeys.departments.all(), [...mockDepartments]);
+      queryClient.setQueryData(queryKeys.departments.all(), [
+        ...mockDepartments,
+      ]);
 
       mockDeleteDepartment.mockRejectedValue(new Error("Delete failed"));
 
@@ -139,7 +146,9 @@ describe("useDeleteDepartment", () => {
 
       // Check that department was rolled back
       await waitFor(() => {
-        const cached = queryClient.getQueryData<string[]>(queryKeys.departments.all());
+        const cached = queryClient.getQueryData<string[]>(
+          queryKeys.departments.all(),
+        );
         expect(cached).toContain("Engineering");
       });
     });
@@ -215,7 +224,7 @@ describe("useDeleteDepartment", () => {
       await expect(
         act(async () => {
           await result.current.mutateAsync("Engineering");
-        })
+        }),
       ).rejects.toThrow("Failed");
     });
   });
@@ -254,7 +263,9 @@ describe("useDeleteDepartment", () => {
       }
 
       // Should not crash - the optimistic update creates an empty array which is fine
-      const cached = queryClient.getQueryData<string[]>(queryKeys.departments.all());
+      const cached = queryClient.getQueryData<string[]>(
+        queryKeys.departments.all(),
+      );
       // Cache may be undefined or an empty array - both are acceptable
       expect(!cached || cached.length === 0).toBe(true);
     });
@@ -288,7 +299,10 @@ describe("useRenameDepartment", () => {
         });
       });
 
-      expect(mockRenameDepartment).toHaveBeenCalledWith("Engineering", "Product Engineering");
+      expect(mockRenameDepartment).toHaveBeenCalledWith(
+        "Engineering",
+        "Product Engineering",
+      );
     });
 
     it("refetches related queries on success", async () => {
@@ -312,7 +326,9 @@ describe("useRenameDepartment", () => {
   describe("optimistic updates", () => {
     it("calls API to rename department and refetches on success", async () => {
       // Pre-populate cache
-      queryClient.setQueryData(queryKeys.departments.all(), [...mockDepartments]);
+      queryClient.setQueryData(queryKeys.departments.all(), [
+        ...mockDepartments,
+      ]);
       mockRenameDepartment.mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useRenameDepartment(), {
@@ -327,14 +343,19 @@ describe("useRenameDepartment", () => {
       });
 
       // Verify the API was called with correct parameters
-      expect(mockRenameDepartment).toHaveBeenCalledWith("Engineering", "Product Engineering");
+      expect(mockRenameDepartment).toHaveBeenCalledWith(
+        "Engineering",
+        "Product Engineering",
+      );
       // Verify refetch was triggered on success
       expect(mockRefetchQueries).toHaveBeenCalled();
     });
 
     it("rolls back on error", async () => {
       // Pre-populate cache
-      queryClient.setQueryData(queryKeys.departments.all(), [...mockDepartments]);
+      queryClient.setQueryData(queryKeys.departments.all(), [
+        ...mockDepartments,
+      ]);
       mockRenameDepartment.mockRejectedValue(new Error("Rename failed"));
 
       const { result } = renderHook(() => useRenameDepartment(), {
@@ -354,7 +375,9 @@ describe("useRenameDepartment", () => {
 
       // Check that department was rolled back to original name
       await waitFor(() => {
-        const cached = queryClient.getQueryData<string[]>(queryKeys.departments.all());
+        const cached = queryClient.getQueryData<string[]>(
+          queryKeys.departments.all(),
+        );
         expect(cached).toContain("Engineering");
         expect(cached).not.toContain("Product Engineering");
       });
@@ -443,7 +466,7 @@ describe("useRenameDepartment", () => {
             oldName: "Engineering",
             newName: "Product Engineering",
           });
-        })
+        }),
       ).rejects.toThrow("Failed");
     });
   });
@@ -465,7 +488,10 @@ describe("useRenameDepartment", () => {
         });
       });
 
-      expect(mockRenameDepartment).toHaveBeenCalledWith("Engineering", "Product Engineering");
+      expect(mockRenameDepartment).toHaveBeenCalledWith(
+        "Engineering",
+        "Product Engineering",
+      );
     });
   });
 });

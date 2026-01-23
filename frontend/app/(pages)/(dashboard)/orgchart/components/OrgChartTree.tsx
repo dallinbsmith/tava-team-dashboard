@@ -4,7 +4,14 @@ import { User, Squad } from "@/shared/types/user";
 import { OrgTreeNode, DraftChange } from "../types";
 import Avatar from "@/shared/common/Avatar";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { ChevronDown, ChevronRight, GripVertical, Shield, AlertCircle, Pencil } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  GripVertical,
+  Shield,
+  AlertCircle,
+  Pencil,
+} from "lucide-react";
 import { badgeRounded, cardBase } from "@/lib/styles";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +19,7 @@ import { cn } from "@/lib/utils";
 export const applyDraftChangesToTree = (
   trees: OrgTreeNode[],
   changes: DraftChange[],
-  squads: Squad[] = []
+  squads: Squad[] = [],
 ): OrgTreeNode[] => {
   if (changes.length === 0) {
     return trees;
@@ -49,12 +56,16 @@ export const applyDraftChangesToTree = (
       change.new_supervisor_id !== undefined &&
       change.new_supervisor_id !== change.original_supervisor_id
     ) {
-      const newSupervisor = change.new_supervisor_id ? nodeMap.get(change.new_supervisor_id) : null;
+      const newSupervisor = change.new_supervisor_id
+        ? nodeMap.get(change.new_supervisor_id)
+        : null;
 
       // Remove from current parent
       const currentParent = parentMap.get(userId);
       if (currentParent) {
-        currentParent.children = currentParent.children.filter((child) => child.user.id !== userId);
+        currentParent.children = currentParent.children.filter(
+          (child) => child.user.id !== userId,
+        );
       } else {
         // Node is at root level - remove from clonedTrees array
         clonedTrees = clonedTrees.filter((tree) => tree.user.id !== userId);
@@ -69,8 +80,9 @@ export const applyDraftChangesToTree = (
 
     // Apply department change - preserve original for comparison
     if (change.new_department !== undefined) {
-      (node.user as unknown as { originalDepartment: string }).originalDepartment =
-        node.user.department || "";
+      (
+        node.user as unknown as { originalDepartment: string }
+      ).originalDepartment = node.user.department || "";
       node.user.department = change.new_department;
     }
 
@@ -82,7 +94,8 @@ export const applyDraftChangesToTree = (
     // Apply squad changes - preserve original squads for comparison
     if (change.new_squad_ids !== undefined) {
       // Store original squads before overwriting
-      (node.user as unknown as { originalSquads: Squad[] }).originalSquads = node.user.squads || [];
+      (node.user as unknown as { originalSquads: Squad[] }).originalSquads =
+        node.user.squads || [];
       node.user.squads = change.new_squad_ids
         .map((id) => squadMap.get(id))
         .filter((squad): squad is Squad => squad !== undefined);
@@ -130,8 +143,10 @@ export const DraggableEmployeeCard = ({
         cardBase,
         "flex items-center gap-2 sm:gap-3 p-2 sm:p-3 transition-all rounded-lg",
         hasChange && "border-purple-400 ring-2 ring-purple-500/30",
-        !hasChange && isDraftMode && "hover:border-primary-400 hover:shadow-sm cursor-pointer",
-        (isDragging || isBeingDragged) && "opacity-50"
+        !hasChange &&
+          isDraftMode &&
+          "hover:border-primary-400 hover:shadow-sm cursor-pointer",
+        (isDragging || isBeingDragged) && "opacity-50",
       )}
     >
       {isDraftMode && (
@@ -157,12 +172,17 @@ export const DraggableEmployeeCard = ({
           <span className="font-medium text-theme-text truncate text-sm sm:text-base">
             {node.user.first_name} {node.user.last_name}
           </span>
-          {node.user.role === "admin" && <Shield className="w-4 h-4 text-amber-400" />}
-          {node.user.role === "supervisor" && <Shield className="w-4 h-4 text-purple-400" />}
+          {node.user.role === "admin" && (
+            <Shield className="w-4 h-4 text-amber-400" />
+          )}
+          {node.user.role === "supervisor" && (
+            <Shield className="w-4 h-4 text-purple-400" />
+          )}
         </div>
         <div className="text-xs sm:text-sm text-theme-text-muted">
           <span className="truncate">
-            {node.user.title || node.user.role.charAt(0).toUpperCase() + node.user.role.slice(1)}
+            {node.user.title ||
+              node.user.role.charAt(0).toUpperCase() + node.user.role.slice(1)}
           </span>
           {node.user.department && (
             <>
@@ -235,18 +255,25 @@ export const DroppableSupervisorZone = ({
 
   return (
     <div
-      className={cn(level > 0 && "ml-3 sm:ml-6 border-l-2 border-theme-border pl-2 sm:pl-4")}
+      className={cn(
+        level > 0 && "ml-3 sm:ml-6 border-l-2 border-theme-border pl-2 sm:pl-4",
+      )}
     >
       <div
         ref={setNodeRef}
         className={cn(
           "rounded-lg transition-all",
-          isOver && canReceiveDrop && "ring-2 ring-primary-500 ring-offset-2 bg-primary-900/30"
+          isOver &&
+            canReceiveDrop &&
+            "ring-2 ring-primary-500 ring-offset-2 bg-primary-900/30",
         )}
       >
         <div className="flex items-center gap-2 mb-2">
           {hasChildren ? (
-            <button onClick={onToggleExpand} className="p-1 hover:bg-theme-elevated rounded">
+            <button
+              onClick={onToggleExpand}
+              className="p-1 hover:bg-theme-elevated rounded"
+            >
               {isExpanded ? (
                 <ChevronDown className="w-4 h-4 text-theme-text-muted" />
               ) : (
@@ -274,7 +301,7 @@ export const DroppableSupervisorZone = ({
               "ml-6 p-2 border-2 border-dashed rounded text-center text-sm transition-all",
               isOver
                 ? "border-primary-500 bg-primary-900/30 text-primary-300"
-                : "border-theme-border text-theme-text-muted"
+                : "border-theme-border text-theme-text-muted",
             )}
           >
             Drop here to move under {node.user.first_name}
@@ -282,7 +309,9 @@ export const DroppableSupervisorZone = ({
         )}
       </div>
 
-      {hasChildren && isExpanded && <div className="mt-2 space-y-2">{children}</div>}
+      {hasChildren && isExpanded && (
+        <div className="mt-2 space-y-2">{children}</div>
+      )}
     </div>
   );
 };
@@ -340,7 +369,12 @@ export const OrgTreeRenderer = ({
 // Drag overlay - shows the card being dragged
 export const DragOverlayCard = ({ user }: { user: User }) => {
   return (
-    <div className={cn(cardBase, "flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border-primary-400 shadow-xl rounded-lg opacity-90 max-w-xs sm:max-w-sm")}>
+    <div
+      className={cn(
+        cardBase,
+        "flex items-center gap-2 sm:gap-3 p-2 sm:p-3 border-primary-400 shadow-xl rounded-lg opacity-90 max-w-xs sm:max-w-sm",
+      )}
+    >
       <GripVertical className="w-4 sm:w-5 h-4 sm:h-5 text-theme-text-muted flex-shrink-0" />
       <Avatar
         s3AvatarUrl={user.avatar_url}

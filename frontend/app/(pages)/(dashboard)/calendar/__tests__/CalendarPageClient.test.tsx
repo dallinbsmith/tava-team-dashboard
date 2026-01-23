@@ -57,12 +57,18 @@ jest.mock("../components/Calendar", () => {
           </button>
         )}
         {onViewMeeting && (
-          <button onClick={() => onViewMeeting(1)} data-testid="view-meeting-btn">
+          <button
+            onClick={() => onViewMeeting(1)}
+            data-testid="view-meeting-btn"
+          >
             View Meeting
           </button>
         )}
         {onViewTimeOff && (
-          <button onClick={() => onViewTimeOff(1)} data-testid="view-time-off-btn">
+          <button
+            onClick={() => onViewTimeOff(1)}
+            data-testid="view-time-off-btn"
+          >
             View Time Off
           </button>
         )}
@@ -106,7 +112,9 @@ jest.mock("../components/CreateMeetingModal", () => {
 
 jest.mock("../components/CreateEventModal", () => {
   return function MockCreateEventModal({ isOpen }: { isOpen: boolean }) {
-    return isOpen ? <div data-testid="create-event-modal">Event Modal</div> : null;
+    return isOpen ? (
+      <div data-testid="create-event-modal">Event Modal</div>
+    ) : null;
   };
 });
 
@@ -127,8 +135,14 @@ jest.mock("../components/RequestTimeOffModal", () => {
 });
 
 jest.mock("../components/CreateTimeOffForEmployeeModal", () => {
-  return function MockCreateTimeOffForEmployeeModal({ isOpen }: { isOpen: boolean }) {
-    return isOpen ? <div data-testid="create-time-off-employee-modal">Modal</div> : null;
+  return function MockCreateTimeOffForEmployeeModal({
+    isOpen,
+  }: {
+    isOpen: boolean;
+  }) {
+    return isOpen ? (
+      <div data-testid="create-time-off-employee-modal">Modal</div>
+    ) : null;
   };
 });
 
@@ -216,7 +230,9 @@ describe("CalendarPageClient", () => {
 
       expect(screen.getByText("Calendar")).toBeInTheDocument();
       expect(
-        screen.getByText("View and manage your tasks, meetings, and Jira tickets")
+        screen.getByText(
+          "View and manage your tasks, meetings, and Jira tickets",
+        ),
       ).toBeInTheDocument();
     });
 
@@ -230,8 +246,12 @@ describe("CalendarPageClient", () => {
       render(<CalendarPageClient {...defaultProps} />);
 
       expect(screen.queryByTestId("create-task-modal")).not.toBeInTheDocument();
-      expect(screen.queryByTestId("create-meeting-modal")).not.toBeInTheDocument();
-      expect(screen.queryByTestId("request-time-off-modal")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("create-meeting-modal"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("request-time-off-modal"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -262,7 +282,9 @@ describe("CalendarPageClient", () => {
       fireEvent.click(screen.getByTestId("request-time-off-btn"));
 
       await waitFor(() => {
-        expect(screen.getByTestId("request-time-off-modal")).toBeInTheDocument();
+        expect(
+          screen.getByTestId("request-time-off-modal"),
+        ).toBeInTheDocument();
       });
     });
 
@@ -279,7 +301,9 @@ describe("CalendarPageClient", () => {
       fireEvent.click(screen.getByText("Close"));
 
       await waitFor(() => {
-        expect(screen.queryByTestId("create-task-modal")).not.toBeInTheDocument();
+        expect(
+          screen.queryByTestId("create-task-modal"),
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -344,7 +368,9 @@ describe("CalendarPageClient", () => {
       });
 
       render(
-        <CalendarPageClient initialCurrentUser={createMockUser({ role: "supervisor" })} />
+        <CalendarPageClient
+          initialCurrentUser={createMockUser({ role: "supervisor" })}
+        />,
       );
 
       // The Calendar mock doesn't render the button for non-supervisors

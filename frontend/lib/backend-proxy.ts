@@ -12,7 +12,9 @@ export interface ProxyOptions {
 const jsonError = (error: string, status: number, details?: string) =>
   NextResponse.json(details ? { error, details } : { error }, { status });
 
-const getToken = async (requireAuth: boolean): Promise<string | null | "error"> => {
+const getToken = async (
+  requireAuth: boolean,
+): Promise<string | null | "error"> => {
   if (!requireAuth) return null;
   try {
     const result = await auth0.getAccessToken();
@@ -33,11 +35,13 @@ const getBody = async (request: NextRequest): Promise<string | undefined> => {
 };
 
 const parseResponse = async (
-  res: Response
+  res: Response,
 ): Promise<{ body: string | object; contentType: string | null } | null> => {
   const contentType = res.headers.get("content-type");
   try {
-    const body = contentType?.includes("application/json") ? await res.json() : await res.text();
+    const body = contentType?.includes("application/json")
+      ? await res.json()
+      : await res.text();
     return { body, contentType };
   } catch (e) {
     console.error("Proxy: Failed to parse response:", e);
@@ -47,13 +51,14 @@ const parseResponse = async (
 
 export const proxyToBackend = async (
   request: NextRequest,
-  options: ProxyOptions = {}
+  options: ProxyOptions = {},
 ): Promise<NextResponse> => {
   const { requireAuth = true, method, backendPath } = options;
 
   try {
     const token = await getToken(requireAuth);
-    if (token === "error") return jsonError("Unauthorized - please log in again", 401);
+    if (token === "error")
+      return jsonError("Unauthorized - please log in again", 401);
 
     const url = new URL(request.url);
     const path = backendPath || url.pathname.replace(/^\/api\/proxy/, "/api");
@@ -91,7 +96,7 @@ export const proxyToBackend = async (
     return jsonError(
       "Internal server error",
       500,
-      error instanceof Error ? error.message : "Unknown error"
+      error instanceof Error ? error.message : "Unknown error",
     );
   }
 };

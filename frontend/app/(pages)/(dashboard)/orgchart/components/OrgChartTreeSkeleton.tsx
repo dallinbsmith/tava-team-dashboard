@@ -68,8 +68,12 @@ const OrgNodeSkeleton = ({
           className={`${isSmall ? "w-8 h-8" : "w-12 h-12"} bg-theme-muted rounded-full shrink-0`}
         />
         <div className="flex-1 min-w-0">
-          <div className={`${isSmall ? "h-4 w-20" : "h-5 w-28"} bg-theme-muted rounded mb-1.5`} />
-          <div className={`${isSmall ? "h-3 w-16" : "h-4 w-24"} bg-theme-muted rounded`} />
+          <div
+            className={`${isSmall ? "h-4 w-20" : "h-5 w-28"} bg-theme-muted rounded mb-1.5`}
+          />
+          <div
+            className={`${isSmall ? "h-3 w-16" : "h-4 w-24"} bg-theme-muted rounded`}
+          />
         </div>
       </div>
       {!isSmall && (

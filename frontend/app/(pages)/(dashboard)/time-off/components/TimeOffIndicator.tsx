@@ -8,7 +8,10 @@ interface TimeOffIndicatorProps {
   compact?: boolean;
 }
 
-export default function TimeOffIndicator({ impact, compact = false }: TimeOffIndicatorProps) {
+export default function TimeOffIndicator({
+  impact,
+  compact = false,
+}: TimeOffIndicatorProps) {
   if (!impact.has_time_off) {
     return null;
   }

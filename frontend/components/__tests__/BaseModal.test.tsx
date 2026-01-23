@@ -55,7 +55,10 @@ describe("BaseModal", () => {
 
     it("renders footer when provided", () => {
       render(
-        <BaseModal {...defaultProps} footer={<button data-testid="footer-button">Save</button>} />
+        <BaseModal
+          {...defaultProps}
+          footer={<button data-testid="footer-button">Save</button>}
+        />,
       );
       expect(screen.getByTestId("footer-button")).toBeInTheDocument();
     });
@@ -63,7 +66,9 @@ describe("BaseModal", () => {
     it("does not render footer section when not provided", () => {
       const { container } = render(<BaseModal {...defaultProps} />);
       // The footer div with border-t should not exist
-      const footerSection = container.querySelector(".border-t.border-theme-border.px-6");
+      const footerSection = container.querySelector(
+        ".border-t.border-theme-border.px-6",
+      );
       expect(footerSection).not.toBeInTheDocument();
     });
   });
@@ -95,7 +100,9 @@ describe("BaseModal", () => {
 
     it("calls onClose when closeOnEscape is true", () => {
       const onClose = jest.fn();
-      render(<BaseModal {...defaultProps} onClose={onClose} closeOnEscape={true} />);
+      render(
+        <BaseModal {...defaultProps} onClose={onClose} closeOnEscape={true} />,
+      );
 
       fireEvent.keyDown(document, { key: "Escape" });
       expect(onClose).toHaveBeenCalledTimes(1);
@@ -103,7 +110,9 @@ describe("BaseModal", () => {
 
     it("does not call onClose when closeOnEscape is false", () => {
       const onClose = jest.fn();
-      render(<BaseModal {...defaultProps} onClose={onClose} closeOnEscape={false} />);
+      render(
+        <BaseModal {...defaultProps} onClose={onClose} closeOnEscape={false} />,
+      );
 
       fireEvent.keyDown(document, { key: "Escape" });
       expect(onClose).not.toHaveBeenCalled();
@@ -122,7 +131,9 @@ describe("BaseModal", () => {
   describe("backdrop click handling", () => {
     it("calls onClose when backdrop is clicked (default behavior)", () => {
       const onClose = jest.fn();
-      const { container } = render(<BaseModal {...defaultProps} onClose={onClose} />);
+      const { container } = render(
+        <BaseModal {...defaultProps} onClose={onClose} />,
+      );
 
       // Find backdrop (the fixed overlay)
       const backdrop = container.querySelector(".fixed.inset-0");
@@ -133,7 +144,11 @@ describe("BaseModal", () => {
     it("calls onClose when closeOnBackdropClick is true", () => {
       const onClose = jest.fn();
       const { container } = render(
-        <BaseModal {...defaultProps} onClose={onClose} closeOnBackdropClick={true} />
+        <BaseModal
+          {...defaultProps}
+          onClose={onClose}
+          closeOnBackdropClick={true}
+        />,
       );
 
       const backdrop = container.querySelector(".fixed.inset-0");
@@ -144,7 +159,11 @@ describe("BaseModal", () => {
     it("does not call onClose when closeOnBackdropClick is false", () => {
       const onClose = jest.fn();
       const { container } = render(
-        <BaseModal {...defaultProps} onClose={onClose} closeOnBackdropClick={false} />
+        <BaseModal
+          {...defaultProps}
+          onClose={onClose}
+          closeOnBackdropClick={false}
+        />,
       );
 
       const backdrop = container.querySelector(".fixed.inset-0");
@@ -178,7 +197,9 @@ describe("BaseModal", () => {
     });
 
     it("restores body overflow when modal closes", () => {
-      const { rerender } = render(<BaseModal {...defaultProps} isOpen={true} />);
+      const { rerender } = render(
+        <BaseModal {...defaultProps} isOpen={true} />,
+      );
       expect(document.body.style.overflow).toBe("hidden");
 
       rerender(<BaseModal {...defaultProps} isOpen={false} />);
@@ -195,8 +216,9 @@ describe("BaseModal", () => {
   });
 
   describe("maxWidth options", () => {
-    const maxWidthOptions: Array<"max-w-sm" | "max-w-md" | "max-w-lg" | "max-w-xl" | "max-w-2xl"> =
-      ["max-w-sm", "max-w-md", "max-w-lg", "max-w-xl", "max-w-2xl"];
+    const maxWidthOptions: Array<
+      "max-w-sm" | "max-w-md" | "max-w-lg" | "max-w-xl" | "max-w-2xl"
+    > = ["max-w-sm", "max-w-md", "max-w-lg", "max-w-xl", "max-w-2xl"];
 
     it.each(maxWidthOptions)("applies %s class when specified", (maxWidth) => {
       render(<BaseModal {...defaultProps} maxWidth={maxWidth} />);
@@ -256,10 +278,14 @@ describe("BaseModal", () => {
   describe("event listener cleanup", () => {
     it("removes keydown listener when modal closes", () => {
       const onClose = jest.fn();
-      const { rerender } = render(<BaseModal {...defaultProps} isOpen={true} onClose={onClose} />);
+      const { rerender } = render(
+        <BaseModal {...defaultProps} isOpen={true} onClose={onClose} />,
+      );
 
       // Close the modal
-      rerender(<BaseModal {...defaultProps} isOpen={false} onClose={onClose} />);
+      rerender(
+        <BaseModal {...defaultProps} isOpen={false} onClose={onClose} />,
+      );
 
       // Escape should no longer trigger onClose
       fireEvent.keyDown(document, { key: "Escape" });
@@ -307,7 +333,7 @@ describe("ConfirmModal", () => {
               <strong>Custom</strong> message
             </div>
           }
-        />
+        />,
       );
       expect(screen.getByTestId("custom-message")).toBeInTheDocument();
     });
@@ -381,7 +407,13 @@ describe("ConfirmModal", () => {
     });
 
     it("shows confirmText when isLoading is false", () => {
-      render(<ConfirmModal {...defaultProps} isLoading={false} confirmText="Delete" />);
+      render(
+        <ConfirmModal
+          {...defaultProps}
+          isLoading={false}
+          confirmText="Delete"
+        />,
+      );
       expect(screen.getByText("Delete")).toBeInTheDocument();
       expect(screen.queryByText("Processing...")).not.toBeInTheDocument();
     });

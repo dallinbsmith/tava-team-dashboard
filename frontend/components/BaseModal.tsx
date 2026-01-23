@@ -73,7 +73,7 @@ export const BaseModal = ({
         onClose();
       }
     },
-    [closeOnEscape, onClose]
+    [closeOnEscape, onClose],
   );
 
   useEffect(() => {
@@ -102,22 +102,31 @@ export const BaseModal = ({
     <div
       className={cn(
         "fixed inset-0 bg-black/50 flex items-center justify-center",
-        zIndexClass
+        zIndexClass,
       )}
       onClick={handleBackdropClick}
     >
       <div
-        className={cn("bg-theme-surface shadow-xl w-full mx-4", maxWidth, className)}
+        className={cn(
+          "bg-theme-surface shadow-xl w-full mx-4",
+          maxWidth,
+          className,
+        )}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
         <div className="flex items-start justify-between px-6 py-4 border-b border-theme-border">
           <div>
-            <h3 id="modal-title" className="text-lg font-semibold text-theme-text">
+            <h3
+              id="modal-title"
+              className="text-lg font-semibold text-theme-text"
+            >
               {title}
             </h3>
-            {subtitle && <p className="text-sm text-theme-text-muted mt-1">{subtitle}</p>}
+            {subtitle && (
+              <p className="text-sm text-theme-text-muted mt-1">{subtitle}</p>
+            )}
           </div>
           <button
             onClick={onClose}
@@ -128,13 +137,20 @@ export const BaseModal = ({
           </button>
         </div>
         <div className="p-6">{children}</div>
-        {footer && <div className="px-6 py-4 border-t border-theme-border">{footer}</div>}
+        {footer && (
+          <div className="px-6 py-4 border-t border-theme-border">{footer}</div>
+        )}
       </div>
     </div>
   );
 };
 
-export type ConfirmModalVariant = "primary" | "danger" | "warning" | "info" | "success";
+export type ConfirmModalVariant =
+  | "primary"
+  | "danger"
+  | "warning"
+  | "info"
+  | "success";
 
 /**
  * ConfirmModal Component
@@ -243,7 +259,8 @@ export const ConfirmModal = ({
 
   const styles = VARIANT_STYLES[variant];
   // Show icon by default for danger/warning variants, or if explicitly requested
-  const shouldShowIcon = showIcon ?? (variant === "danger" || variant === "warning");
+  const shouldShowIcon =
+    showIcon ?? (variant === "danger" || variant === "warning");
 
   return (
     <BaseModal
@@ -259,7 +276,7 @@ export const ConfirmModal = ({
               <span
                 className={cn(
                   "flex items-center justify-center w-8 h-8",
-                  styles.iconBg
+                  styles.iconBg,
                 )}
               >
                 <AlertTriangle className={cn("w-4 h-4", styles.icon)} />
@@ -276,7 +293,11 @@ export const ConfirmModal = ({
       closeOnEscape={!isLoadingState}
     >
       <div className="mb-6">
-        {typeof message === "string" ? <p className="text-theme-text-muted">{message}</p> : message}
+        {typeof message === "string" ? (
+          <p className="text-theme-text-muted">{message}</p>
+        ) : (
+          message
+        )}
       </div>
       <div className="flex gap-3">
         <button
@@ -291,7 +312,7 @@ export const ConfirmModal = ({
           disabled={isLoadingState}
           className={cn(
             "flex-1 px-4 py-2 transition-colors disabled:opacity-50",
-            styles.button
+            styles.button,
           )}
         >
           {isLoadingState ? "Processing..." : confirmText}

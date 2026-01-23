@@ -129,7 +129,10 @@ describe("CalendarToolbar", () => {
   describe("supervisor features", () => {
     it("shows Mine/Team toggle for supervisors", () => {
       render(
-        <CalendarToolbar {...defaultProps} effectiveIsSupervisorOrAdmin={true} />
+        <CalendarToolbar
+          {...defaultProps}
+          effectiveIsSupervisorOrAdmin={true}
+        />,
       );
 
       expect(screen.getByText("Mine")).toBeInTheDocument();
@@ -138,7 +141,10 @@ describe("CalendarToolbar", () => {
 
     it("does not show Mine/Team toggle for regular employees", () => {
       render(
-        <CalendarToolbar {...defaultProps} effectiveIsSupervisorOrAdmin={false} />
+        <CalendarToolbar
+          {...defaultProps}
+          effectiveIsSupervisorOrAdmin={false}
+        />,
       );
 
       expect(screen.queryByText("Mine")).not.toBeInTheDocument();
@@ -151,7 +157,7 @@ describe("CalendarToolbar", () => {
           {...defaultProps}
           effectiveIsSupervisorOrAdmin={true}
           showTeamTimeOff={true}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByText("Mine"));
@@ -165,7 +171,7 @@ describe("CalendarToolbar", () => {
           {...defaultProps}
           effectiveIsSupervisorOrAdmin={true}
           showTeamTimeOff={false}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByText("Team"));
@@ -176,9 +182,7 @@ describe("CalendarToolbar", () => {
 
   describe("add menu", () => {
     it("shows Add button when actions are provided", () => {
-      render(
-        <CalendarToolbar {...defaultProps} onCreateTask={jest.fn()} />
-      );
+      render(<CalendarToolbar {...defaultProps} onCreateTask={jest.fn()} />);
 
       expect(screen.getByText("Add")).toBeInTheDocument();
     });
@@ -190,9 +194,7 @@ describe("CalendarToolbar", () => {
     });
 
     it("calls onToggleAddMenu when Add is clicked", () => {
-      render(
-        <CalendarToolbar {...defaultProps} onCreateTask={jest.fn()} />
-      );
+      render(<CalendarToolbar {...defaultProps} onCreateTask={jest.fn()} />);
 
       fireEvent.click(screen.getByText("Add"));
 
@@ -206,7 +208,7 @@ describe("CalendarToolbar", () => {
           onCreateTask={jest.fn()}
           onCreateMeeting={jest.fn()}
           addMenuOpen={true}
-        />
+        />,
       );
 
       expect(screen.getByText("Task")).toBeInTheDocument();
@@ -220,7 +222,7 @@ describe("CalendarToolbar", () => {
           {...defaultProps}
           onCreateTask={onCreateTask}
           addMenuOpen={true}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByText("Task"));
@@ -238,7 +240,7 @@ describe("CalendarToolbar", () => {
 
     it("shows spinning animation when refreshing", () => {
       const { container } = render(
-        <CalendarToolbar {...defaultProps} refreshing={true} />
+        <CalendarToolbar {...defaultProps} refreshing={true} />,
       );
 
       const spinner = container.querySelector(".animate-spin");

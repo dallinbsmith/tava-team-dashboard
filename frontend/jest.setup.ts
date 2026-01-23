@@ -80,7 +80,7 @@ global.fetch = jest.fn(() =>
     json: () => Promise.resolve({}),
     text: () => Promise.resolve(""),
     headers: new Headers(),
-  } as Response)
+  } as Response),
 );
 
 /**

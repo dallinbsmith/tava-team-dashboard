@@ -4,7 +4,13 @@ import { useState } from "react";
 import { CreateTaskRequest } from "../types";
 import { createTask } from "../actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
-import { BaseModal, InputField, TextareaField, Button, FormError } from "@/components";
+import {
+  BaseModal,
+  InputField,
+  TextareaField,
+  Button,
+  FormError,
+} from "@/components";
 import { format, addDays } from "date-fns";
 
 interface CreateEventModalProps {
@@ -13,14 +19,22 @@ interface CreateEventModalProps {
   onCreated: () => void;
 }
 
-export default function CreateEventModal({ isOpen, onClose, onCreated }: CreateEventModalProps) {
+export default function CreateEventModal({
+  isOpen,
+  onClose,
+  onCreated,
+}: CreateEventModalProps) {
   const { currentUser } = useCurrentUser();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
+  const [startDate, setStartDate] = useState(
+    format(addDays(new Date(), 1), "yyyy-MM-dd"),
+  );
   const [startTime, setStartTime] = useState("09:00");
-  const [endDate, setEndDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
+  const [endDate, setEndDate] = useState(
+    format(addDays(new Date(), 1), "yyyy-MM-dd"),
+  );
   const [endTime, setEndTime] = useState("10:00");
   const [isAllDay, setIsAllDay] = useState(true);
 
@@ -58,7 +72,9 @@ export default function CreateEventModal({ isOpen, onClose, onCreated }: CreateE
     if (startDate === endDate) {
       const [hours, minutes] = newStartTime.split(":").map(Number);
       const endHours = (hours + 1) % 24;
-      setEndTime(`${endHours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`);
+      setEndTime(
+        `${endHours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`,
+      );
     }
   };
 
@@ -130,7 +146,12 @@ export default function CreateEventModal({ isOpen, onClose, onCreated }: CreateE
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Create Event" maxWidth="max-w-md">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Create Event"
+      maxWidth="max-w-md"
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormError error={error} />
 
@@ -159,7 +180,9 @@ export default function CreateEventModal({ isOpen, onClose, onCreated }: CreateE
               onChange={(e) => setIsAllDay(e.target.checked)}
               className="w-4 h-4 text-primary-600 border-theme-border bg-theme-elevated focus:ring-primary-500 rounded"
             />
-            <span className="text-sm font-medium text-theme-text">All day event</span>
+            <span className="text-sm font-medium text-theme-text">
+              All day event
+            </span>
           </label>
         </div>
 

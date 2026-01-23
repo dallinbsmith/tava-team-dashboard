@@ -8,7 +8,15 @@ import {
   TIME_OFF_STATUS_LABELS,
   TimeOffStatus,
 } from "../types";
-import { Calendar, Clock, User, MessageSquare, X, Check, XCircle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  User,
+  MessageSquare,
+  X,
+  Check,
+  XCircle,
+} from "lucide-react";
 
 interface TimeOffRequestCardProps {
   request: TimeOffRequest;
@@ -18,11 +26,30 @@ interface TimeOffRequestCardProps {
   cancelling?: boolean;
 }
 
-const statusColors: Record<TimeOffStatus, { bg: string; text: string; border: string }> = {
-  pending: { bg: "bg-yellow-500/10", text: "text-yellow-400", border: "border-yellow-500/20" },
-  approved: { bg: "bg-green-500/10", text: "text-green-400", border: "border-green-500/20" },
-  rejected: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20" },
-  cancelled: { bg: "bg-gray-500/10", text: "text-gray-400", border: "border-gray-500/20" },
+const statusColors: Record<
+  TimeOffStatus,
+  { bg: string; text: string; border: string }
+> = {
+  pending: {
+    bg: "bg-yellow-500/10",
+    text: "text-yellow-400",
+    border: "border-yellow-500/20",
+  },
+  approved: {
+    bg: "bg-green-500/10",
+    text: "text-green-400",
+    border: "border-green-500/20",
+  },
+  rejected: {
+    bg: "bg-red-500/10",
+    text: "text-red-400",
+    border: "border-red-500/20",
+  },
+  cancelled: {
+    bg: "bg-gray-500/10",
+    text: "text-gray-400",
+    border: "border-gray-500/20",
+  },
 };
 
 const TimeOffRequestCard = memo(function TimeOffRequestCard({
@@ -82,7 +109,8 @@ const TimeOffRequestCard = memo(function TimeOffRequestCard({
               <div className="flex items-center gap-2 text-gray-500 text-xs mt-2">
                 <Clock className="w-3 h-3" />
                 <span>
-                  Reviewed by {request.reviewer.first_name} {request.reviewer.last_name} on{" "}
+                  Reviewed by {request.reviewer.first_name}{" "}
+                  {request.reviewer.last_name} on{" "}
                   {format(new Date(request.reviewed_at), "MMM d, yyyy")}
                 </span>
               </div>
@@ -90,7 +118,8 @@ const TimeOffRequestCard = memo(function TimeOffRequestCard({
 
             {request.reviewer_notes && (
               <div className="mt-2 p-2 bg-gray-700/50 rounded text-gray-400 text-xs">
-                <span className="font-medium">Reviewer note:</span> {request.reviewer_notes}
+                <span className="font-medium">Reviewer note:</span>{" "}
+                {request.reviewer_notes}
               </div>
             )}
           </div>

@@ -49,7 +49,9 @@ describe("SearchableFilterList", () => {
     });
 
     it("uses custom placeholder", () => {
-      render(<SearchableFilterList {...defaultProps} placeholder="Find fruit..." />);
+      render(
+        <SearchableFilterList {...defaultProps} placeholder="Find fruit..." />,
+      );
       expect(screen.getByPlaceholderText("Find fruit...")).toBeInTheDocument();
     });
   });
@@ -109,7 +111,9 @@ describe("SearchableFilterList", () => {
 
   describe("selection behavior", () => {
     it("shows selected item as checked", () => {
-      render(<SearchableFilterList {...defaultProps} selectedValues={["Banana"]} />);
+      render(
+        <SearchableFilterList {...defaultProps} selectedValues={["Banana"]} />,
+      );
 
       // Find the Banana button and check if its checkbox is checked
       const bananaButton = screen.getByText("Banana").closest("button");
@@ -119,7 +123,9 @@ describe("SearchableFilterList", () => {
     });
 
     it("shows other items as unchecked", () => {
-      render(<SearchableFilterList {...defaultProps} selectedValues={["Banana"]} />);
+      render(
+        <SearchableFilterList {...defaultProps} selectedValues={["Banana"]} />,
+      );
 
       // Apple should be unchecked
       const appleButton = screen.getByText("Apple").closest("button");
@@ -140,7 +146,13 @@ describe("SearchableFilterList", () => {
 
     it("calls onChange with item removed when item is deselected", async () => {
       const onChange = jest.fn();
-      render(<SearchableFilterList {...defaultProps} selectedValues={["Cherry"]} onChange={onChange} />);
+      render(
+        <SearchableFilterList
+          {...defaultProps}
+          selectedValues={["Cherry"]}
+          onChange={onChange}
+        />,
+      );
 
       // Click on Cherry (already selected) to deselect
       fireEvent.click(screen.getByText("Cherry"));
@@ -156,7 +168,7 @@ describe("SearchableFilterList", () => {
           {...defaultProps}
           selectedValues={["Cherry"]}
           onChange={onChange}
-        />
+        />,
       );
 
       // Click on Apple to add to selection
@@ -176,7 +188,9 @@ describe("SearchableFilterList", () => {
     });
 
     it("applies custom maxHeight class", () => {
-      const { container } = render(<SearchableFilterList {...defaultProps} maxHeight="max-h-64" />);
+      const { container } = render(
+        <SearchableFilterList {...defaultProps} maxHeight="max-h-64" />,
+      );
 
       const scrollContainer = container.querySelector(".max-h-64");
       expect(scrollContainer).toBeInTheDocument();
@@ -195,7 +209,8 @@ describe("SearchableFilterList", () => {
       render(<SearchableFilterList {...defaultProps} />);
 
       // Search icon should be present (SVG)
-      const searchContainer = screen.getByPlaceholderText("Search...").parentElement;
+      const searchContainer =
+        screen.getByPlaceholderText("Search...").parentElement;
       const svg = searchContainer?.querySelector("svg");
       expect(svg).toBeInTheDocument();
     });
@@ -203,7 +218,9 @@ describe("SearchableFilterList", () => {
     it("updates search value as user types", async () => {
       render(<SearchableFilterList {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText("Search...") as HTMLInputElement;
+      const searchInput = screen.getByPlaceholderText(
+        "Search...",
+      ) as HTMLInputElement;
       await userEvent.type(searchInput, "test");
 
       expect(searchInput.value).toBe("test");

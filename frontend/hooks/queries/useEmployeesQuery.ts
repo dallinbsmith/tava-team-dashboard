@@ -19,7 +19,9 @@ export interface UseEmployeesQueryResult {
   invalidate: () => Promise<void>;
 }
 
-export const useEmployeesQuery = (options: UseEmployeesQueryOptions = {}): UseEmployeesQueryResult => {
+export const useEmployeesQuery = (
+  options: UseEmployeesQueryOptions = {},
+): UseEmployeesQueryResult => {
   const { staleTime = STALE_TIMES.STANDARD } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
@@ -43,7 +45,9 @@ export const useEmployeesQuery = (options: UseEmployeesQueryOptions = {}): UseEm
   }, [queryRefetch]);
 
   const invalidate = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.employees.all() });
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.employees.all(),
+    });
   }, [queryClient]);
 
   return {
@@ -72,7 +76,9 @@ export interface UseEmployeeQueryResult {
   refetch: () => Promise<void>;
 }
 
-export const useEmployeeQuery = (options: UseEmployeeQueryOptions): UseEmployeeQueryResult => {
+export const useEmployeeQuery = (
+  options: UseEmployeeQueryOptions,
+): UseEmployeeQueryResult => {
   const { id, staleTime = STALE_TIMES.STANDARD, enabled = true } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
 

@@ -21,14 +21,19 @@ export default function DashboardError({ error, reset }: ErrorProps) {
           <AlertTriangle className="w-6 h-6 text-red-400" />
         </div>
 
-        <h2 className="text-lg font-semibold text-theme-text mb-2">Something went wrong</h2>
+        <h2 className="text-lg font-semibold text-theme-text mb-2">
+          Something went wrong
+        </h2>
 
         <p className="text-theme-text-muted mb-6">
-          {error.message || "An unexpected error occurred while loading this page."}
+          {error.message ||
+            "An unexpected error occurred while loading this page."}
         </p>
 
         {error.digest && (
-          <p className="text-xs text-theme-text-muted mb-4 font-mono">Error ID: {error.digest}</p>
+          <p className="text-xs text-theme-text-muted mb-4 font-mono">
+            Error ID: {error.digest}
+          </p>
         )}
 
         <div className="flex gap-3 justify-center">

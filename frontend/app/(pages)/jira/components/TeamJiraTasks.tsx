@@ -10,7 +10,12 @@ import Avatar from "@/shared/common/Avatar";
 import { getStatusColor, DueDateDisplay } from "@/lib/jira-utils";
 import { JIRA_LIMITS } from "@/lib/constants";
 import TimeOffIndicator from "@/app/(pages)/(dashboard)/time-off/components/TimeOffIndicator";
-import { FilterDropdown, FilterSection, FilterCheckbox, SearchableFilterList } from "@/components";
+import {
+  FilterDropdown,
+  FilterSection,
+  FilterCheckbox,
+  SearchableFilterList,
+} from "@/components";
 import {
   Users,
   ExternalLink,
@@ -29,7 +34,8 @@ interface TeamJiraTasksProps {
 const viewModes = ["grid", "list"] as const;
 
 export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
-  const { effectiveIsSupervisorOrAdmin, loading: userLoading } = useCurrentUser();
+  const { effectiveIsSupervisorOrAdmin, loading: userLoading } =
+    useCurrentUser();
   const [tasks, setTasks] = useState<TeamTask[]>([]);
   const [settings, setSettings] = useState<JiraSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +58,7 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
   // URL-synced view mode state
   const [viewMode, setViewMode] = useQueryState(
     "teamView",
-    parseAsStringLiteral(viewModes).withDefault("list")
+    parseAsStringLiteral(viewModes).withDefault("list"),
   );
 
   // Extract unique sprints and individuals from tasks
@@ -74,7 +80,9 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
 
     return {
       sprints: Array.from(sprintSet).sort(),
-      individuals: Array.from(individualMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
+      individuals: Array.from(individualMap.values()).sort((a, b) =>
+        a.name.localeCompare(b.name),
+      ),
     };
   }, [tasks]);
 
@@ -133,7 +141,9 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
 
           if (jiraSettings.org_configured) {
             const issues = await getTeamJiraTasks(
-              compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT
+              compact
+                ? JIRA_LIMITS.TEAM_TASKS_COMPACT
+                : JIRA_LIMITS.TEAM_TASKS_DEFAULT,
             );
             setTasks(issues || []);
           }
@@ -146,7 +156,7 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
         setRefreshing(false);
       }
     },
-    [effectiveIsSupervisorOrAdmin, compact]
+    [effectiveIsSupervisorOrAdmin, compact],
   );
 
   useEffect(() => {
@@ -186,7 +196,9 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
           <div className="w-12 h-12 bg-theme-elevated flex items-center justify-center mx-auto mb-4">
             <Settings className="w-6 h-6 text-theme-text-muted" />
           </div>
-          <p className="text-theme-text-muted mb-4">Connect Jira to see your team&apos;s tasks</p>
+          <p className="text-theme-text-muted mb-4">
+            Connect Jira to see your team&apos;s tasks
+          </p>
           <Link
             href="/settings"
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 transition-colors"
@@ -290,7 +302,9 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
             className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated transition-colors disabled:opacity-50"
             title="Refresh tasks"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+            />
           </button>
         </div>
       </div>
@@ -354,11 +368,17 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
               </div>
 
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-mono text-primary-400">{task.key}</span>
-                <span className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}>
+                <span className="text-xs font-mono text-primary-400">
+                  {task.key}
+                </span>
+                <span
+                  className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
+                >
                   {task.status}
                 </span>
-                {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
+                {task.time_off_impact && (
+                  <TimeOffIndicator impact={task.time_off_impact} compact />
+                )}
               </div>
 
               <h3 className="font-medium text-theme-text text-sm line-clamp-2 mb-3 group-hover:text-primary-400 transition-colors">
@@ -399,14 +419,20 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
                 <span className="text-xs text-theme-text-muted whitespace-nowrap">
                   {task.employee.first_name[0]}. {task.employee.last_name}
                 </span>
-                <span className="text-xs font-mono text-primary-400">{task.key}</span>
-                <span className="text-sm text-theme-text truncate flex-1">{task.summary}</span>
+                <span className="text-xs font-mono text-primary-400">
+                  {task.key}
+                </span>
+                <span className="text-sm text-theme-text truncate flex-1">
+                  {task.summary}
+                </span>
                 <span
                   className={`px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ${getStatusColor(task.status)}`}
                 >
                   {task.status}
                 </span>
-                {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
+                {task.time_off_impact && (
+                  <TimeOffIndicator impact={task.time_off_impact} compact />
+                )}
                 {task.due_date && (
                   <span className="flex items-center gap-1 text-xs text-theme-text-muted whitespace-nowrap">
                     <Clock className="w-3 h-3" />

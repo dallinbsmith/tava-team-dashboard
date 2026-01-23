@@ -6,7 +6,12 @@ export type TaskStatus = "pending" | "in_progress" | "completed" | "cancelled";
 export type AssignmentType = "user" | "squad" | "department";
 export type RecurrenceType = "daily" | "weekly" | "monthly";
 export type ResponseStatus = "pending" | "accepted" | "declined" | "tentative";
-export type CalendarEventType = "jira" | "epic" | "task" | "meeting" | "time_off";
+export type CalendarEventType =
+  | "jira"
+  | "epic"
+  | "task"
+  | "meeting"
+  | "time_off";
 
 export interface Task {
   id: number;

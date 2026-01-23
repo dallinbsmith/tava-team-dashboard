@@ -9,7 +9,11 @@ import {
   cancelTimeOffRequest,
   reviewTimeOffRequest,
 } from "./actions";
-import { TimeOffStatus, CreateTimeOffRequest, ReviewTimeOffRequest } from "./types";
+import {
+  TimeOffStatus,
+  CreateTimeOffRequest,
+  ReviewTimeOffRequest,
+} from "./types";
 import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 
 // Query keys for this feature
@@ -72,8 +76,13 @@ export const useReviewTimeOffRequest = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, review }: { id: number; review: ReviewTimeOffRequest }) =>
-      reviewTimeOffRequest(id, review),
+    mutationFn: ({
+      id,
+      review,
+    }: {
+      id: number;
+      review: ReviewTimeOffRequest;
+    }) => reviewTimeOffRequest(id, review),
     onSuccess: async () => {
       // Force refetch all time-off and calendar queries
       await refetchQueries(queryClient, queryKeyGroups.timeOffRelated());

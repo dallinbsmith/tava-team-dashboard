@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { TimeOffType, TIME_OFF_TYPE_LABELS, CreateTimeOffRequest } from "../../time-off/types";
+import {
+  TimeOffType,
+  TIME_OFF_TYPE_LABELS,
+  CreateTimeOffRequest,
+} from "../../time-off/types";
 import { createTimeOffRequest } from "../../time-off/actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { useOrganization } from "@/providers/OrganizationProvider";
@@ -54,12 +58,12 @@ export default function CreateTimeOffForEmployeeModal({
   const [error, setError] = useState<string | null>(null);
 
   // Helper to update individual form fields
-  const updateField = useCallback(<K extends keyof TimeOffFormData>(
-    field: K,
-    value: TimeOffFormData[K]
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  }, []);
+  const updateField = useCallback(
+    <K extends keyof TimeOffFormData>(field: K, value: TimeOffFormData[K]) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    },
+    [],
+  );
 
   // Filter users based on current user's role
   // Supervisors see their direct reports, admins see all users
@@ -67,7 +71,9 @@ export default function CreateTimeOffForEmployeeModal({
     if (!currentUser) return [];
 
     if (isSupervisor && !isAdmin) {
-      return allUsers.filter((u) => u.supervisor_id === currentUser.id && u.id !== currentUser.id);
+      return allUsers.filter(
+        (u) => u.supervisor_id === currentUser.id && u.id !== currentUser.id,
+      );
     } else if (isAdmin) {
       // Admins can create for anyone except themselves
       return allUsers.filter((u) => u.id !== currentUser.id);
@@ -90,7 +96,14 @@ export default function CreateTimeOffForEmployeeModal({
     e.preventDefault();
     setError(null);
 
-    const { selectedUserId, startDate, endDate, requestType, reason, autoApprove } = formData;
+    const {
+      selectedUserId,
+      startDate,
+      endDate,
+      requestType,
+      reason,
+      autoApprove,
+    } = formData;
 
     if (!selectedUserId) {
       setError("Please select an employee");
@@ -158,14 +171,20 @@ export default function CreateTimeOffForEmployeeModal({
           <FormError error={error} />
 
           <div>
-            <label htmlFor="employee" className="block text-sm font-medium text-theme-text mb-1">
+            <label
+              htmlFor="employee"
+              className="block text-sm font-medium text-theme-text mb-1"
+            >
               Employee *
             </label>
             <select
               id="employee"
               value={formData.selectedUserId || ""}
               onChange={(e) =>
-                updateField("selectedUserId", e.target.value ? parseInt(e.target.value) : undefined)
+                updateField(
+                  "selectedUserId",
+                  e.target.value ? parseInt(e.target.value) : undefined,
+                )
               }
               className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
@@ -179,13 +198,18 @@ export default function CreateTimeOffForEmployeeModal({
           </div>
 
           <div>
-            <label htmlFor="requestType" className="block text-sm font-medium text-theme-text mb-1">
+            <label
+              htmlFor="requestType"
+              className="block text-sm font-medium text-theme-text mb-1"
+            >
               Type *
             </label>
             <select
               id="requestType"
               value={formData.requestType}
-              onChange={(e) => updateField("requestType", e.target.value as TimeOffType)}
+              onChange={(e) =>
+                updateField("requestType", e.target.value as TimeOffType)
+              }
               className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               {TIME_OFF_TYPES.map((type) => (
@@ -198,7 +222,10 @@ export default function CreateTimeOffForEmployeeModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-theme-text mb-1">
+              <label
+                htmlFor="startDate"
+                className="block text-sm font-medium text-theme-text mb-1"
+              >
                 Start Date *
               </label>
               <input
@@ -210,7 +237,10 @@ export default function CreateTimeOffForEmployeeModal({
               />
             </div>
             <div>
-              <label htmlFor="endDate" className="block text-sm font-medium text-theme-text mb-1">
+              <label
+                htmlFor="endDate"
+                className="block text-sm font-medium text-theme-text mb-1"
+              >
                 End Date *
               </label>
               <input
@@ -225,7 +255,10 @@ export default function CreateTimeOffForEmployeeModal({
           </div>
 
           <div>
-            <label htmlFor="reason" className="block text-sm font-medium text-theme-text mb-1">
+            <label
+              htmlFor="reason"
+              className="block text-sm font-medium text-theme-text mb-1"
+            >
               Reason
             </label>
             <textarea
@@ -246,10 +279,13 @@ export default function CreateTimeOffForEmployeeModal({
                 onChange={(e) => updateField("autoApprove", e.target.checked)}
                 className="w-4 h-4 text-primary-600 border-theme-border bg-theme-elevated focus:ring-primary-500 rounded"
               />
-              <span className="text-sm font-medium text-theme-text">Auto-approve this request</span>
+              <span className="text-sm font-medium text-theme-text">
+                Auto-approve this request
+              </span>
             </label>
             <p className="text-xs text-theme-text-muted mt-1 ml-6">
-              Since you&apos;re creating this request, it can be automatically approved.
+              Since you&apos;re creating this request, it can be automatically
+              approved.
             </p>
           </div>
 

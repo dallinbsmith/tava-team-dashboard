@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
 import { User } from "@/shared/types/user";
 
 const IMPERSONATION_STORAGE_KEY = "impersonation_user_id";
@@ -14,10 +21,18 @@ interface ImpersonationContextType {
   setImpersonatedUser: (user: User | null) => void;
 }
 
-const ImpersonationContext = createContext<ImpersonationContextType | undefined>(undefined);
+const ImpersonationContext = createContext<
+  ImpersonationContextType | undefined
+>(undefined);
 
-export const ImpersonationProvider = ({ children }: { children: ReactNode }) => {
-  const [impersonatedUserId, setImpersonatedUserId] = useState<number | null>(null);
+export const ImpersonationProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const [impersonatedUserId, setImpersonatedUserId] = useState<number | null>(
+    null,
+  );
   const [impersonatedUser, setImpersonatedUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -51,7 +66,11 @@ export const ImpersonationProvider = ({ children }: { children: ReactNode }) => 
     setImpersonatedUser,
   };
 
-  return <ImpersonationContext.Provider value={value}>{children}</ImpersonationContext.Provider>;
+  return (
+    <ImpersonationContext.Provider value={value}>
+      {children}
+    </ImpersonationContext.Provider>
+  );
 };
 
 const defaultImpersonationContext: ImpersonationContextType = {

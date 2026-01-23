@@ -8,13 +8,18 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+export default function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) {
   if (totalPages <= 1) return null;
 
   return (
     <div className="flex items-center justify-between py-3">
       <div className="text-sm text-theme-text-muted">
-        <span className="font-medium text-theme-text">{currentPage}</span> / {totalPages}
+        <span className="font-medium text-theme-text">{currentPage}</span> /{" "}
+        {totalPages}
       </div>
       <div className="flex items-center gap-2">
         <button

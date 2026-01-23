@@ -3,7 +3,11 @@
  * Input sanitization utilities
  */
 
-import { sanitizeName, validateName, sanitizeAndValidateName } from "../sanitize";
+import {
+  sanitizeName,
+  validateName,
+  sanitizeAndValidateName,
+} from "../sanitize";
 
 describe("sanitizeName", () => {
   describe("basic sanitization", () => {
@@ -31,7 +35,7 @@ describe("sanitizeName", () => {
   describe("HTML tag removal", () => {
     it("removes HTML tags", () => {
       expect(sanitizeName("<script>alert('xss')</script>Engineering")).toBe(
-        "alert('xss')Engineering"
+        "alert('xss')Engineering",
       );
       expect(sanitizeName("<b>Bold</b> Team")).toBe("Bold Team");
       expect(sanitizeName("<div class='test'>Content</div>")).toBe("Content");
@@ -113,7 +117,7 @@ describe("validateName", () => {
   describe("minimum length validation", () => {
     it("returns error for empty string", () => {
       expect(validateName("", "Squad name")).toBe(
-        "Squad name must be at least 1 character"
+        "Squad name must be at least 1 character",
       );
     });
 
@@ -124,7 +128,7 @@ describe("validateName", () => {
 
     it("respects custom minimum length", () => {
       expect(validateName("AB", "Name", 3)).toBe(
-        "Name must be at least 3 characters"
+        "Name must be at least 3 characters",
       );
       expect(validateName("ABC", "Name", 3)).toBeNull();
     });
@@ -134,13 +138,13 @@ describe("validateName", () => {
     it("returns error for string exceeding max length", () => {
       const longString = "A".repeat(101);
       expect(validateName(longString, "Name")).toBe(
-        "Name must be less than 100 characters"
+        "Name must be less than 100 characters",
       );
     });
 
     it("respects custom maximum length", () => {
       expect(validateName("ABCDEF", "Name", 1, 5)).toBe(
-        "Name must be less than 5 characters"
+        "Name must be less than 5 characters",
       );
       expect(validateName("ABCDE", "Name", 1, 5)).toBeNull();
     });
@@ -149,10 +153,10 @@ describe("validateName", () => {
   describe("alphanumeric requirement", () => {
     it("returns error for only special characters", () => {
       expect(validateName("---", "Name")).toBe(
-        "Name must contain at least one letter or number"
+        "Name must contain at least one letter or number",
       );
       expect(validateName("!!!", "Name")).toBe(
-        "Name must contain at least one letter or number"
+        "Name must contain at least one letter or number",
       );
     });
 
@@ -166,9 +170,11 @@ describe("validateName", () => {
   describe("field name customization", () => {
     it("uses custom field name in error messages", () => {
       expect(validateName("", "Department name")).toBe(
-        "Department name must be at least 1 character"
+        "Department name must be at least 1 character",
       );
-      expect(validateName("", "Squad")).toBe("Squad must be at least 1 character");
+      expect(validateName("", "Squad")).toBe(
+        "Squad must be at least 1 character",
+      );
     });
   });
 });

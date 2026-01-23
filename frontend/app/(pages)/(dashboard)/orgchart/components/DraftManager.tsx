@@ -80,7 +80,9 @@ const ChangeRow = ({
             {newValue}
           </span>
         )}
-        {!hasOld && hasNew && <span className="text-xs text-theme-text-muted ml-1">(added)</span>}
+        {!hasOld && hasNew && (
+          <span className="text-xs text-theme-text-muted ml-1">(added)</span>
+        )}
       </div>
     </div>
   );
@@ -283,7 +285,9 @@ export default function DraftManager({
                     onClick={() => onSelectDraft(draft)}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-theme-text">{draft.name}</span>
+                      <span className="font-medium text-theme-text">
+                        {draft.name}
+                      </span>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -352,7 +356,8 @@ export default function DraftManager({
                   change.new_department !== undefined &&
                   change.new_department !== change.original_department;
                 const hasRoleChange =
-                  change.new_role !== undefined && change.new_role !== change.original_role;
+                  change.new_role !== undefined &&
+                  change.new_role !== change.original_role;
                 const hasSquadChange = change.new_squad_ids !== undefined;
 
                 return (
@@ -377,8 +382,14 @@ export default function DraftManager({
                         <ChangeRow
                           label="Supervisor"
                           icon={UserCircle}
-                          oldValue={getSupervisorName(change.original_supervisor_id) || "None"}
-                          newValue={getSupervisorName(change.new_supervisor_id) || "None"}
+                          oldValue={
+                            getSupervisorName(change.original_supervisor_id) ||
+                            "None"
+                          }
+                          newValue={
+                            getSupervisorName(change.new_supervisor_id) ||
+                            "None"
+                          }
                         />
                       )}
 
@@ -404,7 +415,8 @@ export default function DraftManager({
                           }
                           newValue={
                             change.new_role
-                              ? change.new_role.charAt(0).toUpperCase() + change.new_role.slice(1)
+                              ? change.new_role.charAt(0).toUpperCase() +
+                                change.new_role.slice(1)
                               : undefined
                           }
                           type="badge"

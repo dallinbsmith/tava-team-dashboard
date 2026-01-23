@@ -113,13 +113,16 @@ export default function TeamSelector({
         ) : (
           <Building2 className="w-4 h-4 text-purple-400" />
         )}
-        <span className="flex-1 text-left text-theme-text truncate">{getSelectedLabel()}</span>
+        <span className="flex-1 text-left text-theme-text truncate">
+          {getSelectedLabel()}
+        </span>
         <span className="px-1.5 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted">
           {selectedType === "squad" ? "Squad" : "Dept"}
         </span>
         <ChevronDown
-          className={`w-4 h-4 shrink-0 text-theme-text-muted transition-transform ${isOpen ? "rotate-180" : ""
-            }`}
+          className={`w-4 h-4 shrink-0 text-theme-text-muted transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
         />
       </button>
 
@@ -140,7 +143,7 @@ export default function TeamSelector({
             selectedId={selectedId}
             onSelect={handleSelect}
           />,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -180,13 +183,14 @@ const SelectorDropdown = ({
 
   // Filter items by search based on active tab
   const filteredSquads = (squads || []).filter((squad) =>
-    squad.name.toLowerCase().includes(search.toLowerCase())
+    squad.name.toLowerCase().includes(search.toLowerCase()),
   );
   const filteredDepartments = (departments || []).filter((dept) =>
-    dept.toLowerCase().includes(search.toLowerCase())
+    dept.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const currentItems = activeTab === "squad" ? filteredSquads : filteredDepartments;
+  const currentItems =
+    activeTab === "squad" ? filteredSquads : filteredDepartments;
   const hasNoResults = currentItems.length === 0;
 
   return (
@@ -201,36 +205,40 @@ const SelectorDropdown = ({
       <div className="flex border-b border-theme-border">
         <button
           onClick={() => onTabChange("squad")}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "squad"
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+            activeTab === "squad"
               ? "text-primary-400 bg-primary-500/10 border-b-2 border-primary-500 -mb-px"
               : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-            }`}
+          }`}
         >
           <Users className="w-4 h-4" />
           Squads
           <span
-            className={`px-1.5 py-0.5 text-xs rounded-full ${activeTab === "squad"
+            className={`px-1.5 py-0.5 text-xs rounded-full ${
+              activeTab === "squad"
                 ? "bg-primary-500/20 text-primary-300"
                 : "bg-theme-elevated text-theme-text-muted"
-              }`}
+            }`}
           >
             {squads?.length || 0}
           </span>
         </button>
         <button
           onClick={() => onTabChange("department")}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${activeTab === "department"
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+            activeTab === "department"
               ? "text-purple-400 bg-purple-500/10 border-b-2 border-purple-500 -mb-px"
               : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-            }`}
+          }`}
         >
           <Building2 className="w-4 h-4" />
           Departments
           <span
-            className={`px-1.5 py-0.5 text-xs rounded-full ${activeTab === "department"
+            className={`px-1.5 py-0.5 text-xs rounded-full ${
+              activeTab === "department"
                 ? "bg-purple-500/20 text-purple-300"
                 : "bg-theme-elevated text-theme-text-muted"
-              }`}
+            }`}
           >
             {departments?.length || 0}
           </span>
@@ -254,25 +262,31 @@ const SelectorDropdown = ({
       <div className="flex-1 overflow-y-auto max-h-64">
         {hasNoResults ? (
           <div className="px-4 py-8 text-center text-theme-text-muted">
-            <p className="text-sm">No {activeTab === "squad" ? "squads" : "departments"} found</p>
+            <p className="text-sm">
+              No {activeTab === "squad" ? "squads" : "departments"} found
+            </p>
           </div>
         ) : activeTab === "squad" ? (
           // Squad list
           <div className="py-1">
             {filteredSquads.map((squad) => {
-              const isSelected = selectedType === "squad" && selectedId === squad.id.toString();
+              const isSelected =
+                selectedType === "squad" && selectedId === squad.id.toString();
               return (
                 <button
                   key={`squad-${squad.id}`}
                   onClick={() => onSelect("squad", squad.id.toString())}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${isSelected
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+                    isSelected
                       ? "bg-primary-500/20 text-primary-300"
                       : "text-theme-text hover:bg-theme-elevated"
-                    }`}
+                  }`}
                 >
                   <Users className="w-4 h-4 text-primary-400 flex-shrink-0" />
                   <span className="flex-1 truncate">{squad.name}</span>
-                  {isSelected && <Check className="w-4 h-4 text-primary-400 flex-shrink-0" />}
+                  {isSelected && (
+                    <Check className="w-4 h-4 text-primary-400 flex-shrink-0" />
+                  )}
                 </button>
               );
             })}
@@ -281,19 +295,23 @@ const SelectorDropdown = ({
           // Department list
           <div className="py-1">
             {filteredDepartments.map((dept) => {
-              const isSelected = selectedType === "department" && selectedId === dept;
+              const isSelected =
+                selectedType === "department" && selectedId === dept;
               return (
                 <button
                   key={`dept-${dept}`}
                   onClick={() => onSelect("department", dept)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${isSelected
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+                    isSelected
                       ? "bg-purple-500/20 text-purple-300"
                       : "text-theme-text hover:bg-theme-elevated"
-                    }`}
+                  }`}
                 >
                   <Building2 className="w-4 h-4 text-purple-400 flex-shrink-0" />
                   <span className="flex-1 truncate">{dept}</span>
-                  {isSelected && <Check className="w-4 h-4 text-purple-400 flex-shrink-0" />}
+                  {isSelected && (
+                    <Check className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                  )}
                 </button>
               );
             })}

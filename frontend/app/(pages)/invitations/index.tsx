@@ -21,7 +21,13 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-type InviteStep = "loading" | "invalid" | "valid" | "authenticated" | "completing" | "success";
+type InviteStep =
+  | "loading"
+  | "invalid"
+  | "valid"
+  | "authenticated"
+  | "completing"
+  | "success";
 
 export default function InvitePage() {
   const params = useParams();
@@ -30,7 +36,8 @@ export default function InvitePage() {
   const { user: auth0User, isLoading: authLoading } = useUser();
 
   const [step, setStep] = useState<InviteStep>("loading");
-  const [invitation, setInvitation] = useState<ValidateInvitationResponse | null>(null);
+  const [invitation, setInvitation] =
+    useState<ValidateInvitationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -87,7 +94,7 @@ export default function InvitePage() {
       } else {
         setStep("invalid");
         setError(
-          `This invitation was sent to ${invitation?.email}. Please sign in with that email address.`
+          `This invitation was sent to ${invitation?.email}. Please sign in with that email address.`,
         );
       }
     }
@@ -118,7 +125,11 @@ export default function InvitePage() {
   };
 
   const getRoleIcon = (role: string) => {
-    return role === "admin" ? <Shield className="w-5 h-5" /> : <Users className="w-5 h-5" />;
+    return role === "admin" ? (
+      <Shield className="w-5 h-5" />
+    ) : (
+      <Users className="w-5 h-5" />
+    );
   };
 
   const getRoleColor = (role: string) => {
@@ -145,7 +156,9 @@ export default function InvitePage() {
             <div className="w-16 h-16 bg-red-100 flex items-center justify-center mx-auto mb-6">
               <XCircle className="w-8 h-8 text-red-600" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Invalid Invitation</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Invalid Invitation
+            </h1>
             <p className="text-gray-600 mb-6">{error}</p>
             <Link
               href="/login"
@@ -170,7 +183,9 @@ export default function InvitePage() {
               <div className="w-16 h-16 bg-primary-100 flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-8 h-8 text-primary-600" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">You&apos;re Invited!</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                You&apos;re Invited!
+              </h1>
               <p className="text-gray-600 mt-2">
                 You&apos;ve been invited to join the Manager Dashboard
               </p>
@@ -182,10 +197,12 @@ export default function InvitePage() {
                   <Mail className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{invitation?.email}</p>
+                  <p className="font-medium text-gray-900">
+                    {invitation?.email}
+                  </p>
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${getRoleColor(
-                      invitation?.role || ""
+                      invitation?.role || "",
                     )}`}
                   >
                     {getRoleIcon(invitation?.role || "")}
@@ -237,8 +254,12 @@ export default function InvitePage() {
               <div className="w-16 h-16 bg-green-100 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">Almost There!</h1>
-              <p className="text-gray-600 mt-2">Complete your profile to accept the invitation</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Almost There!
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Complete your profile to accept the invitation
+              </p>
             </div>
 
             <div className="bg-gray-50 p-4 mb-6">
@@ -247,10 +268,12 @@ export default function InvitePage() {
                   <Mail className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{invitation?.email}</p>
+                  <p className="font-medium text-gray-900">
+                    {invitation?.email}
+                  </p>
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${getRoleColor(
-                      invitation?.role || ""
+                      invitation?.role || "",
                     )}`}
                   >
                     {getRoleIcon(invitation?.role || "")}
@@ -271,7 +294,9 @@ export default function InvitePage() {
 
             <form onSubmit={handleAcceptInvitation}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  First Name
+                </label>
                 <input
                   type="text"
                   value={firstName}
@@ -283,7 +308,9 @@ export default function InvitePage() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Last Name
+                </label>
                 <input
                   type="text"
                   value={lastName}
@@ -315,8 +342,12 @@ export default function InvitePage() {
         <div className="max-w-md w-full mx-4">
           <div className="bg-white shadow-xl p-8 text-center">
             <div className="animate-spin h-12 w-12 border-b-2 border-primary-600 mx-auto mb-6"></div>
-            <h1 className="text-2xl font-bold text-gray-900">Setting up your account...</h1>
-            <p className="text-gray-600 mt-2">Please wait while we complete your registration.</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Setting up your account...
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Please wait while we complete your registration.
+            </p>
           </div>
         </div>
       </div>
@@ -334,7 +365,8 @@ export default function InvitePage() {
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome!</h1>
             <p className="text-gray-600 mb-6">
-              Your account has been created successfully. Redirecting to dashboard...
+              Your account has been created successfully. Redirecting to
+              dashboard...
             </p>
             <div className="animate-pulse flex justify-center">
               <div className="h-1 w-24 bg-primary-200"></div>

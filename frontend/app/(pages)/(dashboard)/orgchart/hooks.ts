@@ -17,7 +17,11 @@ import {
   getDepartments,
   deleteDepartment,
 } from "./actions";
-import { CreateDraftRequest, UpdateDraftRequest, AddDraftChangeRequest } from "./types";
+import {
+  CreateDraftRequest,
+  UpdateDraftRequest,
+  AddDraftChangeRequest,
+} from "./types";
 import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 
 export const orgChartKeys = {
@@ -83,8 +87,13 @@ export const useAddDraftChange = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ draftId, change }: { draftId: number; change: AddDraftChangeRequest }) =>
-      addDraftChange(draftId, change),
+    mutationFn: ({
+      draftId,
+      change,
+    }: {
+      draftId: number;
+      change: AddDraftChangeRequest;
+    }) => addDraftChange(draftId, change),
     onSuccess: async () => {
       await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },

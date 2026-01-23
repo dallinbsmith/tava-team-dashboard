@@ -10,7 +10,20 @@ import ViewMeetingModal from "../ViewMeetingModal";
 // Mock date-fns
 jest.mock("date-fns", () => ({
   format: (date: Date, formatStr: string) => {
-    const month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getUTCMonth()];
+    const month = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ][date.getUTCMonth()];
     const day = date.getUTCDate();
     const year = date.getUTCFullYear();
 
@@ -38,9 +51,11 @@ const mockRespondToMeetingAction = jest.fn();
 
 jest.mock("../../actions", () => ({
   getMeeting: (id: number) => mockGetMeeting(id),
-  updateMeetingAction: (id: number, data: unknown) => mockUpdateMeetingAction(id, data),
+  updateMeetingAction: (id: number, data: unknown) =>
+    mockUpdateMeetingAction(id, data),
   deleteMeetingAction: (id: number) => mockDeleteMeetingAction(id),
-  respondToMeetingAction: (id: number, response: string) => mockRespondToMeetingAction(id, response),
+  respondToMeetingAction: (id: number, response: string) =>
+    mockRespondToMeetingAction(id, response),
 }));
 
 // Mock OrganizationProvider
@@ -69,7 +84,12 @@ describe("ViewMeetingModal", () => {
     end_time: "2024-01-20T10:30:00Z",
     created_by_id: 1,
     attendees: [
-      { id: 1, meeting_id: 1, user_id: 1, response_status: "accepted" as const },
+      {
+        id: 1,
+        meeting_id: 1,
+        user_id: 1,
+        response_status: "accepted" as const,
+      },
       { id: 2, meeting_id: 1, user_id: 2, response_status: "pending" as const },
     ],
     created_at: "2024-01-01T00:00:00Z",
@@ -86,7 +106,10 @@ describe("ViewMeetingModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetMeeting.mockResolvedValue(mockMeeting);
-    mockUpdateMeetingAction.mockResolvedValue({ success: true, data: mockMeeting });
+    mockUpdateMeetingAction.mockResolvedValue({
+      success: true,
+      data: mockMeeting,
+    });
     mockDeleteMeetingAction.mockResolvedValue({ success: true });
     mockRespondToMeetingAction.mockResolvedValue({ success: true });
   });
@@ -211,7 +234,9 @@ describe("ViewMeetingModal", () => {
       fireEvent.click(screen.getByText("Delete"));
 
       await waitFor(() => {
-        expect(screen.getByText(/Are you sure you want to delete this meeting/i)).toBeInTheDocument();
+        expect(
+          screen.getByText(/Are you sure you want to delete this meeting/i),
+        ).toBeInTheDocument();
       });
     });
 

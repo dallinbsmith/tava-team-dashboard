@@ -35,9 +35,10 @@ jest.mock("@/providers/OrganizationProvider", () => ({
 
 // Mock server actions
 jest.mock("../actions", () => ({
-  createDraftAction: jest
-    .fn()
-    .mockResolvedValue({ success: true, data: { id: 1, name: "Test Draft", changes: [] } }),
+  createDraftAction: jest.fn().mockResolvedValue({
+    success: true,
+    data: { id: 1, name: "Test Draft", changes: [] },
+  }),
   deleteDraftAction: jest.fn().mockResolvedValue({ success: true }),
   publishDraftAction: jest.fn().mockResolvedValue({ success: true }),
   addDraftChangeAction: jest.fn().mockResolvedValue({ success: true }),
@@ -48,7 +49,9 @@ jest.mock("../actions", () => ({
 jest.mock("@/lib/api", () => ({
   getOrgTree: jest.fn().mockResolvedValue([]),
   getOrgChartDrafts: jest.fn().mockResolvedValue([]),
-  getOrgChartDraft: jest.fn().mockResolvedValue({ id: 1, name: "Test Draft", changes: [] }),
+  getOrgChartDraft: jest
+    .fn()
+    .mockResolvedValue({ id: 1, name: "Test Draft", changes: [] }),
   getDepartments: jest.fn().mockResolvedValue(["Engineering", "Product"]),
 }));
 
@@ -65,7 +68,11 @@ jest.mock("@/shared/common/Avatar", () => {
     className?: string;
   }) {
     return (
-      <div data-testid="avatar" data-firstname={firstName} data-lastname={lastName}>
+      <div
+        data-testid="avatar"
+        data-firstname={firstName}
+        data-lastname={lastName}
+      >
         Avatar
       </div>
     );
@@ -75,7 +82,9 @@ jest.mock("@/shared/common/Avatar", () => {
 // Mock modals
 jest.mock("../components/ManageSquadsModal", () => {
   return function MockManageSquadsModal({ isOpen }: { isOpen: boolean }) {
-    return isOpen ? <div data-testid="manage-squads-modal">Manage Squads Modal</div> : null;
+    return isOpen ? (
+      <div data-testid="manage-squads-modal">Manage Squads Modal</div>
+    ) : null;
   };
 });
 
@@ -89,7 +98,9 @@ jest.mock("../components/ManageDepartmentsModal", () => {
 
 jest.mock("../components/DraftEditModal", () => {
   return function MockDraftEditModal({ isOpen }: { isOpen: boolean }) {
-    return isOpen ? <div data-testid="draft-edit-modal">Draft Edit Modal</div> : null;
+    return isOpen ? (
+      <div data-testid="draft-edit-modal">Draft Edit Modal</div>
+    ) : null;
   };
 });
 
@@ -111,7 +122,12 @@ describe("OrgChartPageClient", () => {
   });
 
   const createMockOrgTree = (): OrgTreeNode[] => {
-    const admin = createMockUser({ id: 1, role: "admin", first_name: "Admin", last_name: "Boss" });
+    const admin = createMockUser({
+      id: 1,
+      role: "admin",
+      first_name: "Admin",
+      last_name: "Boss",
+    });
     const employee = createMockUser({
       id: 2,
       role: "employee",
@@ -168,7 +184,9 @@ describe("OrgChartPageClient", () => {
       const { container } = render(<OrgChartPageClient {...defaultProps} />);
 
       // Find the main grid/flex container
-      const flexContainer = container.querySelector(".flex.flex-col.lg\\:flex-row");
+      const flexContainer = container.querySelector(
+        ".flex.flex-col.lg\\:flex-row",
+      );
       expect(flexContainer).toBeInTheDocument();
     });
 
@@ -183,7 +201,9 @@ describe("OrgChartPageClient", () => {
       const { container } = render(<OrgChartPageClient {...defaultProps} />);
 
       // Header should have responsive flex direction
-      const headerFlex = container.querySelector(".flex.flex-col.sm\\:flex-row");
+      const headerFlex = container.querySelector(
+        ".flex.flex-col.sm\\:flex-row",
+      );
       expect(headerFlex).toBeInTheDocument();
     });
   });
@@ -193,14 +213,18 @@ describe("OrgChartPageClient", () => {
       render(<OrgChartPageClient {...defaultProps} />);
 
       // The toggle button has lg:hidden class but is still in the DOM
-      const toggleButton = screen.getByRole("button", { name: /Hide Draft Panel/i });
+      const toggleButton = screen.getByRole("button", {
+        name: /Hide Draft Panel/i,
+      });
       expect(toggleButton).toBeInTheDocument();
     });
 
     it("sidebar toggle button has lg:hidden class", () => {
       render(<OrgChartPageClient {...defaultProps} />);
 
-      const toggleButton = screen.getByRole("button", { name: /Hide Draft Panel/i });
+      const toggleButton = screen.getByRole("button", {
+        name: /Hide Draft Panel/i,
+      });
       expect(toggleButton).toHaveClass("lg:hidden");
     });
 
@@ -208,7 +232,9 @@ describe("OrgChartPageClient", () => {
       render(<OrgChartPageClient {...defaultProps} />);
 
       // Initially shows "Hide Draft Panel"
-      const hideButton = screen.getByRole("button", { name: /Hide Draft Panel/i });
+      const hideButton = screen.getByRole("button", {
+        name: /Hide Draft Panel/i,
+      });
       expect(hideButton).toBeInTheDocument();
 
       // Click to hide
@@ -216,14 +242,20 @@ describe("OrgChartPageClient", () => {
 
       // Should now show "Show Draft Panel"
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Show Draft Panel/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: /Show Draft Panel/i }),
+        ).toBeInTheDocument();
       });
 
       // Click to show again
-      fireEvent.click(screen.getByRole("button", { name: /Show Draft Panel/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /Show Draft Panel/i }),
+      );
 
       await waitFor(() => {
-        expect(screen.getByRole("button", { name: /Hide Draft Panel/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("button", { name: /Hide Draft Panel/i }),
+        ).toBeInTheDocument();
       });
     });
 
@@ -241,7 +273,7 @@ describe("OrgChartPageClient", () => {
 
       // Buttons container should have responsive flex direction
       const buttonContainer = container.querySelector(
-        ".flex.flex-col.sm\\:flex-row.items-stretch.sm\\:items-center"
+        ".flex.flex-col.sm\\:flex-row.items-stretch.sm\\:items-center",
       );
       expect(buttonContainer).toBeInTheDocument();
     });
@@ -249,7 +281,9 @@ describe("OrgChartPageClient", () => {
     it("has responsive button padding", () => {
       render(<OrgChartPageClient {...defaultProps} />);
 
-      const departmentsButton = screen.getByRole("button", { name: /Departments/ });
+      const departmentsButton = screen.getByRole("button", {
+        name: /Departments/,
+      });
       expect(departmentsButton).toHaveClass("px-3", "sm:px-4");
     });
 
@@ -260,7 +294,9 @@ describe("OrgChartPageClient", () => {
       fireEvent.click(button);
 
       await waitFor(() => {
-        expect(screen.getByTestId("manage-departments-modal")).toBeInTheDocument();
+        expect(
+          screen.getByTestId("manage-departments-modal"),
+        ).toBeInTheDocument();
       });
     });
 
@@ -295,7 +331,9 @@ describe("OrgChartPageClient", () => {
     it("shows empty state when no org trees", () => {
       render(<OrgChartPageClient {...defaultProps} initialOrgTrees={[]} />);
 
-      expect(screen.getByText("No organization data available")).toBeInTheDocument();
+      expect(
+        screen.getByText("No organization data available"),
+      ).toBeInTheDocument();
     });
   });
 
@@ -321,7 +359,9 @@ describe("OrgChartPageClient", () => {
       render(<OrgChartPageClient {...defaultProps} />);
 
       // Draft manager should be present - look for the sidebar toggle which indicates sidebar is rendered
-      expect(screen.getByRole("button", { name: /Draft Panel/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /Draft Panel/i }),
+      ).toBeInTheDocument();
     });
 
     it("sidebar has responsive width classes", () => {
@@ -333,7 +373,9 @@ describe("OrgChartPageClient", () => {
     });
 
     it("does not render sidebar for non-editors", () => {
-      const { container } = render(<OrgChartPageClient {...defaultProps} canEdit={false} />);
+      const { container } = render(
+        <OrgChartPageClient {...defaultProps} canEdit={false} />,
+      );
 
       // Sidebar should not be present
       const sidebar = container.querySelector(".lg\\:w-96");

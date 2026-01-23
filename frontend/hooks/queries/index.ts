@@ -1,6 +1,9 @@
 // Current User
 export { useCurrentUserQuery } from "./useCurrentUserQuery";
-export type { UseCurrentUserQueryOptions, UseCurrentUserQueryResult } from "./useCurrentUserQuery";
+export type {
+  UseCurrentUserQueryOptions,
+  UseCurrentUserQueryResult,
+} from "./useCurrentUserQuery";
 
 // Employees
 export { useEmployeesQuery, useEmployeeQuery } from "./useEmployeesQuery";
@@ -13,7 +16,10 @@ export type {
 
 // Squads
 export { useSquadsQuery } from "./useSquadsQuery";
-export type { UseSquadsQueryOptions, UseSquadsQueryResult } from "./useSquadsQuery";
+export type {
+  UseSquadsQueryOptions,
+  UseSquadsQueryResult,
+} from "./useSquadsQuery";
 
 // All Users & Departments
 export { useAllUsersQuery, useDepartmentsQuery } from "./useAllUsersQuery";

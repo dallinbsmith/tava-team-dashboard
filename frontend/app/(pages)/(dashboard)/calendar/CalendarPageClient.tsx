@@ -29,15 +29,20 @@ interface CalendarPageClientProps {
   initialCurrentUser: User;
 }
 
-export const CalendarPageClient = ({ initialCurrentUser }: CalendarPageClientProps) => {
+export const CalendarPageClient = ({
+  initialCurrentUser,
+}: CalendarPageClientProps) => {
   // Use provider for impersonation support, fall back to initial server data
-  const { currentUser, effectiveIsSupervisorOrAdmin: providerIsSupervisorOrAdmin } =
-    useCurrentUser();
+  const {
+    currentUser,
+    effectiveIsSupervisorOrAdmin: providerIsSupervisorOrAdmin,
+  } = useCurrentUser();
 
   // Use provider value if available (handles impersonation), otherwise compute from initial data
   const effectiveIsSupervisorOrAdmin = currentUser
     ? providerIsSupervisorOrAdmin
-    : initialCurrentUser.role === "supervisor" || initialCurrentUser.role === "admin";
+    : initialCurrentUser.role === "supervisor" ||
+      initialCurrentUser.role === "admin";
 
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -92,7 +97,9 @@ export const CalendarPageClient = ({ initialCurrentUser }: CalendarPageClientPro
         onCreateMeeting={() => setActiveModal("meeting")}
         onRequestTimeOff={() => setActiveModal("timeOff")}
         onCreateTimeOffForEmployee={
-          effectiveIsSupervisorOrAdmin ? () => setActiveModal("timeOffForEmployee") : undefined
+          effectiveIsSupervisorOrAdmin
+            ? () => setActiveModal("timeOffForEmployee")
+            : undefined
         }
         onEventClick={handleEventClick}
         onViewTask={handleViewTask}

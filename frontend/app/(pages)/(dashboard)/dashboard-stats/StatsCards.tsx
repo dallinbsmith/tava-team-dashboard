@@ -27,7 +27,9 @@ const isWithinRange = (dateStr: string, start: Date, end: Date) => {
   return d >= start && d <= end;
 };
 
-export default function StatsCards({ employees: employeesInput }: StatsCardsProps) {
+export default function StatsCards({
+  employees: employeesInput,
+}: StatsCardsProps) {
   const employees = employeesInput || [];
   const [animate, setAnimate] = useState(false);
   const [tasksDueThisWeek, setTasksDueThisWeek] = useState(0);
@@ -43,10 +45,19 @@ export default function StatsCards({ employees: employeesInput }: StatsCardsProp
     const now = new Date();
     const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-    Promise.all([getMyJiraTasks(JIRA_LIMITS.TASKS_DEFAULT), getCalendarEvents(now, in30Days)])
+    Promise.all([
+      getMyJiraTasks(JIRA_LIMITS.TASKS_DEFAULT),
+      getCalendarEvents(now, in30Days),
+    ])
       .then(([tasks, events]) => {
-        setTasksDueThisWeek((tasks || []).filter((t) => t.due_date && isWithinRange(t.due_date, start, end)).length);
-        setUpcomingEvents((events || []).filter((e) => e.type === "meeting").length);
+        setTasksDueThisWeek(
+          (tasks || []).filter(
+            (t) => t.due_date && isWithinRange(t.due_date, start, end),
+          ).length,
+        );
+        setUpcomingEvents(
+          (events || []).filter((e) => e.type === "meeting").length,
+        );
       })
       .catch((err) => console.error("Failed to fetch stats:", err));
   }, []);
@@ -59,8 +70,9 @@ export default function StatsCards({ employees: employeesInput }: StatsCardsProp
 
   return (
     <div
-      className={`bg-theme-surface border border-theme-border overflow-hidden transition-all duration-500 ${animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        }`}
+      className={`bg-theme-surface border border-theme-border overflow-hidden transition-all duration-500 ${
+        animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      }`}
     >
       <div className="grid grid-cols-2 grid-rows-2 h-full">
         <div className="p-4 border-r border-b border-theme-border flex items-center gap-3">
@@ -107,7 +119,13 @@ export default function StatsCards({ employees: employeesInput }: StatsCardsProp
   );
 }
 
-const AnimatedNumber = ({ value, animate }: { value: number; animate: boolean }) => {
+const AnimatedNumber = ({
+  value,
+  animate,
+}: {
+  value: number;
+  animate: boolean;
+}) => {
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {

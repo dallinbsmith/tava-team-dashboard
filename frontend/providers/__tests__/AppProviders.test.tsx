@@ -50,7 +50,7 @@ describe("AppProviders", () => {
       render(
         <AppProviders>
           <div data-testid="child">Child content</div>
-        </AppProviders>
+        </AppProviders>,
       );
 
       expect(screen.getByTestId("child")).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe("AppProviders", () => {
         <AppProviders>
           <div data-testid="child-1">Child 1</div>
           <div data-testid="child-2">Child 2</div>
-        </AppProviders>
+        </AppProviders>,
       );
 
       expect(screen.getByTestId("child-1")).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe("AppProviders", () => {
       render(
         <AppProviders>
           <div>Content</div>
-        </AppProviders>
+        </AppProviders>,
       );
 
       expect(screen.getByTestId("auth0-provider")).toBeInTheDocument();
@@ -84,7 +84,7 @@ describe("AppProviders", () => {
       render(
         <AppProviders>
           <div>Content</div>
-        </AppProviders>
+        </AppProviders>,
       );
 
       expect(screen.getByTestId("query-provider")).toBeInTheDocument();
@@ -94,7 +94,7 @@ describe("AppProviders", () => {
       render(
         <AppProviders>
           <div>Content</div>
-        </AppProviders>
+        </AppProviders>,
       );
 
       expect(screen.getByTestId("nuqs-adapter")).toBeInTheDocument();
@@ -104,7 +104,7 @@ describe("AppProviders", () => {
       render(
         <AppProviders>
           <div>Content</div>
-        </AppProviders>
+        </AppProviders>,
       );
 
       expect(screen.getByTestId("impersonation-provider")).toBeInTheDocument();
@@ -114,7 +114,7 @@ describe("AppProviders", () => {
       render(
         <AppProviders>
           <div>Content</div>
-        </AppProviders>
+        </AppProviders>,
       );
 
       expect(screen.getByTestId("current-user-provider")).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe("AppProviders", () => {
       render(
         <AppProviders>
           <div>Content</div>
-        </AppProviders>
+        </AppProviders>,
       );
 
       expect(screen.getByTestId("organization-provider")).toBeInTheDocument();
@@ -133,10 +133,10 @@ describe("AppProviders", () => {
 
   describe("provider nesting order", () => {
     it("nests providers in correct order (Auth0 at root)", () => {
-      const { container } = render(
+      render(
         <AppProviders>
           <div data-testid="child">Content</div>
-        </AppProviders>
+        </AppProviders>,
       );
 
       // Check nesting by verifying the structure
@@ -174,7 +174,7 @@ describe("AppProviders", () => {
           {undefined}
           {"string"}
           {123}
-        </AppProviders>
+        </AppProviders>,
       );
 
       expect(screen.getByText("Text")).toBeInTheDocument();

@@ -56,7 +56,9 @@ export default function EmployeeHeader({
     // Refetch all user data to update avatars everywhere
     await Promise.all([
       // If uploading own avatar, refetch current user to update sidebar
-      currentUser && currentUser.id === employee.id ? refetch() : Promise.resolve(),
+      currentUser && currentUser.id === employee.id
+        ? refetch()
+        : Promise.resolve(),
       // Refetch employee lists to update cards, direct reports, etc.
       refetchEmployees(),
       refetchAllUsers(),
@@ -80,7 +82,8 @@ export default function EmployeeHeader({
           </h1>
           <div className="flex items-center gap-3 mt-2">
             <span className="px-3 py-1 text-sm font-medium bg-white/20 text-white">
-              {employee.title || employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
+              {employee.title ||
+                employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
             </span>
           </div>
           {canEdit && (
@@ -92,7 +95,9 @@ export default function EmployeeHeader({
                 <Pencil className="w-4 h-4" />
                 Edit Profile
               </button>
-              <span className="text-white/50 text-sm">or click avatar to change photo</span>
+              <span className="text-white/50 text-sm">
+                or click avatar to change photo
+              </span>
             </div>
           )}
         </div>

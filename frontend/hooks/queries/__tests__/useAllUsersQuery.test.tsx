@@ -21,8 +21,12 @@ jest.mock("@/lib/api", () => ({
   getAllUsers: jest.fn(),
   getDepartments: jest.fn(),
 }));
-const mockGetAllUsers = api.getAllUsers as jest.MockedFunction<typeof api.getAllUsers>;
-const mockGetDepartments = api.getDepartments as jest.MockedFunction<typeof api.getDepartments>;
+const mockGetAllUsers = api.getAllUsers as jest.MockedFunction<
+  typeof api.getAllUsers
+>;
+const mockGetDepartments = api.getDepartments as jest.MockedFunction<
+  typeof api.getDepartments
+>;
 
 // Test fixtures
 const createMockUser = (overrides: Partial<User> = {}): User => ({
@@ -42,12 +46,33 @@ const createMockUser = (overrides: Partial<User> = {}): User => ({
 });
 
 const mockUsers: User[] = [
-  createMockUser({ id: 1, first_name: "Alice", last_name: "Smith", role: "admin" }),
-  createMockUser({ id: 2, first_name: "Bob", last_name: "Jones", role: "supervisor" }),
-  createMockUser({ id: 3, first_name: "Charlie", last_name: "Brown", role: "employee" }),
+  createMockUser({
+    id: 1,
+    first_name: "Alice",
+    last_name: "Smith",
+    role: "admin",
+  }),
+  createMockUser({
+    id: 2,
+    first_name: "Bob",
+    last_name: "Jones",
+    role: "supervisor",
+  }),
+  createMockUser({
+    id: 3,
+    first_name: "Charlie",
+    last_name: "Brown",
+    role: "employee",
+  }),
 ];
 
-const mockDepartments = ["Engineering", "Product", "Design", "Marketing", "Sales"];
+const mockDepartments = [
+  "Engineering",
+  "Product",
+  "Design",
+  "Marketing",
+  "Sales",
+];
 
 // Create a fresh QueryClient for each test
 const createTestQueryClient = () =>
@@ -107,7 +132,8 @@ describe("useAllUsersQuery", () => {
 
     it("returns loading true while query is loading", async () => {
       mockGetAllUsers.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockUsers), 100))
+        () =>
+          new Promise((resolve) => setTimeout(() => resolve(mockUsers), 100)),
       );
 
       const { result } = renderHook(() => useAllUsersQuery(), {
@@ -303,7 +329,10 @@ describe("useAllUsersQuery", () => {
 
       expect(mockGetAllUsers).toHaveBeenCalledTimes(1);
 
-      const updatedUsers = [...mockUsers, createMockUser({ id: 4, first_name: "New" })];
+      const updatedUsers = [
+        ...mockUsers,
+        createMockUser({ id: 4, first_name: "New" }),
+      ];
       mockGetAllUsers.mockResolvedValue(updatedUsers);
 
       await result.current.refetch();
@@ -336,7 +365,9 @@ describe("useAllUsersQuery", () => {
       await result.current.invalidate();
 
       await waitFor(() => {
-        expect(mockGetAllUsers.mock.calls.length).toBeGreaterThan(initialCallCount);
+        expect(mockGetAllUsers.mock.calls.length).toBeGreaterThan(
+          initialCallCount,
+        );
       });
     });
   });
@@ -397,7 +428,10 @@ describe("useDepartmentsQuery", () => {
 
     it("returns loading true while query is loading", async () => {
       mockGetDepartments.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockDepartments), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(mockDepartments), 100),
+          ),
       );
 
       const { result } = renderHook(() => useDepartmentsQuery(), {

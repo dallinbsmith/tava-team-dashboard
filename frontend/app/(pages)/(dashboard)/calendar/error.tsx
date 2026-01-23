@@ -33,14 +33,17 @@ export default function CalendarError({ error, reset }: ErrorProps) {
           <AlertTriangle className="w-6 h-6 text-red-400" />
         </div>
 
-        <h2 className="text-lg font-semibold text-theme-text mb-2">Unable to Load Calendar</h2>
+        <h2 className="text-lg font-semibold text-theme-text mb-2">
+          Unable to Load Calendar
+        </h2>
 
         <p className="text-theme-text-muted mb-4">
           {isJiraError
             ? "There was a problem connecting to Jira. Your calendar events may not include Jira tickets."
             : isNetworkError
               ? "We couldn't load your calendar events. Please check your connection."
-              : error.message || "An unexpected error occurred while loading the calendar."}
+              : error.message ||
+                "An unexpected error occurred while loading the calendar."}
         </p>
 
         {isJiraError && (
@@ -72,7 +75,9 @@ export default function CalendarError({ error, reset }: ErrorProps) {
         )}
 
         {error.digest && (
-          <p className="text-xs text-theme-text-muted mb-4 font-mono">Error ID: {error.digest}</p>
+          <p className="text-xs text-theme-text-muted mb-4 font-mono">
+            Error ID: {error.digest}
+          </p>
         )}
 
         <div className="flex gap-3 justify-center">
@@ -95,7 +100,10 @@ export default function CalendarError({ error, reset }: ErrorProps) {
         <div className="mt-6 pt-4 border-t border-theme-border">
           <p className="text-xs text-theme-text-muted">
             You can also manage time off from the{" "}
-            <a href="/time-off" className="text-primary-400 hover:text-primary-300">
+            <a
+              href="/time-off"
+              className="text-primary-400 hover:text-primary-300"
+            >
               Time Off page
             </a>
             .

@@ -3,7 +3,11 @@
 import { useState, useEffect, useTransition } from "react";
 import { Meeting, UpdateMeetingRequest, ResponseStatus } from "../types";
 import { getMeeting } from "../actions";
-import { updateMeetingAction, deleteMeetingAction, respondToMeetingAction } from "../actions";
+import {
+  updateMeetingAction,
+  deleteMeetingAction,
+  respondToMeetingAction,
+} from "../actions";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal } from "@/components";
@@ -91,9 +95,13 @@ export default function ViewMeetingModal({
   }, [isOpen, meetingId]);
 
   const canEdit =
-    meeting && (meeting.created_by_id === currentUser?.id || currentUser?.role === "admin");
+    meeting &&
+    (meeting.created_by_id === currentUser?.id ||
+      currentUser?.role === "admin");
 
-  const currentUserAttendee = meeting?.attendees?.find((a) => a.user_id === currentUser?.id);
+  const currentUserAttendee = meeting?.attendees?.find(
+    (a) => a.user_id === currentUser?.id,
+  );
   const isAttendee = !!currentUserAttendee;
 
   const handleClose = () => {
@@ -105,7 +113,9 @@ export default function ViewMeetingModal({
 
   const toggleAttendee = (userId: number) => {
     setAttendeeIds((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
     );
   };
 
@@ -192,7 +202,12 @@ export default function ViewMeetingModal({
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Meeting Details" maxWidth="max-w-lg">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Meeting Details"
+      maxWidth="max-w-lg"
+    >
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
@@ -211,7 +226,9 @@ export default function ViewMeetingModal({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-theme-text mb-1">Title *</label>
+            <label className="block text-sm font-medium text-theme-text mb-1">
+              Title *
+            </label>
             <input
               type="text"
               value={title}
@@ -221,7 +238,9 @@ export default function ViewMeetingModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-theme-text mb-1">Description</label>
+            <label className="block text-sm font-medium text-theme-text mb-1">
+              Description
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -232,7 +251,9 @@ export default function ViewMeetingModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">Start</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Start
+              </label>
               <div className="space-y-2">
                 <input
                   type="date"
@@ -249,7 +270,9 @@ export default function ViewMeetingModal({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">End</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                End
+              </label>
               <div className="space-y-2">
                 <input
                   type="date"
@@ -318,7 +341,9 @@ export default function ViewMeetingModal({
             <p className="text-red-300 font-medium">
               Are you sure you want to delete this meeting?
             </p>
-            <p className="text-red-400 text-sm mt-1">This action cannot be undone.</p>
+            <p className="text-red-400 text-sm mt-1">
+              This action cannot be undone.
+            </p>
           </div>
 
           <div className="flex justify-end gap-3">
@@ -352,11 +377,17 @@ export default function ViewMeetingModal({
               <Users className="w-6 h-6 text-purple-400" />
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-theme-text">{meeting.title}</h3>
+              <h3 className="text-lg font-semibold text-theme-text">
+                {meeting.title}
+              </h3>
               {meeting.description && (
-                <p className="text-theme-text-muted mt-1">{meeting.description}</p>
+                <p className="text-theme-text-muted mt-1">
+                  {meeting.description}
+                </p>
               )}
-              <p className="text-xs text-theme-text-muted mt-2">Organized by {getCreatorName()}</p>
+              <p className="text-xs text-theme-text-muted mt-2">
+                Organized by {getCreatorName()}
+              </p>
             </div>
           </div>
 
@@ -397,7 +428,9 @@ export default function ViewMeetingModal({
           {getRecurrenceText() && (
             <div className="p-3 bg-theme-elevated rounded-lg flex items-center gap-2">
               <Repeat className="w-4 h-4 text-theme-text-muted" />
-              <span className="text-sm text-theme-text">{getRecurrenceText()}</span>
+              <span className="text-sm text-theme-text">
+                {getRecurrenceText()}
+              </span>
             </div>
           )}
 
@@ -417,9 +450,13 @@ export default function ViewMeetingModal({
                       className="flex items-center justify-between px-3 py-2 bg-theme-elevated rounded"
                     >
                       <span className="text-sm text-theme-text">
-                        {user ? `${user.first_name} ${user.last_name}` : "Unknown User"}
+                        {user
+                          ? `${user.first_name} ${user.last_name}`
+                          : "Unknown User"}
                       </span>
-                      <span className={`flex items-center gap-1 text-xs ${statusInfo.color}`}>
+                      <span
+                        className={`flex items-center gap-1 text-xs ${statusInfo.color}`}
+                      >
                         <StatusIcon className="w-3 h-3" />
                         {statusInfo.label}
                       </span>
@@ -432,7 +469,9 @@ export default function ViewMeetingModal({
 
           {isAttendee && (
             <div className="pt-4 border-t border-theme-border">
-              <p className="text-sm font-medium text-theme-text mb-3">Your Response</p>
+              <p className="text-sm font-medium text-theme-text mb-3">
+                Your Response
+              </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => handleRespond("accepted")}

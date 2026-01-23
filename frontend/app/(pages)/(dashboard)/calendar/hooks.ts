@@ -28,7 +28,12 @@ export const calendarKeys = {
   events: (start: Date, end: Date) =>
     ["calendar", "events", start.toISOString(), end.toISOString()] as const,
   eventsWithMetadata: (start: Date, end: Date) =>
-    ["calendar", "eventsWithMetadata", start.toISOString(), end.toISOString()] as const,
+    [
+      "calendar",
+      "eventsWithMetadata",
+      start.toISOString(),
+      end.toISOString(),
+    ] as const,
   tasks: ["calendar", "tasks"] as const,
   task: (id: number) => ["calendar", "tasks", id] as const,
   meetings: ["calendar", "meetings"] as const,
@@ -72,7 +77,8 @@ export const useUpdateTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateTaskRequest }) => updateTask(id, data),
+    mutationFn: ({ id, data }: { id: number; data: UpdateTaskRequest }) =>
+      updateTask(id, data),
     onSuccess: async () => {
       await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
@@ -136,8 +142,13 @@ export const useRespondToMeeting = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ meetingId, response }: { meetingId: number; response: ResponseStatus }) =>
-      respondToMeeting(meetingId, response),
+    mutationFn: ({
+      meetingId,
+      response,
+    }: {
+      meetingId: number;
+      response: ResponseStatus;
+    }) => respondToMeeting(meetingId, response),
     onSuccess: async () => {
       await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },

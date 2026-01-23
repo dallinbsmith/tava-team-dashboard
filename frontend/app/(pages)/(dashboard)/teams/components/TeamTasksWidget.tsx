@@ -28,12 +28,21 @@ interface TeamTasksWidgetProps {
   allUsers: User[];
 }
 
-const taskCategories: TaskCategory[] = ["upcoming", "overdue", "approaching", "completed"];
+const taskCategories: TaskCategory[] = [
+  "upcoming",
+  "overdue",
+  "approaching",
+  "completed",
+];
 const viewModes = ["grid", "list"] as const;
 
 const categoryConfig: Record<
   TaskCategory,
-  { label: string; icon: React.ComponentType<{ className?: string }>; color: string }
+  {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    color: string;
+  }
 > = {
   upcoming: { label: "Upcoming", icon: Calendar, color: "text-blue-400" },
   overdue: { label: "Overdue", icon: AlertTriangle, color: "text-red-400" },
@@ -55,11 +64,11 @@ export default function TeamTasksWidget({
   const [refreshing, setRefreshing] = useState(false);
   const [activeCategory, setActiveCategory] = useQueryState(
     "taskCategory",
-    parseAsStringLiteral(taskCategories).withDefault("upcoming")
+    parseAsStringLiteral(taskCategories).withDefault("upcoming"),
   );
   const [viewMode, setViewMode] = useQueryState(
     "taskView",
-    parseAsStringLiteral(viewModes).withDefault("list")
+    parseAsStringLiteral(viewModes).withDefault("list"),
   );
 
   const handleRefresh = async () => {
@@ -108,20 +117,22 @@ export default function TeamTasksWidget({
           <div className="flex border border-theme-border overflow-hidden bg-theme-elevated">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 transition-colors ${viewMode === "grid"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
+              className={`p-1.5 transition-colors ${
+                viewMode === "grid"
+                  ? "bg-primary-500 text-white"
+                  : "text-theme-text-muted hover:bg-theme-surface"
+              }`}
               title="Grid view"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-1.5 border-l border-theme-border transition-colors ${viewMode === "list"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
+              className={`p-1.5 border-l border-theme-border transition-colors ${
+                viewMode === "list"
+                  ? "bg-primary-500 text-white"
+                  : "text-theme-text-muted hover:bg-theme-surface"
+              }`}
               title="List view"
             >
               <List className="w-3.5 h-3.5" />
@@ -133,7 +144,9 @@ export default function TeamTasksWidget({
             className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated transition-colors disabled:opacity-50"
             title="Refresh"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+            />
           </button>
         </div>
       </div>
@@ -149,17 +162,19 @@ export default function TeamTasksWidget({
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${isActive
-                ? `bg-theme-elevated ${config.color} border-b-2 border-current -mb-px`
-                : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated/50"
-                }`}
+              className={`flex-1 px-3 py-2.5 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                isActive
+                  ? `bg-theme-elevated ${config.color} border-b-2 border-current -mb-px`
+                  : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated/50"
+              }`}
             >
               <Icon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">{config.label}</span>
               {count > 0 && (
                 <span
-                  className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${isActive ? "bg-current/20" : "bg-theme-elevated"
-                    }`}
+                  className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${
+                    isActive ? "bg-current/20" : "bg-theme-elevated"
+                  }`}
                 >
                   {count}
                 </span>
@@ -177,7 +192,9 @@ export default function TeamTasksWidget({
 
       {activeTasks.length === 0 ? (
         <div className="flex-1 px-6 py-12 text-center text-theme-text-muted">
-          <CategoryIcon className={`w-12 h-12 mx-auto mb-4 ${categoryInfo.color} opacity-50`} />
+          <CategoryIcon
+            className={`w-12 h-12 mx-auto mb-4 ${categoryInfo.color} opacity-50`}
+          />
           <p>No {categoryInfo.label.toLowerCase()} tasks</p>
         </div>
       ) : viewMode === "grid" ? (
@@ -233,7 +250,9 @@ const TaskGridCard = ({ task }: TaskGridCardProps) => {
       <div className="flex items-center gap-1.5 mb-1">
         <span className="text-xs font-mono text-primary-400">{task.key}</span>
         <TaskStatusBadge status={task.status} />
-        {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
+        {task.time_off_impact && (
+          <TimeOffIndicator impact={task.time_off_impact} compact />
+        )}
       </div>
 
       <h3 className="text-xs font-medium text-theme-text line-clamp-2 group-hover:text-primary-400 transition-colors">
@@ -273,12 +292,16 @@ const TaskListItem = ({ task }: TaskListItemProps) => {
         <span className="text-xs text-theme-text-muted whitespace-nowrap hidden sm:inline">
           {task.employee.first_name[0]}. {task.employee.last_name}
         </span>
-        <span className="text-xs font-mono text-primary-400 whitespace-nowrap">{task.key}</span>
+        <span className="text-xs font-mono text-primary-400 whitespace-nowrap">
+          {task.key}
+        </span>
         <span className="text-sm text-theme-text truncate flex-1 group-hover:text-primary-400 transition-colors">
           {task.summary}
         </span>
         <TaskStatusBadge status={task.status} />
-        {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
+        {task.time_off_impact && (
+          <TimeOffIndicator impact={task.time_off_impact} compact />
+        )}
         {task.due_date && (
           <span className="flex items-center gap-1 text-xs text-theme-text-muted whitespace-nowrap">
             <Clock className="w-3 h-3" />

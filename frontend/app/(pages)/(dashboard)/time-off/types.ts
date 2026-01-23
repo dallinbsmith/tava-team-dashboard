@@ -1,6 +1,12 @@
 import { User } from "@/shared/types/user";
 
-export type TimeOffType = "vacation" | "sick" | "personal" | "bereavement" | "jury_duty" | "other";
+export type TimeOffType =
+  | "vacation"
+  | "sick"
+  | "personal"
+  | "bereavement"
+  | "jury_duty"
+  | "other";
 export type TimeOffStatus = "pending" | "approved" | "rejected" | "cancelled";
 
 export interface TimeOffRequest {

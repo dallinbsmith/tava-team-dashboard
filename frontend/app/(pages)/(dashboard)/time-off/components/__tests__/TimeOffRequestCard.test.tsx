@@ -11,7 +11,20 @@ import { TimeOffRequest } from "../../types";
 // Mock date-fns to have consistent date formatting across timezones
 jest.mock("date-fns", () => ({
   format: (date: Date, formatStr: string) => {
-    const month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getUTCMonth()];
+    const month = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ][date.getUTCMonth()];
     const day = date.getUTCDate();
     const year = date.getUTCFullYear();
 
@@ -26,7 +39,9 @@ jest.mock("date-fns", () => ({
 }));
 
 describe("TimeOffRequestCard", () => {
-  const createMockRequest = (overrides: Partial<TimeOffRequest> = {}): TimeOffRequest => ({
+  const createMockRequest = (
+    overrides: Partial<TimeOffRequest> = {},
+  ): TimeOffRequest => ({
     id: 1,
     user_id: 1,
     request_type: "vacation",
@@ -46,22 +61,38 @@ describe("TimeOffRequestCard", () => {
     });
 
     it("renders status badge", () => {
-      render(<TimeOffRequestCard request={createMockRequest({ status: "pending" })} />);
+      render(
+        <TimeOffRequestCard
+          request={createMockRequest({ status: "pending" })}
+        />,
+      );
       expect(screen.getByText("Pending")).toBeInTheDocument();
     });
 
     it("renders approved status correctly", () => {
-      render(<TimeOffRequestCard request={createMockRequest({ status: "approved" })} />);
+      render(
+        <TimeOffRequestCard
+          request={createMockRequest({ status: "approved" })}
+        />,
+      );
       expect(screen.getByText("Approved")).toBeInTheDocument();
     });
 
     it("renders rejected status correctly", () => {
-      render(<TimeOffRequestCard request={createMockRequest({ status: "rejected" })} />);
+      render(
+        <TimeOffRequestCard
+          request={createMockRequest({ status: "rejected" })}
+        />,
+      );
       expect(screen.getByText("Rejected")).toBeInTheDocument();
     });
 
     it("renders cancelled status correctly", () => {
-      render(<TimeOffRequestCard request={createMockRequest({ status: "cancelled" })} />);
+      render(
+        <TimeOffRequestCard
+          request={createMockRequest({ status: "cancelled" })}
+        />,
+      );
       expect(screen.getByText("Cancelled")).toBeInTheDocument();
     });
 
@@ -78,7 +109,7 @@ describe("TimeOffRequestCard", () => {
             start_date: "2024-01-15",
             end_date: "2024-01-15",
           })}
-        />
+        />,
       );
       expect(screen.getByText("Jan 15, 2024")).toBeInTheDocument();
     });
@@ -87,16 +118,20 @@ describe("TimeOffRequestCard", () => {
       render(
         <TimeOffRequestCard
           request={createMockRequest({ reason: "Annual vacation trip" })}
-        />
+        />,
       );
       expect(screen.getByText("Annual vacation trip")).toBeInTheDocument();
     });
 
     it("does not render reason section when not provided", () => {
       render(
-        <TimeOffRequestCard request={createMockRequest({ reason: undefined })} />
+        <TimeOffRequestCard
+          request={createMockRequest({ reason: undefined })}
+        />,
       );
-      expect(screen.queryByText("Annual vacation trip")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Annual vacation trip"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -105,14 +140,16 @@ describe("TimeOffRequestCard", () => {
       render(
         <TimeOffRequestCard
           request={createMockRequest({ request_type: "vacation" })}
-        />
+        />,
       );
       expect(screen.getByText("Vacation")).toBeInTheDocument();
     });
 
     it("renders sick type correctly", () => {
       render(
-        <TimeOffRequestCard request={createMockRequest({ request_type: "sick" })} />
+        <TimeOffRequestCard
+          request={createMockRequest({ request_type: "sick" })}
+        />,
       );
       expect(screen.getByText("Sick")).toBeInTheDocument();
     });
@@ -121,7 +158,7 @@ describe("TimeOffRequestCard", () => {
       render(
         <TimeOffRequestCard
           request={createMockRequest({ request_type: "personal" })}
-        />
+        />,
       );
       expect(screen.getByText("Personal")).toBeInTheDocument();
     });
@@ -139,7 +176,7 @@ describe("TimeOffRequestCard", () => {
             },
           })}
           showUser={true}
-        />
+        />,
       );
       expect(screen.getByText("John Doe")).toBeInTheDocument();
     });
@@ -155,7 +192,7 @@ describe("TimeOffRequestCard", () => {
             },
           })}
           showUser={false}
-        />
+        />,
       );
       expect(screen.queryByText("John Doe")).not.toBeInTheDocument();
     });
@@ -167,7 +204,7 @@ describe("TimeOffRequestCard", () => {
         <TimeOffRequestCard
           request={createMockRequest({ status: "pending" })}
           onCancel={jest.fn()}
-        />
+        />,
       );
       expect(screen.getByTitle("Cancel request")).toBeInTheDocument();
     });
@@ -177,13 +214,17 @@ describe("TimeOffRequestCard", () => {
         <TimeOffRequestCard
           request={createMockRequest({ status: "approved" })}
           onCancel={jest.fn()}
-        />
+        />,
       );
       expect(screen.queryByTitle("Cancel request")).not.toBeInTheDocument();
     });
 
     it("does not show cancel button when onCancel is not provided", () => {
-      render(<TimeOffRequestCard request={createMockRequest({ status: "pending" })} />);
+      render(
+        <TimeOffRequestCard
+          request={createMockRequest({ status: "pending" })}
+        />,
+      );
       expect(screen.queryByTitle("Cancel request")).not.toBeInTheDocument();
     });
 
@@ -193,7 +234,7 @@ describe("TimeOffRequestCard", () => {
         <TimeOffRequestCard
           request={createMockRequest({ id: 42, status: "pending" })}
           onCancel={onCancel}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByTitle("Cancel request"));
@@ -206,7 +247,7 @@ describe("TimeOffRequestCard", () => {
           request={createMockRequest({ status: "pending" })}
           onCancel={jest.fn()}
           cancelling={true}
-        />
+        />,
       );
 
       expect(screen.getByTitle("Cancel request")).toBeDisabled();
@@ -219,7 +260,7 @@ describe("TimeOffRequestCard", () => {
         <TimeOffRequestCard
           request={createMockRequest({ status: "pending" })}
           onReview={jest.fn()}
-        />
+        />,
       );
 
       expect(screen.getByTitle("Approve")).toBeInTheDocument();
@@ -231,7 +272,7 @@ describe("TimeOffRequestCard", () => {
         <TimeOffRequestCard
           request={createMockRequest({ status: "approved" })}
           onReview={jest.fn()}
-        />
+        />,
       );
 
       expect(screen.queryByTitle("Approve")).not.toBeInTheDocument();
@@ -244,7 +285,7 @@ describe("TimeOffRequestCard", () => {
         <TimeOffRequestCard
           request={createMockRequest({ id: 42, status: "pending" })}
           onReview={onReview}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByTitle("Approve"));
@@ -257,7 +298,7 @@ describe("TimeOffRequestCard", () => {
         <TimeOffRequestCard
           request={createMockRequest({ id: 42, status: "pending" })}
           onReview={onReview}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByTitle("Reject"));
@@ -278,7 +319,7 @@ describe("TimeOffRequestCard", () => {
               last_name: "Manager",
             },
           })}
-        />
+        />,
       );
 
       expect(screen.getByText(/Reviewed by Jane Manager/)).toBeInTheDocument();
@@ -291,7 +332,7 @@ describe("TimeOffRequestCard", () => {
             status: "rejected",
             reviewer_notes: "Project deadline conflict",
           })}
-        />
+        />,
       );
 
       expect(screen.getByText(/Project deadline conflict/)).toBeInTheDocument();

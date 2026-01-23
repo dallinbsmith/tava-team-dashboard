@@ -68,15 +68,23 @@ describe("LoadingSpinner", () => {
 
   describe("custom className", () => {
     it("applies custom className", () => {
-      const { container } = render(<LoadingSpinner className="my-custom-class" />);
+      const { container } = render(
+        <LoadingSpinner className="my-custom-class" />,
+      );
       const spinner = container.querySelector("svg");
       expect(spinner).toHaveClass("my-custom-class");
     });
 
     it("merges custom className with default classes", () => {
-      const { container } = render(<LoadingSpinner className="my-custom-class" />);
+      const { container } = render(
+        <LoadingSpinner className="my-custom-class" />,
+      );
       const spinner = container.querySelector("svg");
-      expect(spinner).toHaveClass("animate-spin", "text-primary-600", "my-custom-class");
+      expect(spinner).toHaveClass(
+        "animate-spin",
+        "text-primary-600",
+        "my-custom-class",
+      );
     });
   });
 });
@@ -92,7 +100,12 @@ describe("CenteredSpinner", () => {
     it("renders centered container", () => {
       const { container } = render(<CenteredSpinner />);
       const wrapper = container.firstChild;
-      expect(wrapper).toHaveClass("flex", "flex-col", "items-center", "justify-center");
+      expect(wrapper).toHaveClass(
+        "flex",
+        "flex-col",
+        "items-center",
+        "justify-center",
+      );
     });
 
     it("has vertical padding", () => {
@@ -137,7 +150,9 @@ describe("CenteredSpinner", () => {
 
   describe("custom className", () => {
     it("applies custom className to wrapper", () => {
-      const { container } = render(<CenteredSpinner className="my-custom-class" />);
+      const { container } = render(
+        <CenteredSpinner className="my-custom-class" />,
+      );
       const wrapper = container.firstChild;
       expect(wrapper).toHaveClass("my-custom-class");
     });
@@ -160,7 +175,7 @@ describe("FullPageSpinner", () => {
         "flex",
         "flex-col",
         "items-center",
-        "justify-center"
+        "justify-center",
       );
     });
   });
@@ -263,7 +278,7 @@ describe("Skeleton", () => {
       expect(container.firstChild).toHaveClass(
         "animate-pulse",
         "bg-theme-border",
-        "my-custom-class"
+        "my-custom-class",
       );
     });
   });
@@ -283,7 +298,7 @@ describe("SkeletonCard", () => {
         "border",
         "border-theme-border",
         "p-4",
-        "rounded-lg"
+        "rounded-lg",
       );
     });
 
@@ -322,13 +337,20 @@ describe("SkeletonCard", () => {
 
   describe("custom className", () => {
     it("applies custom className", () => {
-      const { container } = render(<SkeletonCard className="my-custom-class" />);
+      const { container } = render(
+        <SkeletonCard className="my-custom-class" />,
+      );
       expect(container.firstChild).toHaveClass("my-custom-class");
     });
 
     it("merges custom className with default classes", () => {
-      const { container } = render(<SkeletonCard className="my-custom-class" />);
-      expect(container.firstChild).toHaveClass("bg-theme-surface", "my-custom-class");
+      const { container } = render(
+        <SkeletonCard className="my-custom-class" />,
+      );
+      expect(container.firstChild).toHaveClass(
+        "bg-theme-surface",
+        "my-custom-class",
+      );
     });
   });
 });

@@ -3,10 +3,13 @@
  * Employee update and deactivate mutations
  */
 
-import { renderHook, waitFor, act } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { ReactNode } from "react";
-import { useUpdateEmployee, useDeactivateEmployee } from "../useEmployeeMutations";
+import {
+  useUpdateEmployee,
+  useDeactivateEmployee,
+} from "../useEmployeeMutations";
 import * as api from "@/lib/api";
 import * as queryUtils from "@/lib/query-utils";
 import { User } from "@/shared/types/user";
@@ -17,15 +20,21 @@ jest.mock("@/lib/api", () => ({
   updateUser: jest.fn(),
   deactivateUser: jest.fn(),
 }));
-const mockUpdateUser = api.updateUser as jest.MockedFunction<typeof api.updateUser>;
-const mockDeactivateUser = api.deactivateUser as jest.MockedFunction<typeof api.deactivateUser>;
+const mockUpdateUser = api.updateUser as jest.MockedFunction<
+  typeof api.updateUser
+>;
+const mockDeactivateUser = api.deactivateUser as jest.MockedFunction<
+  typeof api.deactivateUser
+>;
 
 // Mock queryUtils
 jest.mock("@/lib/query-utils", () => ({
   refetchQueries: jest.fn().mockResolvedValue(undefined),
   queryKeyGroups: {
     employeeRelated: jest.fn().mockReturnValue([["employees"], ["allUsers"]]),
-    users: jest.fn().mockReturnValue([["employees"], ["allUsers"], ["currentUser"]]),
+    users: jest
+      .fn()
+      .mockReturnValue([["employees"], ["allUsers"], ["currentUser"]]),
   },
 }));
 const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<
@@ -136,7 +145,9 @@ describe("useUpdateEmployee", () => {
         });
       });
 
-      const cachedUser = queryClient.getQueryData(queryKeys.employees.detail(5));
+      const cachedUser = queryClient.getQueryData(
+        queryKeys.employees.detail(5),
+      );
       expect(cachedUser).toEqual(updatedUser);
     });
 
@@ -243,7 +254,7 @@ describe("useUpdateEmployee", () => {
             id: 1,
             data: { first_name: "Updated" },
           });
-        })
+        }),
       ).rejects.toThrow("Failed");
     });
   });
@@ -291,7 +302,9 @@ describe("useDeactivateEmployee", () => {
         await result.current.mutateAsync(123);
       });
 
-      const cachedUser = queryClient.getQueryData(queryKeys.employees.detail(123));
+      const cachedUser = queryClient.getQueryData(
+        queryKeys.employees.detail(123),
+      );
       expect(cachedUser).toBeUndefined();
     });
 
@@ -315,9 +328,12 @@ describe("useDeactivateEmployee", () => {
       mockDeactivateUser.mockResolvedValue(undefined);
       const onSuccess = jest.fn();
 
-      const { result } = renderHook(() => useDeactivateEmployee({ onSuccess }), {
-        wrapper: createWrapper(queryClient),
-      });
+      const { result } = renderHook(
+        () => useDeactivateEmployee({ onSuccess }),
+        {
+          wrapper: createWrapper(queryClient),
+        },
+      );
 
       await act(async () => {
         await result.current.mutateAsync(123);
@@ -380,7 +396,7 @@ describe("useDeactivateEmployee", () => {
       await expect(
         act(async () => {
           await result.current.mutateAsync(123);
-        })
+        }),
       ).rejects.toThrow("Failed");
     });
   });

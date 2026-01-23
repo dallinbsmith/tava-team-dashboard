@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
 import { TOKEN } from "@/lib/constants";
 
 interface TokenState {
@@ -216,6 +223,6 @@ export const useAuthenticatedFetch = () => {
         credentials: "same-origin",
       });
     },
-    [getAccessToken]
+    [getAccessToken],
   );
 };

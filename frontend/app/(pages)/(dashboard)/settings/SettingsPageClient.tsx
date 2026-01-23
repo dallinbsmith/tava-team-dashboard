@@ -60,7 +60,7 @@ export const SettingsPageClient = ({
     {
       onSuccess: (users) => setJiraUsers(users),
       onError: (err) => console.error("Failed to fetch Jira users:", err),
-    }
+    },
   );
 
   const disconnectJiraOp = useAsyncOperation(
@@ -79,7 +79,7 @@ export const SettingsPageClient = ({
     {
       onSuccess: () => setSuccess("Jira disconnected successfully"),
       onError: (err) => setError(err),
-    }
+    },
   );
 
   const autoMatchOp = useAsyncOperation(
@@ -92,22 +92,29 @@ export const SettingsPageClient = ({
       successMessage: (result) =>
         `Successfully matched ${result.matched} of ${result.total_jira_users} Jira users by email`,
       onError: (err) => setError(err),
-    }
+    },
   );
 
   const updateMappingOp = useAsyncOperation(
-    async ({ userId, jiraAccountId }: { userId: number; jiraAccountId: string | null }) => {
+    async ({
+      userId,
+      jiraAccountId,
+    }: {
+      userId: number;
+      jiraAccountId: string | null;
+    }) => {
       await updateUserJiraMapping(userId, jiraAccountId);
       await fetchJiraUsersOp.execute();
     },
     {
       successMessage: "Mapping updated",
       onError: (err) => setError(err),
-    }
+    },
   );
 
   // Combine success messages from operations
-  const displaySuccess = success || autoMatchOp.success || updateMappingOp.success;
+  const displaySuccess =
+    success || autoMatchOp.success || updateMappingOp.success;
 
   // Handle OAuth callback params
   useEffect(() => {
@@ -117,7 +124,9 @@ export const SettingsPageClient = ({
     const jiraErrorDescription = searchParams.get("jira_error_description");
 
     if (jiraConnected === "true") {
-      setSuccess(`Successfully connected to Jira${jiraSite ? ` (${jiraSite})` : ""}!`);
+      setSuccess(
+        `Successfully connected to Jira${jiraSite ? ` (${jiraSite})` : ""}!`,
+      );
       window.history.replaceState({}, "", "/settings");
     } else if (jiraError) {
       setError(jiraErrorDescription || `Jira connection failed: ${jiraError}`);
@@ -142,17 +151,22 @@ export const SettingsPageClient = ({
       const response = await getJiraOAuthAuthorizeURL();
       window.location.href = response.authorization_url;
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to initiate Jira connection");
+      setError(
+        e instanceof Error ? e.message : "Failed to initiate Jira connection",
+      );
       setConnecting(false);
     }
   };
 
-  const handleUpdateMapping = async (userId: number, jiraAccountId: string | null) => {
+  const handleUpdateMapping = async (
+    userId: number,
+    jiraAccountId: string | null,
+  ) => {
     await updateMappingOp.execute({ userId, jiraAccountId });
   };
 
   const unmappedEmployees = allUsers.filter(
-    (emp) => !jiraUsers.some((ju) => ju.mapped_user_id === emp.id)
+    (emp) => !jiraUsers.some((ju) => ju.mapped_user_id === emp.id),
   );
 
   const isConnected = jiraSettings?.org_configured;
@@ -160,7 +174,7 @@ export const SettingsPageClient = ({
   const filteredJiraUsers = jiraUsers.filter(
     (u) =>
       u.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   return (
@@ -171,7 +185,9 @@ export const SettingsPageClient = ({
         </div>
         <div>
           <h1 className="text-2xl font-bold text-theme-text">Settings</h1>
-          <p className="text-theme-text-muted">Manage your integrations and preferences</p>
+          <p className="text-theme-text-muted">
+            Manage your integrations and preferences
+          </p>
         </div>
       </div>
 
@@ -204,7 +220,9 @@ export const SettingsPageClient = ({
               />
             </svg>
             <div>
-              <h2 className="text-lg font-semibold text-theme-text">Jira Integration</h2>
+              <h2 className="text-lg font-semibold text-theme-text">
+                Jira Integration
+              </h2>
               <p className="text-sm text-theme-text-muted">
                 {isAdmin
                   ? "Connect your organization's Jira to view tasks for all employees"
@@ -226,14 +244,20 @@ export const SettingsPageClient = ({
               <div className="bg-theme-elevated p-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-theme-text-muted">Connected Site</p>
+                    <p className="text-xs text-theme-text-muted">
+                      Connected Site
+                    </p>
                     <p className="font-medium text-theme-text">
-                      {jiraSettings?.jira_site_name || jiraSettings?.jira_site_url || "Jira Cloud"}
+                      {jiraSettings?.jira_site_name ||
+                        jiraSettings?.jira_site_url ||
+                        "Jira Cloud"}
                     </p>
                   </div>
                   {jiraSettings?.jira_account_id && (
                     <div>
-                      <p className="text-xs text-theme-text-muted">Your Jira Account Status</p>
+                      <p className="text-xs text-theme-text-muted">
+                        Your Jira Account Status
+                      </p>
                       <p className="font-medium text-green-400">Linked</p>
                     </div>
                   )}
@@ -274,9 +298,10 @@ export const SettingsPageClient = ({
                         <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5" />
                         <div>
                           <p className="text-sm text-blue-300">
-                            Connect your organization&apos;s Jira account using OAuth. Once
-                            connected, all employees&apos; Jira tasks will be visible on their
-                            dashboards (after matching their accounts).
+                            Connect your organization&apos;s Jira account using
+                            OAuth. Once connected, all employees&apos; Jira
+                            tasks will be visible on their dashboards (after
+                            matching their accounts).
                           </p>
                         </div>
                       </div>
@@ -301,8 +326,9 @@ export const SettingsPageClient = ({
                       <AlertCircle className="w-5 h-5 text-yellow-400 mt-0.5" />
                       <div>
                         <p className="text-sm text-yellow-300">
-                          Jira OAuth is not configured on the server. Please contact your system
-                          administrator to set up the Jira OAuth integration.
+                          Jira OAuth is not configured on the server. Please
+                          contact your system administrator to set up the Jira
+                          OAuth integration.
                         </p>
                       </div>
                     </div>
@@ -313,8 +339,8 @@ export const SettingsPageClient = ({
                   <AlertCircle className="w-5 h-5 text-theme-text-muted mt-0.5" />
                   <div>
                     <p className="text-sm text-theme-text-muted">
-                      Jira is not connected for your organization. Contact an administrator to set
-                      up the integration.
+                      Jira is not connected for your organization. Contact an
+                      administrator to set up the integration.
                     </p>
                   </div>
                 </div>
@@ -330,7 +356,9 @@ export const SettingsPageClient = ({
             <div className="flex items-center gap-3">
               <Users className="w-6 h-6 text-theme-text-muted" />
               <div>
-                <h2 className="text-lg font-semibold text-theme-text">Jira User Mapping</h2>
+                <h2 className="text-lg font-semibold text-theme-text">
+                  Jira User Mapping
+                </h2>
                 <p className="text-sm text-theme-text-muted">
                   Match Jira users to employees to show their tasks
                 </p>
@@ -370,10 +398,13 @@ export const SettingsPageClient = ({
             </div>
 
             {fetchJiraUsersOp.loading ? (
-              <div className="text-center py-8 text-theme-text-muted">Loading Jira users...</div>
+              <div className="text-center py-8 text-theme-text-muted">
+                Loading Jira users...
+              </div>
             ) : jiraUsers.length === 0 ? (
               <div className="text-center py-8 text-theme-text-muted">
-                No Jira users found. Make sure the organization is connected to Jira.
+                No Jira users found. Make sure the organization is connected to
+                Jira.
               </div>
             ) : (
               <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -385,15 +416,25 @@ export const SettingsPageClient = ({
                     <div className="flex items-center gap-3">
                       <Avatar
                         jiraAvatarUrl={jiraUser.avatar_url}
-                        firstName={jiraUser.display_name.split(" ")[0] || jiraUser.display_name}
-                        lastName={jiraUser.display_name.split(" ").slice(1).join(" ") || ""}
+                        firstName={
+                          jiraUser.display_name.split(" ")[0] ||
+                          jiraUser.display_name
+                        }
+                        lastName={
+                          jiraUser.display_name.split(" ").slice(1).join(" ") ||
+                          ""
+                        }
                         size="sm"
                         className="rounded-full"
                       />
                       <div>
-                        <p className="font-medium text-theme-text">{jiraUser.display_name}</p>
+                        <p className="font-medium text-theme-text">
+                          {jiraUser.display_name}
+                        </p>
                         {jiraUser.email && (
-                          <p className="text-xs text-theme-text-muted">{jiraUser.email}</p>
+                          <p className="text-xs text-theme-text-muted">
+                            {jiraUser.email}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -402,10 +443,16 @@ export const SettingsPageClient = ({
                         <div className="flex items-center gap-2">
                           <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-900/40 text-green-300">
                             <CheckCircle className="w-3 h-3" />
-                            {jiraUser.mapped_user.first_name} {jiraUser.mapped_user.last_name}
+                            {jiraUser.mapped_user.first_name}{" "}
+                            {jiraUser.mapped_user.last_name}
                           </span>
                           <button
-                            onClick={() => handleUpdateMapping(jiraUser.mapped_user_id!, null)}
+                            onClick={() =>
+                              handleUpdateMapping(
+                                jiraUser.mapped_user_id!,
+                                null,
+                              )
+                            }
                             className="text-xs text-red-400 hover:underline"
                           >
                             Remove
@@ -417,7 +464,10 @@ export const SettingsPageClient = ({
                           defaultValue=""
                           onChange={(e) => {
                             if (e.target.value) {
-                              handleUpdateMapping(parseInt(e.target.value), jiraUser.account_id);
+                              handleUpdateMapping(
+                                parseInt(e.target.value),
+                                jiraUser.account_id,
+                              );
                             }
                           }}
                         >
@@ -437,9 +487,9 @@ export const SettingsPageClient = ({
 
             <div className="mt-4 pt-4 border-t border-theme-border">
               <p className="text-sm text-theme-text-muted">
-                <strong>Tip:</strong> Use &quot;Auto-match by email&quot; to automatically link Jira
-                users to employees with matching email addresses. Unmatched users can be manually
-                mapped.
+                <strong>Tip:</strong> Use &quot;Auto-match by email&quot; to
+                automatically link Jira users to employees with matching email
+                addresses. Unmatched users can be manually mapped.
               </p>
             </div>
           </div>

@@ -32,8 +32,12 @@ export default function CalendarLoading() {
             {Array.from({ length: 35 }).map((_, i) => (
               <div key={i} className="h-24 bg-theme-elevated rounded p-2">
                 <div className="h-4 w-6 bg-theme-muted rounded mb-2" />
-                {i % 5 === 0 && <div className="h-5 w-full bg-theme-muted rounded mb-1" />}
-                {i % 7 === 2 && <div className="h-5 w-3/4 bg-theme-muted rounded" />}
+                {i % 5 === 0 && (
+                  <div className="h-5 w-full bg-theme-muted rounded mb-1" />
+                )}
+                {i % 7 === 2 && (
+                  <div className="h-5 w-3/4 bg-theme-muted rounded" />
+                )}
               </div>
             ))}
           </div>

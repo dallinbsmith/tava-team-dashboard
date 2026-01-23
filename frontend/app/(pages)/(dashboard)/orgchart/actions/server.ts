@@ -20,7 +20,7 @@ import {
 } from "@/lib/server-actions";
 
 export const createDraftAction = async (
-  data: CreateDraftRequest
+  data: CreateDraftRequest,
 ): Promise<ActionResult<OrgChartDraft>> => {
   try {
     const res = await authPost("/api/orgchart/drafts", data);
@@ -41,7 +41,7 @@ export const createDraftAction = async (
 
 export const updateDraftAction = async (
   id: number,
-  data: UpdateDraftRequest
+  data: UpdateDraftRequest,
 ): Promise<ActionResult<OrgChartDraft>> => {
   try {
     const res = await authPut(`/api/orgchart/drafts/${id}`, data);
@@ -60,7 +60,9 @@ export const updateDraftAction = async (
   }
 };
 
-export const deleteDraftAction = async (id: number): Promise<ActionResult<void>> => {
+export const deleteDraftAction = async (
+  id: number,
+): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/orgchart/drafts/${id}`);
 
@@ -77,7 +79,9 @@ export const deleteDraftAction = async (id: number): Promise<ActionResult<void>>
   }
 };
 
-export const publishDraftAction = async (id: number): Promise<ActionResult<void>> => {
+export const publishDraftAction = async (
+  id: number,
+): Promise<ActionResult<void>> => {
   try {
     const res = await authPost(`/api/orgchart/drafts/${id}/publish`);
 
@@ -97,10 +101,13 @@ export const publishDraftAction = async (id: number): Promise<ActionResult<void>
 
 export const addDraftChangeAction = async (
   draftId: number,
-  change: AddDraftChangeRequest
+  change: AddDraftChangeRequest,
 ): Promise<ActionResult<DraftChange>> => {
   try {
-    const res = await authPost(`/api/orgchart/drafts/${draftId}/changes`, change);
+    const res = await authPost(
+      `/api/orgchart/drafts/${draftId}/changes`,
+      change,
+    );
 
     if (!res.ok) {
       const error = await extractErrorMessage(res, "Failed to add change");
@@ -118,10 +125,12 @@ export const addDraftChangeAction = async (
 
 export const removeDraftChangeAction = async (
   draftId: number,
-  userId: number
+  userId: number,
 ): Promise<ActionResult<void>> => {
   try {
-    const res = await authDelete(`/api/orgchart/drafts/${draftId}/changes/${userId}`);
+    const res = await authDelete(
+      `/api/orgchart/drafts/${draftId}/changes/${userId}`,
+    );
 
     if (!res.ok) {
       const error = await extractErrorMessage(res, "Failed to remove change");
@@ -136,7 +145,9 @@ export const removeDraftChangeAction = async (
   }
 };
 
-export const createSquadAction = async (name: string): Promise<ActionResult<Squad>> => {
+export const createSquadAction = async (
+  name: string,
+): Promise<ActionResult<Squad>> => {
   try {
     const res = await authPost("/api/squads", { name });
 
@@ -154,7 +165,9 @@ export const createSquadAction = async (name: string): Promise<ActionResult<Squa
   }
 };
 
-export const deleteSquadAction = async (id: number): Promise<ActionResult<void>> => {
+export const deleteSquadAction = async (
+  id: number,
+): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/squads/${id}`);
 
@@ -171,12 +184,19 @@ export const deleteSquadAction = async (id: number): Promise<ActionResult<void>>
   }
 };
 
-export const deleteDepartmentAction = async (name: string): Promise<ActionResult<void>> => {
+export const deleteDepartmentAction = async (
+  name: string,
+): Promise<ActionResult<void>> => {
   try {
-    const res = await authDelete(`/api/departments/${encodeURIComponent(name)}`);
+    const res = await authDelete(
+      `/api/departments/${encodeURIComponent(name)}`,
+    );
 
     if (!res.ok) {
-      const error = await extractErrorMessage(res, "Failed to delete department");
+      const error = await extractErrorMessage(
+        res,
+        "Failed to delete department",
+      );
       return failure(error);
     }
 
@@ -184,6 +204,8 @@ export const deleteDepartmentAction = async (name: string): Promise<ActionResult
     return success(undefined);
   } catch (e) {
     console.error("deleteDepartmentAction error:", e);
-    return failure(e instanceof Error ? e.message : "Failed to delete department");
+    return failure(
+      e instanceof Error ? e.message : "Failed to delete department",
+    );
   }
 };

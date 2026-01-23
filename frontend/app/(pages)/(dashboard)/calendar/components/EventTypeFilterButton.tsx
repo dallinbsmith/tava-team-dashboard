@@ -31,7 +31,9 @@ const EventTypeFilterButton = memo(function EventTypeFilterButton({
             }
           : undefined
       }
-      title={isActive ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+      title={
+        isActive ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`
+      }
     >
       <span
         className={`w-3 h-3 rounded shadow-sm ${dashed ? "border border-dashed" : ""}`}

@@ -37,7 +37,10 @@ export default function TimeOffRequestList({
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-gray-800 rounded-lg border border-gray-700 p-4 animate-pulse">
+          <div
+            key={i}
+            className="bg-gray-800 rounded-lg border border-gray-700 p-4 animate-pulse"
+          >
             <div className="flex items-center gap-2 mb-3">
               <div className="h-5 w-24 bg-gray-700 rounded" />
               <div className="h-5 w-16 bg-gray-700 rounded-full" />
@@ -75,7 +78,9 @@ export default function TimeOffRequestList({
           >
             All
           </button>
-          {(["pending", "approved", "rejected", "cancelled"] as TimeOffStatus[]).map((status) => (
+          {(
+            ["pending", "approved", "rejected", "cancelled"] as TimeOffStatus[]
+          ).map((status) => (
             <button
               key={status}
               onClick={() => onFilterChange(status)}

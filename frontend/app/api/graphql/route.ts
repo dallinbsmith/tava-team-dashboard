@@ -14,7 +14,10 @@ export const POST = async (request: NextRequest) => {
     const accessToken = result?.token;
 
     if (!accessToken) {
-      return NextResponse.json({ errors: [{ message: "Unauthorized" }] }, { status: 401 });
+      return NextResponse.json(
+        { errors: [{ message: "Unauthorized" }] },
+        { status: 401 },
+      );
     }
 
     const body = await request.text();
@@ -35,6 +38,9 @@ export const POST = async (request: NextRequest) => {
     });
   } catch (error) {
     console.error("GraphQL proxy error:", error);
-    return NextResponse.json({ errors: [{ message: "Internal server error" }] }, { status: 500 });
+    return NextResponse.json(
+      { errors: [{ message: "Internal server error" }] },
+      { status: 500 },
+    );
   }
 };

@@ -3,7 +3,12 @@
 import { createContext, useContext, ReactNode, useCallback } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEmployeesQuery, useAllUsersQuery, useSquadsQuery, useDepartmentsQuery } from "@/hooks";
+import {
+  useEmployeesQuery,
+  useAllUsersQuery,
+  useSquadsQuery,
+  useDepartmentsQuery,
+} from "@/hooks";
 import { refetchQueries, queryKeyGroups } from "@/lib/query-utils";
 import { User, Squad } from "@/shared/types/user";
 import { asyncNoop } from "@/lib/constants";
@@ -25,7 +30,9 @@ interface OrganizationContextType {
   refetchAll: () => Promise<void>;
 }
 
-const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
+const OrganizationContext = createContext<OrganizationContextType | undefined>(
+  undefined,
+);
 
 export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   const { user: auth0User, isLoading: authLoading } = useUser();
@@ -52,18 +59,20 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
     removeSquad,
   } = useSquadsQuery({ enabled: isAuthenticated });
 
-  const {
-    departments,
-    isLoading: departmentsLoading,
-    refetch: refetchDepartments,
-  } = useDepartmentsQuery({ enabled: isAuthenticated });
+  const { departments, isLoading: departmentsLoading } = useDepartmentsQuery({
+    enabled: isAuthenticated,
+  });
 
   const loading =
-    authLoading || employeesLoading || allUsersLoading || squadsLoading || departmentsLoading;
+    authLoading ||
+    employeesLoading ||
+    allUsersLoading ||
+    squadsLoading ||
+    departmentsLoading;
 
   const refetchAll = useCallback(
     () => refetchQueries(queryClient, queryKeyGroups.organization()),
-    [queryClient]
+    [queryClient],
   );
 
   const value: OrganizationContextType = {
@@ -83,7 +92,11 @@ export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
     refetchAll,
   };
 
-  return <OrganizationContext.Provider value={value}>{children}</OrganizationContext.Provider>;
+  return (
+    <OrganizationContext.Provider value={value}>
+      {children}
+    </OrganizationContext.Provider>
+  );
 };
 
 const defaultOrganizationContext: OrganizationContextType = {

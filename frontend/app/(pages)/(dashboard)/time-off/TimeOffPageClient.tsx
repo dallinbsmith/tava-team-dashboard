@@ -14,7 +14,12 @@ import TimeOffReviewModal from "./components/TimeOffReviewModal";
 import { Calendar, Plus, Clock, RefreshCw } from "lucide-react";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 
-const timeOffStatuses = ["pending", "approved", "rejected", "cancelled"] as const;
+const timeOffStatuses = [
+  "pending",
+  "approved",
+  "rejected",
+  "cancelled",
+] as const;
 
 interface TimeOffPageClientProps {
   initialMyRequests: TimeOffRequest[];
@@ -28,7 +33,8 @@ export const TimeOffPageClient = ({
   isSupervisorOrAdmin: serverIsSupervisorOrAdmin,
 }: TimeOffPageClientProps) => {
   // Use effective user from context (respects impersonation)
-  const { currentUser: effectiveUser, effectiveIsSupervisorOrAdmin } = useCurrentUser();
+  const { currentUser: effectiveUser, effectiveIsSupervisorOrAdmin } =
+    useCurrentUser();
 
   // Use context values if available, otherwise fall back to server-provided values
   const isSupervisorOrAdmin = effectiveUser
@@ -36,18 +42,22 @@ export const TimeOffPageClient = ({
     : serverIsSupervisorOrAdmin;
 
   const [myRequests, setMyRequests] = useState(initialMyRequests);
-  const [pendingRequests, setPendingRequests] = useState(initialPendingRequests);
+  const [pendingRequests, setPendingRequests] = useState(
+    initialPendingRequests,
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [, startTransition] = useTransition();
-  const [reviewRequest, setReviewRequest] = useState<TimeOffRequest | null>(null);
+  const [reviewRequest, setReviewRequest] = useState<TimeOffRequest | null>(
+    null,
+  );
 
   // URL-synced filter status
   const [filterStatus, setFilterStatus] = useQueryState(
     "status",
-    parseAsStringLiteral(timeOffStatuses)
+    parseAsStringLiteral(timeOffStatuses),
   );
 
   const fetchData = useCallback(async () => {
@@ -65,7 +75,9 @@ export const TimeOffPageClient = ({
         setPendingRequests([]);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load time off data");
+      setError(
+        err instanceof Error ? err.message : "Failed to load time off data",
+      );
     } finally {
       setRefreshing(false);
     }
@@ -121,7 +133,9 @@ export const TimeOffPageClient = ({
             className="p-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
             title="Refresh"
           >
-            <RefreshCw className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`}
+            />
           </button>
           {!showForm && (
             <button

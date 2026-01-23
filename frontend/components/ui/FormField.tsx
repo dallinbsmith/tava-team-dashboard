@@ -16,7 +16,9 @@ export interface FormFieldProps {
 }
 
 interface InputFieldProps
-  extends FormFieldProps, Omit<React.InputHTMLAttributes<HTMLInputElement>, "id" | "className"> {
+  extends
+    FormFieldProps,
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, "id" | "className"> {
   /** Input type */
   type?: "text" | "email" | "password" | "date" | "time" | "number";
 }
@@ -24,12 +26,17 @@ interface InputFieldProps
 interface TextareaFieldProps
   extends
     FormFieldProps,
-    Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "id" | "className"> {
+    Omit<
+      React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+      "id" | "className"
+    > {
   rows?: number;
 }
 
 interface SelectFieldProps
-  extends FormFieldProps, Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "id" | "className"> {
+  extends
+    FormFieldProps,
+    Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "id" | "className"> {
   options: { value: string; label: string }[];
   placeholder?: string;
 }
@@ -45,21 +52,35 @@ export const FormField = ({
 }: FormFieldProps) => {
   return (
     <div className={className}>
-      <label htmlFor={id} className="block text-sm font-medium text-theme-text mb-1">
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium text-theme-text mb-1"
+      >
         {label}
         {required && " *"}
       </label>
       {children}
       {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
-      {helperText && !error && <p className="mt-1 text-sm text-theme-text-muted">{helperText}</p>}
+      {helperText && !error && (
+        <p className="mt-1 text-sm text-theme-text-muted">{helperText}</p>
+      )}
     </div>
   );
 };
 
 export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
   (
-    { label, required, error, helperText, id, className = "", type = "text", ...inputProps },
-    ref
+    {
+      label,
+      required,
+      error,
+      helperText,
+      id,
+      className = "",
+      type = "text",
+      ...inputProps
+    },
+    ref,
   ) => {
     const inputId = id || `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
@@ -83,14 +104,30 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
         />
       </FormField>
     );
-  }
+  },
 );
 
 InputField.displayName = "InputField";
 
-export const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>(
-  ({ label, required, error, helperText, id, className = "", rows = 3, ...textareaProps }, ref) => {
-    const inputId = id || `textarea-${label.toLowerCase().replace(/\s+/g, "-")}`;
+export const TextareaField = forwardRef<
+  HTMLTextAreaElement,
+  TextareaFieldProps
+>(
+  (
+    {
+      label,
+      required,
+      error,
+      helperText,
+      id,
+      className = "",
+      rows = 3,
+      ...textareaProps
+    },
+    ref,
+  ) => {
+    const inputId =
+      id || `textarea-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
     return (
       <FormField
@@ -112,7 +149,7 @@ export const TextareaField = forwardRef<HTMLTextAreaElement, TextareaFieldProps>
         />
       </FormField>
     );
-  }
+  },
 );
 
 TextareaField.displayName = "TextareaField";
@@ -130,7 +167,7 @@ export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
       placeholder,
       ...selectProps
     },
-    ref
+    ref,
   ) => {
     const inputId = id || `select-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
@@ -160,7 +197,7 @@ export const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(
         </select>
       </FormField>
     );
-  }
+  },
 );
 
 SelectField.displayName = "SelectField";

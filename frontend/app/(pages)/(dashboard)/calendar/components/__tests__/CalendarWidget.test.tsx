@@ -49,7 +49,8 @@ jest.mock("date-fns", () => ({
   format: jest.fn((date, formatStr) => {
     if (formatStr === "h:mm a") return "10:00 AM";
     if (formatStr === "EEE, MMM d") return "Mon, Jan 15";
-    if (formatStr === "EEE, MMM d 'at' h:mm a") return "Mon, Jan 15 at 10:00 AM";
+    if (formatStr === "EEE, MMM d 'at' h:mm a")
+      return "Mon, Jan 15 at 10:00 AM";
     return "2024-01-15";
   }),
 }));
@@ -98,7 +99,7 @@ describe("CalendarWidget", () => {
   describe("loading state", () => {
     it("shows loading spinner initially", () => {
       mockGetCalendarEvents.mockImplementation(
-        () => new Promise(() => {}) // Never resolves
+        () => new Promise(() => {}), // Never resolves
       );
 
       render(<CalendarWidget />);
@@ -133,7 +134,7 @@ describe("CalendarWidget", () => {
 
       await waitFor(() => {
         const jiraLink = document.querySelector(
-          'a[href="https://jira.example.com/PROJ-123"]'
+          'a[href="https://jira.example.com/PROJ-123"]',
         );
         expect(jiraLink).toBeInTheDocument();
       });
@@ -149,7 +150,7 @@ describe("CalendarWidget", () => {
       await waitFor(() => {
         expect(screen.getByText("No upcoming events")).toBeInTheDocument();
         expect(
-          screen.getByText("Events for the next 7 days will appear here")
+          screen.getByText("Events for the next 7 days will appear here"),
         ).toBeInTheDocument();
       });
     });
@@ -174,7 +175,7 @@ describe("CalendarWidget", () => {
           onCreateTask={jest.fn()}
           onCreateMeeting={jest.fn()}
           onRequestTimeOff={jest.fn()}
-        />
+        />,
       );
 
       await waitFor(() => {
@@ -188,7 +189,7 @@ describe("CalendarWidget", () => {
           onCreateTask={jest.fn()}
           onCreateMeeting={jest.fn()}
           onRequestTimeOff={jest.fn()}
-        />
+        />,
       );
 
       await waitFor(() => {
@@ -238,7 +239,7 @@ describe("CalendarWidget", () => {
         <CalendarWidget
           onCreateTask={jest.fn()}
           onCreateTimeOffForEmployee={onCreateTimeOffForEmployee}
-        />
+        />,
       );
 
       await waitFor(() => {

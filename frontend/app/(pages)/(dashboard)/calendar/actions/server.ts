@@ -20,7 +20,9 @@ import {
   failure,
 } from "@/lib/server-actions";
 
-export const createTaskAction = async (data: CreateTaskRequest): Promise<ActionResult<Task>> => {
+export const createTaskAction = async (
+  data: CreateTaskRequest,
+): Promise<ActionResult<Task>> => {
   try {
     const res = await authPost("/api/calendar/tasks", data);
 
@@ -41,7 +43,7 @@ export const createTaskAction = async (data: CreateTaskRequest): Promise<ActionR
 
 export const updateTaskAction = async (
   id: number,
-  data: UpdateTaskRequest
+  data: UpdateTaskRequest,
 ): Promise<ActionResult<Task>> => {
   try {
     const res = await authPut(`/api/calendar/tasks/${id}`, data);
@@ -61,7 +63,9 @@ export const updateTaskAction = async (
   }
 };
 
-export const deleteTaskAction = async (id: number): Promise<ActionResult<void>> => {
+export const deleteTaskAction = async (
+  id: number,
+): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/calendar/tasks/${id}`);
 
@@ -80,7 +84,7 @@ export const deleteTaskAction = async (id: number): Promise<ActionResult<void>> 
 };
 
 export const createMeetingAction = async (
-  data: CreateMeetingRequest
+  data: CreateMeetingRequest,
 ): Promise<ActionResult<Meeting>> => {
   try {
     const res = await authPost("/api/calendar/meetings", data);
@@ -102,7 +106,7 @@ export const createMeetingAction = async (
 
 export const updateMeetingAction = async (
   id: number,
-  data: UpdateMeetingRequest
+  data: UpdateMeetingRequest,
 ): Promise<ActionResult<Meeting>> => {
   try {
     const res = await authPut(`/api/calendar/meetings/${id}`, data);
@@ -122,7 +126,9 @@ export const updateMeetingAction = async (
   }
 };
 
-export const deleteMeetingAction = async (id: number): Promise<ActionResult<void>> => {
+export const deleteMeetingAction = async (
+  id: number,
+): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/calendar/meetings/${id}`);
 
@@ -142,13 +148,18 @@ export const deleteMeetingAction = async (id: number): Promise<ActionResult<void
 
 export const respondToMeetingAction = async (
   meetingId: number,
-  response: ResponseStatus
+  response: ResponseStatus,
 ): Promise<ActionResult<void>> => {
   try {
-    const res = await authPost(`/api/calendar/meetings/${meetingId}/respond`, { response });
+    const res = await authPost(`/api/calendar/meetings/${meetingId}/respond`, {
+      response,
+    });
 
     if (!res.ok) {
-      const error = await extractErrorMessage(res, "Failed to respond to meeting");
+      const error = await extractErrorMessage(
+        res,
+        "Failed to respond to meeting",
+      );
       return failure(error);
     }
 
@@ -157,6 +168,8 @@ export const respondToMeetingAction = async (
     return success(undefined);
   } catch (e) {
     console.error("respondToMeetingAction error:", e);
-    return failure(e instanceof Error ? e.message : "Failed to respond to meeting");
+    return failure(
+      e instanceof Error ? e.message : "Failed to respond to meeting",
+    );
   }
 };

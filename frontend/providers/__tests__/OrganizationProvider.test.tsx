@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { OrganizationProvider, useOrganization } from "../OrganizationProvider";
@@ -29,7 +29,12 @@ jest.mock("@/lib/query-utils", () => ({
   queryKeyGroups: {
     organization: jest
       .fn()
-      .mockReturnValue([["employees"], ["allUsers"], ["squads"], ["departments"]]),
+      .mockReturnValue([
+        ["employees"],
+        ["allUsers"],
+        ["squads"],
+        ["departments"],
+      ]),
   },
 }));
 
@@ -39,23 +44,44 @@ const mockUseEmployeesQuery = hooks.useEmployeesQuery as jest.MockedFunction<
 const mockUseAllUsersQuery = hooks.useAllUsersQuery as jest.MockedFunction<
   typeof hooks.useAllUsersQuery
 >;
-const mockUseSquadsQuery = hooks.useSquadsQuery as jest.MockedFunction<typeof hooks.useSquadsQuery>;
-const mockUseDepartmentsQuery = hooks.useDepartmentsQuery as jest.MockedFunction<
-  typeof hooks.useDepartmentsQuery
+const mockUseSquadsQuery = hooks.useSquadsQuery as jest.MockedFunction<
+  typeof hooks.useSquadsQuery
 >;
+const mockUseDepartmentsQuery =
+  hooks.useDepartmentsQuery as jest.MockedFunction<
+    typeof hooks.useDepartmentsQuery
+  >;
 const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<
   typeof queryUtils.refetchQueries
 >;
 
 // Test fixtures
 const mockEmployees = [
-  { id: 1, first_name: "John", last_name: "Doe", email: "john@example.com", role: "employee" },
-  { id: 2, first_name: "Jane", last_name: "Smith", email: "jane@example.com", role: "supervisor" },
+  {
+    id: 1,
+    first_name: "John",
+    last_name: "Doe",
+    email: "john@example.com",
+    role: "employee",
+  },
+  {
+    id: 2,
+    first_name: "Jane",
+    last_name: "Smith",
+    email: "jane@example.com",
+    role: "supervisor",
+  },
 ];
 
 const mockAllUsers = [
   ...mockEmployees,
-  { id: 3, first_name: "Admin", last_name: "User", email: "admin@example.com", role: "admin" },
+  {
+    id: 3,
+    first_name: "Admin",
+    last_name: "User",
+    email: "admin@example.com",
+    role: "admin",
+  },
 ];
 
 const mockSquads = [
@@ -75,7 +101,9 @@ const createWrapper = () => {
   });
 
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    return (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
   };
 };
 
@@ -90,9 +118,13 @@ function TestConsumer({
   return (
     <div>
       <span data-testid="employees-count">{context.employees.length}</span>
-      <span data-testid="employees-loading">{String(context.employeesLoading)}</span>
+      <span data-testid="employees-loading">
+        {String(context.employeesLoading)}
+      </span>
       <span data-testid="all-users-count">{context.allUsers.length}</span>
-      <span data-testid="all-users-loading">{String(context.allUsersLoading)}</span>
+      <span data-testid="all-users-loading">
+        {String(context.allUsersLoading)}
+      </span>
       <span data-testid="squads-count">{context.squads.length}</span>
       <span data-testid="squads-loading">{String(context.squadsLoading)}</span>
       <span data-testid="departments-count">{context.departments.length}</span>
@@ -151,7 +183,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <div data-testid="child">Child content</div>
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("child")).toBeInTheDocument();
@@ -164,7 +196,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("employees-count")).toHaveTextContent("2");
@@ -182,7 +214,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("employees-loading")).toHaveTextContent("true");
@@ -199,7 +231,7 @@ describe("OrganizationProvider", () => {
             }}
           />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(capturedContext?.refetchEmployees).toBeDefined();
@@ -213,7 +245,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("all-users-count")).toHaveTextContent("3");
@@ -231,7 +263,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("all-users-loading")).toHaveTextContent("true");
@@ -244,7 +276,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("squads-count")).toHaveTextContent("2");
@@ -265,7 +297,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("squads-loading")).toHaveTextContent("true");
@@ -282,7 +314,7 @@ describe("OrganizationProvider", () => {
             }}
           />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(capturedContext?.addSquad).toBeDefined();
@@ -299,7 +331,7 @@ describe("OrganizationProvider", () => {
             }}
           />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(capturedContext?.removeSquad).toBeDefined();
@@ -312,7 +344,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("departments-count")).toHaveTextContent("2");
@@ -332,7 +364,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("loading")).toHaveTextContent("true");
@@ -350,7 +382,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("loading")).toHaveTextContent("true");
@@ -361,7 +393,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(screen.getByTestId("loading")).toHaveTextContent("false");
@@ -381,7 +413,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(mockUseEmployeesQuery).toHaveBeenCalledWith({ enabled: true });
@@ -402,7 +434,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(mockUseEmployeesQuery).toHaveBeenCalledWith({ enabled: false });
@@ -420,7 +452,7 @@ describe("OrganizationProvider", () => {
         <OrganizationProvider>
           <TestConsumer />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(mockUseEmployeesQuery).toHaveBeenCalledWith({ enabled: false });
@@ -439,7 +471,7 @@ describe("OrganizationProvider", () => {
             }}
           />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       expect(capturedContext?.refetchAll).toBeDefined();
@@ -457,7 +489,7 @@ describe("OrganizationProvider", () => {
             }}
           />
         </OrganizationProvider>,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       await act(async () => {

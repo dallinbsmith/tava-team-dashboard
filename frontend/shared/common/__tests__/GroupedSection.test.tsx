@@ -36,7 +36,13 @@ describe("GroupedSection", () => {
     it("count has badge styling", () => {
       render(<GroupedSection {...defaultProps} />);
       const count = screen.getByText("5");
-      expect(count).toHaveClass("px-2", "py-0.5", "text-xs", "font-medium", "rounded-full");
+      expect(count).toHaveClass(
+        "px-2",
+        "py-0.5",
+        "text-xs",
+        "font-medium",
+        "rounded-full",
+      );
     });
 
     it("renders children", () => {
@@ -49,7 +55,7 @@ describe("GroupedSection", () => {
         <GroupedSection {...defaultProps}>
           <div data-testid="child-1">Child 1</div>
           <div data-testid="child-2">Child 2</div>
-        </GroupedSection>
+        </GroupedSection>,
       );
       expect(screen.getByTestId("child-1")).toBeInTheDocument();
       expect(screen.getByTestId("child-2")).toBeInTheDocument();
@@ -65,21 +71,27 @@ describe("GroupedSection", () => {
     });
 
     it("renders icon when provided", () => {
-      const { container } = render(<GroupedSection {...defaultProps} icon={Users} />);
+      const { container } = render(
+        <GroupedSection {...defaultProps} icon={Users} />,
+      );
       const header = container.querySelector(".px-6.py-3");
       const svg = header?.querySelector("svg");
       expect(svg).toBeInTheDocument();
     });
 
     it("icon has proper size", () => {
-      const { container } = render(<GroupedSection {...defaultProps} icon={Users} />);
+      const { container } = render(
+        <GroupedSection {...defaultProps} icon={Users} />,
+      );
       const header = container.querySelector(".px-6.py-3");
       const svg = header?.querySelector("svg");
       expect(svg).toHaveClass("w-4", "h-4");
     });
 
     it("uses default icon color when not specified", () => {
-      const { container } = render(<GroupedSection {...defaultProps} icon={Users} />);
+      const { container } = render(
+        <GroupedSection {...defaultProps} icon={Users} />,
+      );
       const header = container.querySelector(".px-6.py-3");
       const svg = header?.querySelector("svg");
       expect(svg).toHaveClass("text-theme-text-muted");
@@ -87,7 +99,11 @@ describe("GroupedSection", () => {
 
     it("uses custom icon color when specified", () => {
       const { container } = render(
-        <GroupedSection {...defaultProps} icon={Clock} iconColor="text-green-500" />
+        <GroupedSection
+          {...defaultProps}
+          icon={Clock}
+          iconColor="text-green-500"
+        />,
       );
       const header = container.querySelector(".px-6.py-3");
       const svg = header?.querySelector("svg");
@@ -103,7 +119,10 @@ describe("GroupedSection", () => {
 
     it("renders indicator when provided", () => {
       render(
-        <GroupedSection {...defaultProps} indicator={<span data-testid="indicator">●</span>} />
+        <GroupedSection
+          {...defaultProps}
+          indicator={<span data-testid="indicator">●</span>}
+        />,
       );
       expect(screen.getByTestId("indicator")).toBeInTheDocument();
     });
@@ -112,8 +131,13 @@ describe("GroupedSection", () => {
       render(
         <GroupedSection
           {...defaultProps}
-          indicator={<div data-testid="indicator" className="w-2 h-2 bg-green-500 rounded-full" />}
-        />
+          indicator={
+            <div
+              data-testid="indicator"
+              className="w-2 h-2 bg-green-500 rounded-full"
+            />
+          }
+        />,
       );
       const indicator = screen.getByTestId("indicator");
       expect(indicator).toHaveClass("bg-green-500", "rounded-full");
@@ -155,8 +179,15 @@ describe("GroupedSection", () => {
 
   describe("title variations", () => {
     it("renders long title", () => {
-      render(<GroupedSection {...defaultProps} title="Very Long Section Title That Might Wrap" />);
-      expect(screen.getByText("Very Long Section Title That Might Wrap")).toBeInTheDocument();
+      render(
+        <GroupedSection
+          {...defaultProps}
+          title="Very Long Section Title That Might Wrap"
+        />,
+      );
+      expect(
+        screen.getByText("Very Long Section Title That Might Wrap"),
+      ).toBeInTheDocument();
     });
   });
 });

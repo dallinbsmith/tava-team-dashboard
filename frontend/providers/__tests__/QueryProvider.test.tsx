@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { render, screen, renderHook } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { QueryProvider } from "../QueryProvider";
 
@@ -14,7 +14,7 @@ describe("QueryProvider", () => {
       render(
         <QueryProvider>
           <div data-testid="child">Child content</div>
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       expect(screen.getByTestId("child")).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe("QueryProvider", () => {
         <QueryProvider>
           <div data-testid="child-1">Child 1</div>
           <div data-testid="child-2">Child 2</div>
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       expect(screen.getByTestId("child-1")).toBeInTheDocument();
@@ -43,7 +43,7 @@ describe("QueryProvider", () => {
       render(
         <QueryProvider>
           <TestComponent />
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       expect(screen.getByTestId("has-client")).toHaveTextContent("yes");
@@ -67,7 +67,7 @@ describe("QueryProvider", () => {
       render(
         <QueryProvider>
           <TestComponent />
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       // Initially shows loading
@@ -88,7 +88,7 @@ describe("QueryProvider", () => {
       render(
         <QueryProvider>
           <TestComponent />
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       expect(clients.length).toBe(1);
@@ -107,13 +107,13 @@ describe("QueryProvider", () => {
       const { rerender } = render(
         <QueryProvider>
           <TestComponent />
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       rerender(
         <QueryProvider>
           <TestComponent />
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       // Should be the same instance
@@ -126,13 +126,17 @@ describe("QueryProvider", () => {
       const TestComponent = () => {
         const queryClient = useQueryClient();
         const defaultOptions = queryClient.getDefaultOptions();
-        return <div data-testid="stale-time">{defaultOptions.queries?.staleTime}</div>;
+        return (
+          <div data-testid="stale-time">
+            {defaultOptions.queries?.staleTime}
+          </div>
+        );
       };
 
       render(
         <QueryProvider>
           <TestComponent />
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       // 5 minutes = 5 * 60 * 1000 = 300000
@@ -143,13 +147,15 @@ describe("QueryProvider", () => {
       const TestComponent = () => {
         const queryClient = useQueryClient();
         const defaultOptions = queryClient.getDefaultOptions();
-        return <div data-testid="gc-time">{defaultOptions.queries?.gcTime}</div>;
+        return (
+          <div data-testid="gc-time">{defaultOptions.queries?.gcTime}</div>
+        );
       };
 
       render(
         <QueryProvider>
           <TestComponent />
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       // 30 minutes = 30 * 60 * 1000 = 1800000
@@ -166,7 +172,7 @@ describe("QueryProvider", () => {
       render(
         <QueryProvider>
           <TestComponent />
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       expect(screen.getByTestId("retry")).toHaveTextContent("1");
@@ -186,7 +192,7 @@ describe("QueryProvider", () => {
       render(
         <QueryProvider>
           <TestComponent />
-        </QueryProvider>
+        </QueryProvider>,
       );
 
       expect(screen.getByTestId("refetch-on-focus")).toHaveTextContent("false");

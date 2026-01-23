@@ -14,13 +14,19 @@ interface CreateTaskModalProps {
   onCreated: () => void;
 }
 
-export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTaskModalProps) {
+export default function CreateTaskModal({
+  isOpen,
+  onClose,
+  onCreated,
+}: CreateTaskModalProps) {
   const { allUsers, squads, departments, allUsersLoading } = useOrganization();
   const { effectiveIsSupervisorOrAdmin } = useCurrentUser();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
+  const [dueDate, setDueDate] = useState(
+    format(addDays(new Date(), 1), "yyyy-MM-dd"),
+  );
   const [assignmentType, setAssignmentType] = useState<AssignmentType>("user");
   const [assignedUserId, setAssignedUserId] = useState<number | undefined>();
   const [assignedSquadId, setAssignedSquadId] = useState<number | undefined>();
@@ -89,7 +95,12 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
   };
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Create Task" maxWidth="max-w-lg">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Create Task"
+      maxWidth="max-w-lg"
+    >
       {allUsersLoading ? (
         <CenteredSpinner />
       ) : (
@@ -97,7 +108,10 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
           <FormError error={error} />
 
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-theme-text mb-1">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-theme-text mb-1"
+            >
               Title *
             </label>
             <input
@@ -111,7 +125,10 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-theme-text mb-1">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-theme-text mb-1"
+            >
               Description
             </label>
             <textarea
@@ -125,7 +142,10 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
           </div>
 
           <div>
-            <label htmlFor="dueDate" className="block text-sm font-medium text-theme-text mb-1">
+            <label
+              htmlFor="dueDate"
+              className="block text-sm font-medium text-theme-text mb-1"
+            >
               Due Date *
             </label>
             <input
@@ -140,29 +160,35 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
 
           {effectiveIsSupervisorOrAdmin && (
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">Assign To</label>
+              <label className="block text-sm font-medium text-theme-text mb-1">
+                Assign To
+              </label>
               <div className="flex gap-2 mb-3">
-                {(["user", "squad", "department"] as AssignmentType[]).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setAssignmentType(type)}
-                    className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                      assignmentType === type
-                        ? "bg-primary-600 text-white"
-                        : "bg-theme-elevated text-theme-text-muted border border-theme-border hover:bg-theme-surface"
-                    }`}
-                  >
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </button>
-                ))}
+                {(["user", "squad", "department"] as AssignmentType[]).map(
+                  (type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setAssignmentType(type)}
+                      className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                        assignmentType === type
+                          ? "bg-primary-600 text-white"
+                          : "bg-theme-elevated text-theme-text-muted border border-theme-border hover:bg-theme-surface"
+                      }`}
+                    >
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </button>
+                  ),
+                )}
               </div>
 
               {assignmentType === "user" && (
                 <select
                   value={assignedUserId || ""}
                   onChange={(e) =>
-                    setAssignedUserId(e.target.value ? parseInt(e.target.value) : undefined)
+                    setAssignedUserId(
+                      e.target.value ? parseInt(e.target.value) : undefined,
+                    )
                   }
                   className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
@@ -179,7 +205,9 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
                 <select
                   value={assignedSquadId || ""}
                   onChange={(e) =>
-                    setAssignedSquadId(e.target.value ? parseInt(e.target.value) : undefined)
+                    setAssignedSquadId(
+                      e.target.value ? parseInt(e.target.value) : undefined,
+                    )
                   }
                   className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >

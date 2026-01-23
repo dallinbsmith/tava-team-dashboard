@@ -50,7 +50,9 @@ export interface UseEmployeeListResult {
 
 export const ITEMS_PER_PAGE_OPTIONS = [6, 12, 24, 48];
 
-export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult => {
+export const useEmployeeList = (
+  employeesInput: User[],
+): UseEmployeeListResult => {
   const employees = employeesInput || [];
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilters, setRoleFilters] = useState<Role[]>([]);
@@ -82,7 +84,7 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
   const filteredEmployees = useMemo(() => {
     return employees.filter((employee) => {
       const squadNamesMatch = employee.squads?.some((s) =>
-        s.name.toLowerCase().includes(searchQuery.toLowerCase())
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()),
       );
 
       const matchesSearch =
@@ -91,17 +93,23 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
           .toLowerCase()
           .includes(searchQuery.toLowerCase()) ||
         employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employee.department?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.department
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
         employee.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         squadNamesMatch;
 
-      const matchesRole = roleFilters.length === 0 || roleFilters.includes(employee.role);
+      const matchesRole =
+        roleFilters.length === 0 || roleFilters.includes(employee.role);
 
       const matchesDepartment =
-        departmentFilters.length === 0 || (employee.department && departmentFilters.includes(employee.department));
+        departmentFilters.length === 0 ||
+        (employee.department &&
+          departmentFilters.includes(employee.department));
 
       const matchesSquad =
-        squadFilters.length === 0 || employee.squads?.some((s) => squadFilters.includes(s.name));
+        squadFilters.length === 0 ||
+        employee.squads?.some((s) => squadFilters.includes(s.name));
 
       return matchesSearch && matchesRole && matchesDepartment && matchesSquad;
     });
@@ -115,7 +123,7 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
       switch (sortField) {
         case "name":
           comparison = `${a.first_name} ${a.last_name}`.localeCompare(
-            `${b.first_name} ${b.last_name}`
+            `${b.first_name} ${b.last_name}`,
           );
           break;
         case "email":
@@ -152,7 +160,7 @@ export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult =
         setSortOrder("asc");
       }
     },
-    [sortField, sortOrder]
+    [sortField, sortOrder],
   );
 
   const clearFilters = useCallback(() => {

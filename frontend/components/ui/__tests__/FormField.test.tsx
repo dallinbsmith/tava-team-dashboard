@@ -5,7 +5,12 @@
 
 import React, { createRef } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { FormField, InputField, TextareaField, SelectField } from "../FormField";
+import {
+  FormField,
+  InputField,
+  TextareaField,
+  SelectField,
+} from "../FormField";
 
 describe("FormField", () => {
   const defaultProps = {
@@ -29,7 +34,7 @@ describe("FormField", () => {
       render(
         <FormField {...defaultProps}>
           <input type="text" id="test-field" />
-        </FormField>
+        </FormField>,
       );
       expect(screen.getByRole("textbox")).toBeInTheDocument();
     });
@@ -38,7 +43,9 @@ describe("FormField", () => {
   describe("required indicator", () => {
     it("shows asterisk when required", () => {
       render(<FormField {...defaultProps} required />);
-      expect(screen.getByText(/Field Label/)).toHaveTextContent("Field Label *");
+      expect(screen.getByText(/Field Label/)).toHaveTextContent(
+        "Field Label *",
+      );
     });
 
     it("does not show asterisk when not required", () => {
@@ -87,7 +94,9 @@ describe("FormField", () => {
 
   describe("custom className", () => {
     it("applies custom className to wrapper", () => {
-      const { container } = render(<FormField {...defaultProps} className="my-custom-class" />);
+      const { container } = render(
+        <FormField {...defaultProps} className="my-custom-class" />,
+      );
       expect(container.firstChild).toHaveClass("my-custom-class");
     });
   });
@@ -96,7 +105,13 @@ describe("FormField", () => {
     it("label has proper styling", () => {
       render(<FormField {...defaultProps} />);
       const label = screen.getByText("Field Label");
-      expect(label).toHaveClass("block", "text-sm", "font-medium", "text-theme-text", "mb-1");
+      expect(label).toHaveClass(
+        "block",
+        "text-sm",
+        "font-medium",
+        "text-theme-text",
+        "mb-1",
+      );
     });
   });
 });
@@ -244,20 +259,27 @@ describe("InputField", () => {
         "border-theme-border",
         "bg-theme-elevated",
         "text-theme-text",
-        "rounded"
+        "rounded",
       );
     });
 
     it("has focus styling classes", () => {
       render(<InputField {...defaultProps} />);
       const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("focus:outline-none", "focus:ring-2", "focus:ring-primary-500");
+      expect(input).toHaveClass(
+        "focus:outline-none",
+        "focus:ring-2",
+        "focus:ring-primary-500",
+      );
     });
 
     it("has disabled styling classes", () => {
       render(<InputField {...defaultProps} />);
       const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("disabled:opacity-50", "disabled:cursor-not-allowed");
+      expect(input).toHaveClass(
+        "disabled:opacity-50",
+        "disabled:cursor-not-allowed",
+      );
     });
   });
 });
@@ -315,7 +337,9 @@ describe("TextareaField", () => {
 
   describe("error state", () => {
     it("shows error message", () => {
-      render(<TextareaField {...defaultProps} error="Description is required" />);
+      render(
+        <TextareaField {...defaultProps} error="Description is required" />,
+      );
       expect(screen.getByText("Description is required")).toBeInTheDocument();
     });
 
@@ -334,7 +358,9 @@ describe("TextareaField", () => {
 
   describe("textarea props", () => {
     it("passes placeholder", () => {
-      render(<TextareaField {...defaultProps} placeholder="Enter description" />);
+      render(
+        <TextareaField {...defaultProps} placeholder="Enter description" />,
+      );
       const textarea = screen.getByRole("textbox");
       expect(textarea).toHaveAttribute("placeholder", "Enter description");
     });
@@ -350,7 +376,13 @@ describe("TextareaField", () => {
     it("has base input styling", () => {
       render(<TextareaField {...defaultProps} />);
       const textarea = screen.getByRole("textbox");
-      expect(textarea).toHaveClass("w-full", "px-3", "py-2", "border", "border-theme-border");
+      expect(textarea).toHaveClass(
+        "w-full",
+        "px-3",
+        "py-2",
+        "border",
+        "border-theme-border",
+      );
     });
   });
 });
@@ -390,15 +422,25 @@ describe("SelectField", () => {
 
     it("renders all options", () => {
       render(<SelectField {...defaultProps} />);
-      expect(screen.getByRole("option", { name: "United States" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "United Kingdom" })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: "Canada" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: "United States" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: "United Kingdom" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: "Canada" }),
+      ).toBeInTheDocument();
     });
 
     it("options have correct values", () => {
       render(<SelectField {...defaultProps} />);
-      expect(screen.getByRole("option", { name: "United States" })).toHaveValue("us");
-      expect(screen.getByRole("option", { name: "United Kingdom" })).toHaveValue("uk");
+      expect(screen.getByRole("option", { name: "United States" })).toHaveValue(
+        "us",
+      );
+      expect(
+        screen.getByRole("option", { name: "United Kingdom" }),
+      ).toHaveValue("uk");
       expect(screen.getByRole("option", { name: "Canada" })).toHaveValue("ca");
     });
   });
@@ -406,12 +448,16 @@ describe("SelectField", () => {
   describe("placeholder", () => {
     it("renders placeholder option when provided", () => {
       render(<SelectField {...defaultProps} placeholder="Select a country" />);
-      expect(screen.getByRole("option", { name: "Select a country" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: "Select a country" }),
+      ).toBeInTheDocument();
     });
 
     it("placeholder option has empty value", () => {
       render(<SelectField {...defaultProps} placeholder="Select a country" />);
-      const placeholder = screen.getByRole("option", { name: "Select a country" });
+      const placeholder = screen.getByRole("option", {
+        name: "Select a country",
+      });
       expect(placeholder).toHaveValue("");
     });
 
@@ -471,7 +517,13 @@ describe("SelectField", () => {
     it("has base input styling", () => {
       render(<SelectField {...defaultProps} />);
       const select = screen.getByRole("combobox");
-      expect(select).toHaveClass("w-full", "px-3", "py-2", "border", "border-theme-border");
+      expect(select).toHaveClass(
+        "w-full",
+        "px-3",
+        "py-2",
+        "border",
+        "border-theme-border",
+      );
     });
   });
 });

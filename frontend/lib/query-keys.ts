@@ -32,7 +32,12 @@ export const queryKeys = {
     events: (start: Date, end: Date) =>
       ["calendar", "events", start.toISOString(), end.toISOString()] as const,
     eventsWithMetadata: (start: Date, end: Date) =>
-      ["calendar", "eventsWithMetadata", start.toISOString(), end.toISOString()] as const,
+      [
+        "calendar",
+        "eventsWithMetadata",
+        start.toISOString(),
+        end.toISOString(),
+      ] as const,
   },
 
   timeOff: {
@@ -47,8 +52,10 @@ export const queryKeys = {
     users: () => ["jira", "users"] as const,
     projects: () => ["jira", "projects"] as const,
     myTasks: (max = 50) => ["jira", "tasks", "my", max] as const,
-    userTasks: (userId: number, max = 50) => ["jira", "tasks", "user", userId, max] as const,
-    teamTasks: (maxPerUser = 20) => ["jira", "tasks", "team", maxPerUser] as const,
+    userTasks: (userId: number, max = 50) =>
+      ["jira", "tasks", "user", userId, max] as const,
+    teamTasks: (maxPerUser = 20) =>
+      ["jira", "tasks", "team", maxPerUser] as const,
     projectTasks: (projectKey: string, max = 50) =>
       ["jira", "projects", projectKey, "tasks", max] as const,
     epics: (max = 100) => ["jira", "epics", max] as const,
@@ -56,7 +63,10 @@ export const queryKeys = {
 
   orgChart: {
     tree: () => ["orgChart", "tree"] as const,
-    drafts: { ...entity("orgChart/drafts"), all: () => ["orgChart", "drafts"] as const },
+    drafts: {
+      ...entity("orgChart/drafts"),
+      all: () => ["orgChart", "drafts"] as const,
+    },
   },
 } as const;
 

@@ -24,7 +24,7 @@ export interface UseCurrentUserQueryResult {
 }
 
 export const useCurrentUserQuery = (
-  options: UseCurrentUserQueryOptions = {}
+  options: UseCurrentUserQueryOptions = {},
 ): UseCurrentUserQueryResult => {
   const { staleTime = STALE_TIMES.STANDARD } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
@@ -53,7 +53,9 @@ export const useCurrentUserQuery = (
   }, [queryRefetch]);
 
   const invalidate = useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.users.current() });
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.users.current(),
+    });
   }, [queryClient]);
 
   return {

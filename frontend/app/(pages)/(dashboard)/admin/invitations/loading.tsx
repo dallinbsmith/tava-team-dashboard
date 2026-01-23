@@ -20,7 +20,10 @@ export default function InvitationsLoading() {
 
         <div className="divide-y divide-theme-border">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="px-6 py-4 flex items-center justify-between">
+            <div
+              key={i}
+              className="px-6 py-4 flex items-center justify-between"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-theme-elevated rounded flex items-center justify-center">
                   <div className="w-5 h-5 bg-theme-muted rounded" />

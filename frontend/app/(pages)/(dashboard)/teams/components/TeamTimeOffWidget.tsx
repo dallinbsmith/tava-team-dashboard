@@ -6,7 +6,10 @@ import { format } from "date-fns";
 import { Palmtree, RefreshCw, Calendar, User as UserIcon } from "lucide-react";
 import { ErrorAlert } from "@/components";
 import { User } from "@/shared/types/user";
-import { TimeOffRequest, TIME_OFF_TYPE_LABELS } from "@/app/(pages)/(dashboard)/time-off/types";
+import {
+  TimeOffRequest,
+  TIME_OFF_TYPE_LABELS,
+} from "@/app/(pages)/(dashboard)/time-off/types";
 import { SelectionType } from "../types";
 import { useTeamTimeOff } from "../hooks";
 import Avatar from "@/shared/common/Avatar";
@@ -22,11 +25,12 @@ export default function TeamTimeOffWidget({
   selectedId,
   allUsers,
 }: TeamTimeOffWidgetProps) {
-  const { currentlyOnLeave, upcoming, isLoading, error, refetch } = useTeamTimeOff({
-    type: selectionType,
-    id: selectedId,
-    allUsers,
-  });
+  const { currentlyOnLeave, upcoming, isLoading, error, refetch } =
+    useTeamTimeOff({
+      type: selectionType,
+      id: selectedId,
+      allUsers,
+    });
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -71,7 +75,9 @@ export default function TeamTimeOffWidget({
           className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated transition-colors disabled:opacity-50"
           title="Refresh"
         >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+          />
         </button>
       </div>
 
@@ -168,7 +174,9 @@ const TimeOffItem = ({ request }: TimeOffItemProps) => {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-theme-text truncate">
-            {request.user ? `${request.user.first_name} ${request.user.last_name}` : "Unknown User"}
+            {request.user
+              ? `${request.user.first_name} ${request.user.last_name}`
+              : "Unknown User"}
           </span>
           <span className="px-1.5 py-0.5 text-xs font-medium bg-amber-900/40 text-amber-300">
             {TIME_OFF_TYPE_LABELS[request.request_type]}

@@ -3,25 +3,31 @@
  * Async operation state management hook
  */
 
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { useAsyncOperation, useAsyncLoading } from "../useAsyncOperation";
 
 describe("useAsyncOperation", () => {
   describe("initial state", () => {
     it("starts with loading false", () => {
-      const { result } = renderHook(() => useAsyncOperation(async () => "result"));
+      const { result } = renderHook(() =>
+        useAsyncOperation(async () => "result"),
+      );
 
       expect(result.current.loading).toBe(false);
     });
 
     it("starts with no error", () => {
-      const { result } = renderHook(() => useAsyncOperation(async () => "result"));
+      const { result } = renderHook(() =>
+        useAsyncOperation(async () => "result"),
+      );
 
       expect(result.current.error).toBeNull();
     });
 
     it("starts with no success message", () => {
-      const { result } = renderHook(() => useAsyncOperation(async () => "result"));
+      const { result } = renderHook(() =>
+        useAsyncOperation(async () => "result"),
+      );
 
       expect(result.current.success).toBeNull();
     });
@@ -51,7 +57,9 @@ describe("useAsyncOperation", () => {
     });
 
     it("returns the result from the operation", async () => {
-      const { result } = renderHook(() => useAsyncOperation(async () => ({ data: "test" })));
+      const { result } = renderHook(() =>
+        useAsyncOperation(async () => ({ data: "test" })),
+      );
 
       let returnValue: { data: string } | undefined;
 
@@ -66,7 +74,7 @@ describe("useAsyncOperation", () => {
       const { result } = renderHook(() =>
         useAsyncOperation(async () => "result", {
           successMessage: "Operation completed!",
-        })
+        }),
       );
 
       await act(async () => {
@@ -80,7 +88,7 @@ describe("useAsyncOperation", () => {
       const { result } = renderHook(() =>
         useAsyncOperation(async () => ({ count: 5 }), {
           successMessage: (result) => `Processed ${result.count} items`,
-        })
+        }),
       );
 
       await act(async () => {
@@ -94,7 +102,7 @@ describe("useAsyncOperation", () => {
       const onSuccess = jest.fn();
 
       const { result } = renderHook(() =>
-        useAsyncOperation(async () => "test-result", { onSuccess })
+        useAsyncOperation(async () => "test-result", { onSuccess }),
       );
 
       await act(async () => {
@@ -122,7 +130,7 @@ describe("useAsyncOperation", () => {
       const { result } = renderHook(() =>
         useAsyncOperation(async () => {
           throw new Error("Something went wrong");
-        })
+        }),
       );
 
       await act(async () => {
@@ -137,7 +145,7 @@ describe("useAsyncOperation", () => {
       const { result } = renderHook(() =>
         useAsyncOperation(async () => {
           throw new Error("Failed");
-        })
+        }),
       );
 
       let returnValue: unknown;
@@ -157,8 +165,8 @@ describe("useAsyncOperation", () => {
           async () => {
             throw new Error("Network error");
           },
-          { onError }
-        )
+          { onError },
+        ),
       );
 
       await act(async () => {
@@ -173,7 +181,7 @@ describe("useAsyncOperation", () => {
         useAsyncOperation(async (shouldFail: boolean) => {
           if (shouldFail) throw new Error("Failed");
           return "success";
-        })
+        }),
       );
 
       // First execution fails
@@ -190,8 +198,8 @@ describe("useAsyncOperation", () => {
           () =>
             new Promise<string>((resolve) => {
               resolvePromise = () => resolve("done");
-            })
-        )
+            }),
+        ),
       );
 
       act(() => {
@@ -215,8 +223,8 @@ describe("useAsyncOperation", () => {
             if (shouldFail) throw new Error("First error");
             return "success";
           },
-          { resetErrorOnStart: false }
-        )
+          { resetErrorOnStart: false },
+        ),
       );
 
       // First execution fails
@@ -244,7 +252,7 @@ describe("useAsyncOperation", () => {
       const { result } = renderHook(() =>
         useAsyncOperation(async () => {
           throw new Error("Error!");
-        })
+        }),
       );
 
       await act(async () => {
@@ -266,7 +274,7 @@ describe("useAsyncOperation", () => {
       const { result } = renderHook(() =>
         useAsyncOperation(async () => "done", {
           successMessage: "Success!",
-        })
+        }),
       );
 
       await act(async () => {
@@ -288,7 +296,7 @@ describe("useAsyncOperation", () => {
       const { result } = renderHook(() =>
         useAsyncOperation(async () => "done", {
           successMessage: "Success!",
-        })
+        }),
       );
 
       await act(async () => {
@@ -318,8 +326,8 @@ describe("useAsyncOperation", () => {
           },
           {
             successMessage: (r) => `Got: ${r}`,
-          }
-        )
+          },
+        ),
       );
 
       // First execution
@@ -337,8 +345,8 @@ describe("useAsyncOperation", () => {
             new Promise<string>((resolve) => {
               resolvePromise = () => resolve("new");
             }),
-          { successMessage: "Done" }
-        )
+          { successMessage: "Done" },
+        ),
       );
 
       act(() => {
@@ -358,7 +366,9 @@ describe("useAsyncOperation", () => {
 describe("useAsyncLoading", () => {
   describe("initial state", () => {
     it("starts with loading false", () => {
-      const { result } = renderHook(() => useAsyncLoading(async () => "result"));
+      const { result } = renderHook(() =>
+        useAsyncLoading(async () => "result"),
+      );
 
       expect(result.current.loading).toBe(false);
     });
@@ -388,7 +398,9 @@ describe("useAsyncLoading", () => {
     });
 
     it("returns the result on success", async () => {
-      const { result } = renderHook(() => useAsyncLoading(async () => ({ value: 42 })));
+      const { result } = renderHook(() =>
+        useAsyncLoading(async () => ({ value: 42 })),
+      );
 
       let returnValue: { value: number } | undefined;
 
@@ -406,7 +418,7 @@ describe("useAsyncLoading", () => {
       const { result } = renderHook(() =>
         useAsyncLoading(async () => {
           throw new Error("Failed");
-        })
+        }),
       );
 
       let returnValue: unknown;
@@ -439,14 +451,17 @@ describe("useAsyncLoading", () => {
       const { result } = renderHook(() =>
         useAsyncLoading(async () => {
           throw new Error("Test error");
-        })
+        }),
       );
 
       await act(async () => {
         await result.current.execute();
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith("Async operation failed:", expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Async operation failed:",
+        expect.any(Error),
+      );
 
       consoleSpy.mockRestore();
     });
@@ -454,7 +469,9 @@ describe("useAsyncLoading", () => {
 
   describe("simplicity", () => {
     it("only provides execute and loading (no error/success states)", () => {
-      const { result } = renderHook(() => useAsyncLoading(async () => "result"));
+      const { result } = renderHook(() =>
+        useAsyncLoading(async () => "result"),
+      );
 
       expect(Object.keys(result.current)).toEqual(["execute", "loading"]);
     });

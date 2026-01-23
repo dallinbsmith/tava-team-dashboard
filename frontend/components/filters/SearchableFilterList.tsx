@@ -24,8 +24,11 @@ export default function SearchableFilterList({
   const debouncedSearch = useDebouncedValue(search, 300);
 
   const filteredItems = useMemo(
-    () => items.filter((item) => item.toLowerCase().includes(debouncedSearch.toLowerCase())),
-    [items, debouncedSearch]
+    () =>
+      items.filter((item) =>
+        item.toLowerCase().includes(debouncedSearch.toLowerCase()),
+      ),
+    [items, debouncedSearch],
   );
 
   const handleToggle = (item: string, checked: boolean) => {
@@ -58,7 +61,9 @@ export default function SearchableFilterList({
           />
         ))}
         {filteredItems.length === 0 && (
-          <p className="text-xs text-theme-text-muted py-2 text-center">No results found</p>
+          <p className="text-xs text-theme-text-muted py-2 text-center">
+            No results found
+          </p>
         )}
       </div>
     </div>

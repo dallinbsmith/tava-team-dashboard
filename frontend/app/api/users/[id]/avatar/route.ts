@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-export const POST = async (request: Request, { params }: { params: Promise<{ id: string }> }) => {
+export const POST = async (
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) => {
   const { id } = await params;
 
   try {
@@ -16,20 +19,23 @@ export const POST = async (request: Request, { params }: { params: Promise<{ id:
 
     const body = await request.json();
 
-    const response = await fetch(`${API_BASE_URL}/api/users/${id}/avatar/base64`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${API_BASE_URL}/api/users/${id}/avatar/base64`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
       },
-      body: JSON.stringify(body),
-    });
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
       return NextResponse.json(
         { error: errorText || "Failed to upload avatar" },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
@@ -37,6 +43,9 @@ export const POST = async (request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json(data);
   } catch (error) {
     console.error("Avatar upload error:", error);
-    return NextResponse.json({ error: "Failed to upload avatar" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to upload avatar" },
+      { status: 500 },
+    );
   }
 };

@@ -1,8 +1,21 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Calendar as BigCalendar, dateFnsLocalizer, View } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
+import {
+  Calendar as BigCalendar,
+  dateFnsLocalizer,
+  View,
+} from "react-big-calendar";
+import {
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  startOfMonth,
+  endOfMonth,
+  addMonths,
+  subMonths,
+} from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./calendar-styles.css";
@@ -23,7 +36,8 @@ const EVENT_TYPE_COLORS = CALENDAR_COLORS.EVENT_TYPES;
 const PENDING_TIME_OFF_COLOR = CALENDAR_COLORS.PENDING_TIME_OFF;
 
 const timeOffToCalendarEvent = (timeOff: TimeOffRequest): CalendarEvent => {
-  const typeLabel = TIME_OFF_TYPE_LABELS[timeOff.request_type] || timeOff.request_type;
+  const typeLabel =
+    TIME_OFF_TYPE_LABELS[timeOff.request_type] || timeOff.request_type;
 
   return {
     id: `team-time-off-${timeOff.id}`,
@@ -108,7 +122,7 @@ export default function Calendar({
   const [showTeamTimeOff, setShowTeamTimeOff] = useState(false);
   const [showPendingTimeOff, setShowPendingTimeOff] = useState(false);
   const [visibleTypes, setVisibleTypes] = useState<Set<CalendarEventType>>(
-    new Set(["epic", "jira", "task", "meeting", "time_off"])
+    new Set(["epic", "jira", "task", "meeting", "time_off"]),
   );
   const addMenuRef = useRef<HTMLDivElement>(null);
 
@@ -127,7 +141,10 @@ export default function Calendar({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (addMenuRef.current && !addMenuRef.current.contains(event.target as Node)) {
+      if (
+        addMenuRef.current &&
+        !addMenuRef.current.contains(event.target as Node)
+      ) {
         setAddMenuOpen(false);
       }
     };
@@ -191,13 +208,17 @@ export default function Calendar({
         const existingTimeOffIds = new Set(
           (calendarEvents || [])
             .filter((e) => e.type === "time_off" && e.time_off_request)
-            .map((e) => e.time_off_request!.id)
+            .map((e) => e.time_off_request!.id),
         );
         const uniqueTeamTimeOffEvents = teamTimeOffEvents.filter(
-          (e) => !existingTimeOffIds.has(e.time_off_request!.id)
+          (e) => !existingTimeOffIds.has(e.time_off_request!.id),
         );
 
-        const allEvents = [...(calendarEvents || []), ...epicEvents, ...uniqueTeamTimeOffEvents];
+        const allEvents = [
+          ...(calendarEvents || []),
+          ...epicEvents,
+          ...uniqueTeamTimeOffEvents,
+        ];
 
         const mapped = allEvents.map((event) => {
           let title = event.title;
@@ -228,7 +249,7 @@ export default function Calendar({
         setRefreshing(false);
       }
     },
-    [date, showTeamTimeOff, showPendingTimeOff]
+    [date, showTeamTimeOff, showPendingTimeOff],
   );
 
   useEffect(() => {
@@ -255,7 +276,11 @@ export default function Calendar({
         onViewMeeting(resource.meeting.id);
         return;
       }
-      if (resource.type === "time_off" && resource.time_off_request && onViewTimeOff) {
+      if (
+        resource.type === "time_off" &&
+        resource.time_off_request &&
+        onViewTimeOff
+      ) {
         onViewTimeOff(resource.time_off_request.id);
         return;
       }
@@ -269,7 +294,7 @@ export default function Calendar({
         onEventClick(resource);
       }
     },
-    [onEventClick, onViewTask, onViewMeeting, onViewTimeOff]
+    [onEventClick, onViewTask, onViewMeeting, onViewTimeOff],
   );
 
   const handleSelectSlot = useCallback(() => {
@@ -282,7 +307,8 @@ export default function Calendar({
     (event: CalendarComponentEvent) => {
       const type = event.resource.type as CalendarEventType;
       const isPendingTimeOff =
-        type === "time_off" && event.resource.time_off_request?.status === "pending";
+        type === "time_off" &&
+        event.resource.time_off_request?.status === "pending";
 
       const backgroundColor = isPendingTimeOff
         ? PENDING_TIME_OFF_COLOR
@@ -291,7 +317,8 @@ export default function Calendar({
       const hoverColors = CALENDAR_COLORS.EVENT_TYPE_HOVER;
       const borderColor = isPendingTimeOff
         ? EVENT_TYPE_COLORS.time_off
-        : hoverColors[type as keyof typeof hoverColors] || CALENDAR_COLORS.DEFAULT;
+        : hoverColors[type as keyof typeof hoverColors] ||
+          CALENDAR_COLORS.DEFAULT;
 
       return {
         style: {
@@ -310,7 +337,7 @@ export default function Calendar({
         },
       };
     },
-    [compact]
+    [compact],
   );
 
   const CustomToolbar = useCallback(
@@ -353,18 +380,20 @@ export default function Calendar({
       onRequestTimeOff,
       onCreateTimeOffForEmployee,
       handleAction,
-    ]
+    ],
   );
 
   const components = useMemo(
     () => ({
       toolbar: CustomToolbar,
     }),
-    [CustomToolbar]
+    [CustomToolbar],
   );
 
   const filteredEvents = useMemo(() => {
-    return events.filter((event) => visibleTypes.has(event.resource.type as CalendarEventType));
+    return events.filter((event) =>
+      visibleTypes.has(event.resource.type as CalendarEventType),
+    );
   }, [events, visibleTypes]);
 
   if (loading) {

@@ -105,7 +105,9 @@ describe("CreateMeetingModal", () => {
 
     it("renders attendees section with count", () => {
       render(<CreateMeetingModal {...defaultProps} />);
-      expect(screen.getByText(/Attendees \* \(0 selected\)/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Attendees \* \(0 selected\)/),
+      ).toBeInTheDocument();
     });
 
     it("renders user list for attendee selection", () => {
@@ -118,7 +120,9 @@ describe("CreateMeetingModal", () => {
       render(<CreateMeetingModal {...defaultProps} />);
 
       expect(screen.getByText("Cancel")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Create Meeting" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Create Meeting" }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -149,7 +153,9 @@ describe("CreateMeetingModal", () => {
       fireEvent.click(johnLabel!);
 
       // Count should update
-      expect(screen.getByText(/Attendees \* \(1 selected\)/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Attendees \* \(1 selected\)/),
+      ).toBeInTheDocument();
     });
   });
 
@@ -184,7 +190,9 @@ describe("CreateMeetingModal", () => {
     it("shows recurrence options when recurring is checked", () => {
       render(<CreateMeetingModal {...defaultProps} />);
 
-      const recurringCheckbox = screen.getByText("Recurring meeting").closest("label");
+      const recurringCheckbox = screen
+        .getByText("Recurring meeting")
+        .closest("label");
       fireEvent.click(recurringCheckbox!);
 
       expect(screen.getByText("Repeat every")).toBeInTheDocument();

@@ -26,17 +26,30 @@ const sizeStyles: Record<SpinnerSize, string> = {
  * <LoadingSpinner size="md" />
  * ```
  */
-export const LoadingSpinner = ({ size = "md", className = "" }: LoadingSpinnerProps) => {
-  return <Loader2 className={`animate-spin text-primary-600 ${sizeStyles[size]} ${className}`} />;
+export const LoadingSpinner = ({
+  size = "md",
+  className = "",
+}: LoadingSpinnerProps) => {
+  return (
+    <Loader2
+      className={`animate-spin text-primary-600 ${sizeStyles[size]} ${className}`}
+    />
+  );
 };
 
 export interface CenteredSpinnerProps extends LoadingSpinnerProps {
   text?: string;
 }
 
-export const CenteredSpinner = ({ size = "lg", text, className = "" }: CenteredSpinnerProps) => {
+export const CenteredSpinner = ({
+  size = "lg",
+  text,
+  className = "",
+}: CenteredSpinnerProps) => {
   return (
-    <div className={`flex flex-col items-center justify-center py-12 ${className}`}>
+    <div
+      className={`flex flex-col items-center justify-center py-12 ${className}`}
+    >
       <LoadingSpinner size={size} />
       {text && <p className="mt-3 text-sm text-theme-text-muted">{text}</p>}
     </div>
@@ -47,7 +60,10 @@ export interface FullPageSpinnerProps extends LoadingSpinnerProps {
   text?: string;
 }
 
-export const FullPageSpinner = ({ size = "xl", text }: FullPageSpinnerProps) => {
+export const FullPageSpinner = ({
+  size = "xl",
+  text,
+}: FullPageSpinnerProps) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
       <LoadingSpinner size={size} />
@@ -83,7 +99,9 @@ export const Skeleton = ({
 
 export const SkeletonCard = ({ className = "" }: { className?: string }) => {
   return (
-    <div className={`bg-theme-surface border border-theme-border p-4 rounded-lg ${className}`}>
+    <div
+      className={`bg-theme-surface border border-theme-border p-4 rounded-lg ${className}`}
+    >
       <div className="flex items-start gap-3">
         <Skeleton circle width="w-10" height="h-10" />
         <div className="flex-1 space-y-2">

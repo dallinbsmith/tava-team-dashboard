@@ -347,7 +347,10 @@ export default function EditEmployeeModal({
               <button
                 type="button"
                 onClick={() => setSquadDropdownOpen(!squadDropdownOpen)}
-                className={cn(selectTriggerStyles, "hover:border-theme-text-muted")}
+                className={cn(
+                  selectTriggerStyles,
+                  "hover:border-theme-text-muted",
+                )}
               >
                 <span className="text-theme-text-muted">
                   {formData.squadIds.length === 0
@@ -357,7 +360,7 @@ export default function EditEmployeeModal({
                 <ChevronDown
                   className={cn(
                     "w-4 h-4 ml-2 shrink-0 text-theme-text-muted transition-transform",
-                    squadDropdownOpen && "rotate-180"
+                    squadDropdownOpen && "rotate-180",
                   )}
                 />
               </button>
@@ -382,7 +385,7 @@ export default function EditEmployeeModal({
                             "w-4 h-4 border flex items-center justify-center",
                             formData.squadIds.includes(squad.id)
                               ? "bg-primary-500 border-primary-500"
-                              : "border-theme-border"
+                              : "border-theme-border",
                           )}
                         >
                           {formData.squadIds.includes(squad.id) && (
@@ -446,7 +449,12 @@ export default function EditEmployeeModal({
             )}
 
             <div className="flex justify-end gap-3 pt-4 border-t border-theme-border">
-              <Button type="button" variant="ghost" onClick={onClose} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onClose}
+                disabled={isLoading}
+              >
                 Cancel
               </Button>
               <Button type="submit" variant="primary" loading={isLoading}>

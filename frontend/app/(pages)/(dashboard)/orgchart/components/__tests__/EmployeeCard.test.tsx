@@ -40,7 +40,11 @@ jest.mock("@/shared/common/Avatar", () => {
     className?: string;
   }) {
     return (
-      <div data-testid="avatar" data-firstname={firstName} data-lastname={lastName}>
+      <div
+        data-testid="avatar"
+        data-firstname={firstName}
+        data-lastname={lastName}
+      >
         Avatar
       </div>
     );
@@ -115,7 +119,9 @@ describe("EmployeeCard", () => {
 
   describe("date formatting", () => {
     it("formats start date correctly", () => {
-      const employee = createMockEmployee({ date_started: "2023-06-15T00:00:00Z" });
+      const employee = createMockEmployee({
+        date_started: "2023-06-15T00:00:00Z",
+      });
       render(<EmployeeCard employee={employee} />);
 
       // Date format is "Started {date}" where date varies by locale
@@ -198,7 +204,9 @@ describe("EmployeeCard", () => {
       const { container } = render(<EmployeeCard employee={employee} />);
 
       // Should not have the department row
-      const departmentIcon = container.querySelector('[data-testid="department-icon"]');
+      const departmentIcon = container.querySelector(
+        '[data-testid="department-icon"]',
+      );
       expect(departmentIcon).not.toBeInTheDocument();
     });
   });
@@ -209,7 +217,11 @@ describe("EmployeeCard", () => {
       render(<EmployeeCard employee={employee} />);
 
       const link = screen.getByRole("link");
-      expect(link).toHaveClass("bg-theme-surface", "border", "border-theme-border");
+      expect(link).toHaveClass(
+        "bg-theme-surface",
+        "border",
+        "border-theme-border",
+      );
     });
 
     it("has hover styling classes", () => {
@@ -217,7 +229,10 @@ describe("EmployeeCard", () => {
       render(<EmployeeCard employee={employee} />);
 
       const link = screen.getByRole("link");
-      expect(link).toHaveClass("hover:border-primary-500/50", "hover:shadow-lg");
+      expect(link).toHaveClass(
+        "hover:border-primary-500/50",
+        "hover:shadow-lg",
+      );
     });
 
     it("has transition classes", () => {
@@ -293,7 +308,9 @@ describe("EmployeeCard", () => {
       const employee = createMockEmployee();
       const { container } = render(<EmployeeCard employee={employee} />);
 
-      const chevronIcons = container.querySelectorAll("svg.lucide-chevron-right");
+      const chevronIcons = container.querySelectorAll(
+        "svg.lucide-chevron-right",
+      );
       expect(chevronIcons.length).toBe(1);
     });
   });

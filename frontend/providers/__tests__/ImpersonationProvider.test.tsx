@@ -5,7 +5,10 @@
 
 import React from "react";
 import { render, screen, act } from "@testing-library/react";
-import { ImpersonationProvider, useImpersonation } from "../ImpersonationProvider";
+import {
+  ImpersonationProvider,
+  useImpersonation,
+} from "../ImpersonationProvider";
 import { User } from "@/shared/types/user";
 
 // Mock sessionStorage
@@ -56,21 +59,32 @@ function TestConsumer({
   onRender?.(context);
   return (
     <div>
-      <span data-testid="is-impersonating">{String(context.isImpersonating)}</span>
-      <span data-testid="impersonated-user-id">{context.impersonatedUserId ?? "null"}</span>
+      <span data-testid="is-impersonating">
+        {String(context.isImpersonating)}
+      </span>
+      <span data-testid="impersonated-user-id">
+        {context.impersonatedUserId ?? "null"}
+      </span>
       <span data-testid="impersonated-user-name">
         {context.impersonatedUser
           ? `${context.impersonatedUser.first_name} ${context.impersonatedUser.last_name}`
           : "null"}
       </span>
-      <button onClick={() => context.startImpersonation(createMockUser())} data-testid="start-btn">
+      <button
+        onClick={() => context.startImpersonation(createMockUser())}
+        data-testid="start-btn"
+      >
         Start
       </button>
       <button onClick={() => context.endImpersonation()} data-testid="end-btn">
         End
       </button>
       <button
-        onClick={() => context.setImpersonatedUser(createMockUser({ id: 99, first_name: "Jane" }))}
+        onClick={() =>
+          context.setImpersonatedUser(
+            createMockUser({ id: 99, first_name: "Jane" }),
+          )
+        }
         data-testid="set-user-btn"
       >
         Set User
@@ -90,7 +104,7 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <div data-testid="child">Child content</div>
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       expect(screen.getByTestId("child")).toBeInTheDocument();
@@ -102,7 +116,7 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       expect(screen.getByTestId("is-impersonating")).toHaveTextContent("false");
@@ -112,20 +126,24 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
-      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent("null");
+      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent(
+        "null",
+      );
     });
 
     it("starts with impersonatedUser null", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
-      expect(screen.getByTestId("impersonated-user-name")).toHaveTextContent("null");
+      expect(screen.getByTestId("impersonated-user-name")).toHaveTextContent(
+        "null",
+      );
     });
   });
 
@@ -134,7 +152,7 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       act(() => {
@@ -148,42 +166,49 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       act(() => {
         screen.getByTestId("start-btn").click();
       });
 
-      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent("42");
+      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent(
+        "42",
+      );
     });
 
     it("sets impersonatedUser", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       act(() => {
         screen.getByTestId("start-btn").click();
       });
 
-      expect(screen.getByTestId("impersonated-user-name")).toHaveTextContent("Test User");
+      expect(screen.getByTestId("impersonated-user-name")).toHaveTextContent(
+        "Test User",
+      );
     });
 
     it("saves to sessionStorage", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       act(() => {
         screen.getByTestId("start-btn").click();
       });
 
-      expect(mockSessionStorage.setItem).toHaveBeenCalledWith("impersonation_user_id", "42");
+      expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
+        "impersonation_user_id",
+        "42",
+      );
     });
   });
 
@@ -192,7 +217,7 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       act(() => {
@@ -210,7 +235,7 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       act(() => {
@@ -221,14 +246,16 @@ describe("ImpersonationProvider", () => {
         screen.getByTestId("end-btn").click();
       });
 
-      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent("null");
+      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent(
+        "null",
+      );
     });
 
     it("clears impersonatedUser", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       act(() => {
@@ -239,14 +266,16 @@ describe("ImpersonationProvider", () => {
         screen.getByTestId("end-btn").click();
       });
 
-      expect(screen.getByTestId("impersonated-user-name")).toHaveTextContent("null");
+      expect(screen.getByTestId("impersonated-user-name")).toHaveTextContent(
+        "null",
+      );
     });
 
     it("removes from sessionStorage", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       act(() => {
@@ -257,7 +286,9 @@ describe("ImpersonationProvider", () => {
         screen.getByTestId("end-btn").click();
       });
 
-      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith("impersonation_user_id");
+      expect(mockSessionStorage.removeItem).toHaveBeenCalledWith(
+        "impersonation_user_id",
+      );
     });
   });
 
@@ -266,14 +297,16 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       act(() => {
         screen.getByTestId("set-user-btn").click();
       });
 
-      expect(screen.getByTestId("impersonated-user-name")).toHaveTextContent("Jane User");
+      expect(screen.getByTestId("impersonated-user-name")).toHaveTextContent(
+        "Jane User",
+      );
     });
   });
 
@@ -284,11 +317,15 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
-      expect(mockSessionStorage.getItem).toHaveBeenCalledWith("impersonation_user_id");
-      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent("123");
+      expect(mockSessionStorage.getItem).toHaveBeenCalledWith(
+        "impersonation_user_id",
+      );
+      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent(
+        "123",
+      );
     });
 
     it("sets isImpersonating true when restored from sessionStorage", () => {
@@ -297,7 +334,7 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       expect(screen.getByTestId("is-impersonating")).toHaveTextContent("true");
@@ -309,11 +346,13 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
       // isNaN check should prevent setting invalid value
-      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent("null");
+      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent(
+        "null",
+      );
     });
 
     it("handles null sessionStorage value", () => {
@@ -322,10 +361,12 @@ describe("ImpersonationProvider", () => {
       render(
         <ImpersonationProvider>
           <TestConsumer />
-        </ImpersonationProvider>
+        </ImpersonationProvider>,
       );
 
-      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent("null");
+      expect(screen.getByTestId("impersonated-user-id")).toHaveTextContent(
+        "null",
+      );
     });
   });
 });
@@ -358,7 +399,9 @@ describe("useImpersonation outside provider", () => {
     render(<TestComponent />);
 
     // Should not throw
-    expect(() => capturedContext?.startImpersonation(createMockUser())).not.toThrow();
+    expect(() =>
+      capturedContext?.startImpersonation(createMockUser()),
+    ).not.toThrow();
   });
 
   it("default endImpersonation is a no-op", () => {
@@ -386,6 +429,8 @@ describe("useImpersonation outside provider", () => {
     render(<TestComponent />);
 
     // Should not throw
-    expect(() => capturedContext?.setImpersonatedUser(createMockUser())).not.toThrow();
+    expect(() =>
+      capturedContext?.setImpersonatedUser(createMockUser()),
+    ).not.toThrow();
   });
 });

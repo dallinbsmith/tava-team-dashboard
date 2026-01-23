@@ -63,7 +63,7 @@ describe("EventTypeFilterButton", () => {
   describe("styling", () => {
     it("applies active styles when isActive is true", () => {
       const { container } = render(
-        <EventTypeFilterButton {...defaultProps} isActive={true} />
+        <EventTypeFilterButton {...defaultProps} isActive={true} />,
       );
 
       const button = container.querySelector("button");
@@ -87,7 +87,7 @@ describe("EventTypeFilterButton", () => {
 
     it("shows muted color indicator when inactive", () => {
       const { container } = render(
-        <EventTypeFilterButton {...defaultProps} isActive={false} />
+        <EventTypeFilterButton {...defaultProps} isActive={false} />,
       );
 
       const colorIndicator = container.querySelector("span.w-3.h-3");
@@ -98,7 +98,7 @@ describe("EventTypeFilterButton", () => {
   describe("dashed variant", () => {
     it("applies dashed border when dashed prop is true", () => {
       const { container } = render(
-        <EventTypeFilterButton {...defaultProps} dashed={true} />
+        <EventTypeFilterButton {...defaultProps} dashed={true} />,
       );
 
       const colorIndicator = container.querySelector("span.w-3.h-3");
@@ -120,7 +120,7 @@ describe("EventTypeFilterButton", () => {
           {...defaultProps}
           label="Meetings"
           color="#a855f7"
-        />
+        />,
       );
 
       expect(screen.getByText("Meetings")).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe("EventTypeFilterButton", () => {
           {...defaultProps}
           label="Jira"
           color="#3b82f6"
-        />
+        />,
       );
 
       expect(screen.getByText("Jira")).toBeInTheDocument();
@@ -146,7 +146,7 @@ describe("EventTypeFilterButton", () => {
           label="Time Off"
           color="#f59e0b"
           dashed={true}
-        />
+        />,
       );
 
       expect(screen.getByText("Time Off")).toBeInTheDocument();

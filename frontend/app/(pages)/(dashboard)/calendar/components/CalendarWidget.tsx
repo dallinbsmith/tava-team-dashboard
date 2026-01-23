@@ -21,8 +21,20 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-import { format, startOfDay, endOfDay, addDays, isToday, isTomorrow } from "date-fns";
-import { dropdownItemButton, widgetContainer, widgetFooter, cardBase } from "@/lib/styles";
+import {
+  format,
+  startOfDay,
+  endOfDay,
+  addDays,
+  isToday,
+  isTomorrow,
+} from "date-fns";
+import {
+  dropdownItemButton,
+  widgetContainer,
+  widgetFooter,
+  cardBase,
+} from "@/lib/styles";
 import { cn } from "@/lib/utils";
 
 interface CalendarWidgetProps {
@@ -54,13 +66,18 @@ export default function CalendarWidget({
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [respondingMeetingId, setRespondingMeetingId] = useState<number | null>(null);
+  const [respondingMeetingId, setRespondingMeetingId] = useState<number | null>(
+    null,
+  );
   const addMenuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (addMenuRef.current && !addMenuRef.current.contains(event.target as Node)) {
+      if (
+        addMenuRef.current &&
+        !addMenuRef.current.contains(event.target as Node)
+      ) {
         setAddMenuOpen(false);
       }
     };
@@ -97,7 +114,7 @@ export default function CalendarWidget({
 
         // Sort by start date
         const sorted = (calendarEvents || []).sort(
-          (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+          (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime(),
         );
 
         setEvents(sorted.slice(0, 5));
@@ -112,7 +129,7 @@ export default function CalendarWidget({
         setRefreshing(false);
       }
     },
-    [onRefresh]
+    [onRefresh],
   );
 
   useEffect(() => {
@@ -133,7 +150,7 @@ export default function CalendarWidget({
         setRespondingMeetingId(null);
       }
     },
-    [fetchEvents]
+    [fetchEvents],
   );
 
   const getEventIcon = (type: string) => {
@@ -169,7 +186,11 @@ export default function CalendarWidget({
       if (allDay) {
         return <span className="text-orange-400 font-medium">Today</span>;
       }
-      return <span className="text-orange-400 font-medium">Today at {format(date, "h:mm a")}</span>;
+      return (
+        <span className="text-orange-400 font-medium">
+          Today at {format(date, "h:mm a")}
+        </span>
+      );
     }
 
     if (isTomorrow(date)) {
@@ -177,14 +198,24 @@ export default function CalendarWidget({
         return <span className="text-yellow-400 font-medium">Tomorrow</span>;
       }
       return (
-        <span className="text-yellow-400 font-medium">Tomorrow at {format(date, "h:mm a")}</span>
+        <span className="text-yellow-400 font-medium">
+          Tomorrow at {format(date, "h:mm a")}
+        </span>
       );
     }
 
     if (allDay) {
-      return <span className="text-theme-text-muted">{format(date, "EEE, MMM d")}</span>;
+      return (
+        <span className="text-theme-text-muted">
+          {format(date, "EEE, MMM d")}
+        </span>
+      );
     }
-    return <span className="text-theme-text-muted">{format(date, "EEE, MMM d 'at' h:mm a")}</span>;
+    return (
+      <span className="text-theme-text-muted">
+        {format(date, "EEE, MMM d 'at' h:mm a")}
+      </span>
+    );
   };
 
   if (loading) {
@@ -192,7 +223,9 @@ export default function CalendarWidget({
       <div className={cn(cardBase, "overflow-hidden")}>
         <div className="px-6 py-4 border-b border-theme-border flex items-center gap-3">
           <CalendarIcon className="w-5 h-5 text-theme-text-muted" />
-          <h2 className="text-lg font-semibold text-theme-text">Upcoming Events</h2>
+          <h2 className="text-lg font-semibold text-theme-text">
+            Upcoming Events
+          </h2>
         </div>
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin h-8 w-8 border-b-2 border-primary-500"></div>
@@ -206,7 +239,9 @@ export default function CalendarWidget({
       <div className="px-4 py-3 border-b border-theme-border flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <CalendarIcon className="w-4 h-4 text-primary-500 flex-shrink-0" />
-          <h2 className="text-sm font-semibold text-theme-text">Upcoming Events</h2>
+          <h2 className="text-sm font-semibold text-theme-text">
+            Upcoming Events
+          </h2>
           {events.length > 0 && (
             <span className="px-1.5 py-0.5 text-xs font-medium bg-primary-900/50 text-primary-300">
               {events.length}
@@ -227,33 +262,53 @@ export default function CalendarWidget({
                 />
               </button>
               {addMenuOpen && (
-                <div className={cn(cardBase, "absolute right-0 mt-1 w-48 rounded-lg shadow-lg z-50 overflow-hidden")}>
+                <div
+                  className={cn(
+                    cardBase,
+                    "absolute right-0 mt-1 w-48 rounded-lg shadow-lg z-50 overflow-hidden",
+                  )}
+                >
                   {onCreateTask && (
-                    <button onClick={() => handleAction(onCreateTask)} className={dropdownItemButton}>
+                    <button
+                      onClick={() => handleAction(onCreateTask)}
+                      className={dropdownItemButton}
+                    >
                       <CheckSquare className="w-4 h-4 text-green-400" />
                       Task
                     </button>
                   )}
                   {onCreateEvent && (
-                    <button onClick={() => handleAction(onCreateEvent)} className={dropdownItemButton}>
+                    <button
+                      onClick={() => handleAction(onCreateEvent)}
+                      className={dropdownItemButton}
+                    >
                       <CalendarIcon className="w-4 h-4 text-blue-400" />
                       Event
                     </button>
                   )}
                   {onCreateMeeting && (
-                    <button onClick={() => handleAction(onCreateMeeting)} className={dropdownItemButton}>
+                    <button
+                      onClick={() => handleAction(onCreateMeeting)}
+                      className={dropdownItemButton}
+                    >
                       <Users className="w-4 h-4 text-purple-400" />
                       Meeting
                     </button>
                   )}
                   {onRequestTimeOff && (
-                    <button onClick={() => handleAction(onRequestTimeOff)} className={dropdownItemButton}>
+                    <button
+                      onClick={() => handleAction(onRequestTimeOff)}
+                      className={dropdownItemButton}
+                    >
                       <Palmtree className="w-4 h-4 text-amber-400" />
                       Request Time Off
                     </button>
                   )}
                   {onCreateTimeOffForEmployee && (
-                    <button onClick={() => handleAction(onCreateTimeOffForEmployee)} className={dropdownItemButton}>
+                    <button
+                      onClick={() => handleAction(onCreateTimeOffForEmployee)}
+                      className={dropdownItemButton}
+                    >
                       <UserPlus className="w-4 h-4 text-amber-400" />
                       Time Off for Employee
                     </button>
@@ -268,7 +323,9 @@ export default function CalendarWidget({
             className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated transition-colors disabled:opacity-50"
             title="Refresh events"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+            />
           </button>
         </div>
       </div>
@@ -297,14 +354,24 @@ export default function CalendarWidget({
             const isClickable =
               (event.type === "task" && event.task && onViewTask) ||
               (event.type === "meeting" && event.meeting && onViewMeeting) ||
-              (event.type === "time_off" && event.time_off_request && onViewTimeOff);
+              (event.type === "time_off" &&
+                event.time_off_request &&
+                onViewTimeOff);
 
             const handleClick = () => {
               if (event.type === "task" && event.task && onViewTask) {
                 onViewTask(event.task.id);
-              } else if (event.type === "meeting" && event.meeting && onViewMeeting) {
+              } else if (
+                event.type === "meeting" &&
+                event.meeting &&
+                onViewMeeting
+              ) {
                 onViewMeeting(event.meeting.id);
-              } else if (event.type === "time_off" && event.time_off_request && onViewTimeOff) {
+              } else if (
+                event.type === "time_off" &&
+                event.time_off_request &&
+                onViewTimeOff
+              ) {
                 onViewTimeOff(event.time_off_request.id);
               }
             };
@@ -312,7 +379,9 @@ export default function CalendarWidget({
             // Check if user is an attendee with pending response for meetings
             const meetingAttendee =
               event.type === "meeting" &&
-              event.meeting?.attendees?.find((a) => a.user_id === currentUser?.id);
+              event.meeting?.attendees?.find(
+                (a) => a.user_id === currentUser?.id,
+              );
             const showMeetingResponse =
               meetingAttendee && meetingAttendee.response_status === "pending";
             const isRespondingToThisMeeting =
@@ -333,12 +402,16 @@ export default function CalendarWidget({
                 key={event.id}
                 onClick={isClickable ? handleClick : undefined}
                 className={`flex items-center gap-3 px-4 py-2 border-l-2 ${getEventBgColor(event.type)} ${
-                  isClickable ? "cursor-pointer hover:bg-theme-elevated/50 transition-colors" : ""
+                  isClickable
+                    ? "cursor-pointer hover:bg-theme-elevated/50 transition-colors"
+                    : ""
                 } ${isRespondingToThisMeeting ? "opacity-50" : ""}`}
               >
                 <div className="flex-shrink-0">{getEventIcon(event.type)}</div>
                 <div className="flex-1 min-w-0 flex items-center gap-2">
-                  <h3 className="text-sm font-medium text-theme-text truncate">{displayTitle}</h3>
+                  <h3 className="text-sm font-medium text-theme-text truncate">
+                    {displayTitle}
+                  </h3>
                   <span className="text-xs text-theme-text-muted whitespace-nowrap flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {formatEventDate(event.start, event.all_day)}

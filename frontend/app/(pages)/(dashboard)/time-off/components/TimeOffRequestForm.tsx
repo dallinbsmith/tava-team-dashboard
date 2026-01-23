@@ -2,7 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { format, addDays } from "date-fns";
-import { TimeOffType, CreateTimeOffRequest, TIME_OFF_TYPE_LABELS } from "../types";
+import {
+  TimeOffType,
+  CreateTimeOffRequest,
+  TIME_OFF_TYPE_LABELS,
+} from "../types";
 import { createTimeOffRequestAction } from "../actions";
 import { Calendar, Loader2, X } from "lucide-react";
 
@@ -11,10 +15,17 @@ interface TimeOffRequestFormProps {
   onCancel: () => void;
 }
 
-export default function TimeOffRequestForm({ onSuccess, onCancel }: TimeOffRequestFormProps) {
+export default function TimeOffRequestForm({
+  onSuccess,
+  onCancel,
+}: TimeOffRequestFormProps) {
   const [requestType, setRequestType] = useState<TimeOffType>("vacation");
-  const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
-  const [endDate, setEndDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
+  const [startDate, setStartDate] = useState(
+    format(addDays(new Date(), 1), "yyyy-MM-dd"),
+  );
+  const [endDate, setEndDate] = useState(
+    format(addDays(new Date(), 1), "yyyy-MM-dd"),
+  );
   const [reason, setReason] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +58,10 @@ export default function TimeOffRequestForm({ onSuccess, onCancel }: TimeOffReque
           <Calendar className="w-5 h-5 text-amber-400" />
           Request Time Off
         </h3>
-        <button onClick={onCancel} className="text-gray-400 hover:text-white transition-colors">
+        <button
+          onClick={onCancel}
+          className="text-gray-400 hover:text-white transition-colors"
+        >
           <X className="w-5 h-5" />
         </button>
       </div>
@@ -60,7 +74,9 @@ export default function TimeOffRequestForm({ onSuccess, onCancel }: TimeOffReque
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Type</label>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Type
+          </label>
           <select
             value={requestType}
             onChange={(e) => setRequestType(e.target.value as TimeOffType)}
@@ -76,7 +92,9 @@ export default function TimeOffRequestForm({ onSuccess, onCancel }: TimeOffReque
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Start Date</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Start Date
+            </label>
             <input
               type="date"
               value={startDate}
@@ -91,7 +109,9 @@ export default function TimeOffRequestForm({ onSuccess, onCancel }: TimeOffReque
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">End Date</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              End Date
+            </label>
             <input
               type="date"
               value={endDate}
@@ -103,7 +123,9 @@ export default function TimeOffRequestForm({ onSuccess, onCancel }: TimeOffReque
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Reason (optional)</label>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Reason (optional)
+          </label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}

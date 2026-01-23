@@ -22,7 +22,9 @@ export interface UseSquadsQueryResult {
   isMutating: boolean;
 }
 
-export const useSquadsQuery = (options: UseSquadsQueryOptions = {}): UseSquadsQueryResult => {
+export const useSquadsQuery = (
+  options: UseSquadsQueryOptions = {},
+): UseSquadsQueryResult => {
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
 
@@ -42,32 +44,38 @@ export const useSquadsQuery = (options: UseSquadsQueryOptions = {}): UseSquadsQu
 
   const refetchRelatedQueries = useCallback(
     () => refetchQueries(queryClient, queryKeyGroups.squadRelated()),
-    [queryClient]
+    [queryClient],
   );
 
   const addMutation = useMutation({
     mutationFn: (name: string) => createSquad(name),
     onSuccess: async (newSquad) => {
       queryClient.setQueryData<Squad[]>(queryKeys.squads.all(), (old) =>
-        old ? [...old, newSquad] : [newSquad]
+        old ? [...old, newSquad] : [newSquad],
       );
       await refetchRelatedQueries();
     },
   });
 
   const renameMutation = useMutation({
-    mutationFn: ({ id, name }: { id: number; name: string }) => renameSquad(id, name),
+    mutationFn: ({ id, name }: { id: number; name: string }) =>
+      renameSquad(id, name),
     onMutate: async ({ id, name }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.squads.all() });
-      const previousSquads = queryClient.getQueryData<Squad[]>(queryKeys.squads.all());
+      const previousSquads = queryClient.getQueryData<Squad[]>(
+        queryKeys.squads.all(),
+      );
       queryClient.setQueryData<Squad[]>(queryKeys.squads.all(), (old) =>
-        old ? old.map((s) => (s.id === id ? { ...s, name } : s)) : []
+        old ? old.map((s) => (s.id === id ? { ...s, name } : s)) : [],
       );
       return { previousSquads };
     },
     onError: (_err, _variables, context) => {
       if (context?.previousSquads) {
-        queryClient.setQueryData(queryKeys.squads.all(), context.previousSquads);
+        queryClient.setQueryData(
+          queryKeys.squads.all(),
+          context.previousSquads,
+        );
       }
     },
     onSuccess: async () => {
@@ -79,15 +87,20 @@ export const useSquadsQuery = (options: UseSquadsQueryOptions = {}): UseSquadsQu
     mutationFn: (id: number) => deleteSquad(id),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.squads.all() });
-      const previousSquads = queryClient.getQueryData<Squad[]>(queryKeys.squads.all());
+      const previousSquads = queryClient.getQueryData<Squad[]>(
+        queryKeys.squads.all(),
+      );
       queryClient.setQueryData<Squad[]>(queryKeys.squads.all(), (old) =>
-        old ? old.filter((s) => s.id !== id) : []
+        old ? old.filter((s) => s.id !== id) : [],
       );
       return { previousSquads };
     },
     onError: (_err, _id, context) => {
       if (context?.previousSquads) {
-        queryClient.setQueryData(queryKeys.squads.all(), context.previousSquads);
+        queryClient.setQueryData(
+          queryKeys.squads.all(),
+          context.previousSquads,
+        );
       }
     },
     onSuccess: async () => {
@@ -103,21 +116,21 @@ export const useSquadsQuery = (options: UseSquadsQueryOptions = {}): UseSquadsQu
     async (name: string): Promise<Squad> => {
       return addMutation.mutateAsync(name);
     },
-    [addMutation]
+    [addMutation],
   );
 
   const updateSquad = useCallback(
     async (id: number, newName: string): Promise<Squad> => {
       return renameMutation.mutateAsync({ id, name: newName });
     },
-    [renameMutation]
+    [renameMutation],
   );
 
   const removeSquad = useCallback(
     async (id: number): Promise<void> => {
       await deleteMutation.mutateAsync(id);
     },
-    [deleteMutation]
+    [deleteMutation],
   );
 
   return {
@@ -132,7 +145,10 @@ export const useSquadsQuery = (options: UseSquadsQueryOptions = {}): UseSquadsQu
     addSquad,
     updateSquad,
     removeSquad,
-    isMutating: addMutation.isPending || renameMutation.isPending || deleteMutation.isPending,
+    isMutating:
+      addMutation.isPending ||
+      renameMutation.isPending ||
+      deleteMutation.isPending,
   };
 };
 

@@ -21,7 +21,11 @@ jest.mock("../Button", () => ({
     icon?: React.ComponentType<{ className?: string }>;
     variant?: string;
   }) => (
-    <button onClick={onClick} data-variant={variant} data-testid="action-button">
+    <button
+      onClick={onClick}
+      data-variant={variant}
+      data-testid="action-button"
+    >
       {Icon && <Icon className="icon" />}
       {children}
     </button>
@@ -48,13 +52,22 @@ describe("EmptyState", () => {
     });
 
     it("renders description when provided", () => {
-      render(<EmptyState {...defaultProps} description="Create your first item to get started." />);
-      expect(screen.getByText("Create your first item to get started.")).toBeInTheDocument();
+      render(
+        <EmptyState
+          {...defaultProps}
+          description="Create your first item to get started."
+        />,
+      );
+      expect(
+        screen.getByText("Create your first item to get started."),
+      ).toBeInTheDocument();
     });
 
     it("does not render description when not provided", () => {
       const { container } = render(<EmptyState {...defaultProps} />);
-      const description = container.querySelector("p.text-sm.text-theme-text-muted");
+      const description = container.querySelector(
+        "p.text-sm.text-theme-text-muted",
+      );
       expect(description).not.toBeInTheDocument();
     });
 
@@ -66,7 +79,9 @@ describe("EmptyState", () => {
     });
 
     it("renders custom icon when provided", () => {
-      const { container } = render(<EmptyState {...defaultProps} icon={Calendar} />);
+      const { container } = render(
+        <EmptyState {...defaultProps} icon={Calendar} />,
+      );
       const icon = container.querySelector("svg");
       expect(icon).toBeInTheDocument();
     });
@@ -75,7 +90,7 @@ describe("EmptyState", () => {
       render(
         <EmptyState {...defaultProps}>
           <span data-testid="custom-child">Custom content</span>
-        </EmptyState>
+        </EmptyState>,
       );
       expect(screen.getByTestId("custom-child")).toBeInTheDocument();
     });
@@ -91,7 +106,7 @@ describe("EmptyState", () => {
             label: "Add Item",
             onClick,
           }}
-        />
+        />,
       );
       expect(screen.getByText("Add Item")).toBeInTheDocument();
     });
@@ -105,7 +120,7 @@ describe("EmptyState", () => {
             label: "Add Item",
             onClick,
           }}
-        />
+        />,
       );
 
       fireEvent.click(screen.getByTestId("action-button"));
@@ -120,9 +135,12 @@ describe("EmptyState", () => {
             label: "Add Item",
             onClick: jest.fn(),
           }}
-        />
+        />,
       );
-      expect(screen.getByTestId("action-button")).toHaveAttribute("data-variant", "primary");
+      expect(screen.getByTestId("action-button")).toHaveAttribute(
+        "data-variant",
+        "primary",
+      );
     });
 
     it("uses custom variant when specified", () => {
@@ -134,9 +152,12 @@ describe("EmptyState", () => {
             onClick: jest.fn(),
             variant: "secondary",
           }}
-        />
+        />,
       );
-      expect(screen.getByTestId("action-button")).toHaveAttribute("data-variant", "secondary");
+      expect(screen.getByTestId("action-button")).toHaveAttribute(
+        "data-variant",
+        "secondary",
+      );
     });
 
     it("renders action button with icon when provided", () => {
@@ -148,7 +169,7 @@ describe("EmptyState", () => {
             onClick: jest.fn(),
             icon: Plus,
           }}
-        />
+        />,
       );
       const button = screen.getByTestId("action-button");
       const icon = button.querySelector(".icon");
@@ -163,13 +184,17 @@ describe("EmptyState", () => {
 
   describe("custom className", () => {
     it("applies custom className", () => {
-      const { container } = render(<EmptyState {...defaultProps} className="my-custom-class" />);
+      const { container } = render(
+        <EmptyState {...defaultProps} className="my-custom-class" />,
+      );
       const wrapper = container.firstChild;
       expect(wrapper).toHaveClass("my-custom-class");
     });
 
     it("merges custom className with default classes", () => {
-      const { container } = render(<EmptyState {...defaultProps} className="my-custom-class" />);
+      const { container } = render(
+        <EmptyState {...defaultProps} className="my-custom-class" />,
+      );
       const wrapper = container.firstChild;
       expect(wrapper).toHaveClass("text-center", "py-12", "my-custom-class");
     });
@@ -206,14 +231,14 @@ describe("NoResults", () => {
     it("renders default description without query", () => {
       render(<NoResults />);
       expect(
-        screen.getByText("Try adjusting your filters or search criteria.")
+        screen.getByText("Try adjusting your filters or search criteria."),
       ).toBeInTheDocument();
     });
 
     it("renders query-specific description when query provided", () => {
       render(<NoResults query="test search" />);
       expect(
-        screen.getByText('We couldn\'t find anything matching "test search".')
+        screen.getByText('We couldn\'t find anything matching "test search".'),
       ).toBeInTheDocument();
     });
   });
@@ -234,7 +259,10 @@ describe("NoResults", () => {
 
     it("uses secondary variant for clear filters button", () => {
       render(<NoResults onClearFilters={jest.fn()} />);
-      expect(screen.getByTestId("action-button")).toHaveAttribute("data-variant", "secondary");
+      expect(screen.getByTestId("action-button")).toHaveAttribute(
+        "data-variant",
+        "secondary",
+      );
     });
 
     it("does not render clear filters button when onClearFilters not provided", () => {

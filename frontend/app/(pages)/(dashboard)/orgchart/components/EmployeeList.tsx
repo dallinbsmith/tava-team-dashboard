@@ -2,7 +2,10 @@
 
 import { useMemo } from "react";
 import { User } from "@/shared/types/user";
-import { useEmployeeList, ITEMS_PER_PAGE_OPTIONS } from "@/hooks/useEmployeeList";
+import {
+  useEmployeeList,
+  ITEMS_PER_PAGE_OPTIONS,
+} from "@/hooks/useEmployeeList";
 import EmployeeCard from "./EmployeeCard";
 import EmployeeTable from "./EmployeeTable";
 import FilterButton from "./FilterButton";
@@ -61,7 +64,10 @@ export default function EmployeeList({
       if (b === "Unassigned") return -1;
       return a.localeCompare(b);
     });
-    return sortedKeys.map((dept) => ({ department: dept, employees: grouped[dept] }));
+    return sortedKeys.map((dept) => ({
+      department: dept,
+      employees: grouped[dept],
+    }));
   }, [sortedEmployees]);
 
   // For department view: get the current department (one per page)
@@ -69,26 +75,30 @@ export default function EmployeeList({
   const currentDepartment = allDepartmentsWithEmployees[state.currentPage - 1];
 
   // Get active filters for chips
-  const activeFilters: { type: string; value: string; onRemove: () => void }[] = [];
+  const activeFilters: { type: string; value: string; onRemove: () => void }[] =
+    [];
   state.roleFilters.forEach((role) => {
     activeFilters.push({
       type: "Role",
       value: role === "supervisor" ? "Supervisor" : "Employee",
-      onRemove: () => setRoleFilters(state.roleFilters.filter((r) => r !== role)),
+      onRemove: () =>
+        setRoleFilters(state.roleFilters.filter((r) => r !== role)),
     });
   });
   state.departmentFilters.forEach((dept) => {
     activeFilters.push({
       type: "Department",
       value: dept,
-      onRemove: () => setDepartmentFilters(state.departmentFilters.filter((d) => d !== dept)),
+      onRemove: () =>
+        setDepartmentFilters(state.departmentFilters.filter((d) => d !== dept)),
     });
   });
   state.squadFilters.forEach((squad) => {
     activeFilters.push({
       type: "Squad",
       value: squad,
-      onRemove: () => setSquadFilters(state.squadFilters.filter((s) => s !== squad)),
+      onRemove: () =>
+        setSquadFilters(state.squadFilters.filter((s) => s !== squad)),
     });
   });
 
@@ -100,7 +110,10 @@ export default function EmployeeList({
           <div className="h-10 sm:h-12 bg-theme-elevated rounded-lg mb-3 sm:mb-4" />
           <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-40 sm:h-48 bg-theme-elevated rounded-lg" />
+              <div
+                key={i}
+                className="h-40 sm:h-48 bg-theme-elevated rounded-lg"
+              />
             ))}
           </div>
         </div>
@@ -115,7 +128,9 @@ export default function EmployeeList({
         <div className="w-16 h-16 bg-red-900/50 rounded-lg flex items-center justify-center mx-auto mb-4">
           <X className="w-8 h-8 text-red-400" />
         </div>
-        <h3 className="text-lg font-semibold text-red-300 mb-2">Failed to Load Employees</h3>
+        <h3 className="text-lg font-semibold text-red-300 mb-2">
+          Failed to Load Employees
+        </h3>
         <p className="text-red-400">{error}</p>
       </div>
     );
@@ -221,7 +236,8 @@ export default function EmployeeList({
 
       <div className="flex items-center justify-between text-xs text-theme-text-muted px-1">
         <span className="truncate">
-          {sortedEmployees.length} {sortedEmployees.length === 1 ? "employee" : "employees"}
+          {sortedEmployees.length}{" "}
+          {sortedEmployees.length === 1 ? "employee" : "employees"}
         </span>
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <span className="hidden sm:inline">Show:</span>
@@ -231,7 +247,11 @@ export default function EmployeeList({
             className="bg-transparent border-none p-0 text-theme-text-muted focus:ring-0 cursor-pointer hover:text-theme-text"
           >
             {ITEMS_PER_PAGE_OPTIONS.map((n) => (
-              <option key={n} value={n} className="bg-theme-surface text-theme-text">
+              <option
+                key={n}
+                value={n}
+                className="bg-theme-surface text-theme-text"
+              >
                 {n}
               </option>
             ))}
@@ -300,7 +320,9 @@ export default function EmployeeList({
                         <div className="flex items-center gap-3 mt-1 text-sm text-theme-text-muted">
                           <span>{employee.email}</span>
                           {employee.title && (
-                            <span className="text-theme-text-subtle">{employee.title}</span>
+                            <span className="text-theme-text-subtle">
+                              {employee.title}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -320,7 +342,11 @@ export default function EmployeeList({
 
           <Pagination
             currentPage={state.currentPage}
-            totalPages={state.viewMode === "department" ? departmentTotalPages : totalPages}
+            totalPages={
+              state.viewMode === "department"
+                ? departmentTotalPages
+                : totalPages
+            }
             onPageChange={setCurrentPage}
           />
         </div>

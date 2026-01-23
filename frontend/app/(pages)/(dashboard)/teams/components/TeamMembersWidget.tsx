@@ -8,14 +8,21 @@ import { SelectionType, filterMembersByTeam } from "../types";
 import Avatar from "@/shared/common/Avatar";
 import Pagination from "@/shared/common/Pagination";
 import { PAGINATION } from "@/lib/constants";
-import { badgePrimaryHover, cardHover, widgetContainer, widgetFooter } from "@/lib/styles";
+import {
+  badgePrimaryHover,
+  cardHover,
+  widgetContainer,
+  widgetFooter,
+} from "@/lib/styles";
 import { cn } from "@/lib/utils";
 
 interface TeamMemberCardProps {
   member: User;
 }
 
-const TeamMemberCard = memo(function TeamMemberCard({ member }: TeamMemberCardProps) {
+const TeamMemberCard = memo(function TeamMemberCard({
+  member,
+}: TeamMemberCardProps) {
   return (
     <div className={cn(cardHover, "flex flex-col p-3 bg-theme-elevated group")}>
       <Link href={`/employee/${member.id}`} className="flex items-center gap-3">
@@ -39,7 +46,9 @@ const TeamMemberCard = memo(function TeamMemberCard({ member }: TeamMemberCardPr
             )}
           </div>
           {member.title && (
-            <p className="text-xs text-theme-text-muted truncate mt-0.5">{member.title}</p>
+            <p className="text-xs text-theme-text-muted truncate mt-0.5">
+              {member.title}
+            </p>
           )}
         </div>
       </Link>
@@ -80,7 +89,7 @@ export default function TeamMembersWidget({
 
   const members = useMemo(
     () => filterMembersByTeam(allUsers, selectionType, selectedId),
-    [allUsers, selectionType, selectedId]
+    [allUsers, selectionType, selectedId],
   );
 
   // Reset to page 1 when selection changes
@@ -93,7 +102,9 @@ export default function TeamMembersWidget({
     return [...members].sort((a, b) => {
       if (a.role === "supervisor" && b.role !== "supervisor") return -1;
       if (a.role !== "supervisor" && b.role === "supervisor") return 1;
-      return `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`);
+      return `${a.first_name} ${a.last_name}`.localeCompare(
+        `${b.first_name} ${b.last_name}`,
+      );
     });
   }, [members]);
 
@@ -101,7 +112,10 @@ export default function TeamMembersWidget({
   const totalPages = Math.ceil(sortedMembers.length / PAGINATION.TEAM_MEMBERS);
   const paginatedMembers = useMemo(() => {
     const startIndex = (currentPage - 1) * PAGINATION.TEAM_MEMBERS;
-    return sortedMembers.slice(startIndex, startIndex + PAGINATION.TEAM_MEMBERS);
+    return sortedMembers.slice(
+      startIndex,
+      startIndex + PAGINATION.TEAM_MEMBERS,
+    );
   }, [sortedMembers, currentPage]);
 
   const handlePageChange = (page: number) => {
@@ -113,7 +127,9 @@ export default function TeamMembersWidget({
       <div className="px-6 py-4 border-b border-theme-border flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Users className="w-5 h-5 text-primary-500" />
-          <h2 className="text-lg font-semibold text-theme-text">Team Members</h2>
+          <h2 className="text-lg font-semibold text-theme-text">
+            Team Members
+          </h2>
           {members.length > 0 && (
             <span className="px-2 py-0.5 text-xs font-medium bg-primary-900/50 text-primary-300">
               {members.length}
@@ -126,7 +142,10 @@ export default function TeamMembersWidget({
       {members.length === 0 ? (
         <div className="flex-1 px-6 py-12 text-center text-theme-text-muted">
           <Users className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
-          <p>No members in this {selectionType === "squad" ? "squad" : "department"}</p>
+          <p>
+            No members in this{" "}
+            {selectionType === "squad" ? "squad" : "department"}
+          </p>
         </div>
       ) : (
         <div className="p-4">

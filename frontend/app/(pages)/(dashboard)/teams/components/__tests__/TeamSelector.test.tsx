@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import TeamSelector from "../TeamSelector";
 import { Squad } from "@/shared/types/user";
 
@@ -47,7 +47,7 @@ describe("TeamSelector", () => {
           {...defaultProps}
           selectedType="department"
           selectedId="Engineering"
-        />
+        />,
       );
       expect(screen.getByText("Engineering")).toBeInTheDocument();
     });
@@ -68,7 +68,7 @@ describe("TeamSelector", () => {
           {...defaultProps}
           selectedType="department"
           selectedId="Engineering"
-        />
+        />,
       );
       expect(screen.getByText("Dept")).toBeInTheDocument();
     });
@@ -155,7 +155,10 @@ describe("TeamSelector", () => {
       // Click Product department
       fireEvent.click(screen.getByText("Product"));
 
-      expect(defaultProps.onSelect).toHaveBeenCalledWith("department", "Product");
+      expect(defaultProps.onSelect).toHaveBeenCalledWith(
+        "department",
+        "Product",
+      );
     });
   });
 
@@ -174,12 +177,14 @@ describe("TeamSelector", () => {
           {...defaultProps}
           selectedType="department"
           selectedId="Engineering"
-        />
+        />,
       );
 
       fireEvent.click(screen.getByRole("button"));
 
-      expect(screen.getByPlaceholderText(/search departments/i)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(/search departments/i),
+      ).toBeInTheDocument();
     });
   });
 
@@ -199,7 +204,7 @@ describe("TeamSelector", () => {
           departments={[]}
           selectedType="department"
           selectedId=""
-        />
+        />,
       );
 
       fireEvent.click(screen.getByRole("button"));
@@ -237,18 +242,15 @@ describe("TeamSelector", () => {
       fireEvent.click(screen.getByText("Departments"));
 
       // Now shows department search
-      expect(screen.getByPlaceholderText(/search departments/i)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(/search departments/i),
+      ).toBeInTheDocument();
     });
   });
 
   describe("placeholder text", () => {
     it("shows placeholder when no selection", () => {
-      render(
-        <TeamSelector
-          {...defaultProps}
-          selectedId=""
-        />
-      );
+      render(<TeamSelector {...defaultProps} selectedId="" />);
 
       expect(screen.getByText("Select team...")).toBeInTheDocument();
     });

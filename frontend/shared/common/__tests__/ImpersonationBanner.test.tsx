@@ -73,7 +73,9 @@ describe("ImpersonationBanner", () => {
 
     it("renders end impersonation button", () => {
       render(<ImpersonationBanner />);
-      expect(screen.getByRole("button", { name: /end impersonation/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /end impersonation/i }),
+      ).toBeInTheDocument();
     });
 
     it("calls endImpersonation when button clicked", () => {
@@ -119,14 +121,20 @@ describe("ImpersonationBanner", () => {
 
     it("content is centered", () => {
       const { container } = render(<ImpersonationBanner />);
-      const content = container.querySelector(".flex.items-center.justify-center");
+      const content = container.querySelector(
+        ".flex.items-center.justify-center",
+      );
       expect(content).toBeInTheDocument();
     });
 
     it("end button has proper styling", () => {
       render(<ImpersonationBanner />);
       const button = screen.getByRole("button", { name: /end impersonation/i });
-      expect(button).toHaveClass("bg-amber-950", "text-amber-100", "rounded-full");
+      expect(button).toHaveClass(
+        "bg-amber-950",
+        "text-amber-100",
+        "rounded-full",
+      );
     });
 
     it("end button has hover state", () => {

@@ -9,10 +9,18 @@ import { getMyJiraTasks, getTeamJiraTasks, getJiraSettings } from "../actions";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import Avatar from "@/shared/common/Avatar";
-import { getStatusColor, getPriorityColor, DueDateDisplay } from "@/lib/jira-utils";
+import {
+  getStatusColor,
+  getPriorityColor,
+  DueDateDisplay,
+} from "@/lib/jira-utils";
 import { JIRA_LIMITS } from "@/lib/constants";
 import TimeOffIndicator from "@/app/(pages)/(dashboard)/time-off/components/TimeOffIndicator";
-import { FilterDropdown, FilterSection, SearchableFilterList } from "@/components";
+import {
+  FilterDropdown,
+  FilterSection,
+  SearchableFilterList,
+} from "@/components";
 import {
   CheckSquare,
   ExternalLink,
@@ -62,7 +70,8 @@ interface DisplayTask {
 }
 
 export default function JiraTasks({ compact = false }: JiraTasksProps) {
-  const { loading: userLoading, effectiveIsSupervisorOrAdmin } = useCurrentUser();
+  const { loading: userLoading, effectiveIsSupervisorOrAdmin } =
+    useCurrentUser();
   const {
     departments: departmentsInput,
     squads: squadsInput,
@@ -82,7 +91,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
 
   // Filter state
   const [filterOpen, setFilterOpen] = useState(false);
-  const [sourceFilter, setSourceFilter] = useState<SourceFilter>({ type: "my" });
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>({
+    type: "my",
+  });
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [epicFilter, setEpicFilter] = useState("all");
   const [individualFilters, setIndividualFilters] = useState<string[]>([]);
@@ -98,7 +109,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
   // URL-synced view mode state
   const [viewMode, setViewMode] = useQueryState(
     "myView",
-    parseAsStringLiteral(viewModes).withDefault("list")
+    parseAsStringLiteral(viewModes).withDefault("list"),
   );
 
   // Convert tasks to unified display format based on source filter
@@ -123,7 +134,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
       // Filter by department if selected
       if (sourceFilter.type === "department") {
         filteredTeamTasks = teamTasks.filter(
-          (task) => task.employee?.department === sourceFilter.value
+          (task) => task.employee?.department === sourceFilter.value,
         );
       }
 
@@ -132,11 +143,13 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
         // Find user IDs that belong to this squad
         const squadUserIds = new Set(
           allUsers
-            .filter((user) => user.squads?.some((s) => s.id === sourceFilter.value))
-            .map((user) => user.id)
+            .filter((user) =>
+              user.squads?.some((s) => s.id === sourceFilter.value),
+            )
+            .map((user) => user.id),
         );
         filteredTeamTasks = teamTasks.filter(
-          (task) => task.employee && squadUserIds.has(task.employee.id)
+          (task) => task.employee && squadUserIds.has(task.employee.id),
         );
       }
 
@@ -182,8 +195,12 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
 
     return {
       statuses: Array.from(statusSet).sort(),
-      epics: Array.from(epicMap.values()).sort((a, b) => a.summary.localeCompare(b.summary)),
-      individuals: Array.from(individualMap.values()).sort((a, b) => a.name.localeCompare(b.name)),
+      epics: Array.from(epicMap.values()).sort((a, b) =>
+        a.summary.localeCompare(b.summary),
+      ),
+      individuals: Array.from(individualMap.values()).sort((a, b) =>
+        a.name.localeCompare(b.name),
+      ),
     };
   }, [displayTasks]);
 
@@ -219,7 +236,13 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
 
       return true;
     });
-  }, [displayTasks, statusFilters, epicFilter, sourceFilter, individualFilters]);
+  }, [
+    displayTasks,
+    statusFilters,
+    epicFilter,
+    sourceFilter,
+    individualFilters,
+  ]);
 
   // Calculate active filter count (include source if not default "my")
   const activeFilterCount = [
@@ -260,9 +283,15 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
         if (jiraSettings.org_configured) {
           // Fetch both my tasks and team tasks
           const [myIssues, teamIssues] = await Promise.all([
-            getMyJiraTasks(compact ? JIRA_LIMITS.TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT),
+            getMyJiraTasks(
+              compact
+                ? JIRA_LIMITS.TASKS_COMPACT
+                : JIRA_LIMITS.TEAM_TASKS_DEFAULT,
+            ),
             getTeamJiraTasks(
-              compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT
+              compact
+                ? JIRA_LIMITS.TEAM_TASKS_COMPACT
+                : JIRA_LIMITS.TEAM_TASKS_DEFAULT,
             ),
           ]);
           setMyTasks(myIssues || []);
@@ -288,7 +317,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
         setRefreshing(false);
       }
     },
-    [compact]
+    [compact],
   );
 
   useEffect(() => {
@@ -323,7 +352,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
           <div className="w-12 h-12 bg-theme-elevated flex items-center justify-center mx-auto mb-4">
             <Settings className="w-6 h-6 text-theme-text-muted" />
           </div>
-          <p className="text-theme-text-muted mb-2">Jira is not configured for your organization</p>
+          <p className="text-theme-text-muted mb-2">
+            Jira is not configured for your organization
+          </p>
           {effectiveIsSupervisorOrAdmin ? (
             <>
               <p className="text-sm text-theme-text-muted mb-4">
@@ -347,7 +378,8 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
     );
   }
 
-  const totalTasks = sourceFilter.type === "my" ? myTasks.length : displayTasks.length;
+  const totalTasks =
+    sourceFilter.type === "my" ? myTasks.length : displayTasks.length;
 
   return (
     <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col">
@@ -415,18 +447,27 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                     {departments.map((dept) => (
                       <button
                         key={dept}
-                        onClick={() => handleSourceChange({ type: "department", value: dept })}
+                        onClick={() =>
+                          handleSourceChange({
+                            type: "department",
+                            value: dept,
+                          })
+                        }
                         className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
-                          sourceFilter.type === "department" && sourceFilter.value === dept
+                          sourceFilter.type === "department" &&
+                          sourceFilter.value === dept
                             ? "bg-primary-500/20 text-primary-300"
                             : "text-theme-text-muted hover:bg-theme-elevated"
                         }`}
                       >
                         <Building2 className="w-4 h-4" />
                         <span className="truncate">{dept}</span>
-                        {sourceFilter.type === "department" && sourceFilter.value === dept && (
-                          <span className="ml-auto text-primary-400 flex-shrink-0">✓</span>
-                        )}
+                        {sourceFilter.type === "department" &&
+                          sourceFilter.value === dept && (
+                            <span className="ml-auto text-primary-400 flex-shrink-0">
+                              ✓
+                            </span>
+                          )}
                       </button>
                     ))}
                   </>
@@ -440,18 +481,24 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                     {squads.map((squad) => (
                       <button
                         key={squad.id}
-                        onClick={() => handleSourceChange({ type: "squad", value: squad.id })}
+                        onClick={() =>
+                          handleSourceChange({ type: "squad", value: squad.id })
+                        }
                         className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
-                          sourceFilter.type === "squad" && sourceFilter.value === squad.id
+                          sourceFilter.type === "squad" &&
+                          sourceFilter.value === squad.id
                             ? "bg-primary-500/20 text-primary-300"
                             : "text-theme-text-muted hover:bg-theme-elevated"
                         }`}
                       >
                         <UsersRound className="w-4 h-4" />
                         <span className="truncate">{squad.name}</span>
-                        {sourceFilter.type === "squad" && sourceFilter.value === squad.id && (
-                          <span className="ml-auto text-primary-400 flex-shrink-0">✓</span>
-                        )}
+                        {sourceFilter.type === "squad" &&
+                          sourceFilter.value === squad.id && (
+                            <span className="ml-auto text-primary-400 flex-shrink-0">
+                              ✓
+                            </span>
+                          )}
                       </button>
                     ))}
                   </>
@@ -487,7 +534,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                   }`}
                 >
                   <span>All Epics</span>
-                  {epicFilter === "all" && <span className="ml-auto text-primary-400">✓</span>}
+                  {epicFilter === "all" && (
+                    <span className="ml-auto text-primary-400">✓</span>
+                  )}
                 </button>
                 <button
                   onClick={() => setEpicFilter("no-epic")}
@@ -498,7 +547,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                   }`}
                 >
                   <span>No Epic</span>
-                  {epicFilter === "no-epic" && <span className="ml-auto text-primary-400">✓</span>}
+                  {epicFilter === "no-epic" && (
+                    <span className="ml-auto text-primary-400">✓</span>
+                  )}
                 </button>
                 {epics.map((epic) => (
                   <button
@@ -512,7 +563,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                   >
                     <span className="truncate">{epic.summary}</span>
                     {epicFilter === epic.key && (
-                      <span className="ml-auto text-primary-400 flex-shrink-0">✓</span>
+                      <span className="ml-auto text-primary-400 flex-shrink-0">
+                        ✓
+                      </span>
                     )}
                   </button>
                 ))}
@@ -565,7 +618,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
             className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated transition-colors disabled:opacity-50"
             title="Refresh tasks"
           >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+            />
           </button>
         </div>
       </div>
@@ -654,16 +709,24 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
               )}
 
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-mono text-primary-400">{task.key}</span>
-                <span className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}>
+                <span className="text-xs font-mono text-primary-400">
+                  {task.key}
+                </span>
+                <span
+                  className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
+                >
                   {task.status}
                 </span>
                 {task.priority && (
-                  <span className={`text-xs ${getPriorityColor(task.priority)}`}>
+                  <span
+                    className={`text-xs ${getPriorityColor(task.priority)}`}
+                  >
                     {task.priority}
                   </span>
                 )}
-                {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
+                {task.time_off_impact && (
+                  <TimeOffIndicator impact={task.time_off_impact} compact />
+                )}
               </div>
 
               <h3 className="font-medium text-theme-text text-sm line-clamp-2 mb-3 group-hover:text-primary-400 transition-colors">
@@ -708,19 +771,27 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                     {task.employee.first_name[0]}. {task.employee.last_name}
                   </span>
                 )}
-                <span className="text-xs font-mono text-primary-400">{task.key}</span>
-                <span className="text-sm text-theme-text truncate flex-1">{task.summary}</span>
+                <span className="text-xs font-mono text-primary-400">
+                  {task.key}
+                </span>
+                <span className="text-sm text-theme-text truncate flex-1">
+                  {task.summary}
+                </span>
                 <span
                   className={`px-1.5 py-0.5 text-xs font-medium whitespace-nowrap ${getStatusColor(task.status)}`}
                 >
                   {task.status}
                 </span>
                 {task.priority && (
-                  <span className={`text-xs whitespace-nowrap ${getPriorityColor(task.priority)}`}>
+                  <span
+                    className={`text-xs whitespace-nowrap ${getPriorityColor(task.priority)}`}
+                  >
                     {task.priority}
                   </span>
                 )}
-                {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
+                {task.time_off_impact && (
+                  <TimeOffIndicator impact={task.time_off_impact} compact />
+                )}
                 {task.due_date && (
                   <span className="flex items-center gap-1 text-xs text-theme-text-muted whitespace-nowrap">
                     <Clock className="w-3 h-3" />

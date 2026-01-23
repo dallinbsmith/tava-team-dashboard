@@ -36,7 +36,13 @@ jest.mock("next/navigation", () => ({
 
 // Mock Avatar component
 jest.mock("../Avatar", () => {
-  return function MockAvatar({ firstName, lastName }: { firstName: string; lastName: string }) {
+  return function MockAvatar({
+    firstName,
+    lastName,
+  }: {
+    firstName: string;
+    lastName: string;
+  }) {
     return (
       <div data-testid="avatar">
         {firstName} {lastName}
@@ -78,7 +84,9 @@ describe("Sidebar", () => {
     });
 
     it("renders email when no name provided", () => {
-      render(<Sidebar {...defaultProps} user={{ email: "john@example.com" }} />);
+      render(
+        <Sidebar {...defaultProps} user={{ email: "john@example.com" }} />,
+      );
       expect(screen.getByText("john@example.com")).toBeInTheDocument();
     });
 
@@ -98,22 +106,30 @@ describe("Sidebar", () => {
     it("renders Dashboard/Overview link", () => {
       render(<Sidebar {...defaultProps} />);
       // Default role shows "My Profile"
-      expect(screen.getByRole("link", { name: /my profile/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /my profile/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders Calendar link", () => {
       render(<Sidebar {...defaultProps} />);
-      expect(screen.getByRole("link", { name: /calendar/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /calendar/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders Time Off link", () => {
       render(<Sidebar {...defaultProps} />);
-      expect(screen.getByRole("link", { name: /time off/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /time off/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders Org Chart link", () => {
       render(<Sidebar {...defaultProps} />);
-      expect(screen.getByRole("link", { name: /org chart/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: /org chart/i }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -121,66 +137,90 @@ describe("Sidebar", () => {
     describe("employee role", () => {
       it("shows My Profile label", () => {
         render(<Sidebar {...defaultProps} role="employee" />);
-        expect(screen.getByRole("link", { name: /my profile/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /my profile/i }),
+        ).toBeInTheDocument();
       });
 
       it("does not show Invitations link", () => {
         render(<Sidebar {...defaultProps} role="employee" />);
-        expect(screen.queryByRole("link", { name: /invitations/i })).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole("link", { name: /invitations/i }),
+        ).not.toBeInTheDocument();
       });
 
       it("does not show Teams link", () => {
         render(<Sidebar {...defaultProps} role="employee" />);
-        expect(screen.queryByRole("link", { name: /teams/i })).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole("link", { name: /teams/i }),
+        ).not.toBeInTheDocument();
       });
 
       it("does not show Settings link", () => {
         render(<Sidebar {...defaultProps} role="employee" />);
-        expect(screen.queryByRole("link", { name: /settings/i })).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole("link", { name: /settings/i }),
+        ).not.toBeInTheDocument();
       });
     });
 
     describe("supervisor role", () => {
       it("shows My Team label", () => {
         render(<Sidebar {...defaultProps} role="supervisor" />);
-        expect(screen.getByRole("link", { name: /my team/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /my team/i }),
+        ).toBeInTheDocument();
       });
 
       it("does not show Invitations link", () => {
         render(<Sidebar {...defaultProps} role="supervisor" />);
-        expect(screen.queryByRole("link", { name: /invitations/i })).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole("link", { name: /invitations/i }),
+        ).not.toBeInTheDocument();
       });
 
       it("shows Teams link", () => {
         render(<Sidebar {...defaultProps} role="supervisor" />);
-        expect(screen.getByRole("link", { name: /teams/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /teams/i }),
+        ).toBeInTheDocument();
       });
 
       it("shows Settings link", () => {
         render(<Sidebar {...defaultProps} role="supervisor" />);
-        expect(screen.getByRole("link", { name: /settings/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /settings/i }),
+        ).toBeInTheDocument();
       });
     });
 
     describe("admin role", () => {
       it("shows Overview label", () => {
         render(<Sidebar {...defaultProps} role="admin" />);
-        expect(screen.getByRole("link", { name: /overview/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /overview/i }),
+        ).toBeInTheDocument();
       });
 
       it("shows Invitations link", () => {
         render(<Sidebar {...defaultProps} role="admin" />);
-        expect(screen.getByRole("link", { name: /invitations/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /invitations/i }),
+        ).toBeInTheDocument();
       });
 
       it("shows Teams link", () => {
         render(<Sidebar {...defaultProps} role="admin" />);
-        expect(screen.getByRole("link", { name: /teams/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /teams/i }),
+        ).toBeInTheDocument();
       });
 
       it("shows Settings link", () => {
         render(<Sidebar {...defaultProps} role="admin" />);
-        expect(screen.getByRole("link", { name: /settings/i })).toBeInTheDocument();
+        expect(
+          screen.getByRole("link", { name: /settings/i }),
+        ).toBeInTheDocument();
       });
     });
 
@@ -195,14 +235,20 @@ describe("Sidebar", () => {
       mockPathname = "/";
       render(<Sidebar {...defaultProps} />);
       const homeLink = screen.getByRole("link", { name: /my profile/i });
-      expect(homeLink).toHaveClass("bg-theme-sidebar-active", "text-primary-400");
+      expect(homeLink).toHaveClass(
+        "bg-theme-sidebar-active",
+        "text-primary-400",
+      );
     });
 
     it("highlights active link for calendar page", () => {
       mockPathname = "/calendar";
       render(<Sidebar {...defaultProps} />);
       const calendarLink = screen.getByRole("link", { name: /calendar/i });
-      expect(calendarLink).toHaveClass("bg-theme-sidebar-active", "text-primary-400");
+      expect(calendarLink).toHaveClass(
+        "bg-theme-sidebar-active",
+        "text-primary-400",
+      );
     });
 
     it("highlights active link for time-off page", () => {
@@ -222,7 +268,9 @@ describe("Sidebar", () => {
     it("highlights active link for invitations page", () => {
       mockPathname = "/admin/invitations";
       render(<Sidebar {...defaultProps} role="admin" />);
-      const invitationsLink = screen.getByRole("link", { name: /invitations/i });
+      const invitationsLink = screen.getByRole("link", {
+        name: /invitations/i,
+      });
       expect(invitationsLink).toHaveClass("bg-theme-sidebar-active");
     });
 
@@ -254,14 +302,18 @@ describe("Sidebar", () => {
     });
 
     it("does not show overlay when closed", () => {
-      const { container } = render(<Sidebar {...defaultProps} isOpen={false} />);
+      const { container } = render(
+        <Sidebar {...defaultProps} isOpen={false} />,
+      );
       const overlay = container.querySelector(".fixed.inset-0.bg-black\\/50");
       expect(overlay).not.toBeInTheDocument();
     });
 
     it("calls onToggle when overlay clicked", () => {
       const onToggle = jest.fn();
-      const { container } = render(<Sidebar {...defaultProps} isOpen onToggle={onToggle} />);
+      const { container } = render(
+        <Sidebar {...defaultProps} isOpen onToggle={onToggle} />,
+      );
       const overlay = container.querySelector(".fixed.inset-0.bg-black\\/50");
       fireEvent.click(overlay!);
       expect(onToggle).toHaveBeenCalledTimes(1);
@@ -327,7 +379,9 @@ describe("Sidebar", () => {
   describe("user section", () => {
     it("user section is at bottom", () => {
       const { container } = render(<Sidebar {...defaultProps} />);
-      const userSection = container.querySelector(".border-t.border-theme-border");
+      const userSection = container.querySelector(
+        ".border-t.border-theme-border",
+      );
       expect(userSection).toBeInTheDocument();
     });
 

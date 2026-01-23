@@ -10,7 +10,20 @@ import ViewTaskModal from "../ViewTaskModal";
 // Mock date-fns
 jest.mock("date-fns", () => ({
   format: (date: Date, formatStr: string) => {
-    const month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getUTCMonth()];
+    const month = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ][date.getUTCMonth()];
     const day = date.getUTCDate();
     const year = date.getUTCFullYear();
 
@@ -34,7 +47,8 @@ const mockDeleteTaskAction = jest.fn();
 
 jest.mock("../../actions", () => ({
   getTask: (id: number) => mockGetTask(id),
-  updateTaskAction: (id: number, data: unknown) => mockUpdateTaskAction(id, data),
+  updateTaskAction: (id: number, data: unknown) =>
+    mockUpdateTaskAction(id, data),
   deleteTaskAction: (id: number) => mockDeleteTaskAction(id),
 }));
 
@@ -181,7 +195,7 @@ describe("ViewTaskModal", () => {
       await waitFor(() => {
         expect(mockUpdateTaskAction).toHaveBeenCalledWith(
           1,
-          expect.objectContaining({ title: "Updated Task" })
+          expect.objectContaining({ title: "Updated Task" }),
         );
       });
     });
@@ -228,7 +242,7 @@ describe("ViewTaskModal", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Are you sure you want to delete this task/i)
+          screen.getByText(/Are you sure you want to delete this task/i),
         ).toBeInTheDocument();
       });
     });

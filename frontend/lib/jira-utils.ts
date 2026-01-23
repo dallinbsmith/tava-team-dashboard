@@ -37,7 +37,9 @@ export const getDueDateDiffDays = (dateString: string): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-export const getDueDateInfo = (dateString: string): {
+export const getDueDateInfo = (
+  dateString: string,
+): {
   text: string;
   colorClass: string;
   isOverdue: boolean;
@@ -86,7 +88,9 @@ export const getDueDateInfo = (dateString: string): {
   };
 };
 
-export const getDueDateInfoCompact = (dateString: string): {
+export const getDueDateInfoCompact = (
+  dateString: string,
+): {
   text: string;
   colorClass: string;
 } => {
@@ -132,11 +136,13 @@ export const DueDateDisplay = ({
   compact?: boolean;
   className?: string;
 }): React.ReactElement => {
-  const info = compact ? getDueDateInfoCompact(dueDate) : getDueDateInfo(dueDate);
+  const info = compact
+    ? getDueDateInfoCompact(dueDate)
+    : getDueDateInfo(dueDate);
   return React.createElement(
     "span",
     { className: `${info.colorClass} ${className}`.trim() },
-    info.text
+    info.text,
   );
 };
 
@@ -154,6 +160,6 @@ export const TaskStatusBadge = ({
       className:
         `px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap ${colorClass} ${className}`.trim(),
     },
-    status
+    status,
   );
 };

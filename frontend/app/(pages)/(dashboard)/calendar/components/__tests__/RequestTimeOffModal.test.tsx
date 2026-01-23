@@ -4,7 +4,13 @@
  */
 
 import React from "react";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 // Mock date-fns for consistent dates
@@ -26,7 +32,8 @@ jest.mock("date-fns", () => ({
 // Mock createTimeOffRequestAction
 const mockCreateTimeOffRequestAction = jest.fn();
 jest.mock("../../../time-off/actions", () => ({
-  createTimeOffRequestAction: (req: unknown) => mockCreateTimeOffRequestAction(req),
+  createTimeOffRequestAction: (req: unknown) =>
+    mockCreateTimeOffRequestAction(req),
 }));
 
 import RequestTimeOffModal from "../RequestTimeOffModal";
@@ -75,9 +82,13 @@ describe("RequestTimeOffModal", () => {
       expect(typeSelect).toBeInTheDocument();
 
       // Check that options exist
-      expect(screen.getByRole("option", { name: /Vacation/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: /Vacation/i }),
+      ).toBeInTheDocument();
       expect(screen.getByRole("option", { name: /Sick/i })).toBeInTheDocument();
-      expect(screen.getByRole("option", { name: /Personal/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("option", { name: /Personal/i }),
+      ).toBeInTheDocument();
     });
 
     it("renders cancel and submit buttons", () => {
@@ -100,7 +111,7 @@ describe("RequestTimeOffModal", () => {
     it("updates start date field", async () => {
       const { container } = render(<RequestTimeOffModal {...defaultProps} />);
       const dateInputs = container.querySelectorAll(
-        'input[type="date"]'
+        'input[type="date"]',
       ) as NodeListOf<HTMLInputElement>;
       const startDateInput = dateInputs[0];
 
@@ -111,7 +122,7 @@ describe("RequestTimeOffModal", () => {
     it("updates end date field", async () => {
       const { container } = render(<RequestTimeOffModal {...defaultProps} />);
       const dateInputs = container.querySelectorAll(
-        'input[type="date"]'
+        'input[type="date"]',
       ) as NodeListOf<HTMLInputElement>;
       const endDateInput = dateInputs[1];
 
@@ -134,7 +145,7 @@ describe("RequestTimeOffModal", () => {
 
       // Clear the default start date
       const dateInputs = container.querySelectorAll(
-        'input[type="date"]'
+        'input[type="date"]',
       ) as NodeListOf<HTMLInputElement>;
       fireEvent.change(dateInputs[0], { target: { value: "" } });
 
@@ -149,7 +160,7 @@ describe("RequestTimeOffModal", () => {
       const { container } = render(<RequestTimeOffModal {...defaultProps} />);
 
       const dateInputs = container.querySelectorAll(
-        'input[type="date"]'
+        'input[type="date"]',
       ) as NodeListOf<HTMLInputElement>;
       fireEvent.change(dateInputs[0], { target: { value: "2024-01-20" } });
       fireEvent.change(dateInputs[1], { target: { value: "2024-01-15" } });
@@ -160,7 +171,7 @@ describe("RequestTimeOffModal", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/End date must be on or after start date/i)
+          screen.getByText(/End date must be on or after start date/i),
         ).toBeInTheDocument();
       });
     });
@@ -177,7 +188,7 @@ describe("RequestTimeOffModal", () => {
 
       // Set dates
       const dateInputs = container.querySelectorAll(
-        'input[type="date"]'
+        'input[type="date"]',
       ) as NodeListOf<HTMLInputElement>;
       fireEvent.change(dateInputs[0], { target: { value: "2024-01-15" } });
       fireEvent.change(dateInputs[1], { target: { value: "2024-01-20" } });
@@ -192,7 +203,7 @@ describe("RequestTimeOffModal", () => {
         expect(mockCreateTimeOffRequestAction).toHaveBeenCalledWith(
           expect.objectContaining({
             request_type: "vacation",
-          })
+          }),
         );
       });
     });
@@ -200,11 +211,11 @@ describe("RequestTimeOffModal", () => {
     it("calls onCreated callback on success", async () => {
       const onCreated = jest.fn();
       const { container } = render(
-        <RequestTimeOffModal {...defaultProps} onCreated={onCreated} />
+        <RequestTimeOffModal {...defaultProps} onCreated={onCreated} />,
       );
 
       const dateInputs = container.querySelectorAll(
-        'input[type="date"]'
+        'input[type="date"]',
       ) as NodeListOf<HTMLInputElement>;
       fireEvent.change(dateInputs[0], { target: { value: "2024-01-15" } });
       fireEvent.change(dateInputs[1], { target: { value: "2024-01-20" } });
@@ -228,7 +239,7 @@ describe("RequestTimeOffModal", () => {
       const { container } = render(<RequestTimeOffModal {...defaultProps} />);
 
       const dateInputs = container.querySelectorAll(
-        'input[type="date"]'
+        'input[type="date"]',
       ) as NodeListOf<HTMLInputElement>;
       fireEvent.change(dateInputs[0], { target: { value: "2024-01-15" } });
       fireEvent.change(dateInputs[1], { target: { value: "2024-01-20" } });
@@ -239,7 +250,9 @@ describe("RequestTimeOffModal", () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText("Failed to submit request")).toBeInTheDocument();
+        expect(
+          screen.getByText("Failed to submit request"),
+        ).toBeInTheDocument();
       });
     });
   });

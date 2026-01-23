@@ -17,7 +17,10 @@ export const GET = async (request: NextRequest) => {
       const settingsUrl = new URL("/settings", request.url);
       settingsUrl.searchParams.set("jira_error", error);
       if (errorDescription) {
-        settingsUrl.searchParams.set("jira_error_description", errorDescription);
+        settingsUrl.searchParams.set(
+          "jira_error_description",
+          errorDescription,
+        );
       }
       return NextResponse.redirect(settingsUrl);
     }
@@ -25,7 +28,10 @@ export const GET = async (request: NextRequest) => {
     if (!code || !state) {
       const settingsUrl = new URL("/settings", request.url);
       settingsUrl.searchParams.set("jira_error", "missing_params");
-      settingsUrl.searchParams.set("jira_error_description", "Missing code or state parameter");
+      settingsUrl.searchParams.set(
+        "jira_error_description",
+        "Missing code or state parameter",
+      );
       return NextResponse.redirect(settingsUrl);
     }
 
@@ -66,7 +72,10 @@ export const GET = async (request: NextRequest) => {
     console.error("Jira OAuth callback error:", error);
     const settingsUrl = new URL("/settings", request.url);
     settingsUrl.searchParams.set("jira_error", "internal_error");
-    settingsUrl.searchParams.set("jira_error_description", "An internal error occurred");
+    settingsUrl.searchParams.set(
+      "jira_error_description",
+      "An internal error occurred",
+    );
     return NextResponse.redirect(settingsUrl);
   }
 };

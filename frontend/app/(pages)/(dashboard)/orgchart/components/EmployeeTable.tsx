@@ -6,7 +6,15 @@ import Avatar from "@/shared/common/Avatar";
 import { SortField, SortOrder } from "@/hooks/useEmployeeList";
 import { ChevronUp, ChevronDown, Shield } from "lucide-react";
 import { getDepartmentBgColor } from "@/lib/department-colors";
-import { badgeRounded, cardBase, tableHeader, tableHeaderSortable, pillSupervisor, pillAdmin, pillEmployee } from "@/lib/styles";
+import {
+  badgeRounded,
+  cardBase,
+  tableHeader,
+  tableHeaderSortable,
+  pillSupervisor,
+  pillAdmin,
+  pillEmployee,
+} from "@/lib/styles";
 import { cn } from "@/lib/utils";
 
 interface EmployeeTableRowProps {
@@ -49,7 +57,9 @@ const EmployeeTableRow = memo(function EmployeeTableRow({
                 <Shield className="w-3.5 h-3.5 text-purple-400" />
               )}
             </div>
-            <div className="text-xs text-theme-text-muted md:hidden">{employee.email}</div>
+            <div className="text-xs text-theme-text-muted md:hidden">
+              {employee.email}
+            </div>
           </div>
         </div>
       </td>
@@ -80,11 +90,15 @@ const EmployeeTableRow = memo(function EmployeeTableRow({
       <td className="px-4 py-3 hidden sm:table-cell">
         <span
           className={cn(
-            employee.role === "supervisor" ? pillSupervisor :
-            employee.role === "admin" ? pillAdmin : pillEmployee
+            employee.role === "supervisor"
+              ? pillSupervisor
+              : employee.role === "admin"
+                ? pillAdmin
+                : pillEmployee,
           )}
         >
-          {employee.title || employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
+          {employee.title ||
+            employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
         </span>
       </td>
     </tr>
@@ -114,7 +128,7 @@ export default function EmployeeTable({
         window.location.href = `/employee/${employee.id}`;
       }
     },
-    [onRowClick]
+    [onRowClick],
   );
 
   const SortIcon = ({ field }: { field: SortField }) => {

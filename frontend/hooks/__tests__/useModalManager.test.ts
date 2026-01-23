@@ -21,7 +21,9 @@ describe("useModalManager", () => {
     });
 
     it("isOpen returns false for any modal initially", () => {
-      const { result } = renderHook(() => useModalManager<"create" | "edit" | null>());
+      const { result } = renderHook(() =>
+        useModalManager<"create" | "edit" | null>(),
+      );
 
       expect(result.current.isOpen("create")).toBe(false);
       expect(result.current.isOpen("edit")).toBe(false);
@@ -30,7 +32,9 @@ describe("useModalManager", () => {
 
   describe("open()", () => {
     it("sets the active modal", () => {
-      const { result } = renderHook(() => useModalManager<"create" | "edit" | null>());
+      const { result } = renderHook(() =>
+        useModalManager<"create" | "edit" | null>(),
+      );
 
       act(() => {
         result.current.open("create");
@@ -40,7 +44,9 @@ describe("useModalManager", () => {
     });
 
     it("sets modal data when provided", () => {
-      const { result } = renderHook(() => useModalManager<"edit" | null, { id: number }>());
+      const { result } = renderHook(() =>
+        useModalManager<"edit" | null, { id: number }>(),
+      );
 
       act(() => {
         result.current.open("edit", { id: 123 });
@@ -51,7 +57,9 @@ describe("useModalManager", () => {
     });
 
     it("opens without data when not provided", () => {
-      const { result } = renderHook(() => useModalManager<"create" | null, { name: string }>());
+      const { result } = renderHook(() =>
+        useModalManager<"create" | null, { name: string }>(),
+      );
 
       act(() => {
         result.current.open("create");
@@ -62,7 +70,9 @@ describe("useModalManager", () => {
     });
 
     it("replaces previous modal when opening a new one", () => {
-      const { result } = renderHook(() => useModalManager<"create" | "edit" | null>());
+      const { result } = renderHook(() =>
+        useModalManager<"create" | "edit" | null>(),
+      );
 
       act(() => {
         result.current.open("create");
@@ -78,7 +88,9 @@ describe("useModalManager", () => {
     });
 
     it("replaces previous data when opening with new data", () => {
-      const { result } = renderHook(() => useModalManager<"edit" | null, { id: number }>());
+      const { result } = renderHook(() =>
+        useModalManager<"edit" | null, { id: number }>(),
+      );
 
       act(() => {
         result.current.open("edit", { id: 1 });
@@ -108,7 +120,9 @@ describe("useModalManager", () => {
     });
 
     it("clears data", () => {
-      const { result } = renderHook(() => useModalManager<"edit" | null, { id: number }>());
+      const { result } = renderHook(() =>
+        useModalManager<"edit" | null, { id: number }>(),
+      );
 
       act(() => {
         result.current.open("edit", { id: 123 });
@@ -136,7 +150,9 @@ describe("useModalManager", () => {
 
   describe("isOpen()", () => {
     it("returns true for the open modal", () => {
-      const { result } = renderHook(() => useModalManager<"create" | "edit" | "delete" | null>());
+      const { result } = renderHook(() =>
+        useModalManager<"create" | "edit" | "delete" | null>(),
+      );
 
       act(() => {
         result.current.open("edit");
@@ -146,7 +162,9 @@ describe("useModalManager", () => {
     });
 
     it("returns false for other modals", () => {
-      const { result } = renderHook(() => useModalManager<"create" | "edit" | "delete" | null>());
+      const { result } = renderHook(() =>
+        useModalManager<"create" | "edit" | "delete" | null>(),
+      );
 
       act(() => {
         result.current.open("edit");
@@ -199,7 +217,9 @@ describe("useModalManager", () => {
     });
 
     it("opens with data when toggling open", () => {
-      const { result } = renderHook(() => useModalManager<"edit" | null, { userId: number }>());
+      const { result } = renderHook(() =>
+        useModalManager<"edit" | null, { userId: number }>(),
+      );
 
       act(() => {
         result.current.toggle("edit", { userId: 42 });
@@ -210,7 +230,9 @@ describe("useModalManager", () => {
     });
 
     it("clears data when toggling closed", () => {
-      const { result } = renderHook(() => useModalManager<"edit" | null, { userId: number }>());
+      const { result } = renderHook(() =>
+        useModalManager<"edit" | null, { userId: number }>(),
+      );
 
       act(() => {
         result.current.open("edit", { userId: 42 });
@@ -224,7 +246,9 @@ describe("useModalManager", () => {
     });
 
     it("switches from one modal to another", () => {
-      const { result } = renderHook(() => useModalManager<"create" | "edit" | null>());
+      const { result } = renderHook(() =>
+        useModalManager<"create" | "edit" | null>(),
+      );
 
       act(() => {
         result.current.open("create");
@@ -247,7 +271,6 @@ describe("useModalManager", () => {
 
       const firstOpen = result.current.open;
       const firstClose = result.current.close;
-      const firstToggle = result.current.toggle;
 
       rerender();
 
@@ -289,7 +312,9 @@ describe("useModalManager", () => {
         action: "approve" | "reject";
       }
 
-      const { result } = renderHook(() => useModalManager<"confirm" | null, ModalData>());
+      const { result } = renderHook(() =>
+        useModalManager<"confirm" | null, ModalData>(),
+      );
 
       const testData: ModalData = {
         user: { id: 1, name: "John" },

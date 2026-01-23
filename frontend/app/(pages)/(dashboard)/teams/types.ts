@@ -33,7 +33,10 @@ export interface GroupedSelectOptions {
   departments: SelectOption[];
 }
 
-export const getGroupedOptions = (squads: Squad[], departments: string[]): GroupedSelectOptions => {
+export const getGroupedOptions = (
+  squads: Squad[],
+  departments: string[],
+): GroupedSelectOptions => {
   return {
     squads: squads.map((squad) => ({
       value: squad.id.toString(),
@@ -96,7 +99,7 @@ export const filterTimeOffByTeam = (
   timeOffRequests: TimeOffRequest[] | null | undefined,
   allUsers: User[],
   type: SelectionType,
-  id: string | null
+  id: string | null,
 ): TimeOffRequest[] => {
   if (!id || !timeOffRequests) return [];
 
@@ -124,7 +127,7 @@ export const filterTasksByTeam = (
   tasks: TeamTask[] | null | undefined,
   allUsers: User[],
   type: SelectionType,
-  id: string | null
+  id: string | null,
 ): TeamTask[] => {
   if (!id || !tasks) return [];
 
@@ -145,19 +148,23 @@ export const filterTasksByTeam = (
     });
   }
 
-  return tasks.filter((task) => task.employee && memberIds.has(task.employee.id));
+  return tasks.filter(
+    (task) => task.employee && memberIds.has(task.employee.id),
+  );
 };
 
 export const filterMembersByTeam = (
   allUsers: User[],
   type: SelectionType,
-  id: string | null
+  id: string | null,
 ): User[] => {
   if (!id) return [];
 
   if (type === "squad") {
     const squadId = parseInt(id, 10);
-    return allUsers.filter((user) => user.squads?.some((squad) => squad.id === squadId));
+    return allUsers.filter((user) =>
+      user.squads?.some((squad) => squad.id === squadId),
+    );
   } else {
     return allUsers.filter((user) => user.department === id);
   }

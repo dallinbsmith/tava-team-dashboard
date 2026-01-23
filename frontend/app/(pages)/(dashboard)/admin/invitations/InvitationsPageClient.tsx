@@ -34,13 +34,19 @@ export const InvitationsPageClient = ({
   initialDepartments,
 }: InvitationsPageClientProps) => {
   // Use organization provider for mutations (addSquad), fall back to initial data for display
-  const { squads: providerSquads, addSquad, departments: providerDepartments } = useOrganization();
+  const {
+    squads: providerSquads,
+    addSquad,
+    departments: providerDepartments,
+  } = useOrganization();
 
   // Use provider data if available, otherwise use initial server data
   const squads = providerSquads?.length > 0 ? providerSquads : initialSquads;
-  const departments = providerDepartments?.length > 0 ? providerDepartments : initialDepartments;
+  const departments =
+    providerDepartments?.length > 0 ? providerDepartments : initialDepartments;
 
-  const [invitations, setInvitations] = useState<Invitation[]>(initialInvitations);
+  const [invitations, setInvitations] =
+    useState<Invitation[]>(initialInvitations);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -50,7 +56,9 @@ export const InvitationsPageClient = ({
     department: "",
     squad_ids: [],
   });
-  const [createdInvitation, setCreatedInvitation] = useState<Invitation | null>(null);
+  const [createdInvitation, setCreatedInvitation] = useState<Invitation | null>(
+    null,
+  );
 
   // Department selection state
   const [departmentDropdownOpen, setDepartmentDropdownOpen] = useState(false);
@@ -75,7 +83,12 @@ export const InvitationsPageClient = ({
       if (result.success) {
         setCreatedInvitation(result.data);
         setInvitations([result.data, ...invitations]);
-        setNewInvitation({ email: "", role: "supervisor", department: "", squad_ids: [] });
+        setNewInvitation({
+          email: "",
+          role: "supervisor",
+          department: "",
+          squad_ids: [],
+        });
       } else {
         setError(result.error);
       }
@@ -96,7 +109,9 @@ export const InvitationsPageClient = ({
       const result = await revokeInvitationAction(id);
       if (result.success) {
         setInvitations(
-          invitations.map((inv) => (inv.id === id ? { ...inv, status: "revoked" as const } : inv))
+          invitations.map((inv) =>
+            inv.id === id ? { ...inv, status: "revoked" as const } : inv,
+          ),
         );
       } else {
         setError(result.error);
@@ -144,7 +159,9 @@ export const InvitationsPageClient = ({
   };
 
   const removeSquad = (squadId: number) => {
-    const newIds = (newInvitation.squad_ids || []).filter((id) => id !== squadId);
+    const newIds = (newInvitation.squad_ids || []).filter(
+      (id) => id !== squadId,
+    );
     setNewInvitation({ ...newInvitation, squad_ids: newIds });
   };
 
@@ -214,10 +231,13 @@ export const InvitationsPageClient = ({
           <div className="px-6 py-12 text-center text-theme-text-muted">
             <Mail className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
             <p>No invitations yet</p>
-            <p className="text-sm mt-1">Send your first invitation to get started</p>
+            <p className="text-sm mt-1">
+              Send your first invitation to get started
+            </p>
           </div>
-        ) : invitations.filter((inv) => !showOnlyPending || inv.status === "pending").length ===
-          0 ? (
+        ) : invitations.filter(
+            (inv) => !showOnlyPending || inv.status === "pending",
+          ).length === 0 ? (
           <div className="px-6 py-12 text-center text-theme-text-muted">
             <CheckCircle className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
             <p>No pending invitations</p>
@@ -236,13 +256,18 @@ export const InvitationsPageClient = ({
             {invitations
               .filter((inv) => !showOnlyPending || inv.status === "pending")
               .map((invitation) => (
-                <div key={invitation.id} className="px-6 py-4 flex items-center justify-between">
+                <div
+                  key={invitation.id}
+                  className="px-6 py-4 flex items-center justify-between"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-theme-elevated flex items-center justify-center">
                       <Mail className="w-5 h-5 text-theme-text-muted" />
                     </div>
                     <div>
-                      <p className="font-medium text-theme-text">{invitation.email}</p>
+                      <p className="font-medium text-theme-text">
+                        {invitation.email}
+                      </p>
                       <div className="flex items-center gap-2 mt-1">
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${
@@ -256,7 +281,7 @@ export const InvitationsPageClient = ({
                         </span>
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${getStatusColor(
-                            invitation.status
+                            invitation.status,
                           )}`}
                         >
                           {getStatusIcon(invitation.status)}
@@ -288,7 +313,9 @@ export const InvitationsPageClient = ({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-theme-surface shadow-xl max-w-md w-full mx-4">
             <div className="px-6 py-4 border-b border-theme-border">
-              <h3 className="text-lg font-semibold text-theme-text">Send Invitation</h3>
+              <h3 className="text-lg font-semibold text-theme-text">
+                Send Invitation
+              </h3>
             </div>
 
             {createdInvitation ? (
@@ -297,10 +324,14 @@ export const InvitationsPageClient = ({
                   <div className="w-12 h-12 bg-green-900/40 flex items-center justify-center mx-auto mb-4">
                     <Mail className="w-6 h-6 text-green-400" />
                   </div>
-                  <h4 className="text-lg font-medium text-theme-text">Invitation Sent!</h4>
+                  <h4 className="text-lg font-medium text-theme-text">
+                    Invitation Sent!
+                  </h4>
                   <p className="text-sm text-theme-text-muted mt-1">
                     An email has been sent to{" "}
-                    <span className="text-theme-text font-medium">{createdInvitation.email}</span>{" "}
+                    <span className="text-theme-text font-medium">
+                      {createdInvitation.email}
+                    </span>{" "}
                     with instructions to join.
                   </p>
                 </div>
@@ -328,7 +359,12 @@ export const InvitationsPageClient = ({
                   <input
                     type="email"
                     value={newInvitation.email}
-                    onChange={(e) => setNewInvitation({ ...newInvitation, email: e.target.value })}
+                    onChange={(e) =>
+                      setNewInvitation({
+                        ...newInvitation,
+                        email: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="Enter email address"
                     required
@@ -336,7 +372,9 @@ export const InvitationsPageClient = ({
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-theme-text mb-1">Role</label>
+                  <label className="block text-sm font-medium text-theme-text mb-1">
+                    Role
+                  </label>
                   <select
                     value={newInvitation.role}
                     onChange={(e) =>
@@ -364,12 +402,16 @@ export const InvitationsPageClient = ({
                   <div className="relative">
                     <button
                       type="button"
-                      onClick={() => setDepartmentDropdownOpen(!departmentDropdownOpen)}
+                      onClick={() =>
+                        setDepartmentDropdownOpen(!departmentDropdownOpen)
+                      }
                       className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text text-left flex items-center justify-between focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     >
                       <span
                         className={
-                          newInvitation.department ? "text-theme-text" : "text-theme-text-muted"
+                          newInvitation.department
+                            ? "text-theme-text"
+                            : "text-theme-text-muted"
                         }
                       >
                         {newInvitation.department || "Select department..."}
@@ -384,7 +426,10 @@ export const InvitationsPageClient = ({
                         <button
                           type="button"
                           onClick={() => {
-                            setNewInvitation({ ...newInvitation, department: "" });
+                            setNewInvitation({
+                              ...newInvitation,
+                              department: "",
+                            });
                             setDepartmentDropdownOpen(false);
                           }}
                           className="w-full px-3 py-2 text-left text-theme-text-muted hover:bg-theme-elevated"
@@ -396,11 +441,16 @@ export const InvitationsPageClient = ({
                             key={dept}
                             type="button"
                             onClick={() => {
-                              setNewInvitation({ ...newInvitation, department: dept });
+                              setNewInvitation({
+                                ...newInvitation,
+                                department: dept,
+                              });
                               setDepartmentDropdownOpen(false);
                             }}
                             className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-theme-elevated ${
-                              newInvitation.department === dept ? "bg-primary-900/20" : ""
+                              newInvitation.department === dept
+                                ? "bg-primary-900/20"
+                                : ""
                             }`}
                           >
                             <Building2 className="w-4 h-4 text-theme-text-muted" />
@@ -418,7 +468,9 @@ export const InvitationsPageClient = ({
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-theme-text mb-1">Squads</label>
+                  <label className="block text-sm font-medium text-theme-text mb-1">
+                    Squads
+                  </label>
 
                   {getSelectedSquads().length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-2">
@@ -472,12 +524,16 @@ export const InvitationsPageClient = ({
                           >
                             <div
                               className={`w-4 h-4 border flex items-center justify-center ${
-                                (newInvitation.squad_ids || []).includes(squad.id)
+                                (newInvitation.squad_ids || []).includes(
+                                  squad.id,
+                                )
                                   ? "border-primary-500 bg-primary-500"
                                   : "border-theme-border"
                               }`}
                             >
-                              {(newInvitation.squad_ids || []).includes(squad.id) && (
+                              {(newInvitation.squad_ids || []).includes(
+                                squad.id,
+                              ) && (
                                 <svg
                                   className="w-3 h-3 text-white"
                                   fill="currentColor"
@@ -491,7 +547,9 @@ export const InvitationsPageClient = ({
                                 </svg>
                               )}
                             </div>
-                            <span className="text-theme-text">{squad.name}</span>
+                            <span className="text-theme-text">
+                              {squad.name}
+                            </span>
                           </button>
                         ))}
 

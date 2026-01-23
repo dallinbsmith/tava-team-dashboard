@@ -3,7 +3,12 @@
 import { forwardRef, ReactNode } from "react";
 import { Loader2, LucideIcon } from "lucide-react";
 
-export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "success";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "danger"
+  | "ghost"
+  | "success";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps extends Omit<
@@ -21,7 +26,8 @@ export interface ButtonProps extends Omit<
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: "bg-primary-600 hover:bg-primary-700 text-white",
-  secondary: "bg-theme-elevated border border-theme-border text-theme-text hover:bg-theme-surface",
+  secondary:
+    "bg-theme-elevated border border-theme-border text-theme-text hover:bg-theme-surface",
   danger: "bg-red-600 hover:bg-red-700 text-white",
   ghost: "text-theme-text hover:bg-theme-elevated",
   success: "bg-emerald-600 hover:bg-emerald-700 text-white",
@@ -80,7 +86,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className = "",
       ...props
     },
-    ref
+    ref,
   ) => {
     const isDisabled = disabled || loading;
 
@@ -107,7 +113,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!loading && IconAfter && <IconAfter className={iconSizes[size]} />}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";
@@ -123,7 +129,10 @@ export interface IconButtonProps extends Omit<
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
-  ({ icon: Icon, variant = "ghost", size = "md", className = "", ...props }, ref) => {
+  (
+    { icon: Icon, variant = "ghost", size = "md", className = "", ...props },
+    ref,
+  ) => {
     const sizeClasses: Record<ButtonSize, string> = {
       sm: "p-1",
       md: "p-1.5",
@@ -145,7 +154,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         <Icon className={iconSizes[size]} />
       </button>
     );
-  }
+  },
 );
 
 IconButton.displayName = "IconButton";

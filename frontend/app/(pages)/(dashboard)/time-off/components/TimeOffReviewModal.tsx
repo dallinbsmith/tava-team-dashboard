@@ -4,7 +4,15 @@ import { useState, useTransition } from "react";
 import { format } from "date-fns";
 import { TimeOffRequest, TIME_OFF_TYPE_LABELS } from "../types";
 import { reviewTimeOffRequestAction } from "../actions";
-import { X, Check, XCircle, Loader2, Calendar, User, MessageSquare } from "lucide-react";
+import {
+  X,
+  Check,
+  XCircle,
+  Loader2,
+  Calendar,
+  User,
+  MessageSquare,
+} from "lucide-react";
 
 interface TimeOffReviewModalProps {
   request: TimeOffRequest;
@@ -49,8 +57,13 @@ export default function TimeOffReviewModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-md">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <h3 className="text-lg font-medium text-white">Review Time Off Request</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+          <h3 className="text-lg font-medium text-white">
+            Review Time Off Request
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -86,7 +99,9 @@ export default function TimeOffReviewModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Notes (optional)</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Notes (optional)
+            </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

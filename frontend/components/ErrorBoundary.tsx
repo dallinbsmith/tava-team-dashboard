@@ -2,7 +2,13 @@
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import Link from "next/link";
-import { AlertTriangle, RefreshCw, Home, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  AlertTriangle,
+  RefreshCw,
+  Home,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -45,7 +51,10 @@ interface ErrorBoundaryState {
  * </ErrorBoundary>
  * ```
  */
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -122,8 +131,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <AlertTriangle className="w-5 h-5 text-red-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-theme-text">Something went wrong</h2>
-              <p className="text-sm text-theme-text-muted">An unexpected error occurred</p>
+              <h2 className="text-lg font-semibold text-theme-text">
+                Something went wrong
+              </h2>
+              <p className="text-sm text-theme-text-muted">
+                An unexpected error occurred
+              </p>
             </div>
           </div>
 
@@ -201,7 +214,9 @@ export const QueryErrorFallback = ({
           <AlertTriangle className="w-4 h-4 text-red-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-theme-text mb-1">Failed to load data</h3>
+          <h3 className="text-sm font-medium text-theme-text mb-1">
+            Failed to load data
+          </h3>
           <p className="text-sm text-theme-text-muted mb-3">{error.message}</p>
           {resetErrorBoundary && (
             <button

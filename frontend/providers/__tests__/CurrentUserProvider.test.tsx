@@ -4,13 +4,15 @@
  */
 
 import React from "react";
-import { render, screen, waitFor, renderHook } from "@testing-library/react";
+import { render, screen, renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { CurrentUserProvider, useCurrentUser } from "../CurrentUserProvider";
-import { ImpersonationProvider, useImpersonation } from "../ImpersonationProvider";
+import {
+  ImpersonationProvider,
+  useImpersonation,
+} from "../ImpersonationProvider";
 import { useCurrentUserQuery } from "@/hooks";
-import * as api from "@/lib/api";
 import { User } from "@/shared/types/user";
 
 // Mock Auth0
@@ -29,7 +31,6 @@ const mockUseCurrentUserQuery = useCurrentUserQuery as jest.MockedFunction<
 jest.mock("@/lib/api", () => ({
   getUserById: jest.fn(),
 }));
-const mockGetUserById = api.getUserById as jest.MockedFunction<typeof api.getUserById>;
 
 // Test fixtures
 const createMockUser = (overrides: Partial<User> = {}): User => ({
@@ -49,8 +50,16 @@ const createMockUser = (overrides: Partial<User> = {}): User => ({
 });
 
 const adminUser = createMockUser({ role: "admin" });
-const supervisorUser = createMockUser({ id: 2, role: "supervisor", first_name: "Supervisor" });
-const employeeUser = createMockUser({ id: 3, role: "employee", first_name: "Employee" });
+const supervisorUser = createMockUser({
+  id: 2,
+  role: "supervisor",
+  first_name: "Supervisor",
+});
+const employeeUser = createMockUser({
+  id: 3,
+  role: "employee",
+  first_name: "Employee",
+});
 
 // Create a fresh QueryClient for each test
 const createTestQueryClient = () =>
@@ -85,7 +94,9 @@ function TestConsumer() {
       <div data-testid="error">{error || "null"}</div>
       <div data-testid="is-admin">{String(isAdmin)}</div>
       <div data-testid="is-supervisor">{String(isSupervisor)}</div>
-      <div data-testid="is-supervisor-or-admin">{String(isSupervisorOrAdmin)}</div>
+      <div data-testid="is-supervisor-or-admin">
+        {String(isSupervisorOrAdmin)}
+      </div>
       <div data-testid="effective-is-supervisor-or-admin">
         {String(effectiveIsSupervisorOrAdmin)}
       </div>
@@ -183,7 +194,9 @@ describe("CurrentUserProvider", () => {
 
       render(<TestConsumer />, { wrapper: createWrapper(queryClient) });
 
-      expect(screen.getByTestId("error")).toHaveTextContent("Failed to load user");
+      expect(screen.getByTestId("error")).toHaveTextContent(
+        "Failed to load user",
+      );
     });
   });
 
@@ -205,7 +218,9 @@ describe("CurrentUserProvider", () => {
 
       expect(screen.getByTestId("is-admin")).toHaveTextContent("true");
       expect(screen.getByTestId("is-supervisor")).toHaveTextContent("false");
-      expect(screen.getByTestId("is-supervisor-or-admin")).toHaveTextContent("true");
+      expect(screen.getByTestId("is-supervisor-or-admin")).toHaveTextContent(
+        "true",
+      );
     });
 
     it("correctly identifies supervisor user", () => {
@@ -225,7 +240,9 @@ describe("CurrentUserProvider", () => {
 
       expect(screen.getByTestId("is-admin")).toHaveTextContent("false");
       expect(screen.getByTestId("is-supervisor")).toHaveTextContent("true");
-      expect(screen.getByTestId("is-supervisor-or-admin")).toHaveTextContent("true");
+      expect(screen.getByTestId("is-supervisor-or-admin")).toHaveTextContent(
+        "true",
+      );
     });
 
     it("correctly identifies employee user", () => {
@@ -245,7 +262,9 @@ describe("CurrentUserProvider", () => {
 
       expect(screen.getByTestId("is-admin")).toHaveTextContent("false");
       expect(screen.getByTestId("is-supervisor")).toHaveTextContent("false");
-      expect(screen.getByTestId("is-supervisor-or-admin")).toHaveTextContent("false");
+      expect(screen.getByTestId("is-supervisor-or-admin")).toHaveTextContent(
+        "false",
+      );
     });
   });
 
@@ -301,7 +320,9 @@ describe("CurrentUserProvider", () => {
 
       render(<TestConsumer />, { wrapper: createWrapper(queryClient) });
 
-      expect(screen.getByTestId("effective-is-supervisor-or-admin")).toHaveTextContent("true");
+      expect(
+        screen.getByTestId("effective-is-supervisor-or-admin"),
+      ).toHaveTextContent("true");
     });
 
     it("effectiveIsSupervisorOrAdmin is false for employee", () => {
@@ -319,7 +340,9 @@ describe("CurrentUserProvider", () => {
 
       render(<TestConsumer />, { wrapper: createWrapper(queryClient) });
 
-      expect(screen.getByTestId("effective-is-supervisor-or-admin")).toHaveTextContent("false");
+      expect(
+        screen.getByTestId("effective-is-supervisor-or-admin"),
+      ).toHaveTextContent("false");
     });
   });
 });
@@ -359,7 +382,9 @@ describe("ImpersonationProvider", () => {
 
   it("provides default non-impersonating state", () => {
     const { result } = renderHook(() => useImpersonation(), {
-      wrapper: ({ children }) => <ImpersonationProvider>{children}</ImpersonationProvider>,
+      wrapper: ({ children }) => (
+        <ImpersonationProvider>{children}</ImpersonationProvider>
+      ),
     });
 
     expect(result.current.isImpersonating).toBe(false);

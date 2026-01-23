@@ -61,7 +61,7 @@ export default function AvatarUpload({
       };
       reader.readAsDataURL(file);
     },
-    [onUpload]
+    [onUpload],
   );
 
   const handleDrop = useCallback(
@@ -76,7 +76,7 @@ export default function AvatarUpload({
         handleFileSelect(file);
       }
     },
-    [canEdit, handleFileSelect]
+    [canEdit, handleFileSelect],
   );
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -96,7 +96,7 @@ export default function AvatarUpload({
         handleFileSelect(file);
       }
     },
-    [handleFileSelect]
+    [handleFileSelect],
   );
 
   const handleClick = () => {
@@ -131,7 +131,11 @@ export default function AvatarUpload({
         onClick={handleClick}
       >
         {displayUrl ? (
-          <img src={displayUrl} alt={userName} className="w-full h-full object-cover" />
+          <img
+            src={displayUrl}
+            alt={userName}
+            className="w-full h-full object-cover"
+          />
         ) : (
           <div className="w-full h-full bg-primary-400 flex items-center justify-center">
             <span className="text-3xl font-bold text-white">

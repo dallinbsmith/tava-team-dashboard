@@ -11,7 +11,10 @@ import {
   useReviewTimeOffRequest,
   useCancelTimeOffRequest,
 } from "@/app/(pages)/(dashboard)/time-off/hooks";
-import { TimeOffRequest, TIME_OFF_TYPE_LABELS } from "@/app/(pages)/(dashboard)/time-off/types";
+import {
+  TimeOffRequest,
+  TIME_OFF_TYPE_LABELS,
+} from "@/app/(pages)/(dashboard)/time-off/types";
 import Avatar from "@/shared/common/Avatar";
 import Pagination from "@/shared/common/Pagination";
 import { format, differenceInDays, isAfter, startOfDay } from "date-fns";
@@ -26,11 +29,14 @@ interface TimeOffWidgetProps {
 
 export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
   const { currentUser } = useCurrentUser();
-  const isSupervisorOrAdmin = currentUser?.role === "supervisor" || currentUser?.role === "admin";
+  const isSupervisorOrAdmin =
+    currentUser?.role === "supervisor" || currentUser?.role === "admin";
 
   const [activeTab, setActiveTab] = useState<TabType>("upcoming");
   const [page, setPage] = useState(1);
-  const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
+  const [selectedRequests, setSelectedRequests] = useState<Set<number>>(
+    new Set(),
+  );
   const [processingIds, setProcessingIds] = useState<Set<number>>(new Set());
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -40,8 +46,10 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
   const { data: teamTimeOff, isLoading: teamLoading } = useTeamTimeOff();
 
   // Fetch data for pending requests
-  const { data: myPendingTimeOff, isLoading: myPendingLoading } = useMyTimeOffRequests("pending");
-  const { data: teamPendingTimeOff, isLoading: teamPendingLoading } = usePendingTimeOffRequests();
+  const { data: myPendingTimeOff, isLoading: myPendingLoading } =
+    useMyTimeOffRequests("pending");
+  const { data: teamPendingTimeOff, isLoading: teamPendingLoading } =
+    usePendingTimeOffRequests();
 
   const reviewMutation = useReviewTimeOffRequest();
   const cancelMutation = useCancelTimeOffRequest();
@@ -68,9 +76,13 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
       .filter(
         (r) =>
           isAfter(new Date(r.end_date), today) ||
-          format(new Date(r.end_date), "yyyy-MM-dd") === format(today, "yyyy-MM-dd")
+          format(new Date(r.end_date), "yyyy-MM-dd") ===
+            format(today, "yyyy-MM-dd"),
       )
-      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+      .sort(
+        (a, b) =>
+          new Date(a.start_date).getTime() - new Date(b.start_date).getTime(),
+      );
   }, [isSupervisorOrAdmin, myApprovedTimeOff, teamTimeOff]);
 
   // Pending requests data
@@ -83,14 +95,20 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
 
   // Loading states
   const upcomingLoading = isSupervisorOrAdmin ? teamLoading : myApprovedLoading;
-  const pendingLoading = isSupervisorOrAdmin ? teamPendingLoading : myPendingLoading;
+  const pendingLoading = isSupervisorOrAdmin
+    ? teamPendingLoading
+    : myPendingLoading;
   const isLoading = activeTab === "upcoming" ? upcomingLoading : pendingLoading;
 
   // Current data based on active tab
-  const currentData = activeTab === "upcoming" ? upcomingTimeOff : pendingRequests;
+  const currentData =
+    activeTab === "upcoming" ? upcomingTimeOff : pendingRequests;
   const totalPages = Math.ceil(currentData.length / PAGINATION.TIME_OFF);
   const startIndex = (page - 1) * PAGINATION.TIME_OFF;
-  const paginatedData = currentData.slice(startIndex, startIndex + PAGINATION.TIME_OFF);
+  const paginatedData = currentData.slice(
+    startIndex,
+    startIndex + PAGINATION.TIME_OFF,
+  );
 
   // Selection handlers for supervisors/admins (pending tab only)
   const toggleRequestSelection = (id: number) => {
@@ -122,8 +140,8 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
     try {
       await Promise.all(
         Array.from(selectedRequests).map((id) =>
-          reviewMutation.mutateAsync({ id, review: { status: action } })
-        )
+          reviewMutation.mutateAsync({ id, review: { status: action } }),
+        ),
       );
       setSelectedRequests(new Set());
     } catch (error) {
@@ -131,14 +149,17 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
       setActionError(
         error instanceof Error
           ? error.message
-          : "Failed to process time off requests. Please try again."
+          : "Failed to process time off requests. Please try again.",
       );
     } finally {
       setProcessingIds(new Set());
     }
   };
 
-  const handleSingleReview = async (id: number, action: "approved" | "rejected") => {
+  const handleSingleReview = async (
+    id: number,
+    action: "approved" | "rejected",
+  ) => {
     setProcessingIds(new Set([id]));
     setActionError(null);
 
@@ -154,7 +175,7 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
       setActionError(
         error instanceof Error
           ? error.message
-          : "Failed to process time off request. Please try again."
+          : "Failed to process time off request. Please try again.",
       );
     } finally {
       setProcessingIds(new Set());
@@ -172,7 +193,7 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
       setActionError(
         error instanceof Error
           ? error.message
-          : "Failed to cancel time off request. Please try again."
+          : "Failed to cancel time off request. Please try again.",
       );
     } finally {
       setProcessingIds(new Set());
@@ -249,47 +270,55 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
       </div>
 
       <div className="flex-1">
-        {isSupervisorOrAdmin && activeTab === "pending" && pendingRequests.length > 0 && (
-          <div className="flex items-center gap-2 px-4 py-2" role="group" aria-label="Bulk actions">
-            <button
-              onClick={toggleAllRequests}
-              className="text-xs text-theme-text-muted hover:text-theme-text transition-colors"
-              aria-label={
-                selectedRequests.size === pendingRequests.length
-                  ? "Deselect all time off requests"
-                  : "Select all time off requests"
-              }
+        {isSupervisorOrAdmin &&
+          activeTab === "pending" &&
+          pendingRequests.length > 0 && (
+            <div
+              className="flex items-center gap-2 px-4 py-2"
+              role="group"
+              aria-label="Bulk actions"
             >
-              {selectedRequests.size === pendingRequests.length ? "Deselect All" : "Select All"}
-            </button>
-            {selectedRequests.size > 0 && (
-              <>
-                <button
-                  onClick={() => handleBulkAction("approved")}
-                  disabled={processingIds.size > 0}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
-                  aria-label={`Approve ${selectedRequests.size} selected request${
-                    selectedRequests.size !== 1 ? "s" : ""
-                  }`}
-                >
-                  <Check className="w-3 h-3" aria-hidden="true" />
-                  Approve ({selectedRequests.size})
-                </button>
-                <button
-                  onClick={() => handleBulkAction("rejected")}
-                  disabled={processingIds.size > 0}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-                  aria-label={`Reject ${selectedRequests.size} selected request${
-                    selectedRequests.size !== 1 ? "s" : ""
-                  }`}
-                >
-                  <X className="w-3 h-3" aria-hidden="true" />
-                  Reject ({selectedRequests.size})
-                </button>
-              </>
-            )}
-          </div>
-        )}
+              <button
+                onClick={toggleAllRequests}
+                className="text-xs text-theme-text-muted hover:text-theme-text transition-colors"
+                aria-label={
+                  selectedRequests.size === pendingRequests.length
+                    ? "Deselect all time off requests"
+                    : "Select all time off requests"
+                }
+              >
+                {selectedRequests.size === pendingRequests.length
+                  ? "Deselect All"
+                  : "Select All"}
+              </button>
+              {selectedRequests.size > 0 && (
+                <>
+                  <button
+                    onClick={() => handleBulkAction("approved")}
+                    disabled={processingIds.size > 0}
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+                    aria-label={`Approve ${selectedRequests.size} selected request${
+                      selectedRequests.size !== 1 ? "s" : ""
+                    }`}
+                  >
+                    <Check className="w-3 h-3" aria-hidden="true" />
+                    Approve ({selectedRequests.size})
+                  </button>
+                  <button
+                    onClick={() => handleBulkAction("rejected")}
+                    disabled={processingIds.size > 0}
+                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                    aria-label={`Reject ${selectedRequests.size} selected request${
+                      selectedRequests.size !== 1 ? "s" : ""
+                    }`}
+                  >
+                    <X className="w-3 h-3" aria-hidden="true" />
+                    Reject ({selectedRequests.size})
+                  </button>
+                </>
+              )}
+            </div>
+          )}
 
         {actionError && (
           <ErrorAlert
@@ -314,14 +343,18 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
               <>
                 <Calendar className="w-10 h-10 mx-auto mb-3 text-theme-text-subtle" />
                 <p className="text-sm">
-                  {isSupervisorOrAdmin ? "No upcoming team time off" : "No upcoming time off"}
+                  {isSupervisorOrAdmin
+                    ? "No upcoming team time off"
+                    : "No upcoming time off"}
                 </p>
               </>
             ) : (
               <>
                 <Clock className="w-10 h-10 mx-auto mb-3 text-theme-text-subtle" />
                 <p className="text-sm">
-                  {isSupervisorOrAdmin ? "No pending requests to review" : "No pending requests"}
+                  {isSupervisorOrAdmin
+                    ? "No pending requests to review"
+                    : "No pending requests"}
                 </p>
               </>
             )}
@@ -336,7 +369,10 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
               const isSelected = selectedRequests.has(request.id);
               const isProcessing = processingIds.has(request.id);
               const days =
-                differenceInDays(new Date(request.end_date), new Date(request.start_date)) + 1;
+                differenceInDays(
+                  new Date(request.end_date),
+                  new Date(request.start_date),
+                ) + 1;
 
               const userName = request.user
                 ? `${request.user.first_name} ${request.user.last_name}`
@@ -407,7 +443,9 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
                     <div className="text-xs text-theme-text-muted">
                       {format(new Date(request.start_date), "MMM d")} -{" "}
                       {format(new Date(request.end_date), "MMM d")}
-                      <span className="ml-1 text-theme-text-subtle">({days}d)</span>
+                      <span className="ml-1 text-theme-text-subtle">
+                        ({days}d)
+                      </span>
                     </div>
                   </div>
 
@@ -416,7 +454,9 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
                       {isSupervisorOrAdmin ? (
                         <>
                           <button
-                            onClick={() => handleSingleReview(request.id, "approved")}
+                            onClick={() =>
+                              handleSingleReview(request.id, "approved")
+                            }
                             disabled={isProcessing}
                             className="p-1 text-green-400 hover:bg-green-900/30 transition-colors disabled:opacity-50"
                             title="Approve"
@@ -424,7 +464,9 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
                             <Check className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleSingleReview(request.id, "rejected")}
+                            onClick={() =>
+                              handleSingleReview(request.id, "rejected")
+                            }
                             disabled={isProcessing}
                             className="p-1 text-red-400 hover:bg-red-900/30 transition-colors disabled:opacity-50"
                             title="Reject"
@@ -459,7 +501,11 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
           View all time off →
         </Link>
         {totalPages > 1 && (
-          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+          />
         )}
       </div>
     </div>

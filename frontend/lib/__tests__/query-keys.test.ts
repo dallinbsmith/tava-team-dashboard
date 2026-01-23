@@ -120,8 +120,14 @@ describe("queryKeys", () => {
     });
 
     it("different date ranges produce different keys", () => {
-      const jan = queryKeys.calendar.events(new Date("2024-01-01"), new Date("2024-01-31"));
-      const feb = queryKeys.calendar.events(new Date("2024-02-01"), new Date("2024-02-28"));
+      const jan = queryKeys.calendar.events(
+        new Date("2024-01-01"),
+        new Date("2024-01-31"),
+      );
+      const feb = queryKeys.calendar.events(
+        new Date("2024-02-01"),
+        new Date("2024-02-28"),
+      );
 
       expect(jan).not.toEqual(feb);
     });
@@ -133,8 +139,16 @@ describe("queryKeys", () => {
     });
 
     it("timeOff.my(status) includes status", () => {
-      expect(queryKeys.timeOff.my("pending")).toEqual(["timeOff", "my", "pending"]);
-      expect(queryKeys.timeOff.my("approved")).toEqual(["timeOff", "my", "approved"]);
+      expect(queryKeys.timeOff.my("pending")).toEqual([
+        "timeOff",
+        "my",
+        "pending",
+      ]);
+      expect(queryKeys.timeOff.my("approved")).toEqual([
+        "timeOff",
+        "my",
+        "approved",
+      ]);
     });
 
     it("timeOff.pending() returns correct key", () => {
@@ -172,11 +186,23 @@ describe("queryKeys", () => {
     });
 
     it("jira.userTasks() includes userId and default max", () => {
-      expect(queryKeys.jira.userTasks(42)).toEqual(["jira", "tasks", "user", 42, 50]);
+      expect(queryKeys.jira.userTasks(42)).toEqual([
+        "jira",
+        "tasks",
+        "user",
+        42,
+        50,
+      ]);
     });
 
     it("jira.userTasks() with custom max", () => {
-      expect(queryKeys.jira.userTasks(42, 25)).toEqual(["jira", "tasks", "user", 42, 25]);
+      expect(queryKeys.jira.userTasks(42, 25)).toEqual([
+        "jira",
+        "tasks",
+        "user",
+        42,
+        25,
+      ]);
     });
 
     it("jira.teamTasks() uses default maxPerUser", () => {
@@ -184,7 +210,12 @@ describe("queryKeys", () => {
     });
 
     it("jira.teamTasks(maxPerUser) uses provided value", () => {
-      expect(queryKeys.jira.teamTasks(10)).toEqual(["jira", "tasks", "team", 10]);
+      expect(queryKeys.jira.teamTasks(10)).toEqual([
+        "jira",
+        "tasks",
+        "team",
+        10,
+      ]);
     });
 
     it("jira.projectTasks() includes project key and max", () => {
@@ -226,7 +257,10 @@ describe("queryKeys", () => {
     });
 
     it("orgChart.drafts.detail(id) returns correct key", () => {
-      expect(queryKeys.orgChart.drafts.detail(999)).toEqual(["orgChart/drafts", 999]);
+      expect(queryKeys.orgChart.drafts.detail(999)).toEqual([
+        "orgChart/drafts",
+        999,
+      ]);
     });
   });
 

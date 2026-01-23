@@ -67,13 +67,17 @@ export default function CalendarToolbar({
 
   const handlePrevious = () => {
     onNavigate(
-      view === "month" ? subMonths(date, 1) : new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000)
+      view === "month"
+        ? subMonths(date, 1)
+        : new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000),
     );
   };
 
   const handleNext = () => {
     onNavigate(
-      view === "month" ? addMonths(date, 1) : new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000)
+      view === "month"
+        ? addMonths(date, 1)
+        : new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000),
     );
   };
 
@@ -104,7 +108,9 @@ export default function CalendarToolbar({
           className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors disabled:opacity-50 ml-1"
           title="Refresh"
         >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+          />
         </button>
       </div>
 

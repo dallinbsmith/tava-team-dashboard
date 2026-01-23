@@ -15,7 +15,10 @@ interface AvatarProps {
   className?: string;
 }
 
-const sizeClasses: Record<AvatarSize, { container: string; text: string; pixels: number }> = {
+const sizeClasses: Record<
+  AvatarSize,
+  { container: string; text: string; pixels: number }
+> = {
   xs: { container: "w-6 h-6", text: "text-xs", pixels: 24 },
   sm: { container: "w-8 h-8", text: "text-xs", pixels: 32 },
   md: { container: "w-10 h-10", text: "text-sm", pixels: 40 },
@@ -33,8 +36,16 @@ const Avatar = memo(function Avatar({
   className = "",
 }: AvatarProps) {
   const [imageError, setImageError] = useState(false);
-  const [currentSource, setCurrentSource] = useState<"s3" | "auth0" | "jira" | "initials">(
-    s3AvatarUrl ? "s3" : auth0AvatarUrl ? "auth0" : jiraAvatarUrl ? "jira" : "initials"
+  const [currentSource, setCurrentSource] = useState<
+    "s3" | "auth0" | "jira" | "initials"
+  >(
+    s3AvatarUrl
+      ? "s3"
+      : auth0AvatarUrl
+        ? "auth0"
+        : jiraAvatarUrl
+          ? "jira"
+          : "initials",
   );
 
   const { container, text, pixels } = sizeClasses[size];
@@ -44,7 +55,10 @@ const Avatar = memo(function Avatar({
     if (currentSource === "s3" && auth0AvatarUrl) {
       setCurrentSource("auth0");
       setImageError(false);
-    } else if ((currentSource === "s3" || currentSource === "auth0") && jiraAvatarUrl) {
+    } else if (
+      (currentSource === "s3" || currentSource === "auth0") &&
+      jiraAvatarUrl
+    ) {
       setCurrentSource("jira");
       setImageError(false);
     } else {

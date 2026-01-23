@@ -273,7 +273,7 @@ export const CreateEmployeeModal = ({
               <ChevronDown
                 className={cn(
                   "w-4 h-4 ml-2 shrink-0 transition-transform",
-                  departmentDropdownOpen && "rotate-180"
+                  departmentDropdownOpen && "rotate-180",
                 )}
               />
             </button>
@@ -307,7 +307,7 @@ export const CreateEmployeeModal = ({
                       className={cn(
                         dropdownItem,
                         newEmployee.department === dept &&
-                          "bg-primary-600/20 text-primary-400"
+                          "bg-primary-600/20 text-primary-400",
                       )}
                     >
                       {dept}
@@ -339,7 +339,7 @@ export const CreateEmployeeModal = ({
                       }}
                       className={cn(
                         dropdownItem,
-                        "text-primary-400 border-t border-theme-border flex items-center gap-2"
+                        "text-primary-400 border-t border-theme-border flex items-center gap-2",
                       )}
                     >
                       <Plus className="w-4 h-4" />
@@ -397,7 +397,7 @@ export const CreateEmployeeModal = ({
               <ChevronDown
                 className={cn(
                   "w-4 h-4 ml-2 shrink-0 transition-transform",
-                  squadDropdownOpen && "rotate-180"
+                  squadDropdownOpen && "rotate-180",
                 )}
               />
             </button>
@@ -464,7 +464,7 @@ export const CreateEmployeeModal = ({
                 "p-3 border text-left transition-colors",
                 newEmployee.role === "employee"
                   ? "border-primary-500 bg-primary-500/10"
-                  : "border-theme-border bg-theme-elevated hover:border-theme-text-muted"
+                  : "border-theme-border bg-theme-elevated hover:border-theme-text-muted",
               )}
             >
               <div className="flex items-center gap-2 mb-1">
@@ -473,7 +473,7 @@ export const CreateEmployeeModal = ({
                     "w-4 h-4",
                     newEmployee.role === "employee"
                       ? "text-primary-400"
-                      : "text-theme-text-muted"
+                      : "text-theme-text-muted",
                   )}
                 />
                 <span
@@ -481,7 +481,7 @@ export const CreateEmployeeModal = ({
                     "font-medium",
                     newEmployee.role === "employee"
                       ? "text-primary-400"
-                      : "text-theme-text"
+                      : "text-theme-text",
                   )}
                 >
                   Employee
@@ -501,7 +501,7 @@ export const CreateEmployeeModal = ({
                 "p-3 border text-left transition-colors",
                 newEmployee.role === "supervisor"
                   ? "border-primary-500 bg-primary-500/10"
-                  : "border-theme-border bg-theme-elevated hover:border-theme-text-muted"
+                  : "border-theme-border bg-theme-elevated hover:border-theme-text-muted",
               )}
             >
               <div className="flex items-center gap-2 mb-1">
@@ -510,7 +510,7 @@ export const CreateEmployeeModal = ({
                     "w-4 h-4",
                     newEmployee.role === "supervisor"
                       ? "text-primary-400"
-                      : "text-theme-text-muted"
+                      : "text-theme-text-muted",
                   )}
                 />
                 <span
@@ -518,7 +518,7 @@ export const CreateEmployeeModal = ({
                     "font-medium",
                     newEmployee.role === "supervisor"
                       ? "text-primary-400"
-                      : "text-theme-text"
+                      : "text-theme-text",
                   )}
                 >
                   Supervisor

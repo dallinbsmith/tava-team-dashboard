@@ -114,7 +114,9 @@ describe("CreateTaskModal", () => {
       render(<CreateTaskModal {...defaultProps} />);
 
       expect(screen.getByText("Cancel")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: "Create Task" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Create Task" }),
+      ).toBeInTheDocument();
     });
   });
 
@@ -137,7 +139,9 @@ describe("CreateTaskModal", () => {
 
     it("updates due date field", async () => {
       const { container } = render(<CreateTaskModal {...defaultProps} />);
-      const dateInput = container.querySelector('input[type="date"]') as HTMLInputElement;
+      const dateInput = container.querySelector(
+        'input[type="date"]',
+      ) as HTMLInputElement;
 
       fireEvent.change(dateInput, { target: { value: "2024-12-31" } });
       expect(dateInput).toHaveValue("2024-12-31");
@@ -219,10 +223,15 @@ describe("CreateTaskModal", () => {
       const { container } = render(<CreateTaskModal {...defaultProps} />);
 
       // Fill title
-      await userEvent.type(screen.getByPlaceholderText("Task title"), "Test Task");
+      await userEvent.type(
+        screen.getByPlaceholderText("Task title"),
+        "Test Task",
+      );
 
       // Clear due date
-      const dateInput = container.querySelector('input[type="date"]') as HTMLInputElement;
+      const dateInput = container.querySelector(
+        'input[type="date"]',
+      ) as HTMLInputElement;
       fireEvent.change(dateInput, { target: { value: "" } });
 
       // Submit form
@@ -239,7 +248,10 @@ describe("CreateTaskModal", () => {
       render(<CreateTaskModal {...defaultProps} />);
 
       // Fill out form
-      await userEvent.type(screen.getByPlaceholderText("Task title"), "Test Task");
+      await userEvent.type(
+        screen.getByPlaceholderText("Task title"),
+        "Test Task",
+      );
 
       // Submit form
       fireEvent.click(screen.getByRole("button", { name: "Create Task" }));
@@ -249,7 +261,7 @@ describe("CreateTaskModal", () => {
           expect.objectContaining({
             title: "Test Task",
             assignment_type: "user",
-          })
+          }),
         );
       });
     });
@@ -258,7 +270,10 @@ describe("CreateTaskModal", () => {
       const onCreated = jest.fn();
       render(<CreateTaskModal {...defaultProps} onCreated={onCreated} />);
 
-      await userEvent.type(screen.getByPlaceholderText("Task title"), "Test Task");
+      await userEvent.type(
+        screen.getByPlaceholderText("Task title"),
+        "Test Task",
+      );
       fireEvent.click(screen.getByRole("button", { name: "Create Task" }));
 
       await waitFor(() => {
@@ -274,7 +289,10 @@ describe("CreateTaskModal", () => {
 
       render(<CreateTaskModal {...defaultProps} />);
 
-      await userEvent.type(screen.getByPlaceholderText("Task title"), "Test Task");
+      await userEvent.type(
+        screen.getByPlaceholderText("Task title"),
+        "Test Task",
+      );
       fireEvent.click(screen.getByRole("button", { name: "Create Task" }));
 
       await waitFor(() => {
@@ -296,7 +314,10 @@ describe("CreateTaskModal", () => {
       const { rerender } = render(<CreateTaskModal {...defaultProps} />);
 
       // Fill out some fields
-      await userEvent.type(screen.getByPlaceholderText("Task title"), "Test Task");
+      await userEvent.type(
+        screen.getByPlaceholderText("Task title"),
+        "Test Task",
+      );
 
       // Close modal
       fireEvent.click(screen.getByText("Cancel"));

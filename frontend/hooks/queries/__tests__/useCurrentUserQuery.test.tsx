@@ -19,7 +19,9 @@ const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 jest.mock("@/lib/api", () => ({
   getCurrentUser: jest.fn(),
 }));
-const mockGetCurrentUser = api.getCurrentUser as jest.MockedFunction<typeof api.getCurrentUser>;
+const mockGetCurrentUser = api.getCurrentUser as jest.MockedFunction<
+  typeof api.getCurrentUser
+>;
 
 // Test fixtures
 const createMockUser = (overrides: Partial<User> = {}): User => ({
@@ -101,7 +103,10 @@ describe("useCurrentUserQuery", () => {
 
     it("returns loading true while query is loading", async () => {
       mockGetCurrentUser.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(employeeUser), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(employeeUser), 100),
+          ),
       );
 
       const { result } = renderHook(() => useCurrentUserQuery(), {
@@ -391,7 +396,9 @@ describe("useCurrentUserQuery", () => {
       await result.current.invalidate();
 
       await waitFor(() => {
-        expect(mockGetCurrentUser.mock.calls.length).toBeGreaterThan(initialCallCount);
+        expect(mockGetCurrentUser.mock.calls.length).toBeGreaterThan(
+          initialCallCount,
+        );
       });
     });
   });
@@ -418,7 +425,7 @@ describe("useCurrentUserQuery", () => {
         () =>
           new Promise((resolve) => {
             resolveQuery = resolve;
-          })
+          }),
       );
 
       const { result } = renderHook(() => useCurrentUserQuery(), {

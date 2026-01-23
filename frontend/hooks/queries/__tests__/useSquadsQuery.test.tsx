@@ -24,10 +24,18 @@ jest.mock("@/lib/api", () => ({
   renameSquad: jest.fn(),
   deleteSquad: jest.fn(),
 }));
-const mockGetSquads = api.getSquads as jest.MockedFunction<typeof api.getSquads>;
-const mockCreateSquad = api.createSquad as jest.MockedFunction<typeof api.createSquad>;
-const mockRenameSquad = api.renameSquad as jest.MockedFunction<typeof api.renameSquad>;
-const mockDeleteSquad = api.deleteSquad as jest.MockedFunction<typeof api.deleteSquad>;
+const mockGetSquads = api.getSquads as jest.MockedFunction<
+  typeof api.getSquads
+>;
+const mockCreateSquad = api.createSquad as jest.MockedFunction<
+  typeof api.createSquad
+>;
+const mockRenameSquad = api.renameSquad as jest.MockedFunction<
+  typeof api.renameSquad
+>;
+const mockDeleteSquad = api.deleteSquad as jest.MockedFunction<
+  typeof api.deleteSquad
+>;
 
 // Mock the queryUtils
 jest.mock("@/lib/query-utils", () => ({
@@ -108,7 +116,8 @@ describe("useSquadsQuery", () => {
 
     it("returns loading true while query is loading", async () => {
       mockGetSquads.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockSquads), 100))
+        () =>
+          new Promise((resolve) => setTimeout(() => resolve(mockSquads), 100)),
       );
 
       const { result } = renderHook(() => useSquadsQuery(), {
@@ -477,7 +486,10 @@ describe("useSquadsQuery", () => {
 
       let returnedSquad: Squad | undefined;
       await act(async () => {
-        returnedSquad = await result.current.updateSquad(1, "Frontend Engineers");
+        returnedSquad = await result.current.updateSquad(
+          1,
+          "Frontend Engineers",
+        );
       });
 
       expect(mockRenameSquad).toHaveBeenCalledWith(1, "Frontend Engineers");

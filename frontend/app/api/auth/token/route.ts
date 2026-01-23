@@ -20,7 +20,10 @@ export const GET = async (request: NextRequest) => {
   try {
     const isValidCsrf = await validateCsrfToken(request);
     if (!isValidCsrf) {
-      return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Invalid CSRF token" },
+        { status: 403 },
+      );
     }
 
     const session = await auth0.getSession();

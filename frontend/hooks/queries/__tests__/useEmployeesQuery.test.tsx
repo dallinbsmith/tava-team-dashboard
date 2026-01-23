@@ -21,7 +21,9 @@ jest.mock("@/lib/api", () => ({
   getEmployees: jest.fn(),
   getEmployeeGraphQL: jest.fn(),
 }));
-const mockGetEmployees = api.getEmployees as jest.MockedFunction<typeof api.getEmployees>;
+const mockGetEmployees = api.getEmployees as jest.MockedFunction<
+  typeof api.getEmployees
+>;
 const mockGetEmployeeGraphQL = api.getEmployeeGraphQL as jest.MockedFunction<
   typeof api.getEmployeeGraphQL
 >;
@@ -49,7 +51,11 @@ const mockEmployees: User[] = [
   createMockUser({ id: 3, first_name: "Charlie", last_name: "Brown" }),
 ];
 
-const singleEmployee = createMockUser({ id: 42, first_name: "Single", last_name: "Employee" });
+const singleEmployee = createMockUser({
+  id: 42,
+  first_name: "Single",
+  last_name: "Employee",
+});
 
 // Create a fresh QueryClient for each test
 const createTestQueryClient = () =>
@@ -109,7 +115,10 @@ describe("useEmployeesQuery", () => {
 
     it("returns loading true while query is loading", async () => {
       mockGetEmployees.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockEmployees), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(mockEmployees), 100),
+          ),
       );
 
       const { result } = renderHook(() => useEmployeesQuery(), {
@@ -310,7 +319,10 @@ describe("useEmployeesQuery", () => {
       expect(mockGetEmployees).toHaveBeenCalledTimes(1);
 
       // Update mock to return different data
-      const updatedEmployees = [...mockEmployees, createMockUser({ id: 4, first_name: "New" })];
+      const updatedEmployees = [
+        ...mockEmployees,
+        createMockUser({ id: 4, first_name: "New" }),
+      ];
       mockGetEmployees.mockResolvedValue(updatedEmployees);
 
       await result.current.refetch();
@@ -344,7 +356,9 @@ describe("useEmployeesQuery", () => {
       await result.current.invalidate();
 
       await waitFor(() => {
-        expect(mockGetEmployees.mock.calls.length).toBeGreaterThan(initialCallCount);
+        expect(mockGetEmployees.mock.calls.length).toBeGreaterThan(
+          initialCallCount,
+        );
       });
     });
   });
@@ -371,7 +385,7 @@ describe("useEmployeesQuery", () => {
         () =>
           new Promise((resolve) => {
             resolveQuery = resolve;
-          })
+          }),
       );
 
       const { result } = renderHook(() => useEmployeesQuery(), {
@@ -459,7 +473,10 @@ describe("useEmployeeQuery", () => {
 
     it("returns loading true while query is loading", async () => {
       mockGetEmployeeGraphQL.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(singleEmployee), 100))
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(singleEmployee), 100),
+          ),
       );
 
       const { result } = renderHook(() => useEmployeeQuery({ id: 42 }), {
@@ -628,9 +645,12 @@ describe("useEmployeeQuery", () => {
 
       const customStaleTime = 10 * 60 * 1000; // 10 minutes
 
-      renderHook(() => useEmployeeQuery({ id: 42, staleTime: customStaleTime }), {
-        wrapper: createWrapper(queryClient),
-      });
+      renderHook(
+        () => useEmployeeQuery({ id: 42, staleTime: customStaleTime }),
+        {
+          wrapper: createWrapper(queryClient),
+        },
+      );
 
       await waitFor(() => {
         expect(mockGetEmployeeGraphQL).toHaveBeenCalled();
@@ -708,7 +728,7 @@ describe("useEmployeeQuery", () => {
         () =>
           new Promise((resolve) => {
             resolveQuery = resolve;
-          })
+          }),
       );
 
       const { result } = renderHook(() => useEmployeeQuery({ id: 42 }), {
@@ -751,7 +771,9 @@ describe("useEmployeeQuery", () => {
       });
 
       // Check that data is cached under the correct key
-      const cachedData = queryClient.getQueryData(queryKeys.employees.detail(42));
+      const cachedData = queryClient.getQueryData(
+        queryKeys.employees.detail(42),
+      );
       expect(cachedData).toEqual(singleEmployee);
     });
 
@@ -759,7 +781,9 @@ describe("useEmployeeQuery", () => {
       const employee1 = createMockUser({ id: 1 });
       const employee2 = createMockUser({ id: 2 });
 
-      mockGetEmployeeGraphQL.mockResolvedValueOnce(employee1).mockResolvedValueOnce(employee2);
+      mockGetEmployeeGraphQL
+        .mockResolvedValueOnce(employee1)
+        .mockResolvedValueOnce(employee2);
 
       // Render first hook
       renderHook(() => useEmployeeQuery({ id: 1 }), {
@@ -767,7 +791,9 @@ describe("useEmployeeQuery", () => {
       });
 
       await waitFor(() => {
-        expect(queryClient.getQueryData(queryKeys.employees.detail(1))).toEqual(employee1);
+        expect(queryClient.getQueryData(queryKeys.employees.detail(1))).toEqual(
+          employee1,
+        );
       });
 
       // Render second hook
@@ -776,12 +802,18 @@ describe("useEmployeeQuery", () => {
       });
 
       await waitFor(() => {
-        expect(queryClient.getQueryData(queryKeys.employees.detail(2))).toEqual(employee2);
+        expect(queryClient.getQueryData(queryKeys.employees.detail(2))).toEqual(
+          employee2,
+        );
       });
 
       // Both should be cached separately
-      expect(queryClient.getQueryData(queryKeys.employees.detail(1))).toEqual(employee1);
-      expect(queryClient.getQueryData(queryKeys.employees.detail(2))).toEqual(employee2);
+      expect(queryClient.getQueryData(queryKeys.employees.detail(1))).toEqual(
+        employee1,
+      );
+      expect(queryClient.getQueryData(queryKeys.employees.detail(2))).toEqual(
+        employee2,
+      );
     });
   });
 
@@ -790,14 +822,16 @@ describe("useEmployeeQuery", () => {
       const employee1 = createMockUser({ id: 1, first_name: "First" });
       const employee2 = createMockUser({ id: 2, first_name: "Second" });
 
-      mockGetEmployeeGraphQL.mockResolvedValueOnce(employee1).mockResolvedValueOnce(employee2);
+      mockGetEmployeeGraphQL
+        .mockResolvedValueOnce(employee1)
+        .mockResolvedValueOnce(employee2);
 
       const { result, rerender } = renderHook(
         (props: { id: number }) => useEmployeeQuery({ id: props.id }),
         {
           wrapper: createWrapper(queryClient),
           initialProps: { id: 1 },
-        }
+        },
       );
 
       await waitFor(() => {

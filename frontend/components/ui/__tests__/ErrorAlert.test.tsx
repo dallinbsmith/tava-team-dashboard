@@ -53,31 +53,51 @@ describe("ErrorAlert", () => {
     it("defaults to error variant", () => {
       render(<ErrorAlert {...defaultProps} />);
       const alert = screen.getByRole("alert");
-      expect(alert).toHaveClass("bg-red-900/30", "border-red-500/30", "text-red-400");
+      expect(alert).toHaveClass(
+        "bg-red-900/30",
+        "border-red-500/30",
+        "text-red-400",
+      );
     });
 
     it("renders error variant correctly", () => {
       render(<ErrorAlert {...defaultProps} variant="error" />);
       const alert = screen.getByRole("alert");
-      expect(alert).toHaveClass("bg-red-900/30", "border-red-500/30", "text-red-400");
+      expect(alert).toHaveClass(
+        "bg-red-900/30",
+        "border-red-500/30",
+        "text-red-400",
+      );
     });
 
     it("renders warning variant correctly", () => {
       render(<ErrorAlert {...defaultProps} variant="warning" />);
       const alert = screen.getByRole("alert");
-      expect(alert).toHaveClass("bg-yellow-900/30", "border-yellow-500/30", "text-yellow-400");
+      expect(alert).toHaveClass(
+        "bg-yellow-900/30",
+        "border-yellow-500/30",
+        "text-yellow-400",
+      );
     });
 
     it("renders info variant correctly", () => {
       render(<ErrorAlert {...defaultProps} variant="info" />);
       const alert = screen.getByRole("alert");
-      expect(alert).toHaveClass("bg-blue-900/30", "border-blue-500/30", "text-blue-400");
+      expect(alert).toHaveClass(
+        "bg-blue-900/30",
+        "border-blue-500/30",
+        "text-blue-400",
+      );
     });
 
     it("renders success variant correctly", () => {
       render(<ErrorAlert {...defaultProps} variant="success" />);
       const alert = screen.getByRole("alert");
-      expect(alert).toHaveClass("bg-green-900/30", "border-green-500/30", "text-green-400");
+      expect(alert).toHaveClass(
+        "bg-green-900/30",
+        "border-green-500/30",
+        "text-green-400",
+      );
     });
   });
 
@@ -93,26 +113,39 @@ describe("ErrorAlert", () => {
     });
 
     it("shows dismiss button when dismissible and onDismiss provided", () => {
-      render(<ErrorAlert {...defaultProps} dismissible onDismiss={jest.fn()} />);
+      render(
+        <ErrorAlert {...defaultProps} dismissible onDismiss={jest.fn()} />,
+      );
       expect(screen.getByLabelText("Dismiss")).toBeInTheDocument();
     });
 
     it("calls onDismiss when dismiss button clicked", () => {
       const onDismiss = jest.fn();
-      render(<ErrorAlert {...defaultProps} dismissible onDismiss={onDismiss} />);
+      render(
+        <ErrorAlert {...defaultProps} dismissible onDismiss={onDismiss} />,
+      );
 
       fireEvent.click(screen.getByLabelText("Dismiss"));
       expect(onDismiss).toHaveBeenCalledTimes(1);
     });
 
     it("dismiss button has hover transition", () => {
-      render(<ErrorAlert {...defaultProps} dismissible onDismiss={jest.fn()} />);
+      render(
+        <ErrorAlert {...defaultProps} dismissible onDismiss={jest.fn()} />,
+      );
       const button = screen.getByLabelText("Dismiss");
       expect(button).toHaveClass("hover:opacity-70", "transition-opacity");
     });
 
     it("dismiss button inherits variant text color", () => {
-      render(<ErrorAlert {...defaultProps} variant="warning" dismissible onDismiss={jest.fn()} />);
+      render(
+        <ErrorAlert
+          {...defaultProps}
+          variant="warning"
+          dismissible
+          onDismiss={jest.fn()}
+        />,
+      );
       const button = screen.getByLabelText("Dismiss");
       expect(button).toHaveClass("text-yellow-400");
     });
@@ -159,7 +192,7 @@ describe("ErrorAlert", () => {
       render(
         <ErrorAlert>
           <span data-testid="custom-element">Custom element</span>
-        </ErrorAlert>
+        </ErrorAlert>,
       );
       expect(screen.getByTestId("custom-element")).toBeInTheDocument();
     });
@@ -169,7 +202,7 @@ describe("ErrorAlert", () => {
         <ErrorAlert>
           <span>First line</span>
           <span>Second line</span>
-        </ErrorAlert>
+        </ErrorAlert>,
       );
       expect(screen.getByText("First line")).toBeInTheDocument();
       expect(screen.getByText("Second line")).toBeInTheDocument();
@@ -216,7 +249,7 @@ describe("FormError", () => {
         "border-red-500/30",
         "text-red-400",
         "text-sm",
-        "rounded"
+        "rounded",
       );
     });
   });

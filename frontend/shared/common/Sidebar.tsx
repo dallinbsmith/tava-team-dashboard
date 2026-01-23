@@ -11,7 +11,6 @@ import {
   GitBranch,
   Calendar,
   Palmtree,
-  Menu,
   X,
   Users,
 } from "lucide-react";
@@ -28,12 +27,22 @@ interface SidebarProps {
   onToggle?: () => void;
 }
 
-export default function Sidebar({ user, role, isOpen = false, onToggle }: SidebarProps) {
+export default function Sidebar({
+  user,
+  role,
+  isOpen = false,
+  onToggle,
+}: SidebarProps) {
   const pathname = usePathname();
 
   return (
     <>
-      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onToggle} />}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onToggle}
+        />
+      )}
 
       <aside
         className={`fixed left-0 top-0 h-full w-64 bg-theme-sidebar border-r border-theme-border flex flex-col z-50 transition-transform duration-300 ${
@@ -42,7 +51,11 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
       >
         <div className="px-3 py-3 border-b border-theme-border flex items-center justify-between">
           <div className="ml-2">
-            <Link href="/" onClick={onToggle} className="flex items-center gap-1">
+            <Link
+              href="/"
+              onClick={onToggle}
+              className="flex items-center gap-1"
+            >
               <img
                 src="https://tava-team-calendar.s3.us-east-2.amazonaws.com/avatars/tava-logo.svg"
                 alt="Tava"

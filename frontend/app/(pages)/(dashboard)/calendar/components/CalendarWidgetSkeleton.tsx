@@ -29,7 +29,10 @@ export const CalendarWidgetSkeleton = () => {
 
         <div className="grid grid-cols-7 gap-1">
           {Array.from({ length: 35 }).map((_, i) => (
-            <div key={i} className="aspect-square bg-theme-elevated rounded p-1">
+            <div
+              key={i}
+              className="aspect-square bg-theme-elevated rounded p-1"
+            >
               <div className="h-3 w-3 bg-theme-muted rounded" />
             </div>
           ))}

@@ -1,9 +1,20 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { TimeOffType, TIME_OFF_TYPE_LABELS, CreateTimeOffRequest } from "../../time-off/types";
+import {
+  TimeOffType,
+  TIME_OFF_TYPE_LABELS,
+  CreateTimeOffRequest,
+} from "../../time-off/types";
 import { createTimeOffRequestAction } from "../../time-off/actions";
-import { BaseModal, SelectField, InputField, TextareaField, Button, FormError } from "@/components";
+import {
+  BaseModal,
+  SelectField,
+  InputField,
+  TextareaField,
+  Button,
+  FormError,
+} from "@/components";
 import { format, addDays } from "date-fns";
 
 interface RequestTimeOffModalProps {
@@ -27,8 +38,12 @@ export default function RequestTimeOffModal({
   onCreated,
 }: RequestTimeOffModalProps) {
   const [requestType, setRequestType] = useState<TimeOffType>("vacation");
-  const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
-  const [endDate, setEndDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
+  const [startDate, setStartDate] = useState(
+    format(addDays(new Date(), 1), "yyyy-MM-dd"),
+  );
+  const [endDate, setEndDate] = useState(
+    format(addDays(new Date(), 1), "yyyy-MM-dd"),
+  );
   const [reason, setReason] = useState("");
 
   const [isPending, startTransition] = useTransition();
@@ -91,7 +106,12 @@ export default function RequestTimeOffModal({
   }));
 
   return (
-    <BaseModal isOpen={isOpen} onClose={handleClose} title="Request Time Off" maxWidth="max-w-md">
+    <BaseModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Request Time Off"
+      maxWidth="max-w-md"
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormError error={error} />
 

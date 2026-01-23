@@ -5,7 +5,13 @@
 
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { StatusBadge, RoleBadge, BadgeVariant, BadgeSize, UserRole } from "../StatusBadge";
+import {
+  StatusBadge,
+  RoleBadge,
+  BadgeVariant,
+  BadgeSize,
+  UserRole,
+} from "../StatusBadge";
 
 describe("StatusBadge", () => {
   describe("rendering", () => {
@@ -45,15 +51,18 @@ describe("StatusBadge", () => {
       "cancelled",
     ];
 
-    it.each(variants)("renders %s variant with correct color classes", (variant) => {
-      render(<StatusBadge variant={variant}>{variant}</StatusBadge>);
-      const badge = screen.getByText(variant);
+    it.each(variants)(
+      "renders %s variant with correct color classes",
+      (variant) => {
+        render(<StatusBadge variant={variant}>{variant}</StatusBadge>);
+        const badge = screen.getByText(variant);
 
-      // Each variant should have bg, text, and border classes
-      expect(badge.className).toMatch(/bg-/);
-      expect(badge.className).toMatch(/text-/);
-      expect(badge.className).toMatch(/border-/);
-    });
+        // Each variant should have bg, text, and border classes
+        expect(badge.className).toMatch(/bg-/);
+        expect(badge.className).toMatch(/text-/);
+        expect(badge.className).toMatch(/border-/);
+      },
+    );
 
     it("defaults to 'default' variant", () => {
       render(<StatusBadge>Default</StatusBadge>);
@@ -201,7 +210,7 @@ describe("StatusBadge", () => {
       render(
         <StatusBadge>
           <span data-testid="inner">Inner Element</span>
-        </StatusBadge>
+        </StatusBadge>,
       );
       expect(screen.getByTestId("inner")).toBeInTheDocument();
     });

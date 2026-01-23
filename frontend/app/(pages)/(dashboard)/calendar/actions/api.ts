@@ -12,25 +12,31 @@ import {
 import { fetchWithProxy, handleResponse } from "@/lib/api";
 
 // Calendar Events
-export const getCalendarEvents = async (start: Date, end: Date): Promise<CalendarEvent[]> => {
+export const getCalendarEvents = async (
+  start: Date,
+  end: Date,
+): Promise<CalendarEvent[]> => {
   const response = await fetchWithProxy(
-    `/calendar/events?start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`
+    `/calendar/events?start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`,
   );
   const data = await handleResponse<CalendarEventsResponse>(
     response,
-    "Failed to fetch calendar events"
+    "Failed to fetch calendar events",
   );
   return data.events || [];
 };
 
 export const getCalendarEventsWithMetadata = async (
   start: Date,
-  end: Date
+  end: Date,
 ): Promise<CalendarEventsResponse> => {
   const response = await fetchWithProxy(
-    `/calendar/events?start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`
+    `/calendar/events?start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`,
   );
-  return handleResponse<CalendarEventsResponse>(response, "Failed to fetch calendar events");
+  return handleResponse<CalendarEventsResponse>(
+    response,
+    "Failed to fetch calendar events",
+  );
 };
 
 // Tasks
@@ -47,7 +53,10 @@ export const getTask = async (id: number): Promise<Task> => {
   return handleResponse<Task>(response, "Failed to fetch task");
 };
 
-export const updateTask = async (id: number, data: UpdateTaskRequest): Promise<Task> => {
+export const updateTask = async (
+  id: number,
+  data: UpdateTaskRequest,
+): Promise<Task> => {
   const response = await fetchWithProxy(`/calendar/tasks/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
@@ -56,12 +65,16 @@ export const updateTask = async (id: number, data: UpdateTaskRequest): Promise<T
 };
 
 export const deleteTask = async (id: number): Promise<void> => {
-  const response = await fetchWithProxy(`/calendar/tasks/${id}`, { method: "DELETE" });
+  const response = await fetchWithProxy(`/calendar/tasks/${id}`, {
+    method: "DELETE",
+  });
   if (!response.ok) throw new Error("Failed to delete task");
 };
 
 // Meetings
-export const createMeeting = async (data: CreateMeetingRequest): Promise<Meeting> => {
+export const createMeeting = async (
+  data: CreateMeetingRequest,
+): Promise<Meeting> => {
   const response = await fetchWithProxy("/calendar/meetings", {
     method: "POST",
     body: JSON.stringify(data),
@@ -74,7 +87,10 @@ export const getMeeting = async (id: number): Promise<Meeting> => {
   return handleResponse<Meeting>(response, "Failed to fetch meeting");
 };
 
-export const updateMeeting = async (id: number, data: UpdateMeetingRequest): Promise<Meeting> => {
+export const updateMeeting = async (
+  id: number,
+  data: UpdateMeetingRequest,
+): Promise<Meeting> => {
   const response = await fetchWithProxy(`/calendar/meetings/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
@@ -83,11 +99,16 @@ export const updateMeeting = async (id: number, data: UpdateMeetingRequest): Pro
 };
 
 export const deleteMeeting = async (id: number): Promise<void> => {
-  const response = await fetchWithProxy(`/calendar/meetings/${id}`, { method: "DELETE" });
+  const response = await fetchWithProxy(`/calendar/meetings/${id}`, {
+    method: "DELETE",
+  });
   if (!response.ok) throw new Error("Failed to delete meeting");
 };
 
-export const respondToMeeting = async (meetingId: number, response: ResponseStatus): Promise<void> => {
+export const respondToMeeting = async (
+  meetingId: number,
+  response: ResponseStatus,
+): Promise<void> => {
   const res = await fetchWithProxy(`/calendar/meetings/${meetingId}/respond`, {
     method: "POST",
     body: JSON.stringify({ response }),

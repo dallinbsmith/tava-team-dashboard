@@ -50,7 +50,10 @@ describe("FilterDropdown", () => {
 
     it("uses custom title", () => {
       render(<FilterDropdown {...defaultProps} title="Custom Filters" />);
-      expect(screen.getByRole("button")).toHaveAttribute("title", "Custom Filters");
+      expect(screen.getByRole("button")).toHaveAttribute(
+        "title",
+        "Custom Filters",
+      );
     });
   });
 
@@ -70,7 +73,9 @@ describe("FilterDropdown", () => {
     });
 
     it("displays correct count", () => {
-      const { rerender } = render(<FilterDropdown {...defaultProps} activeFilterCount={1} />);
+      const { rerender } = render(
+        <FilterDropdown {...defaultProps} activeFilterCount={1} />,
+      );
       expect(screen.getByText("1")).toBeInTheDocument();
 
       rerender(<FilterDropdown {...defaultProps} activeFilterCount={10} />);
@@ -80,7 +85,13 @@ describe("FilterDropdown", () => {
 
   describe("button styling", () => {
     it("has muted style when closed and no active filters", () => {
-      render(<FilterDropdown {...defaultProps} isOpen={false} activeFilterCount={0} />);
+      render(
+        <FilterDropdown
+          {...defaultProps}
+          isOpen={false}
+          activeFilterCount={0}
+        />,
+      );
       const button = screen.getByRole("button");
 
       expect(button).toHaveClass("text-theme-text-muted");
@@ -124,7 +135,7 @@ describe("FilterDropdown", () => {
         render(
           <FilterDropdown {...defaultProps} isOpen={true}>
             <div data-testid="custom-content">Custom Content</div>
-          </FilterDropdown>
+          </FilterDropdown>,
         );
       });
 
@@ -133,7 +144,9 @@ describe("FilterDropdown", () => {
 
     it("shows title in panel", async () => {
       await act(async () => {
-        render(<FilterDropdown {...defaultProps} isOpen={true} title="My Filters" />);
+        render(
+          <FilterDropdown {...defaultProps} isOpen={true} title="My Filters" />,
+        );
       });
 
       expect(screen.getByText("My Filters")).toBeInTheDocument();
@@ -143,7 +156,13 @@ describe("FilterDropdown", () => {
   describe("reset all button", () => {
     it("does not show reset button when no active filters", async () => {
       await act(async () => {
-        render(<FilterDropdown {...defaultProps} isOpen={true} activeFilterCount={0} />);
+        render(
+          <FilterDropdown
+            {...defaultProps}
+            isOpen={true}
+            activeFilterCount={0}
+          />,
+        );
       });
 
       expect(screen.queryByText("Reset all")).not.toBeInTheDocument();
@@ -151,7 +170,13 @@ describe("FilterDropdown", () => {
 
     it("shows reset button when has active filters", async () => {
       await act(async () => {
-        render(<FilterDropdown {...defaultProps} isOpen={true} activeFilterCount={2} />);
+        render(
+          <FilterDropdown
+            {...defaultProps}
+            isOpen={true}
+            activeFilterCount={2}
+          />,
+        );
       });
 
       expect(screen.getByText("Reset all")).toBeInTheDocument();
@@ -166,7 +191,7 @@ describe("FilterDropdown", () => {
             isOpen={true}
             activeFilterCount={2}
             onClearAll={onClearAll}
-          />
+          />,
         );
       });
 
@@ -179,7 +204,9 @@ describe("FilterDropdown", () => {
     it("calls onClose when Escape key is pressed while open", async () => {
       const onClose = jest.fn();
       await act(async () => {
-        render(<FilterDropdown {...defaultProps} isOpen={true} onClose={onClose} />);
+        render(
+          <FilterDropdown {...defaultProps} isOpen={true} onClose={onClose} />,
+        );
       });
 
       fireEvent.keyDown(document, { key: "Escape" });
@@ -188,7 +215,9 @@ describe("FilterDropdown", () => {
 
     it("does not call onClose when Escape is pressed while closed", () => {
       const onClose = jest.fn();
-      render(<FilterDropdown {...defaultProps} isOpen={false} onClose={onClose} />);
+      render(
+        <FilterDropdown {...defaultProps} isOpen={false} onClose={onClose} />,
+      );
 
       fireEvent.keyDown(document, { key: "Escape" });
       expect(onClose).not.toHaveBeenCalled();
@@ -204,7 +233,7 @@ describe("FilterDropdown", () => {
           <div>
             <div data-testid="outside">Outside</div>
             <FilterDropdown {...defaultProps} isOpen={true} onClose={onClose} />
-          </div>
+          </div>,
         );
       });
 
@@ -224,7 +253,7 @@ describe("FilterDropdown", () => {
         render(
           <FilterDropdown {...defaultProps} isOpen={true} onClose={onClose}>
             <button data-testid="inside-button">Inside</button>
-          </FilterDropdown>
+          </FilterDropdown>,
         );
       });
 
@@ -241,7 +270,9 @@ describe("FilterDropdown", () => {
       const onClose = jest.fn();
 
       await act(async () => {
-        render(<FilterDropdown {...defaultProps} isOpen={true} onClose={onClose} />);
+        render(
+          <FilterDropdown {...defaultProps} isOpen={true} onClose={onClose} />,
+        );
       });
 
       // Wait for the timeout

@@ -16,13 +16,17 @@ jest.mock("@/hooks", () => ({
   useSquadsQuery: jest.fn(),
 }));
 import { useSquadsQuery } from "@/hooks";
-const mockUseSquadsQuery = useSquadsQuery as jest.MockedFunction<typeof useSquadsQuery>;
+const mockUseSquadsQuery = useSquadsQuery as jest.MockedFunction<
+  typeof useSquadsQuery
+>;
 
 // Mock API
 jest.mock("@/lib/api", () => ({
   getUsersBySquad: jest.fn(),
 }));
-const mockGetUsersBySquad = api.getUsersBySquad as jest.MockedFunction<typeof api.getUsersBySquad>;
+const mockGetUsersBySquad = api.getUsersBySquad as jest.MockedFunction<
+  typeof api.getUsersBySquad
+>;
 
 // Mock Avatar component
 jest.mock("@/shared/common/Avatar", () => {
@@ -83,8 +87,18 @@ const createMockUser = (overrides: Partial<User> = {}): User => ({
 });
 
 const mockUsers: User[] = [
-  createMockUser({ id: 1, first_name: "John", last_name: "Doe", title: "Frontend Dev" }),
-  createMockUser({ id: 2, first_name: "Jane", last_name: "Smith", title: "UI Engineer" }),
+  createMockUser({
+    id: 1,
+    first_name: "John",
+    last_name: "Doe",
+    title: "Frontend Dev",
+  }),
+  createMockUser({
+    id: 2,
+    first_name: "Jane",
+    last_name: "Smith",
+    title: "UI Engineer",
+  }),
 ];
 
 // Create QueryClient for tests
@@ -206,7 +220,9 @@ describe("ManageSquadsModal", () => {
       render(<ManageSquadsModal {...defaultProps} />, {
         wrapper: createWrapper(queryClient),
       });
-      expect(screen.getByPlaceholderText("New squad name...")).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText("New squad name..."),
+      ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
   });
@@ -225,11 +241,16 @@ describe("ManageSquadsModal", () => {
 
     it("calls onClose when backdrop clicked", () => {
       const onClose = jest.fn();
-      const { container } = render(<ManageSquadsModal {...defaultProps} onClose={onClose} />, {
-        wrapper: createWrapper(queryClient),
-      });
+      const { container } = render(
+        <ManageSquadsModal {...defaultProps} onClose={onClose} />,
+        {
+          wrapper: createWrapper(queryClient),
+        },
+      );
 
-      const backdrop = container.querySelector(".absolute.inset-0.bg-black\\/50");
+      const backdrop = container.querySelector(
+        ".absolute.inset-0.bg-black\\/50",
+      );
       fireEvent.click(backdrop!);
       expect(onClose).toHaveBeenCalled();
     });
@@ -240,9 +261,15 @@ describe("ManageSquadsModal", () => {
       const onSquadsChanged = jest.fn();
       const user = userEvent.setup();
 
-      render(<ManageSquadsModal {...defaultProps} onSquadsChanged={onSquadsChanged} />, {
-        wrapper: createWrapper(queryClient),
-      });
+      render(
+        <ManageSquadsModal
+          {...defaultProps}
+          onSquadsChanged={onSquadsChanged}
+        />,
+        {
+          wrapper: createWrapper(queryClient),
+        },
+      );
 
       const input = screen.getByPlaceholderText("New squad name...");
       await user.type(input, "QA Team");
@@ -333,7 +360,7 @@ describe("ManageSquadsModal", () => {
 
       expect(screen.getByTestId("confirmation-modal")).toBeInTheDocument();
       expect(
-        screen.getByText(/Are you sure you want to delete "Frontend Team"/)
+        screen.getByText(/Are you sure you want to delete "Frontend Team"/),
       ).toBeInTheDocument();
     });
 
@@ -366,7 +393,9 @@ describe("ManageSquadsModal", () => {
 
       fireEvent.click(screen.getByText("Cancel"));
 
-      expect(screen.queryByTestId("confirmation-modal")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("confirmation-modal"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -414,7 +443,9 @@ describe("ManageSquadsModal", () => {
 
       fireEvent.click(screen.getByTitle("Cancel"));
 
-      expect(screen.queryByDisplayValue("Backend Team")).not.toBeInTheDocument();
+      expect(
+        screen.queryByDisplayValue("Backend Team"),
+      ).not.toBeInTheDocument();
       expect(screen.getByText("Backend Team")).toBeInTheDocument();
     });
 
@@ -429,7 +460,9 @@ describe("ManageSquadsModal", () => {
       const input = screen.getByDisplayValue("Backend Team");
       fireEvent.keyDown(input, { key: "Escape" });
 
-      expect(screen.queryByDisplayValue("Backend Team")).not.toBeInTheDocument();
+      expect(
+        screen.queryByDisplayValue("Backend Team"),
+      ).not.toBeInTheDocument();
     });
 
     it("saves on Enter key", async () => {
@@ -518,7 +551,8 @@ describe("ManageSquadsModal", () => {
 
     it("shows loading state while fetching users", async () => {
       mockGetUsersBySquad.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockUsers), 100))
+        () =>
+          new Promise((resolve) => setTimeout(() => resolve(mockUsers), 100)),
       );
 
       render(<ManageSquadsModal {...defaultProps} />, {

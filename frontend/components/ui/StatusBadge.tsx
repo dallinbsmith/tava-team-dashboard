@@ -26,7 +26,10 @@ export interface StatusBadgeProps {
   className?: string;
 }
 
-const variantStyles: Record<BadgeVariant, { bg: string; text: string; border: string }> = {
+const variantStyles: Record<
+  BadgeVariant,
+  { bg: string; text: string; border: string }
+> = {
   default: {
     bg: "bg-gray-500/10",
     text: "text-gray-400",
@@ -142,7 +145,11 @@ const roleLabels: Record<UserRole, string> = {
   employee: "Employee",
 };
 
-export const RoleBadge = ({ role, size = "sm", className = "" }: RoleBadgeProps) => {
+export const RoleBadge = ({
+  role,
+  size = "sm",
+  className = "",
+}: RoleBadgeProps) => {
   return (
     <StatusBadge variant={roleVariants[role]} size={size} className={className}>
       {roleLabels[role]}

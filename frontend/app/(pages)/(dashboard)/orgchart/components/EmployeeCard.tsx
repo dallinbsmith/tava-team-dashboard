@@ -10,7 +10,9 @@ interface EmployeeCardProps {
   employee: User;
 }
 
-const EmployeeCard = memo(function EmployeeCard({ employee }: EmployeeCardProps) {
+const EmployeeCard = memo(function EmployeeCard({
+  employee,
+}: EmployeeCardProps) {
   const formattedDate = employee.date_started
     ? new Date(employee.date_started).toLocaleDateString("en-US", {
         month: "short",
@@ -22,7 +24,10 @@ const EmployeeCard = memo(function EmployeeCard({ employee }: EmployeeCardProps)
   return (
     <Link
       href={`/employee/${employee.id}`}
-      className={cn(cardInteractive, "block p-4 sm:p-6 group relative overflow-hidden rounded-lg")}
+      className={cn(
+        cardInteractive,
+        "block p-4 sm:p-6 group relative overflow-hidden rounded-lg",
+      )}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary-900/0 to-primary-800/0 group-hover:from-primary-900/20 group-hover:to-primary-800/10 transition-all duration-300" />
 
@@ -42,13 +47,21 @@ const EmployeeCard = memo(function EmployeeCard({ employee }: EmployeeCardProps)
                   {employee.first_name} {employee.last_name}
                 </span>
                 {employee.role === "admin" && (
-                  <Shield className="w-4 h-4 text-amber-400" aria-label="Admin" />
+                  <Shield
+                    className="w-4 h-4 text-amber-400"
+                    aria-label="Admin"
+                  />
                 )}
                 {employee.role === "supervisor" && (
-                  <Shield className="w-4 h-4 text-purple-400" aria-label="Supervisor" />
+                  <Shield
+                    className="w-4 h-4 text-purple-400"
+                    aria-label="Supervisor"
+                  />
                 )}
               </h3>
-              <div className="text-sm text-theme-text-muted mt-1">{employee.title}</div>
+              <div className="text-sm text-theme-text-muted mt-1">
+                {employee.title}
+              </div>
               {(employee.squads?.length ?? 0) > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {(employee.squads ?? []).map((squad) => (

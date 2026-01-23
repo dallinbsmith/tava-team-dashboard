@@ -62,7 +62,9 @@ export const OrgChartPageClient = ({
   const { refetchSquads } = useOrganization();
   const toast = useToast();
 
-  const [orgTrees, setOrgTrees] = useState<OrgTreeNode[]>(initialOrgTrees || []);
+  const [orgTrees, setOrgTrees] = useState<OrgTreeNode[]>(
+    initialOrgTrees || [],
+  );
   const [drafts, setDrafts] = useState<OrgChartDraft[]>(initialDrafts || []);
   const [squads] = useState<Squad[]>(initialSquads || []);
   const [currentDraft, setCurrentDraft] = useState<OrgChartDraft | null>(null);
@@ -72,9 +74,10 @@ export const OrgChartPageClient = ({
   const [activeUser, setActiveUser] = useState<User | null>(null);
   const [editingEmployee, setEditingEmployee] = useState<User | null>(null);
   const [availableDepartments, setAvailableDepartments] = useState<string[]>(
-    initialDepartments || []
+    initialDepartments || [],
   );
-  const [showManageDepartmentsModal, setShowManageDepartmentsModal] = useState(false);
+  const [showManageDepartmentsModal, setShowManageDepartmentsModal] =
+    useState(false);
   const [showManageSquadsModal, setShowManageSquadsModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
     type: "delete" | "publish";
@@ -99,7 +102,7 @@ export const OrgChartPageClient = ({
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
   // Build pending changes map from current draft
@@ -200,7 +203,10 @@ export const OrgChartPageClient = ({
         const result = await publishDraftAction(id);
         if (result.success) {
           // Refresh data after successful publish
-          const [treeResult, draftsList] = await Promise.all([getOrgTree(), getOrgChartDrafts()]);
+          const [treeResult, draftsList] = await Promise.all([
+            getOrgTree(),
+            getOrgChartDrafts(),
+          ]);
           const trees = Array.isArray(treeResult) ? treeResult : [treeResult];
           setOrgTrees(trees);
           setDrafts(draftsList);
@@ -215,7 +221,10 @@ export const OrgChartPageClient = ({
   };
 
   // Add a change (move employee)
-  const handleMoveEmployee = async (userId: number, newSupervisorId: number) => {
+  const handleMoveEmployee = async (
+    userId: number,
+    newSupervisorId: number,
+  ) => {
     if (!currentDraft) {
       toast.warning("Please create or select a draft first to make changes.");
       return;
@@ -259,7 +268,7 @@ export const OrgChartPageClient = ({
     userId: number,
     newDepartment: string,
     squadIds: number[],
-    newRole?: "employee" | "supervisor"
+    newRole?: "employee" | "supervisor",
   ) => {
     if (!currentDraft) {
       toast.warning("Please create or select a draft first to make changes.");
@@ -279,7 +288,9 @@ export const OrgChartPageClient = ({
         setCurrentDraft(updatedDraft);
         await refetchSquads();
         if (newDepartment && !availableDepartments.includes(newDepartment)) {
-          setAvailableDepartments([...availableDepartments, newDepartment].sort());
+          setAvailableDepartments(
+            [...availableDepartments, newDepartment].sort(),
+          );
         }
         setEditingEmployee(null);
       } else {
@@ -330,12 +341,18 @@ export const OrgChartPageClient = ({
   const isDraftMode = canEdit && currentDraft !== null;
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <div className="h-full">
         <div className="mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h1 className="text-2xl font-bold text-theme-text">Organization Chart</h1>
+              <h1 className="text-2xl font-bold text-theme-text">
+                Organization Chart
+              </h1>
               <p className="text-theme-text-muted mt-1">
                 {!canEdit
                   ? "View the organization structure."
@@ -370,13 +387,13 @@ export const OrgChartPageClient = ({
             <span>
               {canEdit ? (
                 <>
-                  <strong>View Only Mode:</strong> Create or select a draft from the sidebar to
-                  enable drag-and-drop editing.
+                  <strong>View Only Mode:</strong> Create or select a draft from
+                  the sidebar to enable drag-and-drop editing.
                 </>
               ) : (
                 <>
-                  <strong>View Only:</strong> You can view the organization structure but cannot
-                  make changes.
+                  <strong>View Only:</strong> You can view the organization
+                  structure but cannot make changes.
                 </>
               )}
             </span>
@@ -397,7 +414,8 @@ export const OrgChartPageClient = ({
                 <div>
                   <span className="font-semibold">Draft Mode</span>
                   <span className="text-sm ml-2">
-                    Drag employees to reorganize. Changes are saved to your draft.
+                    Drag employees to reorganize. Changes are saved to your
+                    draft.
                   </span>
                 </div>
               </div>
@@ -406,7 +424,11 @@ export const OrgChartPageClient = ({
             {orgTrees.length > 0 ? (
               <div className="space-y-4">
                 {(isDraftMode && currentDraft?.changes?.length
-                  ? applyDraftChangesToTree(orgTrees, currentDraft.changes, squads)
+                  ? applyDraftChangesToTree(
+                      orgTrees,
+                      currentDraft.changes,
+                      squads,
+                    )
                   : orgTrees
                 ).map((tree) => (
                   <OrgTreeRenderer
@@ -425,7 +447,9 @@ export const OrgChartPageClient = ({
             ) : (
               <div className="text-center py-12">
                 <UserCircle className="w-16 h-16 text-theme-text-subtle mx-auto mb-4" />
-                <p className="text-theme-text-muted">No organization data available</p>
+                <p className="text-theme-text-muted">
+                  No organization data available
+                </p>
               </div>
             )}
           </div>
@@ -450,7 +474,9 @@ export const OrgChartPageClient = ({
                   </>
                 )}
               </button>
-              <div className={`${showSidebar ? "block" : "hidden"} h-full overflow-y-auto`}>
+              <div
+                className={`${showSidebar ? "block" : "hidden"} h-full overflow-y-auto`}
+              >
                 <DraftManager
                   drafts={drafts}
                   currentDraft={currentDraft}
@@ -470,7 +496,9 @@ export const OrgChartPageClient = ({
         </div>
       </div>
 
-      <DragOverlay>{activeUser ? <DragOverlayCard user={activeUser} /> : null}</DragOverlay>
+      <DragOverlay>
+        {activeUser ? <DragOverlayCard user={activeUser} /> : null}
+      </DragOverlay>
 
       {editingEmployee && (
         <DraftEditModal
@@ -480,7 +508,12 @@ export const OrgChartPageClient = ({
           isOpen={!!editingEmployee}
           onClose={() => setEditingEmployee(null)}
           onSave={(newDepartment, newSquadIds, newRole) =>
-            handleDepartmentAndSquadChange(editingEmployee.id, newDepartment, newSquadIds, newRole)
+            handleDepartmentAndSquadChange(
+              editingEmployee.id,
+              newDepartment,
+              newSquadIds,
+              newRole,
+            )
           }
         />
       )}
@@ -499,7 +532,9 @@ export const OrgChartPageClient = ({
 
       <ConfirmModal
         isOpen={confirmAction !== null}
-        title={confirmAction?.type === "delete" ? "Delete Draft" : "Publish Draft"}
+        title={
+          confirmAction?.type === "delete" ? "Delete Draft" : "Publish Draft"
+        }
         message={
           confirmAction?.type === "delete"
             ? "Are you sure you want to delete this draft? This action cannot be undone."

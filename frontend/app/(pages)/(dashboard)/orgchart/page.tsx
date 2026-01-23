@@ -6,7 +6,8 @@ import { OrgChartTreeSkeleton } from "./components/OrgChartTreeSkeleton";
 export default async function OrgChartPage() {
   // Fetch current user first for auth check
   const currentUser = await getCurrentUserServer();
-  const canEdit = currentUser.role === "admin" || currentUser.role === "supervisor";
+  const canEdit =
+    currentUser.role === "admin" || currentUser.role === "supervisor";
 
   return (
     <Suspense fallback={<OrgChartLoadingSkeleton canEdit={canEdit} />}>

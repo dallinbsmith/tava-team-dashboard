@@ -94,7 +94,8 @@ export const useTeamTimeOff = ({
 
     // Sort upcoming by start date
     upcomingList.sort(
-      (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+      (a, b) =>
+        new Date(a.start_date).getTime() - new Date(b.start_date).getTime(),
     );
 
     return { currentlyOnLeave: onLeave, upcoming: upcomingList };
@@ -162,7 +163,10 @@ export const useTeamTasks = ({
   }, [allTasks, allUsers, type, id]);
 
   // Categorize tasks
-  const categorized = useMemo(() => categorizeTasks(filteredTasks), [filteredTasks]);
+  const categorized = useMemo(
+    () => categorizeTasks(filteredTasks),
+    [filteredTasks],
+  );
 
   const refetch = useCallback(async () => {
     await queryRefetch();
@@ -197,7 +201,10 @@ export const useTeamMembers = ({
   id,
   allUsers,
 }: UseTeamMembersOptions): UseTeamMembersResult => {
-  const members = useMemo(() => filterMembersByTeam(allUsers, type, id), [allUsers, type, id]);
+  const members = useMemo(
+    () => filterMembersByTeam(allUsers, type, id),
+    [allUsers, type, id],
+  );
 
   return {
     members,

@@ -27,18 +27,23 @@ interface SquadStat {
 }
 
 const buildSquadStats = (employees: User[]): SquadStat[] => {
-  const squadMap: Record<string, { id: number; count: number; departments: Record<string, number> }> = {};
+  const squadMap: Record<
+    string,
+    { id: number; count: number; departments: Record<string, number> }
+  > = {};
 
   for (const emp of employees) {
     const dept = emp.department || "Unknown";
-    const squads = emp.squads?.length > 0 ? emp.squads : [{ id: 0, name: "Unassigned" }];
+    const squads =
+      emp.squads?.length > 0 ? emp.squads : [{ id: 0, name: "Unassigned" }];
 
     for (const squad of squads) {
       if (!squadMap[squad.name]) {
         squadMap[squad.name] = { id: squad.id, count: 0, departments: {} };
       }
       squadMap[squad.name].count++;
-      squadMap[squad.name].departments[dept] = (squadMap[squad.name].departments[dept] || 0) + 1;
+      squadMap[squad.name].departments[dept] =
+        (squadMap[squad.name].departments[dept] || 0) + 1;
     }
   }
 
@@ -59,7 +64,9 @@ const buildSquadStats = (employees: User[]): SquadStat[] => {
     .sort((a, b) => b.count - a.count);
 };
 
-export default function SquadBreakdown({ employees: employeesInput }: SquadBreakdownProps) {
+export default function SquadBreakdown({
+  employees: employeesInput,
+}: SquadBreakdownProps) {
   const [animate, setAnimate] = useState(false);
   const [hoveredSquad, setHoveredSquad] = useState<string | null>(null);
   const [squadPage, setSquadPage] = useState(1);
@@ -69,21 +76,30 @@ export default function SquadBreakdown({ employees: employeesInput }: SquadBreak
     return () => clearTimeout(timer);
   }, []);
 
-  const squadStats = useMemo(() => buildSquadStats(employeesInput || []), [employeesInput]);
+  const squadStats = useMemo(
+    () => buildSquadStats(employeesInput || []),
+    [employeesInput],
+  );
 
   const maxSquadCount = Math.max(...squadStats.map((s) => s.count), 1);
   const totalSquadPages = Math.ceil(squadStats.length / PAGINATION.SQUADS);
   const startIndex = (squadPage - 1) * PAGINATION.SQUADS;
-  const paginatedSquads = squadStats.slice(startIndex, startIndex + PAGINATION.SQUADS);
+  const paginatedSquads = squadStats.slice(
+    startIndex,
+    startIndex + PAGINATION.SQUADS,
+  );
 
   return (
     <div
-      className={`bg-theme-surface border border-theme-border overflow-hidden flex flex-col transition-all duration-500 ${animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        }`}
+      className={`bg-theme-surface border border-theme-border overflow-hidden flex flex-col transition-all duration-500 ${
+        animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      }`}
     >
       <div className="px-4 py-3 border-b border-theme-border flex items-center gap-2">
         <UsersRound className="w-4 h-4 text-primary-500 flex-shrink-0" />
-        <h2 className="text-sm font-semibold text-theme-text">Squad Breakdown</h2>
+        <h2 className="text-sm font-semibold text-theme-text">
+          Squad Breakdown
+        </h2>
         {squadStats.length > 0 && (
           <span className="px-1.5 py-0.5 text-xs font-medium bg-primary-900/50 text-primary-300">
             {squadStats.length}
@@ -102,10 +118,11 @@ export default function SquadBreakdown({ employees: employeesInput }: SquadBreak
               <div className="flex justify-between items-center mb-1">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`text-sm transition-colors ${hoveredSquad === squad.name
-                      ? "text-theme-text font-medium"
-                      : "text-theme-text-muted"
-                      }`}
+                    className={`text-sm transition-colors ${
+                      hoveredSquad === squad.name
+                        ? "text-theme-text font-medium"
+                        : "text-theme-text-muted"
+                    }`}
                   >
                     {squad.name}
                   </span>
@@ -117,18 +134,24 @@ export default function SquadBreakdown({ employees: employeesInput }: SquadBreak
                   {hoveredSquad !== squad.name && (
                     <span className="text-xs text-theme-text-subtle">
                       {squad.segments[0]?.department}
-                      {squad.segments.length > 1 && ` +${squad.segments.length - 1}`}
+                      {squad.segments.length > 1 &&
+                        ` +${squad.segments.length - 1}`}
                     </span>
                   )}
                 </div>
-                <span className="text-sm text-theme-text-muted font-medium">{squad.count}</span>
+                <span className="text-sm text-theme-text-muted font-medium">
+                  {squad.count}
+                </span>
               </div>
               <div className="h-2 bg-theme-muted overflow-hidden">
                 <div
-                  className={`h-full flex transition-all duration-700 ease-out ${hoveredSquad === squad.name ? "opacity-100" : "opacity-80"
-                    }`}
+                  className={`h-full flex transition-all duration-700 ease-out ${
+                    hoveredSquad === squad.name ? "opacity-100" : "opacity-80"
+                  }`}
                   style={{
-                    width: animate ? `${(squad.count / maxSquadCount) * 100}%` : "0%",
+                    width: animate
+                      ? `${(squad.count / maxSquadCount) * 100}%`
+                      : "0%",
                     transitionDelay: `${500 + index * 100}ms`,
                   }}
                 >
@@ -150,7 +173,11 @@ export default function SquadBreakdown({ employees: employeesInput }: SquadBreak
           }
 
           return (
-            <Link key={squad.name} href={`/teams?type=squad&id=${squad.id}`} className="block">
+            <Link
+              key={squad.name}
+              href={`/teams?type=squad&id=${squad.id}`}
+              className="block"
+            >
               {SquadContent}
             </Link>
           );

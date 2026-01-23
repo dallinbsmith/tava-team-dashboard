@@ -19,10 +19,12 @@ import {
 export const jiraKeys = {
   all: ["jira"] as const,
   settings: () => ["jira", "settings"] as const,
-  myTasks: (maxResults?: number) => ["jira", "myTasks", maxResults ?? 50] as const,
+  myTasks: (maxResults?: number) =>
+    ["jira", "myTasks", maxResults ?? 50] as const,
   userTasks: (userId: number, maxResults?: number) =>
     ["jira", "userTasks", userId, maxResults ?? 50] as const,
-  teamTasks: (maxPerUser?: number) => ["jira", "teamTasks", maxPerUser ?? 20] as const,
+  teamTasks: (maxPerUser?: number) =>
+    ["jira", "teamTasks", maxPerUser ?? 20] as const,
   projects: () => ["jira", "projects"] as const,
   projectTasks: (projectKey: string, maxResults?: number) =>
     ["jira", "projectTasks", projectKey, maxResults ?? 50] as const,
@@ -77,7 +79,10 @@ export const useJiraProjects = () => {
   });
 };
 
-export const useProjectJiraTasks = (projectKey: string, maxResults?: number) => {
+export const useProjectJiraTasks = (
+  projectKey: string,
+  maxResults?: number,
+) => {
   return useQuery({
     queryKey: jiraKeys.projectTasks(projectKey, maxResults),
     queryFn: () => getProjectJiraTasks(projectKey, maxResults),
@@ -122,8 +127,13 @@ export const useUpdateUserJiraMapping = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, jiraAccountId }: { userId: number; jiraAccountId: string | null }) =>
-      updateUserJiraMapping(userId, jiraAccountId),
+    mutationFn: ({
+      userId,
+      jiraAccountId,
+    }: {
+      userId: number;
+      jiraAccountId: string | null;
+    }) => updateUserJiraMapping(userId, jiraAccountId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: jiraKeys.users() });
     },

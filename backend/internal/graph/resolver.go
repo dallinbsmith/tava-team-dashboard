@@ -22,7 +22,13 @@ type Resolver struct {
 
 func NewResolver(userRepo *database.UserRepository, squadRepo *database.SquadRepository, orgJiraRepo *database.OrgJiraRepository, auth0Client *auth0.ManagementClient, emailService *services.EmailService, frontendURL string, log *logger.Logger) *Resolver {
 	// Create auth0 adapter for EmployeeService
-	auth0Adapter := services.NewAuth0ManagementAdapter(auth0Client)
+	// Important: Only create the adapter if auth0Client is not nil to avoid
+	// the Go nil interface issue where a nil pointer stored in an interface
+	// makes the interface non-nil
+	var auth0Adapter services.Auth0Client
+	if auth0Client != nil {
+		auth0Adapter = services.NewAuth0ManagementAdapter(auth0Client)
+	}
 
 	// Create EmployeeService with proper dependency injection
 	employeeService := services.NewEmployeeService(userRepo, squadRepo, orgJiraRepo, auth0Adapter, emailService, frontendURL, log)

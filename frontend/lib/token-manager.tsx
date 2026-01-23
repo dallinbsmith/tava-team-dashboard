@@ -1,13 +1,6 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
 import { TOKEN } from "@/lib/constants";
 
 interface TokenState {
@@ -31,7 +24,7 @@ let inMemoryToken: TokenState = {
   expiresAt: null,
 };
 
-export function TokenProvider({ children }: { children: React.ReactNode }) {
+export const TokenProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const refreshPromiseRef = useRef<Promise<string | null> | null>(null);
   const csrfTokenRef = useRef<string | null>(null);
@@ -192,18 +185,18 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
       {children}
     </TokenContext.Provider>
   );
-}
+};
 
-export function useTokenManager(): TokenContextType {
+export const useTokenManager = (): TokenContextType => {
   const context = useContext(TokenContext);
   if (!context) {
     throw new Error("useTokenManager must be used within a TokenProvider");
   }
   return context;
-}
+};
 
 // Hook for making authenticated API calls
-export function useAuthenticatedFetch() {
+export const useAuthenticatedFetch = () => {
   const { getAccessToken } = useTokenManager();
 
   return useCallback(
@@ -225,4 +218,4 @@ export function useAuthenticatedFetch() {
     },
     [getAccessToken]
   );
-}
+};

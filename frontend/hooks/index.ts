@@ -4,10 +4,7 @@ export type { ModalState } from "./useModalManager";
 export { useEmployeeList } from "./useEmployeeList";
 
 export { useAsyncOperation, useAsyncLoading } from "./useAsyncOperation";
-export type {
-  UseAsyncOperationOptions,
-  UseAsyncOperationReturn,
-} from "./useAsyncOperation";
+export type { UseAsyncOperationOptions, UseAsyncOperationReturn } from "./useAsyncOperation";
 
 // React Query hooks
 export {

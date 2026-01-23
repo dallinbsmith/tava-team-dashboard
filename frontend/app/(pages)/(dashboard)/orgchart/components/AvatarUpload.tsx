@@ -23,43 +23,46 @@ export default function AvatarUpload({
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = useCallback(async (file: File) => {
-    setError(null);
-    setSuccess(false);
+  const handleFileSelect = useCallback(
+    async (file: File) => {
+      setError(null);
+      setSuccess(false);
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      setError("Please select an image file");
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Image must be less than 5MB");
-      return;
-    }
-
-    // Create preview
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const dataUrl = e.target?.result as string;
-      setPreviewUrl(dataUrl);
-
-      // Upload the image
-      setIsUploading(true);
-      try {
-        await onUpload(dataUrl);
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
-      } catch {
-        setError("Failed to upload image. Please try again.");
-        setPreviewUrl(null);
-      } finally {
-        setIsUploading(false);
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        setError("Please select an image file");
+        return;
       }
-    };
-    reader.readAsDataURL(file);
-  }, [onUpload]);
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image must be less than 5MB");
+        return;
+      }
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const dataUrl = e.target?.result as string;
+        setPreviewUrl(dataUrl);
+
+        // Upload the image
+        setIsUploading(true);
+        try {
+          await onUpload(dataUrl);
+          setSuccess(true);
+          setTimeout(() => setSuccess(false), 3000);
+        } catch {
+          setError("Failed to upload image. Please try again.");
+          setPreviewUrl(null);
+        } finally {
+          setIsUploading(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    },
+    [onUpload]
+  );
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
@@ -119,8 +122,8 @@ export default function AvatarUpload({
           isDragging
             ? "border-primary-400 scale-105"
             : canEdit
-            ? "border-white hover:border-primary-200 cursor-pointer"
-            : "border-white"
+              ? "border-white hover:border-primary-200 cursor-pointer"
+              : "border-white"
         } ${isUploading ? "opacity-75" : ""}`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
@@ -128,11 +131,7 @@ export default function AvatarUpload({
         onClick={handleClick}
       >
         {displayUrl ? (
-          <img
-            src={displayUrl}
-            alt={userName}
-            className="w-full h-full object-cover"
-          />
+          <img src={displayUrl} alt={userName} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-primary-400 flex items-center justify-center">
             <span className="text-3xl font-bold text-white">

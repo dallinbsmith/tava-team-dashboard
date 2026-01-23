@@ -70,9 +70,7 @@ describe("FilterDropdown", () => {
     });
 
     it("displays correct count", () => {
-      const { rerender } = render(
-        <FilterDropdown {...defaultProps} activeFilterCount={1} />
-      );
+      const { rerender } = render(<FilterDropdown {...defaultProps} activeFilterCount={1} />);
       expect(screen.getByText("1")).toBeInTheDocument();
 
       rerender(<FilterDropdown {...defaultProps} activeFilterCount={10} />);

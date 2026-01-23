@@ -25,37 +25,39 @@ import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 
 export const calendarKeys = {
   all: ["calendar"] as const,
-  events: (start: Date, end: Date) => ["calendar", "events", start.toISOString(), end.toISOString()] as const,
-  eventsWithMetadata: (start: Date, end: Date) => ["calendar", "eventsWithMetadata", start.toISOString(), end.toISOString()] as const,
+  events: (start: Date, end: Date) =>
+    ["calendar", "events", start.toISOString(), end.toISOString()] as const,
+  eventsWithMetadata: (start: Date, end: Date) =>
+    ["calendar", "eventsWithMetadata", start.toISOString(), end.toISOString()] as const,
   tasks: ["calendar", "tasks"] as const,
   task: (id: number) => ["calendar", "tasks", id] as const,
   meetings: ["calendar", "meetings"] as const,
   meeting: (id: number) => ["calendar", "meetings", id] as const,
 };
 
-export function useCalendarEvents(start: Date, end: Date) {
+export const useCalendarEvents = (start: Date, end: Date) => {
   return useQuery({
     queryKey: calendarKeys.events(start, end),
     queryFn: () => getCalendarEvents(start, end),
   });
-}
+};
 
-export function useCalendarEventsWithMetadata(start: Date, end: Date) {
+export const useCalendarEventsWithMetadata = (start: Date, end: Date) => {
   return useQuery({
     queryKey: calendarKeys.eventsWithMetadata(start, end),
     queryFn: () => getCalendarEventsWithMetadata(start, end),
   });
-}
+};
 
-export function useTask(id: number) {
+export const useTask = (id: number) => {
   return useQuery({
     queryKey: calendarKeys.task(id),
     queryFn: () => getTask(id),
     enabled: id > 0,
   });
-}
+};
 
-export function useCreateTask() {
+export const useCreateTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -64,9 +66,9 @@ export function useCreateTask() {
       await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
-}
+};
 
-export function useUpdateTask() {
+export const useUpdateTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -75,9 +77,9 @@ export function useUpdateTask() {
       await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
-}
+};
 
-export function useDeleteTask() {
+export const useDeleteTask = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -86,17 +88,17 @@ export function useDeleteTask() {
       await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
-}
+};
 
-export function useMeeting(id: number) {
+export const useMeeting = (id: number) => {
   return useQuery({
     queryKey: calendarKeys.meeting(id),
     queryFn: () => getMeeting(id),
     enabled: id > 0,
   });
-}
+};
 
-export function useCreateMeeting() {
+export const useCreateMeeting = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -105,20 +107,21 @@ export function useCreateMeeting() {
       await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
-}
+};
 
-export function useUpdateMeeting() {
+export const useUpdateMeeting = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateMeetingRequest }) => updateMeeting(id, data),
+    mutationFn: ({ id, data }: { id: number; data: UpdateMeetingRequest }) =>
+      updateMeeting(id, data),
     onSuccess: async () => {
       await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
-}
+};
 
-export function useDeleteMeeting() {
+export const useDeleteMeeting = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -127,9 +130,9 @@ export function useDeleteMeeting() {
       await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
-}
+};
 
-export function useRespondToMeeting() {
+export const useRespondToMeeting = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -139,4 +142,4 @@ export function useRespondToMeeting() {
       await refetchQueries(queryClient, queryKeyGroups.calendarRelated());
     },
   });
-}
+};

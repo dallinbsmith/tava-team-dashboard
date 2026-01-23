@@ -27,7 +27,10 @@ interface EmployeePageClientProps {
   currentUser: User;
 }
 
-export function EmployeePageClient({ employee: initialEmployee, currentUser }: EmployeePageClientProps) {
+export const EmployeePageClient = ({
+  employee: initialEmployee,
+  currentUser,
+}: EmployeePageClientProps) => {
   const router = useRouter();
   const [employee, setEmployee] = useState(initialEmployee);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -37,7 +40,11 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
   const { startImpersonation, isImpersonating } = useImpersonation();
 
   // Admin can impersonate any active user except themselves
-  const canImpersonate = currentUser?.role === "admin" && currentUser?.id !== employee.id && !isImpersonating && employee.is_active;
+  const canImpersonate =
+    currentUser?.role === "admin" &&
+    currentUser?.id !== employee.id &&
+    !isImpersonating &&
+    employee.is_active;
 
   // Admin can remove any active user except themselves
   // Supervisor can remove their active direct reports
@@ -68,18 +75,17 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
 
   const formattedDate = employee?.date_started
     ? new Date(employee.date_started).toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    })
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
     : "Not specified";
 
   const canEdit =
     currentUser?.id === employee.id ||
     currentUser?.role === "admin" ||
-    (currentUser?.role === "supervisor" &&
-      employee.supervisor_id === currentUser?.id);
+    (currentUser?.role === "supervisor" && employee.supervisor_id === currentUser?.id);
 
   return (
     <div className="max-w-4xl">
@@ -145,9 +151,7 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
                     </div>
                     <div>
                       <p className="text-sm text-theme-text-muted">Email</p>
-                      <p className="font-medium text-theme-text">
-                        {employee.email}
-                      </p>
+                      <p className="font-medium text-theme-text">{employee.email}</p>
                     </div>
                   </div>
                 </div>
@@ -177,7 +181,7 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
                       <p className="text-sm text-theme-text-muted">Squads</p>
                       {employee.squads?.length > 0 ? (
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {employee.squads.map(squad => (
+                          {employee.squads.map((squad) => (
                             <span
                               key={squad.id}
                               className="inline-flex items-center px-2 py-0.5 text-sm font-medium bg-theme-elevated text-theme-text border border-theme-border"
@@ -198,7 +202,8 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
                     <div>
                       <p className="text-sm text-theme-text-muted">Title</p>
                       <p className="font-medium text-theme-text">
-                        {employee.title || employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
+                        {employee.title ||
+                          employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
                       </p>
                     </div>
                   </div>
@@ -218,9 +223,7 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
                     </div>
                     <div>
                       <p className="text-sm text-theme-text-muted">Start Date</p>
-                      <p className="font-medium text-theme-text">
-                        {formattedDate}
-                      </p>
+                      <p className="font-medium text-theme-text">{formattedDate}</p>
                     </div>
                   </div>
                 </div>
@@ -233,9 +236,7 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
                 <div className="bg-theme-elevated p-4 space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm text-theme-text-muted">User ID</span>
-                    <span className="text-sm font-mono text-theme-text">
-                      {employee.id}
-                    </span>
+                    <span className="text-sm font-mono text-theme-text">{employee.id}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-theme-text-muted">Created</span>
@@ -244,9 +245,7 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-theme-text-muted">
-                      Last Updated
-                    </span>
+                    <span className="text-sm text-theme-text-muted">Last Updated</span>
                     <span className="text-sm text-theme-text">
                       {new Date(employee.updated_at).toLocaleDateString()}
                     </span>
@@ -290,12 +289,14 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
           </div>
 
           <p className="text-theme-text">
-            Are you sure you want to remove <strong>{employee.first_name} {employee.last_name}</strong>?
+            Are you sure you want to remove{" "}
+            <strong>
+              {employee.first_name} {employee.last_name}
+            </strong>
+            ?
           </p>
 
-          {removeError && (
-            <p className="text-sm text-red-400">{removeError}</p>
-          )}
+          {removeError && <p className="text-sm text-red-400">{removeError}</p>}
 
           <div className="flex justify-end gap-3 pt-2">
             <button
@@ -327,4 +328,4 @@ export function EmployeePageClient({ employee: initialEmployee, currentUser }: E
       </BaseModal>
     </div>
   );
-}
+};

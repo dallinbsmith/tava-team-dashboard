@@ -8,14 +8,9 @@ import { queryKeys } from "./queryKeys";
  * @param queryClient - The React Query client
  * @param keys - Array of query keys to refetch
  */
-export async function refetchQueries(
-  queryClient: QueryClient,
-  keys: QueryKey[]
-): Promise<void> {
-  await Promise.allSettled(
-    keys.map((queryKey) => queryClient.refetchQueries({ queryKey }))
-  );
-}
+export const refetchQueries = async (queryClient: QueryClient, keys: QueryKey[]): Promise<void> => {
+  await Promise.allSettled(keys.map((queryKey) => queryClient.refetchQueries({ queryKey })));
+};
 
 /**
  * Invalidate multiple queries safely.
@@ -24,25 +19,16 @@ export async function refetchQueries(
  * @param queryClient - The React Query client
  * @param keys - Array of query keys to invalidate
  */
-export async function invalidateQueries(
-  queryClient: QueryClient,
-  keys: QueryKey[]
-): Promise<void> {
-  await Promise.allSettled(
-    keys.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
-  );
-}
+export const invalidateQueries = async (queryClient: QueryClient, keys: QueryKey[]): Promise<void> => {
+  await Promise.allSettled(keys.map((queryKey) => queryClient.invalidateQueries({ queryKey })));
+};
 
 /**
  * Common query key groups for batch operations
  */
 export const queryKeyGroups = {
   /** All user-related queries */
-  users: () => [
-    queryKeys.employees.all(),
-    queryKeys.allUsers.all(),
-    queryKeys.supervisors.all(),
-  ],
+  users: () => [queryKeys.employees.all(), queryKeys.allUsers.all(), queryKeys.supervisors.all()],
 
   /** All organization structure queries */
   organization: () => [

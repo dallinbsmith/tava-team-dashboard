@@ -4,11 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import Link from "next/link";
-import {
-  validateInvitation,
-  acceptInvitation,
-  ValidateInvitationResponse,
-} from "@/lib/api";
+import { validateInvitation, acceptInvitation, ValidateInvitationResponse } from "@/lib/api";
 import {
   Mail,
   Shield,
@@ -118,11 +114,7 @@ export default function InvitePage() {
   };
 
   const getRoleIcon = (role: string) => {
-    return role === "admin" ? (
-      <Shield className="w-5 h-5" />
-    ) : (
-      <Users className="w-5 h-5" />
-    );
+    return role === "admin" ? <Shield className="w-5 h-5" /> : <Users className="w-5 h-5" />;
   };
 
   const getRoleColor = (role: string) => {
@@ -242,9 +234,7 @@ export default function InvitePage() {
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900">Almost There!</h1>
-              <p className="text-gray-600 mt-2">
-                Complete your profile to accept the invitation
-              </p>
+              <p className="text-gray-600 mt-2">Complete your profile to accept the invitation</p>
             </div>
 
             <div className="bg-gray-50 p-4 mb-6">
@@ -277,9 +267,7 @@ export default function InvitePage() {
 
             <form onSubmit={handleAcceptInvitation}>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                 <input
                   type="text"
                   value={firstName}
@@ -291,9 +279,7 @@ export default function InvitePage() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                 <input
                   type="text"
                   value={lastName}

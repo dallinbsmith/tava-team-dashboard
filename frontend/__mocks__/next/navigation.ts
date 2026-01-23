@@ -68,9 +68,7 @@ export const mockNavigation = (options: {
     (usePathname as jest.Mock).mockReturnValue(options.pathname);
   }
   if (options.searchParams !== undefined) {
-    (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams(options.searchParams)
-    );
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams(options.searchParams));
   }
   if (options.params !== undefined) {
     (useParams as jest.Mock).mockReturnValue(options.params);

@@ -21,7 +21,8 @@ export default function OrgChartError({ error, reset }: ErrorProps) {
   }, [error]);
 
   // Determine if this is a data loading error vs other error
-  const isDataError = error.message?.toLowerCase().includes("fetch") ||
+  const isDataError =
+    error.message?.toLowerCase().includes("fetch") ||
     error.message?.toLowerCase().includes("load") ||
     error.message?.toLowerCase().includes("network");
 
@@ -56,9 +57,7 @@ export default function OrgChartError({ error, reset }: ErrorProps) {
         )}
 
         {error.digest && (
-          <p className="text-xs text-theme-text-muted mb-4 font-mono">
-            Error ID: {error.digest}
-          </p>
+          <p className="text-xs text-theme-text-muted mb-4 font-mono">Error ID: {error.digest}</p>
         )}
 
         <div className="flex gap-3 justify-center">

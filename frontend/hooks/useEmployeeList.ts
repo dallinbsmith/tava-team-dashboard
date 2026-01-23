@@ -50,7 +50,7 @@ export interface UseEmployeeListResult {
 
 export const ITEMS_PER_PAGE_OPTIONS = [6, 12, 24, 48];
 
-export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
+export const useEmployeeList = (employeesInput: User[]): UseEmployeeListResult => {
   const employees = employeesInput || [];
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | Role>("all");
@@ -81,7 +81,6 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
 
   const filteredEmployees = useMemo(() => {
     return employees.filter((employee) => {
-
       const squadNamesMatch = employee.squads?.some((s) =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -102,12 +101,10 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
         departmentFilter === "all" || employee.department === departmentFilter;
 
       const matchesSquad =
-        squadFilter === "all" ||
-        employee.squads?.some((s) => s.name === squadFilter);
+        squadFilter === "all" || employee.squads?.some((s) => s.name === squadFilter);
 
       return matchesSearch && matchesRole && matchesDepartment && matchesSquad;
     });
-
   }, [employees, searchQuery, roleFilter, departmentFilter, squadFilter]);
 
   const sortedEmployees = useMemo(() => {
@@ -146,14 +143,17 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
     return sortedEmployees.slice(start, start + itemsPerPage);
   }, [sortedEmployees, currentPage, itemsPerPage]);
 
-  const handleSort = useCallback((field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  }, [sortField, sortOrder]);
+  const handleSort = useCallback(
+    (field: SortField) => {
+      if (sortField === field) {
+        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      } else {
+        setSortField(field);
+        setSortOrder("asc");
+      }
+    },
+    [sortField, sortOrder]
+  );
 
   const clearFilters = useCallback(() => {
     setSearchQuery("");
@@ -226,4 +226,4 @@ export function useEmployeeList(employeesInput: User[]): UseEmployeeListResult {
     setViewMode: handleViewModeChange,
     clearFilters,
   };
-}
+};

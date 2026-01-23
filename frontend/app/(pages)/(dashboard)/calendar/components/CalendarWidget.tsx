@@ -73,55 +73,66 @@ export default function CalendarWidget({
     }
   };
 
-  const hasAnyAction = onCreateTask || onCreateEvent || onCreateMeeting || onRequestTimeOff || onCreateTimeOffForEmployee;
+  const hasAnyAction =
+    onCreateTask ||
+    onCreateEvent ||
+    onCreateMeeting ||
+    onRequestTimeOff ||
+    onCreateTimeOffForEmployee;
 
-  const fetchEvents = useCallback(async (showRefresh = false) => {
-    if (showRefresh) {
-      setRefreshing(true);
-    }
-    setError(null);
-
-    try {
-      const start = startOfDay(new Date());
-      const end = endOfDay(addDays(new Date(), 7));
-
-      const calendarEvents = await getCalendarEvents(start, end);
-
-      // Sort by start date
-      const sorted = (calendarEvents || []).sort((a, b) =>
-        new Date(a.start).getTime() - new Date(b.start).getTime()
-      );
-
-      setEvents(sorted.slice(0, 5));
-      if (showRefresh && onRefresh) {
-        onRefresh();
+  const fetchEvents = useCallback(
+    async (showRefresh = false) => {
+      if (showRefresh) {
+        setRefreshing(true);
       }
-    } catch (e) {
-      console.error("Failed to fetch calendar events:", e);
-      setError("Failed to load events");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [onRefresh]);
+      setError(null);
+
+      try {
+        const start = startOfDay(new Date());
+        const end = endOfDay(addDays(new Date(), 7));
+
+        const calendarEvents = await getCalendarEvents(start, end);
+
+        // Sort by start date
+        const sorted = (calendarEvents || []).sort(
+          (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+        );
+
+        setEvents(sorted.slice(0, 5));
+        if (showRefresh && onRefresh) {
+          onRefresh();
+        }
+      } catch (e) {
+        console.error("Failed to fetch calendar events:", e);
+        setError("Failed to load events");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [onRefresh]
+  );
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
 
-  const handleMeetingResponse = useCallback(async (meetingId: number, response: ResponseStatus) => {
-    setRespondingMeetingId(meetingId);
-    try {
-      await respondToMeeting(meetingId, response);
-      // Refresh events to get updated response status
-      await fetchEvents();
-    } catch (e) {
-      console.error("Failed to respond to meeting:", e);
-      setError("Failed to update response");
-    } finally {
-      setRespondingMeetingId(null);
-    }
-  }, [fetchEvents]);
+  const handleMeetingResponse = useCallback(
+    async (meetingId: number, response: ResponseStatus) => {
+      setRespondingMeetingId(meetingId);
+      try {
+        await respondToMeeting(meetingId, response);
+        // Refresh events to get updated response status
+        await fetchEvents();
+      } catch (e) {
+        console.error("Failed to respond to meeting:", e);
+        setError("Failed to update response");
+      } finally {
+        setRespondingMeetingId(null);
+      }
+    },
+    [fetchEvents]
+  );
 
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -163,7 +174,9 @@ export default function CalendarWidget({
       if (allDay) {
         return <span className="text-yellow-400 font-medium">Tomorrow</span>;
       }
-      return <span className="text-yellow-400 font-medium">Tomorrow at {format(date, "h:mm a")}</span>;
+      return (
+        <span className="text-yellow-400 font-medium">Tomorrow at {format(date, "h:mm a")}</span>
+      );
     }
 
     if (allDay) {
@@ -207,7 +220,9 @@ export default function CalendarWidget({
               >
                 <Plus className="w-3 h-3" />
                 Add
-                <ChevronDown className={`w-3 h-3 transition-transform ${addMenuOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`w-3 h-3 transition-transform ${addMenuOpen ? "rotate-180" : ""}`}
+                />
               </button>
               {addMenuOpen && (
                 <div className="absolute right-0 mt-1 w-48 bg-theme-surface border border-theme-border rounded-lg shadow-lg z-50 overflow-hidden">
@@ -284,7 +299,9 @@ export default function CalendarWidget({
         <div className="flex-1 px-6 py-8 text-center text-theme-text-muted">
           <CalendarIcon className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
           <p>No upcoming events</p>
-          <p className="text-sm mt-1 text-theme-text-subtle">Events for the next 7 days will appear here</p>
+          <p className="text-sm mt-1 text-theme-text-subtle">
+            Events for the next 7 days will appear here
+          </p>
         </div>
       ) : (
         <div className="flex-1 divide-y divide-theme-border">
@@ -306,11 +323,13 @@ export default function CalendarWidget({
             };
 
             // Check if user is an attendee with pending response for meetings
-            const meetingAttendee = event.type === "meeting" && event.meeting?.attendees?.find(
-              (a) => a.user_id === currentUser?.id
-            );
-            const showMeetingResponse = meetingAttendee && meetingAttendee.response_status === "pending";
-            const isRespondingToThisMeeting = event.meeting && respondingMeetingId === event.meeting.id;
+            const meetingAttendee =
+              event.type === "meeting" &&
+              event.meeting?.attendees?.find((a) => a.user_id === currentUser?.id);
+            const showMeetingResponse =
+              meetingAttendee && meetingAttendee.response_status === "pending";
+            const isRespondingToThisMeeting =
+              event.meeting && respondingMeetingId === event.meeting.id;
 
             // For time_off events, include the employee name in the display title
             let displayTitle = event.title;
@@ -330,9 +349,7 @@ export default function CalendarWidget({
                   isClickable ? "cursor-pointer hover:bg-theme-elevated/50 transition-colors" : ""
                 } ${isRespondingToThisMeeting ? "opacity-50" : ""}`}
               >
-                <div className="flex-shrink-0">
-                  {getEventIcon(event.type)}
-                </div>
+                <div className="flex-shrink-0">{getEventIcon(event.type)}</div>
                 <div className="flex-1 min-w-0 flex items-center gap-2">
                   <h3 className="text-sm font-medium text-theme-text truncate">{displayTitle}</h3>
                   <span className="text-xs text-theme-text-muted whitespace-nowrap flex items-center gap-1">

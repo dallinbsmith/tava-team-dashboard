@@ -30,19 +30,12 @@ interface CustomRenderResult extends RenderResult {
 /**
  * Creates an all-in-one provider wrapper for tests
  */
-const createAllProviders = (options: {
-  queryClient: QueryClient;
-  withQueryClient: boolean;
-}) => {
+const createAllProviders = (options: { queryClient: QueryClient; withQueryClient: boolean }) => {
   const { queryClient, withQueryClient } = options;
 
   const AllProviders = ({ children }: { children: ReactNode }) => {
     if (withQueryClient) {
-      return (
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      );
+      return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
     }
     return <>{children}</>;
   };
@@ -81,10 +74,10 @@ const createAllProviders = (options: {
  * customRender(<Button>Click me</Button>, { withQueryClient: false });
  * ```
  */
-export function customRender(
+export const customRender = (
   ui: ReactElement,
   options: CustomRenderOptions = {}
-): CustomRenderResult {
+): CustomRenderResult => {
   const {
     queryClient = createTestQueryClient(),
     withQueryClient = true,
@@ -99,7 +92,7 @@ export function customRender(
     ...result,
     queryClient,
   };
-}
+};
 
 /**
  * Re-export everything from @testing-library/react

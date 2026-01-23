@@ -19,7 +19,6 @@ interface DepartmentSegment {
   percentage: number;
 }
 
-
 export default function SquadBreakdown({ employees: employeesInput }: SquadBreakdownProps) {
   const [animate, setAnimate] = useState(false);
   const [hoveredSquad, setHoveredSquad] = useState<string | null>(null);
@@ -32,21 +31,24 @@ export default function SquadBreakdown({ employees: employeesInput }: SquadBreak
 
   const squadStats = useMemo(() => {
     const employees = employeesInput || [];
-    const squadData = employees.reduce((acc, emp) => {
-      const dept = emp.department || "Unknown";
-      const squadList = emp.squads?.length > 0 ? emp.squads : [{ id: 0, name: "Unassigned" }];
+    const squadData = employees.reduce(
+      (acc, emp) => {
+        const dept = emp.department || "Unknown";
+        const squadList = emp.squads?.length > 0 ? emp.squads : [{ id: 0, name: "Unassigned" }];
 
-      for (const squad of squadList) {
-        const squadName = squad.name;
-        if (!acc[squadName]) {
-          acc[squadName] = { id: squad.id, count: 0, departments: {} };
+        for (const squad of squadList) {
+          const squadName = squad.name;
+          if (!acc[squadName]) {
+            acc[squadName] = { id: squad.id, count: 0, departments: {} };
+          }
+          acc[squadName].count++;
+          acc[squadName].departments[dept] = (acc[squadName].departments[dept] || 0) + 1;
         }
-        acc[squadName].count++;
-        acc[squadName].departments[dept] = (acc[squadName].departments[dept] || 0) + 1;
-      }
 
-      return acc;
-    }, {} as Record<string, { id: number; count: number; departments: Record<string, number> }>);
+        return acc;
+      },
+      {} as Record<string, { id: number; count: number; departments: Record<string, number> }>
+    );
 
     return Object.entries(squadData)
       .map(([name, data]) => {

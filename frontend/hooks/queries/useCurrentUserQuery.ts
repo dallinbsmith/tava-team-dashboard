@@ -47,9 +47,9 @@ export interface UseCurrentUserQueryResult {
  * return <div>Welcome, {currentUser.first_name}</div>;
  * ```
  */
-export function useCurrentUserQuery(
+export const useCurrentUserQuery = (
   options: UseCurrentUserQueryOptions = {}
-): UseCurrentUserQueryResult {
+): UseCurrentUserQueryResult => {
   const { staleTime = 5 * 60 * 1000 } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
@@ -95,6 +95,6 @@ export function useCurrentUserQuery(
     refetch,
     invalidate,
   };
-}
+};
 
 export default useCurrentUserQuery;

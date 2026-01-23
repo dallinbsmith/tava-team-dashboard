@@ -27,15 +27,25 @@ jest.mock("@/hooks", () => ({
 jest.mock("@/lib/queryUtils", () => ({
   refetchQueries: jest.fn().mockResolvedValue(undefined),
   queryKeyGroups: {
-    organization: jest.fn().mockReturnValue([["employees"], ["allUsers"], ["squads"], ["departments"]]),
+    organization: jest
+      .fn()
+      .mockReturnValue([["employees"], ["allUsers"], ["squads"], ["departments"]]),
   },
 }));
 
-const mockUseEmployeesQuery = hooks.useEmployeesQuery as jest.MockedFunction<typeof hooks.useEmployeesQuery>;
-const mockUseAllUsersQuery = hooks.useAllUsersQuery as jest.MockedFunction<typeof hooks.useAllUsersQuery>;
+const mockUseEmployeesQuery = hooks.useEmployeesQuery as jest.MockedFunction<
+  typeof hooks.useEmployeesQuery
+>;
+const mockUseAllUsersQuery = hooks.useAllUsersQuery as jest.MockedFunction<
+  typeof hooks.useAllUsersQuery
+>;
 const mockUseSquadsQuery = hooks.useSquadsQuery as jest.MockedFunction<typeof hooks.useSquadsQuery>;
-const mockUseDepartmentsQuery = hooks.useDepartmentsQuery as jest.MockedFunction<typeof hooks.useDepartmentsQuery>;
-const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<typeof queryUtils.refetchQueries>;
+const mockUseDepartmentsQuery = hooks.useDepartmentsQuery as jest.MockedFunction<
+  typeof hooks.useDepartmentsQuery
+>;
+const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<
+  typeof queryUtils.refetchQueries
+>;
 
 // Test fixtures
 const mockEmployees = [
@@ -65,16 +75,16 @@ const createWrapper = () => {
   });
 
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    );
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
   };
 };
 
 // Test consumer component
-function TestConsumer({ onRender }: { onRender?: (ctx: ReturnType<typeof useOrganization>) => void }) {
+function TestConsumer({
+  onRender,
+}: {
+  onRender?: (ctx: ReturnType<typeof useOrganization>) => void;
+}) {
   const context = useOrganization();
   onRender?.(context);
   return (
@@ -183,7 +193,11 @@ describe("OrganizationProvider", () => {
 
       render(
         <OrganizationProvider>
-          <TestConsumer onRender={(ctx) => { capturedContext = ctx; }} />
+          <TestConsumer
+            onRender={(ctx) => {
+              capturedContext = ctx;
+            }}
+          />
         </OrganizationProvider>,
         { wrapper: createWrapper() }
       );
@@ -262,7 +276,11 @@ describe("OrganizationProvider", () => {
 
       render(
         <OrganizationProvider>
-          <TestConsumer onRender={(ctx) => { capturedContext = ctx; }} />
+          <TestConsumer
+            onRender={(ctx) => {
+              capturedContext = ctx;
+            }}
+          />
         </OrganizationProvider>,
         { wrapper: createWrapper() }
       );
@@ -275,7 +293,11 @@ describe("OrganizationProvider", () => {
 
       render(
         <OrganizationProvider>
-          <TestConsumer onRender={(ctx) => { capturedContext = ctx; }} />
+          <TestConsumer
+            onRender={(ctx) => {
+              capturedContext = ctx;
+            }}
+          />
         </OrganizationProvider>,
         { wrapper: createWrapper() }
       );
@@ -411,7 +433,11 @@ describe("OrganizationProvider", () => {
 
       render(
         <OrganizationProvider>
-          <TestConsumer onRender={(ctx) => { capturedContext = ctx; }} />
+          <TestConsumer
+            onRender={(ctx) => {
+              capturedContext = ctx;
+            }}
+          />
         </OrganizationProvider>,
         { wrapper: createWrapper() }
       );
@@ -425,7 +451,11 @@ describe("OrganizationProvider", () => {
 
       render(
         <OrganizationProvider>
-          <TestConsumer onRender={(ctx) => { capturedContext = ctx; }} />
+          <TestConsumer
+            onRender={(ctx) => {
+              capturedContext = ctx;
+            }}
+          />
         </OrganizationProvider>,
         { wrapper: createWrapper() }
       );

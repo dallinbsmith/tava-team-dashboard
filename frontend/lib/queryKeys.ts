@@ -29,8 +29,10 @@ export const queryKeys = {
   },
 
   calendar: {
-    events: (start: Date, end: Date) => ["calendar", "events", start.toISOString(), end.toISOString()] as const,
-    eventsWithMetadata: (start: Date, end: Date) => ["calendar", "eventsWithMetadata", start.toISOString(), end.toISOString()] as const,
+    events: (start: Date, end: Date) =>
+      ["calendar", "events", start.toISOString(), end.toISOString()] as const,
+    eventsWithMetadata: (start: Date, end: Date) =>
+      ["calendar", "eventsWithMetadata", start.toISOString(), end.toISOString()] as const,
   },
 
   timeOff: {
@@ -47,7 +49,8 @@ export const queryKeys = {
     myTasks: (max = 50) => ["jira", "tasks", "my", max] as const,
     userTasks: (userId: number, max = 50) => ["jira", "tasks", "user", userId, max] as const,
     teamTasks: (maxPerUser = 20) => ["jira", "tasks", "team", maxPerUser] as const,
-    projectTasks: (projectKey: string, max = 50) => ["jira", "projects", projectKey, "tasks", max] as const,
+    projectTasks: (projectKey: string, max = 50) =>
+      ["jira", "projects", projectKey, "tasks", max] as const,
     epics: (max = 100) => ["jira", "epics", max] as const,
   },
 

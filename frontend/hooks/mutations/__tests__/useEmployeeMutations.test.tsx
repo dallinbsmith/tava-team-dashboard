@@ -28,7 +28,9 @@ jest.mock("@/lib/queryUtils", () => ({
     users: jest.fn().mockReturnValue([["employees"], ["allUsers"], ["currentUser"]]),
   },
 }));
-const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<typeof queryUtils.refetchQueries>;
+const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<
+  typeof queryUtils.refetchQueries
+>;
 
 // Test fixtures
 const createMockUser = (overrides: Partial<User> = {}): User => ({

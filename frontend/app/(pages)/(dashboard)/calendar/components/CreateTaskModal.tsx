@@ -90,12 +90,7 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
   };
 
   return (
-    <BaseModal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Create Task"
-      maxWidth="max-w-lg"
-    >
+    <BaseModal isOpen={isOpen} onClose={handleClose} title="Create Task" maxWidth="max-w-lg">
       {allUsersLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
@@ -152,19 +147,18 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
 
           {effectiveIsSupervisorOrAdmin && (
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">
-                Assign To
-              </label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Assign To</label>
               <div className="flex gap-2 mb-3">
                 {(["user", "squad", "department"] as AssignmentType[]).map((type) => (
                   <button
                     key={type}
                     type="button"
                     onClick={() => setAssignmentType(type)}
-                    className={`px-3 py-1.5 text-sm font-medium transition-colors ${assignmentType === type
+                    className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                      assignmentType === type
                         ? "bg-primary-600 text-white"
                         : "bg-theme-elevated text-theme-text-muted border border-theme-border hover:bg-theme-surface"
-                      }`}
+                    }`}
                   >
                     {type.charAt(0).toUpperCase() + type.slice(1)}
                   </button>
@@ -174,7 +168,9 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
               {assignmentType === "user" && (
                 <select
                   value={assignedUserId || ""}
-                  onChange={(e) => setAssignedUserId(e.target.value ? parseInt(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    setAssignedUserId(e.target.value ? parseInt(e.target.value) : undefined)
+                  }
                   className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="">Select a user (optional)</option>
@@ -189,7 +185,9 @@ export default function CreateTaskModal({ isOpen, onClose, onCreated }: CreateTa
               {assignmentType === "squad" && (
                 <select
                   value={assignedSquadId || ""}
-                  onChange={(e) => setAssignedSquadId(e.target.value ? parseInt(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    setAssignedSquadId(e.target.value ? parseInt(e.target.value) : undefined)
+                  }
                   className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="">Select a squad</option>

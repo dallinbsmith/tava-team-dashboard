@@ -5,16 +5,7 @@ import { TimeOffRequest, TIME_OFF_TYPE_LABELS, TIME_OFF_STATUS_LABELS } from "..
 import { getTimeOffRequest, cancelTimeOffRequest, reviewTimeOffRequest } from "@/lib/api";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { BaseModal } from "@/components";
-import {
-  Loader2,
-  Palmtree,
-  Calendar,
-  User,
-  Clock,
-  X,
-  Check,
-  MessageSquare,
-} from "lucide-react";
+import { Loader2, Palmtree, Calendar, User, Clock, X, Check, MessageSquare } from "lucide-react";
 import { format, differenceInDays } from "date-fns";
 
 interface ViewTimeOffModalProps {
@@ -77,7 +68,8 @@ export default function ViewTimeOffModal({
   const canCancel = timeOff && timeOff.user_id === currentUser?.id && timeOff.status === "pending";
 
   // Can review if supervisor/admin and request is pending (and not their own)
-  const canReview = timeOff &&
+  const canReview =
+    timeOff &&
     effectiveIsSupervisorOrAdmin &&
     timeOff.status === "pending" &&
     timeOff.user_id !== currentUser?.id;
@@ -156,7 +148,9 @@ export default function ViewTimeOffModal({
         // Cancel confirmation
         <div className="space-y-4">
           <div className="p-4 bg-red-900/30 border border-red-500/30 rounded">
-            <p className="text-red-300 font-medium">Are you sure you want to cancel this request?</p>
+            <p className="text-red-300 font-medium">
+              Are you sure you want to cancel this request?
+            </p>
             <p className="text-red-400 text-sm mt-1">This action cannot be undone.</p>
           </div>
 
@@ -184,8 +178,11 @@ export default function ViewTimeOffModal({
             <p className="text-sm text-theme-text-muted mb-1">Reviewing request from</p>
             <p className="font-medium text-theme-text">{getRequestorName()}</p>
             <p className="text-sm text-theme-text-muted mt-2">
-              {format(new Date(timeOff.start_date), "MMM d")} - {format(new Date(timeOff.end_date), "MMM d, yyyy")}
-              <span className="ml-2">({getDuration()} day{getDuration() !== 1 ? "s" : ""})</span>
+              {format(new Date(timeOff.start_date), "MMM d")} -{" "}
+              {format(new Date(timeOff.end_date), "MMM d, yyyy")}
+              <span className="ml-2">
+                ({getDuration()} day{getDuration() !== 1 ? "s" : ""})
+              </span>
             </p>
           </div>
 
@@ -255,7 +252,9 @@ export default function ViewTimeOffModal({
                 <h3 className={`text-lg font-semibold ${TYPE_COLORS[timeOff.request_type]}`}>
                   {TIME_OFF_TYPE_LABELS[timeOff.request_type]}
                 </h3>
-                <span className={`px-2 py-0.5 text-xs font-medium rounded-full text-white ${STATUS_COLORS[timeOff.status]}`}>
+                <span
+                  className={`px-2 py-0.5 text-xs font-medium rounded-full text-white ${STATUS_COLORS[timeOff.status]}`}
+                >
                   {TIME_OFF_STATUS_LABELS[timeOff.status]}
                 </span>
               </div>

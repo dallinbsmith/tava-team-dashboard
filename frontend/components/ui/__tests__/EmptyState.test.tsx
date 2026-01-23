@@ -10,7 +10,12 @@ import { Calendar, Plus } from "lucide-react";
 
 // Mock the Button component
 jest.mock("../Button", () => ({
-  Button: ({ children, onClick, icon: Icon, variant }: {
+  Button: ({
+    children,
+    onClick,
+    icon: Icon,
+    variant,
+  }: {
     children: React.ReactNode;
     onClick?: () => void;
     icon?: React.ComponentType<{ className?: string }>;
@@ -43,9 +48,7 @@ describe("EmptyState", () => {
     });
 
     it("renders description when provided", () => {
-      render(
-        <EmptyState {...defaultProps} description="Create your first item to get started." />
-      );
+      render(<EmptyState {...defaultProps} description="Create your first item to get started." />);
       expect(screen.getByText("Create your first item to get started.")).toBeInTheDocument();
     });
 
@@ -202,12 +205,16 @@ describe("NoResults", () => {
 
     it("renders default description without query", () => {
       render(<NoResults />);
-      expect(screen.getByText("Try adjusting your filters or search criteria.")).toBeInTheDocument();
+      expect(
+        screen.getByText("Try adjusting your filters or search criteria.")
+      ).toBeInTheDocument();
     });
 
     it("renders query-specific description when query provided", () => {
       render(<NoResults query="test search" />);
-      expect(screen.getByText('We couldn\'t find anything matching "test search".')).toBeInTheDocument();
+      expect(
+        screen.getByText('We couldn\'t find anything matching "test search".')
+      ).toBeInTheDocument();
     });
   });
 

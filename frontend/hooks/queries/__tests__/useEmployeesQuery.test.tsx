@@ -21,9 +21,7 @@ jest.mock("@/lib/api", () => ({
   getEmployees: jest.fn(),
   getEmployeeGraphQL: jest.fn(),
 }));
-const mockGetEmployees = api.getEmployees as jest.MockedFunction<
-  typeof api.getEmployees
->;
+const mockGetEmployees = api.getEmployees as jest.MockedFunction<typeof api.getEmployees>;
 const mockGetEmployeeGraphQL = api.getEmployeeGraphQL as jest.MockedFunction<
   typeof api.getEmployeeGraphQL
 >;
@@ -312,10 +310,7 @@ describe("useEmployeesQuery", () => {
       expect(mockGetEmployees).toHaveBeenCalledTimes(1);
 
       // Update mock to return different data
-      const updatedEmployees = [
-        ...mockEmployees,
-        createMockUser({ id: 4, first_name: "New" }),
-      ];
+      const updatedEmployees = [...mockEmployees, createMockUser({ id: 4, first_name: "New" })];
       mockGetEmployees.mockResolvedValue(updatedEmployees);
 
       await result.current.refetch();
@@ -764,9 +759,7 @@ describe("useEmployeeQuery", () => {
       const employee1 = createMockUser({ id: 1 });
       const employee2 = createMockUser({ id: 2 });
 
-      mockGetEmployeeGraphQL
-        .mockResolvedValueOnce(employee1)
-        .mockResolvedValueOnce(employee2);
+      mockGetEmployeeGraphQL.mockResolvedValueOnce(employee1).mockResolvedValueOnce(employee2);
 
       // Render first hook
       renderHook(() => useEmployeeQuery({ id: 1 }), {
@@ -797,9 +790,7 @@ describe("useEmployeeQuery", () => {
       const employee1 = createMockUser({ id: 1, first_name: "First" });
       const employee2 = createMockUser({ id: 2, first_name: "Second" });
 
-      mockGetEmployeeGraphQL
-        .mockResolvedValueOnce(employee1)
-        .mockResolvedValueOnce(employee2);
+      mockGetEmployeeGraphQL.mockResolvedValueOnce(employee1).mockResolvedValueOnce(employee2);
 
       const { result, rerender } = renderHook(
         (props: { id: number }) => useEmployeeQuery({ id: props.id }),

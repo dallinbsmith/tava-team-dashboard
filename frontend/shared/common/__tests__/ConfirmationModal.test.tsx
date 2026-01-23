@@ -73,7 +73,9 @@ describe("ConfirmationModal", () => {
     });
 
     it("renders custom icon when iconUrl provided", () => {
-      const { container } = render(<ConfirmationModal {...defaultProps} iconUrl="https://example.com/icon.png" />);
+      const { container } = render(
+        <ConfirmationModal {...defaultProps} iconUrl="https://example.com/icon.png" />
+      );
       const img = container.querySelector("img");
       expect(img).toHaveAttribute("src", "https://example.com/icon.png");
     });
@@ -188,7 +190,9 @@ describe("ConfirmationModal", () => {
 
     it("does not close on backdrop click when loading", () => {
       const onClose = jest.fn();
-      const { container } = render(<ConfirmationModal {...defaultProps} loading onClose={onClose} />);
+      const { container } = render(
+        <ConfirmationModal {...defaultProps} loading onClose={onClose} />
+      );
 
       const backdrop = container.querySelector(".absolute.inset-0.bg-black\\/50");
       fireEvent.click(backdrop!);

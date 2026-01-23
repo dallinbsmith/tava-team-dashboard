@@ -26,7 +26,17 @@ import { JiraTasksSkeleton } from "@/app/(pages)/jira/components/JiraTasksSkelet
 import { CalendarWidgetSkeleton } from "./calendar/components/CalendarWidgetSkeleton";
 import { TimeOffWidgetSkeleton } from "./dashboard-stats/TimeOffWidgetSkeleton";
 
-type ModalType = "createEmployee" | "task" | "event" | "meeting" | "timeOff" | "timeOffForEmployee" | "viewTask" | "viewMeeting" | "viewTimeOff" | null;
+type ModalType =
+  | "createEmployee"
+  | "task"
+  | "event"
+  | "meeting"
+  | "timeOff"
+  | "timeOffForEmployee"
+  | "viewTask"
+  | "viewMeeting"
+  | "viewTimeOff"
+  | null;
 
 interface DashboardPageClientProps {
   initialCurrentUser?: User;
@@ -35,20 +45,27 @@ interface DashboardPageClientProps {
   initialDepartments?: string[];
 }
 
-export function DashboardPageClient({
+export const DashboardPageClient = ({
   initialCurrentUser,
   initialEmployees = [],
   initialSquads = [],
   initialDepartments = [],
-}: DashboardPageClientProps = {}) {
-
+}: DashboardPageClientProps = {}) => {
   const { currentUser, error: userError } = useCurrentUser();
-  const { employees: employeesFromProvider, squads: squadsFromProvider, departments: departmentsFromProvider, addSquad, refetchEmployees } = useOrganization();
+  const {
+    employees: employeesFromProvider,
+    squads: squadsFromProvider,
+    departments: departmentsFromProvider,
+    addSquad,
+    refetchEmployees,
+  } = useOrganization();
   const effectiveUser = currentUser ?? initialCurrentUser;
   const employees = employeesFromProvider?.length > 0 ? employeesFromProvider : initialEmployees;
   const squads = squadsFromProvider?.length > 0 ? squadsFromProvider : initialSquads;
-  const departments = departmentsFromProvider?.length > 0 ? departmentsFromProvider : initialDepartments;
-  const effectiveIsSupervisorOrAdmin = effectiveUser?.role === "supervisor" || effectiveUser?.role === "admin";
+  const departments =
+    departmentsFromProvider?.length > 0 ? departmentsFromProvider : initialDepartments;
+  const effectiveIsSupervisorOrAdmin =
+    effectiveUser?.role === "supervisor" || effectiveUser?.role === "admin";
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [calendarRefreshKey, setCalendarRefreshKey] = useState(0);
   const [viewTaskId, setViewTaskId] = useState<number | null>(null);
@@ -168,9 +185,7 @@ export function DashboardPageClient({
             onCreateMeeting={() => setActiveModal("meeting")}
             onRequestTimeOff={() => setActiveModal("timeOff")}
             onCreateTimeOffForEmployee={
-              effectiveIsSupervisorOrAdmin
-                ? () => setActiveModal("timeOffForEmployee")
-                : undefined
+              effectiveIsSupervisorOrAdmin ? () => setActiveModal("timeOffForEmployee") : undefined
             }
             onViewTask={handleViewTask}
             onViewMeeting={handleViewMeeting}
@@ -255,4 +270,4 @@ export function DashboardPageClient({
       )}
     </>
   );
-}
+};

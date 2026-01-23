@@ -33,7 +33,7 @@ export interface GroupedSelectOptions {
   departments: SelectOption[];
 }
 
-export function getGroupedOptions(squads: Squad[], departments: string[]): GroupedSelectOptions {
+export const getGroupedOptions = (squads: Squad[], departments: string[]): GroupedSelectOptions => {
   return {
     squads: squads.map((squad) => ({
       value: squad.id.toString(),
@@ -46,9 +46,9 @@ export function getGroupedOptions(squads: Squad[], departments: string[]): Group
       type: "department" as SelectionType,
     })),
   };
-}
+};
 
-export function categorizeTask(task: TeamTask): TaskCategory {
+export const categorizeTask = (task: TeamTask): TaskCategory => {
   const dueDate = task.due_date ? new Date(task.due_date) : null;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -74,9 +74,9 @@ export function categorizeTask(task: TeamTask): TaskCategory {
     return "approaching";
   }
   return "upcoming";
-}
+};
 
-export function categorizeTasks(tasks: TeamTask[]): CategorizedTasks {
+export const categorizeTasks = (tasks: TeamTask[]): CategorizedTasks => {
   const result: CategorizedTasks = {
     upcoming: [],
     completed: [],
@@ -90,14 +90,14 @@ export function categorizeTasks(tasks: TeamTask[]): CategorizedTasks {
   });
 
   return result;
-}
+};
 
-export function filterTimeOffByTeam(
+export const filterTimeOffByTeam = (
   timeOffRequests: TimeOffRequest[] | null | undefined,
   allUsers: User[],
   type: SelectionType,
   id: string | null
-): TimeOffRequest[] {
+): TimeOffRequest[] => {
   if (!id || !timeOffRequests) return [];
 
   const memberIds = new Set<number>();
@@ -118,14 +118,14 @@ export function filterTimeOffByTeam(
   }
 
   return timeOffRequests.filter((request) => memberIds.has(request.user_id));
-}
+};
 
-export function filterTasksByTeam(
+export const filterTasksByTeam = (
   tasks: TeamTask[] | null | undefined,
   allUsers: User[],
   type: SelectionType,
   id: string | null
-): TeamTask[] {
+): TeamTask[] => {
   if (!id || !tasks) return [];
 
   const memberIds = new Set<number>();
@@ -146,21 +146,19 @@ export function filterTasksByTeam(
   }
 
   return tasks.filter((task) => task.employee && memberIds.has(task.employee.id));
-}
+};
 
-export function filterMembersByTeam(
+export const filterMembersByTeam = (
   allUsers: User[],
   type: SelectionType,
   id: string | null
-): User[] {
+): User[] => {
   if (!id) return [];
 
   if (type === "squad") {
     const squadId = parseInt(id, 10);
-    return allUsers.filter((user) =>
-      user.squads?.some((squad) => squad.id === squadId)
-    );
+    return allUsers.filter((user) => user.squads?.some((squad) => squad.id === squadId));
   } else {
     return allUsers.filter((user) => user.department === id);
   }
-}
+};

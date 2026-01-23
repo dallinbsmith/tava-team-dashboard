@@ -37,9 +37,7 @@ export default function LoginPage() {
               <Users className="w-8 h-8 text-primary-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">Manager Dashboard</h1>
-            <p className="text-gray-500 mt-2">
-              Sign in to manage your team
-            </p>
+            <p className="text-gray-500 mt-2">Sign in to manage your team</p>
           </div>
 
           <Link

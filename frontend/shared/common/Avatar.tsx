@@ -73,7 +73,9 @@ const Avatar = memo(function Avatar({
   }
 
   return (
-    <div className={`${container} flex-shrink-0 rounded-full relative overflow-hidden ${className}`}>
+    <div
+      className={`${container} flex-shrink-0 rounded-full relative overflow-hidden ${className}`}
+    >
       <Image
         src={imageUrl}
         alt={`${firstName} ${lastName}`}

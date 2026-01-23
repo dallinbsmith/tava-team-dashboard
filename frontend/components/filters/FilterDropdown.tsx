@@ -94,10 +94,11 @@ export default function FilterDropdown({
       <button
         ref={buttonRef}
         onClick={onToggle}
-        className={`relative p-2 transition-colors ${isOpen || activeFilterCount > 0
+        className={`relative p-2 transition-colors ${
+          isOpen || activeFilterCount > 0
             ? "bg-primary-500 text-white"
             : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-          }`}
+        }`}
         title={title}
       >
         <Filter className="w-4 h-4" />
@@ -108,18 +109,21 @@ export default function FilterDropdown({
         )}
       </button>
 
-      {mounted && isOpen && buttonRef.current && createPortal(
-        <DropdownPanel
-          buttonRect={buttonRef.current.getBoundingClientRect()}
-          panelRef={panelRef}
-          activeFilterCount={activeFilterCount}
-          onClearAll={onClearAll}
-          title={title}
-        >
-          {children}
-        </DropdownPanel>,
-        document.body
-      )}
+      {mounted &&
+        isOpen &&
+        buttonRef.current &&
+        createPortal(
+          <DropdownPanel
+            buttonRect={buttonRef.current.getBoundingClientRect()}
+            panelRef={panelRef}
+            activeFilterCount={activeFilterCount}
+            onClearAll={onClearAll}
+            title={title}
+          >
+            {children}
+          </DropdownPanel>,
+          document.body
+        )}
     </>
   );
 }
@@ -139,7 +143,6 @@ function DropdownPanel({
   title: string;
   children: React.ReactNode;
 }) {
-
   const position = {
     top: buttonRect.bottom + 8,
     left: Math.min(buttonRect.left, window.innerWidth - 288 - 16),

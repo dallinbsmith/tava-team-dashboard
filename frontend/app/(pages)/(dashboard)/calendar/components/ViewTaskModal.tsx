@@ -33,12 +33,7 @@ const STATUS_OPTIONS: { value: TaskStatus; label: string; color: string }[] = [
   { value: "cancelled", label: "Cancelled", color: "bg-gray-500" },
 ];
 
-export default function ViewTaskModal({
-  isOpen,
-  onClose,
-  taskId,
-  onUpdated,
-}: ViewTaskModalProps) {
+export default function ViewTaskModal({ isOpen, onClose, taskId, onUpdated }: ViewTaskModalProps) {
   const { allUsers, squads, departments } = useOrganization();
   const { currentUser, effectiveIsSupervisorOrAdmin } = useCurrentUser();
 
@@ -269,7 +264,9 @@ export default function ViewTaskModal({
               {assignmentType === "user" && (
                 <select
                   value={assignedUserId || ""}
-                  onChange={(e) => setAssignedUserId(e.target.value ? parseInt(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    setAssignedUserId(e.target.value ? parseInt(e.target.value) : undefined)
+                  }
                   className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">Unassigned</option>
@@ -284,7 +281,9 @@ export default function ViewTaskModal({
               {assignmentType === "squad" && (
                 <select
                   value={assignedSquadId || ""}
-                  onChange={(e) => setAssignedSquadId(e.target.value ? parseInt(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    setAssignedSquadId(e.target.value ? parseInt(e.target.value) : undefined)
+                  }
                   className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">Select a squad</option>
@@ -371,9 +370,7 @@ export default function ViewTaskModal({
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-theme-text">{task.title}</h3>
-              {task.description && (
-                <p className="text-theme-text-muted mt-1">{task.description}</p>
-              )}
+              {task.description && <p className="text-theme-text-muted mt-1">{task.description}</p>}
             </div>
           </div>
 

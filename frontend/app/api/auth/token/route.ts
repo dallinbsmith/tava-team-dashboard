@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 
 const CSRF_COOKIE_NAME = "csrf_token";
 
-async function validateCsrfToken(request: NextRequest): Promise<boolean> {
+const validateCsrfToken = async (request: NextRequest): Promise<boolean> => {
   const cookieStore = await cookies();
   const csrfCookie = cookieStore.get(CSRF_COOKIE_NAME)?.value;
   const csrfHeader = request.headers.get("X-CSRF-Token");
@@ -14,16 +14,13 @@ async function validateCsrfToken(request: NextRequest): Promise<boolean> {
   }
 
   return csrfCookie === csrfHeader;
-}
+};
 
-export async function GET(request: NextRequest) {
+export const GET = async (request: NextRequest) => {
   try {
     const isValidCsrf = await validateCsrfToken(request);
     if (!isValidCsrf) {
-      return NextResponse.json(
-        { error: "Invalid CSRF token" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
     }
 
     const session = await auth0.getSession();
@@ -48,4 +45,4 @@ export async function GET(request: NextRequest) {
   } catch {
     return NextResponse.json({ accessToken: null }, { status: 401 });
   }
-}
+};

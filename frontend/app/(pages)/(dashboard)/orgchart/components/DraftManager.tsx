@@ -3,7 +3,18 @@
 import { useState, useEffect } from "react";
 import { OrgChartDraft } from "../types";
 import { User, Squad } from "@/shared/types/user";
-import { FileText, Plus, Trash2, Send, X, AlertCircle, UserCircle, Building2, Shield, Users } from "lucide-react";
+import {
+  FileText,
+  Plus,
+  Trash2,
+  Send,
+  X,
+  AlertCircle,
+  UserCircle,
+  Building2,
+  Shield,
+  Users,
+} from "lucide-react";
 
 export interface DraftManagerProps {
   drafts: OrgChartDraft[];
@@ -48,25 +59,29 @@ function ChangeRow({
       </div>
       <div className="flex flex-wrap items-center gap-1.5 ml-4">
         {hasOld && (
-          <span className={`${type === "badge"
-            ? "px-2 py-0.5 text-xs bg-red-900/40 text-red-400 border border-red-500/30 rounded line-through"
-            : "text-sm text-red-400 line-through"}`}>
+          <span
+            className={`${
+              type === "badge"
+                ? "px-2 py-0.5 text-xs bg-red-900/40 text-red-400 border border-red-500/30 rounded line-through"
+                : "text-sm text-red-400 line-through"
+            }`}
+          >
             {oldValue}
           </span>
         )}
-        {hasOld && hasNew && (
-          <span className="text-theme-text-muted">→</span>
-        )}
+        {hasOld && hasNew && <span className="text-theme-text-muted">→</span>}
         {hasNew && (
-          <span className={`${type === "badge"
-            ? "px-2 py-0.5 text-xs bg-green-900/40 text-green-400 border border-green-500/30 rounded"
-            : "text-sm text-green-400"}`}>
+          <span
+            className={`${
+              type === "badge"
+                ? "px-2 py-0.5 text-xs bg-green-900/40 text-green-400 border border-green-500/30 rounded"
+                : "text-sm text-green-400"
+            }`}
+          >
             {newValue}
           </span>
         )}
-        {!hasOld && hasNew && (
-          <span className="text-xs text-theme-text-muted ml-1">(added)</span>
-        )}
+        {!hasOld && hasNew && <span className="text-xs text-theme-text-muted ml-1">(added)</span>}
       </div>
     </div>
   );
@@ -82,24 +97,24 @@ function SquadChangeRow({
   newSquadIds?: number[];
   squads: Squad[];
 }) {
-  const squadMap = new Map(squads.map(s => [s.id, s]));
+  const squadMap = new Map(squads.map((s) => [s.id, s]));
 
   const originalIds = new Set(originalSquadIds || []);
   const newIds = new Set(newSquadIds || []);
 
   const removedSquads = (originalSquadIds || [])
-    .filter(id => !newIds.has(id))
-    .map(id => squadMap.get(id))
+    .filter((id) => !newIds.has(id))
+    .map((id) => squadMap.get(id))
     .filter((s): s is Squad => s !== undefined);
 
   const addedSquads = (newSquadIds || [])
-    .filter(id => !originalIds.has(id))
-    .map(id => squadMap.get(id))
+    .filter((id) => !originalIds.has(id))
+    .map((id) => squadMap.get(id))
     .filter((s): s is Squad => s !== undefined);
 
   const unchangedSquads = (newSquadIds || [])
-    .filter(id => originalIds.has(id))
-    .map(id => squadMap.get(id))
+    .filter((id) => originalIds.has(id))
+    .map((id) => squadMap.get(id))
     .filter((s): s is Squad => s !== undefined);
 
   if (removedSquads.length === 0 && addedSquads.length === 0) return null;
@@ -111,7 +126,7 @@ function SquadChangeRow({
         <span>Squads</span>
       </div>
       <div className="flex flex-wrap gap-1.5 ml-4">
-        {removedSquads.map(squad => (
+        {removedSquads.map((squad) => (
           <span
             key={`removed-${squad.id}`}
             className="px-2 py-0.5 text-xs bg-red-900/40 text-red-400 border border-red-500/30 rounded line-through"
@@ -119,7 +134,7 @@ function SquadChangeRow({
             {squad.name}
           </span>
         ))}
-        {unchangedSquads.map(squad => (
+        {unchangedSquads.map((squad) => (
           <span
             key={squad.id}
             className="px-2 py-0.5 text-xs bg-theme-elevated text-theme-text-muted border border-theme-border rounded"
@@ -127,7 +142,7 @@ function SquadChangeRow({
             {squad.name}
           </span>
         ))}
-        {addedSquads.map(squad => (
+        {addedSquads.map((squad) => (
           <span
             key={`added-${squad.id}`}
             className="px-2 py-0.5 text-xs bg-green-900/40 text-green-400 border border-green-500/30 rounded"
@@ -161,7 +176,7 @@ export default function DraftManager({
   const hasChanges = changes.length > 0;
 
   // Build user lookup map for supervisor names
-  const userMap = new Map(allUsers.map(u => [u.id, u]));
+  const userMap = new Map(allUsers.map((u) => [u.id, u]));
 
   const getSupervisorName = (id?: number | null): string | null => {
     if (!id) return null;
@@ -226,11 +241,13 @@ export default function DraftManager({
               <AlertCircle className="w-4 h-4" />
               Changes
               {hasChanges && (
-                <span className={`flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold rounded-full ${
-                  activeTab === "changes"
-                    ? "bg-purple-500 text-white"
-                    : "bg-purple-500 text-white animate-pulse"
-                }`}>
+                <span
+                  className={`flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-bold rounded-full ${
+                    activeTab === "changes"
+                      ? "bg-purple-500 text-white"
+                      : "bg-purple-500 text-white animate-pulse"
+                  }`}
+                >
                   {changes.length}
                 </span>
               )}
@@ -254,9 +271,10 @@ export default function DraftManager({
             ) : (
               activeDrafts.map((draft) => {
                 // Use currentDraft's changes count if this is the selected draft (more up-to-date)
-                const changesCount = currentDraft?.id === draft.id
-                  ? currentDraft.changes?.length || 0
-                  : draft.changes?.length || 0;
+                const changesCount =
+                  currentDraft?.id === draft.id
+                    ? currentDraft.changes?.length || 0
+                    : draft.changes?.length || 0;
 
                 return (
                   <div
@@ -332,11 +350,13 @@ export default function DraftManager({
               </p>
             ) : (
               changes.map((change) => {
-                const hasSupervisorChange = change.new_supervisor_id !== change.original_supervisor_id;
-                const hasDepartmentChange = change.new_department !== undefined &&
+                const hasSupervisorChange =
+                  change.new_supervisor_id !== change.original_supervisor_id;
+                const hasDepartmentChange =
+                  change.new_department !== undefined &&
                   change.new_department !== change.original_department;
-                const hasRoleChange = change.new_role !== undefined &&
-                  change.new_role !== change.original_role;
+                const hasRoleChange =
+                  change.new_role !== undefined && change.new_role !== change.original_role;
                 const hasSquadChange = change.new_squad_ids !== undefined;
 
                 return (
@@ -380,12 +400,17 @@ export default function DraftManager({
                         <ChangeRow
                           label="Role"
                           icon={Shield}
-                          oldValue={change.original_role ?
-                            change.original_role.charAt(0).toUpperCase() + change.original_role.slice(1) :
-                            undefined}
-                          newValue={change.new_role ?
-                            change.new_role.charAt(0).toUpperCase() + change.new_role.slice(1) :
-                            undefined}
+                          oldValue={
+                            change.original_role
+                              ? change.original_role.charAt(0).toUpperCase() +
+                                change.original_role.slice(1)
+                              : undefined
+                          }
+                          newValue={
+                            change.new_role
+                              ? change.new_role.charAt(0).toUpperCase() + change.new_role.slice(1)
+                              : undefined
+                          }
                           type="badge"
                         />
                       )}

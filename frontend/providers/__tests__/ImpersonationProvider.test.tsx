@@ -47,7 +47,11 @@ const createMockUser = (overrides: Partial<User> = {}): User => ({
 });
 
 // Test component that uses the hook
-function TestConsumer({ onRender }: { onRender?: (ctx: ReturnType<typeof useImpersonation>) => void }) {
+function TestConsumer({
+  onRender,
+}: {
+  onRender?: (ctx: ReturnType<typeof useImpersonation>) => void;
+}) {
   const context = useImpersonation();
   onRender?.(context);
   return (
@@ -55,7 +59,9 @@ function TestConsumer({ onRender }: { onRender?: (ctx: ReturnType<typeof useImpe
       <span data-testid="is-impersonating">{String(context.isImpersonating)}</span>
       <span data-testid="impersonated-user-id">{context.impersonatedUserId ?? "null"}</span>
       <span data-testid="impersonated-user-name">
-        {context.impersonatedUser ? `${context.impersonatedUser.first_name} ${context.impersonatedUser.last_name}` : "null"}
+        {context.impersonatedUser
+          ? `${context.impersonatedUser.first_name} ${context.impersonatedUser.last_name}`
+          : "null"}
       </span>
       <button onClick={() => context.startImpersonation(createMockUser())} data-testid="start-btn">
         Start
@@ -63,7 +69,10 @@ function TestConsumer({ onRender }: { onRender?: (ctx: ReturnType<typeof useImpe
       <button onClick={() => context.endImpersonation()} data-testid="end-btn">
         End
       </button>
-      <button onClick={() => context.setImpersonatedUser(createMockUser({ id: 99, first_name: "Jane" }))} data-testid="set-user-btn">
+      <button
+        onClick={() => context.setImpersonatedUser(createMockUser({ id: 99, first_name: "Jane" }))}
+        data-testid="set-user-btn"
+      >
         Set User
       </button>
     </div>

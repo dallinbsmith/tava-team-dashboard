@@ -26,46 +26,35 @@ const sizeStyles: Record<SpinnerSize, string> = {
  * <LoadingSpinner size="md" />
  * ```
  */
-export function LoadingSpinner({ size = "md", className = "" }: LoadingSpinnerProps) {
-  return (
-    <Loader2
-      className={`animate-spin text-primary-600 ${sizeStyles[size]} ${className}`}
-    />
-  );
-}
-
+export const LoadingSpinner = ({ size = "md", className = "" }: LoadingSpinnerProps) => {
+  return <Loader2 className={`animate-spin text-primary-600 ${sizeStyles[size]} ${className}`} />;
+};
 
 export interface CenteredSpinnerProps extends LoadingSpinnerProps {
   text?: string;
 }
 
-export function CenteredSpinner({
-  size = "lg",
-  text,
-  className = "",
-}: CenteredSpinnerProps) {
+export const CenteredSpinner = ({ size = "lg", text, className = "" }: CenteredSpinnerProps) => {
   return (
     <div className={`flex flex-col items-center justify-center py-12 ${className}`}>
       <LoadingSpinner size={size} />
       {text && <p className="mt-3 text-sm text-theme-text-muted">{text}</p>}
     </div>
   );
-}
-
+};
 
 export interface FullPageSpinnerProps extends LoadingSpinnerProps {
   text?: string;
 }
 
-export function FullPageSpinner({ size = "xl", text }: FullPageSpinnerProps) {
+export const FullPageSpinner = ({ size = "xl", text }: FullPageSpinnerProps) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
       <LoadingSpinner size={size} />
       {text && <p className="mt-4 text-theme-text-muted">{text}</p>}
     </div>
   );
-}
-
+};
 
 export interface SkeletonProps {
   width?: string;
@@ -74,12 +63,12 @@ export interface SkeletonProps {
   className?: string;
 }
 
-export function Skeleton({
+export const Skeleton = ({
   width = "w-full",
   height = "h-4",
   circle = false,
   className = "",
-}: SkeletonProps) {
+}: SkeletonProps) => {
   return (
     <div
       className={`
@@ -90,13 +79,11 @@ export function Skeleton({
       `}
     />
   );
-}
+};
 
-export function SkeletonCard({ className = "" }: { className?: string }) {
+export const SkeletonCard = ({ className = "" }: { className?: string }) => {
   return (
-    <div
-      className={`bg-theme-surface border border-theme-border p-4 rounded-lg ${className}`}
-    >
+    <div className={`bg-theme-surface border border-theme-border p-4 rounded-lg ${className}`}>
       <div className="flex items-start gap-3">
         <Skeleton circle width="w-10" height="h-10" />
         <div className="flex-1 space-y-2">
@@ -110,4 +97,4 @@ export function SkeletonCard({ className = "" }: { className?: string }) {
       </div>
     </div>
   );
-}
+};

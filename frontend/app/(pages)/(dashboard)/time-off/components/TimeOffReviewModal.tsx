@@ -12,7 +12,11 @@ interface TimeOffReviewModalProps {
   onSuccess: () => void;
 }
 
-export default function TimeOffReviewModal({ request, onClose, onSuccess }: TimeOffReviewModalProps) {
+export default function TimeOffReviewModal({
+  request,
+  onClose,
+  onSuccess,
+}: TimeOffReviewModalProps) {
   const [notes, setNotes] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -46,10 +50,7 @@ export default function TimeOffReviewModal({ request, onClose, onSuccess }: Time
       <div className="bg-gray-800 rounded-lg border border-gray-700 w-full max-w-md">
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h3 className="text-lg font-medium text-white">Review Time Off Request</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -85,9 +86,7 @@ export default function TimeOffReviewModal({ request, onClose, onSuccess }: Time
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Notes (optional)
-            </label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Notes (optional)</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -103,7 +102,11 @@ export default function TimeOffReviewModal({ request, onClose, onSuccess }: Time
               disabled={isPending}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+              {isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <XCircle className="w-4 h-4" />
+              )}
               Reject
             </button>
             <button
@@ -111,7 +114,11 @@ export default function TimeOffReviewModal({ request, onClose, onSuccess }: Time
               disabled={isPending}
               className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+              {isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Check className="w-4 h-4" />
+              )}
               Approve
             </button>
           </div>

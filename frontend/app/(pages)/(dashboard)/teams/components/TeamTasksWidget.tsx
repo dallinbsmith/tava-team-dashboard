@@ -20,10 +20,7 @@ import { SelectionType, TaskCategory } from "../types";
 import { useTeamTasks } from "../hooks";
 import Avatar from "@/shared/common/Avatar";
 import TimeOffIndicator from "@/app/(pages)/(dashboard)/time-off/components/TimeOffIndicator";
-import {
-  TaskStatusBadge,
-  DueDateDisplay,
-} from "@/lib/jira-utils";
+import { TaskStatusBadge, DueDateDisplay } from "@/lib/jira-utils";
 
 interface TeamTasksWidgetProps {
   selectionType: SelectionType;

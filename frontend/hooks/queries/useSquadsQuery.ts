@@ -37,9 +37,7 @@ export interface UseSquadsQueryResult {
  * Hook for fetching and managing squads.
  * Includes mutations for add/remove with automatic cache invalidation.
  */
-export function useSquadsQuery(
-  options: UseSquadsQueryOptions = {}
-): UseSquadsQueryResult {
+export const useSquadsQuery = (options: UseSquadsQueryOptions = {}): UseSquadsQueryResult => {
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
 
@@ -163,6 +161,6 @@ export function useSquadsQuery(
     removeSquad,
     isMutating: addMutation.isPending || renameMutation.isPending || deleteMutation.isPending,
   };
-}
+};
 
 export default useSquadsQuery;

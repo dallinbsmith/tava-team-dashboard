@@ -16,8 +16,12 @@ jest.mock("@/lib/api", () => ({
   deleteDepartment: jest.fn(),
   renameDepartment: jest.fn(),
 }));
-const mockDeleteDepartment = api.deleteDepartment as jest.MockedFunction<typeof api.deleteDepartment>;
-const mockRenameDepartment = api.renameDepartment as jest.MockedFunction<typeof api.renameDepartment>;
+const mockDeleteDepartment = api.deleteDepartment as jest.MockedFunction<
+  typeof api.deleteDepartment
+>;
+const mockRenameDepartment = api.renameDepartment as jest.MockedFunction<
+  typeof api.renameDepartment
+>;
 
 // Mock queryUtils
 jest.mock("@/lib/queryUtils", () => ({
@@ -26,7 +30,9 @@ jest.mock("@/lib/queryUtils", () => ({
     departmentRelated: jest.fn().mockReturnValue([["departments"], ["employees"]]),
   },
 }));
-const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<typeof queryUtils.refetchQueries>;
+const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<
+  typeof queryUtils.refetchQueries
+>;
 
 // Test fixtures
 const mockDepartments = ["Engineering", "Product", "Design", "Marketing"];
@@ -276,7 +282,10 @@ describe("useRenameDepartment", () => {
       });
 
       await act(async () => {
-        await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
+        await result.current.mutateAsync({
+          oldName: "Engineering",
+          newName: "Product Engineering",
+        });
       });
 
       expect(mockRenameDepartment).toHaveBeenCalledWith("Engineering", "Product Engineering");
@@ -290,7 +299,10 @@ describe("useRenameDepartment", () => {
       });
 
       await act(async () => {
-        await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
+        await result.current.mutateAsync({
+          oldName: "Engineering",
+          newName: "Product Engineering",
+        });
       });
 
       expect(mockRefetchQueries).toHaveBeenCalled();
@@ -308,7 +320,10 @@ describe("useRenameDepartment", () => {
       });
 
       await act(async () => {
-        await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
+        await result.current.mutateAsync({
+          oldName: "Engineering",
+          newName: "Product Engineering",
+        });
       });
 
       // Verify the API was called with correct parameters
@@ -328,7 +343,10 @@ describe("useRenameDepartment", () => {
 
       try {
         await act(async () => {
-          await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
+          await result.current.mutateAsync({
+            oldName: "Engineering",
+            newName: "Product Engineering",
+          });
         });
       } catch {
         // Expected to throw
@@ -353,7 +371,10 @@ describe("useRenameDepartment", () => {
       });
 
       await act(async () => {
-        await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
+        await result.current.mutateAsync({
+          oldName: "Engineering",
+          newName: "Product Engineering",
+        });
       });
 
       expect(onSuccess).toHaveBeenCalled();
@@ -370,7 +391,10 @@ describe("useRenameDepartment", () => {
 
       try {
         await act(async () => {
-          await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
+          await result.current.mutateAsync({
+            oldName: "Engineering",
+            newName: "Product Engineering",
+          });
         });
       } catch {
         // Expected to throw
@@ -397,7 +421,10 @@ describe("useRenameDepartment", () => {
       });
 
       await act(async () => {
-        await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
+        await result.current.mutateAsync({
+          oldName: "Engineering",
+          newName: "Product Engineering",
+        });
       });
 
       expect(result.current.isPending).toBe(false);
@@ -412,7 +439,10 @@ describe("useRenameDepartment", () => {
 
       await expect(
         act(async () => {
-          await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
+          await result.current.mutateAsync({
+            oldName: "Engineering",
+            newName: "Product Engineering",
+          });
         })
       ).rejects.toThrow("Failed");
     });
@@ -429,7 +459,10 @@ describe("useRenameDepartment", () => {
 
       // Should not throw
       await act(async () => {
-        await result.current.mutateAsync({ oldName: "Engineering", newName: "Product Engineering" });
+        await result.current.mutateAsync({
+          oldName: "Engineering",
+          newName: "Product Engineering",
+        });
       });
 
       expect(mockRenameDepartment).toHaveBeenCalledWith("Engineering", "Product Engineering");

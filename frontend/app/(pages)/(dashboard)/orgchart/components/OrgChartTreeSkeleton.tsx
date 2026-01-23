@@ -1,4 +1,4 @@
-export function OrgChartTreeSkeleton() {
+export const OrgChartTreeSkeleton = () => {
   return (
     <div className="bg-theme-surface border border-theme-border p-8 overflow-x-auto animate-pulse">
       <div className="flex flex-col items-center min-w-max">
@@ -53,17 +53,27 @@ export function OrgChartTreeSkeleton() {
       </div>
     </div>
   );
-}
+};
 
-function OrgNodeSkeleton({ isRoot = false, isSmall = false }: { isRoot?: boolean; isSmall?: boolean }) {
+const OrgNodeSkeleton = ({
+  isRoot = false,
+  isSmall = false,
+}: {
+  isRoot?: boolean;
+  isSmall?: boolean;
+}) => {
   const width = isSmall ? "w-44" : isRoot ? "w-56" : "w-52";
   const padding = isSmall ? "p-3" : "p-4";
 
   return (
-    <div className={`${width} ${padding} bg-theme-elevated border border-theme-border rounded-lg shadow-sm`}>
+    <div
+      className={`${width} ${padding} bg-theme-elevated border border-theme-border rounded-lg shadow-sm`}
+    >
       <div className="flex items-center gap-3">
         {/* Avatar */}
-        <div className={`${isSmall ? "w-8 h-8" : "w-12 h-12"} bg-theme-muted rounded-full shrink-0`} />
+        <div
+          className={`${isSmall ? "w-8 h-8" : "w-12 h-12"} bg-theme-muted rounded-full shrink-0`}
+        />
         <div className="flex-1 min-w-0">
           {/* Name */}
           <div className={`${isSmall ? "h-4 w-20" : "h-5 w-28"} bg-theme-muted rounded mb-1.5`} />
@@ -79,9 +89,9 @@ function OrgNodeSkeleton({ isRoot = false, isSmall = false }: { isRoot?: boolean
       )}
     </div>
   );
-}
+};
 
-export function DraftsBannerSkeleton() {
+export const DraftsBannerSkeleton = () => {
   return (
     <div className="bg-amber-900/20 border border-amber-500/30 p-4 animate-pulse">
       <div className="flex items-center justify-between">
@@ -96,4 +106,4 @@ export function DraftsBannerSkeleton() {
       </div>
     </div>
   );
-}
+};

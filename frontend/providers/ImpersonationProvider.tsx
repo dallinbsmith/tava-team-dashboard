@@ -16,7 +16,7 @@ interface ImpersonationContextType {
 
 const ImpersonationContext = createContext<ImpersonationContextType | undefined>(undefined);
 
-export function ImpersonationProvider({ children }: { children: ReactNode }) {
+export const ImpersonationProvider = ({ children }: { children: ReactNode }) => {
   const [impersonatedUserId, setImpersonatedUserId] = useState<number | null>(null);
   const [impersonatedUser, setImpersonatedUser] = useState<User | null>(null);
 
@@ -51,26 +51,22 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
     setImpersonatedUser,
   };
 
-  return (
-    <ImpersonationContext.Provider value={value}>
-      {children}
-    </ImpersonationContext.Provider>
-  );
-}
+  return <ImpersonationContext.Provider value={value}>{children}</ImpersonationContext.Provider>;
+};
 
 const defaultImpersonationContext: ImpersonationContextType = {
   impersonatedUser: null,
   isImpersonating: false,
-  startImpersonation: () => { },
-  endImpersonation: () => { },
+  startImpersonation: () => {},
+  endImpersonation: () => {},
   impersonatedUserId: null,
-  setImpersonatedUser: () => { },
+  setImpersonatedUser: () => {},
 };
 
-export function useImpersonation() {
+export const useImpersonation = () => {
   const context = useContext(ImpersonationContext);
   if (context === undefined) {
     return defaultImpersonationContext;
   }
   return context;
-}
+};

@@ -24,7 +24,7 @@ export default function DraftEditModal({
 }: DraftEditModalProps) {
   const [department, setDepartment] = useState(employee.department || "");
   const [selectedSquadIds, setSelectedSquadIds] = useState<number[]>(
-    employee.squads?.map(s => s.id) || []
+    employee.squads?.map((s) => s.id) || []
   );
   const [role, setRole] = useState<"employee" | "supervisor">(
     employee.role === "admin" ? "supervisor" : employee.role
@@ -32,7 +32,7 @@ export default function DraftEditModal({
   const [isCreatingDepartment, setIsCreatingDepartment] = useState(false);
   const [newDepartmentName, setNewDepartmentName] = useState("");
 
-  const originalSquadIds = employee.squads?.map(s => s.id).sort() || [];
+  const originalSquadIds = employee.squads?.map((s) => s.id).sort() || [];
   const currentSquadIds = [...selectedSquadIds].sort();
   const squadsChanged =
     originalSquadIds.length !== currentSquadIds.length ||
@@ -41,8 +41,7 @@ export default function DraftEditModal({
   const originalRole = employee.role === "admin" ? "supervisor" : employee.role;
   const roleChanged = role !== originalRole;
 
-  const hasChanges =
-    department !== (employee.department || "") || squadsChanged || roleChanged;
+  const hasChanges = department !== (employee.department || "") || squadsChanged || roleChanged;
 
   if (!isOpen) return null;
 
@@ -57,10 +56,8 @@ export default function DraftEditModal({
   };
 
   const toggleSquad = (squadId: number) => {
-    setSelectedSquadIds(prev =>
-      prev.includes(squadId)
-        ? prev.filter(id => id !== squadId)
-        : [...prev, squadId]
+    setSelectedSquadIds((prev) =>
+      prev.includes(squadId) ? prev.filter((id) => id !== squadId) : [...prev, squadId]
     );
   };
 
@@ -77,10 +74,7 @@ export default function DraftEditModal({
       <div className="bg-theme-surface border border-theme-border rounded-lg w-full max-w-md mx-4 shadow-2xl">
         <div className="p-4 border-b border-theme-border flex items-center justify-between">
           <h2 className="text-lg font-semibold text-theme-text">Edit Employee</h2>
-          <button
-            onClick={onClose}
-            className="p-1 text-theme-text-muted hover:text-theme-text"
-          >
+          <button onClick={onClose} className="p-1 text-theme-text-muted hover:text-theme-text">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -97,18 +91,14 @@ export default function DraftEditModal({
               <div className="font-medium text-theme-text">
                 {employee.first_name} {employee.last_name}
               </div>
-              <div className="text-sm text-theme-text-muted">
-                {employee.title || employee.role}
-              </div>
+              <div className="text-sm text-theme-text-muted">{employee.title || employee.role}</div>
             </div>
           </div>
 
           <div className="space-y-4">
             {/* Department Dropdown */}
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">
-                Department
-              </label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Department</label>
               {isCreatingDepartment ? (
                 <div className="flex gap-2">
                   <input
@@ -154,9 +144,7 @@ export default function DraftEditModal({
 
             {/* Squads Multi-Select */}
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">
-                Squads
-              </label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Squads</label>
               <div className="border border-theme-border rounded bg-theme-elevated p-2 max-h-40 overflow-y-auto">
                 {squads.length === 0 ? (
                   <p className="text-sm text-theme-text-muted p-2">No squads available</p>
@@ -186,9 +174,7 @@ export default function DraftEditModal({
 
             {/* Role Selector */}
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">
-                Role
-              </label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Role</label>
               <div className="flex gap-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input

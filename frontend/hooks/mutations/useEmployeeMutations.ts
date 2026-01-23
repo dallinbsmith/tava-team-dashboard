@@ -30,16 +30,13 @@ export interface UseUpdateEmployeeOptions {
  * updateEmployee({ id: 123, data: { first_name: 'John' } });
  * ```
  */
-export function useUpdateEmployee(options: UseUpdateEmployeeOptions = {}) {
+export const useUpdateEmployee = (options: UseUpdateEmployeeOptions = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, data }: UpdateEmployeeVariables) => updateUser(id, data),
     onSuccess: async (updatedUser) => {
-      queryClient.setQueryData(
-        queryKeys.employees.detail(updatedUser.id),
-        updatedUser
-      );
+      queryClient.setQueryData(queryKeys.employees.detail(updatedUser.id), updatedUser);
 
       await refetchQueries(queryClient, queryKeyGroups.employeeRelated());
       options.onSuccess?.(updatedUser);
@@ -48,7 +45,7 @@ export function useUpdateEmployee(options: UseUpdateEmployeeOptions = {}) {
       options.onError?.(error);
     },
   });
-}
+};
 
 export interface UseDeactivateEmployeeOptions {
   onSuccess?: () => void;
@@ -68,7 +65,7 @@ export interface UseDeactivateEmployeeOptions {
  * deactivate(123);
  * ```
  */
-export function useDeactivateEmployee(options: UseDeactivateEmployeeOptions = {}) {
+export const useDeactivateEmployee = (options: UseDeactivateEmployeeOptions = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -76,10 +73,7 @@ export function useDeactivateEmployee(options: UseDeactivateEmployeeOptions = {}
     onSuccess: async (_data, userId) => {
       queryClient.removeQueries({ queryKey: queryKeys.employees.detail(userId) });
 
-      await refetchQueries(queryClient, [
-        ...queryKeyGroups.users(),
-        queryKeys.orgChart.tree(),
-      ]);
+      await refetchQueries(queryClient, [...queryKeyGroups.users(), queryKeys.orgChart.tree()]);
 
       options.onSuccess?.();
     },
@@ -87,4 +81,4 @@ export function useDeactivateEmployee(options: UseDeactivateEmployeeOptions = {}
       options.onError?.(error);
     },
   });
-}
+};

@@ -46,9 +46,7 @@ export const createTestQueryClient = () =>
 export const QueryWrapper = ({ children }: { children: ReactNode }) => {
   const queryClient = createTestQueryClient();
 
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
 /**

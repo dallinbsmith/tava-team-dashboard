@@ -1,7 +1,12 @@
 "use client";
 
 import { format } from "date-fns";
-import { TimeOffRequest, TIME_OFF_TYPE_LABELS, TIME_OFF_STATUS_LABELS, TimeOffStatus } from "../types";
+import {
+  TimeOffRequest,
+  TIME_OFF_TYPE_LABELS,
+  TIME_OFF_STATUS_LABELS,
+  TimeOffStatus,
+} from "../types";
 import { Calendar, Clock, User, MessageSquare, X, Check, XCircle } from "lucide-react";
 
 interface TimeOffRequestCardProps {
@@ -43,7 +48,9 @@ export default function TimeOffRequestCard({
             <span className="text-white font-medium">
               {TIME_OFF_TYPE_LABELS[request.request_type]}
             </span>
-            <span className={`px-2 py-0.5 text-xs rounded-full ${colors.bg} ${colors.text} border ${colors.border}`}>
+            <span
+              className={`px-2 py-0.5 text-xs rounded-full ${colors.bg} ${colors.text} border ${colors.border}`}
+            >
               {TIME_OFF_STATUS_LABELS[request.status]}
             </span>
           </div>
@@ -57,7 +64,9 @@ export default function TimeOffRequestCard({
             {showUser && request.user && (
               <div className="flex items-center gap-2 text-gray-400">
                 <User className="w-4 h-4 flex-shrink-0" />
-                <span>{request.user.first_name} {request.user.last_name}</span>
+                <span>
+                  {request.user.first_name} {request.user.last_name}
+                </span>
               </div>
             )}
 

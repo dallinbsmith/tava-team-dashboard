@@ -3,12 +3,7 @@
 import { createContext, useContext, ReactNode, useCallback } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  useEmployeesQuery,
-  useAllUsersQuery,
-  useSquadsQuery,
-  useDepartmentsQuery,
-} from "@/hooks";
+import { useEmployeesQuery, useAllUsersQuery, useSquadsQuery, useDepartmentsQuery } from "@/hooks";
 import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 import { User, Squad } from "@/shared/types/user";
 
@@ -42,7 +37,7 @@ interface OrganizationContextType {
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined);
 
-export function OrganizationProvider({ children }: { children: ReactNode }) {
+export const OrganizationProvider = ({ children }: { children: ReactNode }) => {
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
   const isAuthenticated = !!auth0User && !authLoading;
@@ -73,7 +68,8 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     refetch: refetchDepartments,
   } = useDepartmentsQuery({ enabled: isAuthenticated });
 
-  const loading = authLoading || employeesLoading || allUsersLoading || squadsLoading || departmentsLoading;
+  const loading =
+    authLoading || employeesLoading || allUsersLoading || squadsLoading || departmentsLoading;
 
   const refetchAll = useCallback(
     () => refetchQueries(queryClient, queryKeyGroups.organization()),
@@ -97,34 +93,30 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     refetchAll,
   };
 
-  return (
-    <OrganizationContext.Provider value={value}>
-      {children}
-    </OrganizationContext.Provider>
-  );
-}
+  return <OrganizationContext.Provider value={value}>{children}</OrganizationContext.Provider>;
+};
 
 const defaultOrganizationContext: OrganizationContextType = {
   employees: [],
   employeesLoading: true,
-  refetchEmployees: async () => { },
+  refetchEmployees: async () => {},
   allUsers: [],
   allUsersLoading: true,
-  refetchAllUsers: async () => { },
+  refetchAllUsers: async () => {},
   squads: [],
   squadsLoading: true,
-  refetchSquads: async () => { },
+  refetchSquads: async () => {},
   addSquad: async () => ({ id: 0, name: "", members: [] }),
-  removeSquad: async () => { },
+  removeSquad: async () => {},
   departments: [],
   loading: true,
-  refetchAll: async () => { },
+  refetchAll: async () => {},
 };
 
-export function useOrganization() {
+export const useOrganization = () => {
   const context = useContext(OrganizationContext);
   if (context === undefined) {
     return defaultOrganizationContext;
   }
   return context;
-}
+};

@@ -320,9 +320,7 @@ describe("IconButton", () => {
 
   describe("sizes", () => {
     it("applies correct padding for each size", () => {
-      const { rerender } = render(
-        <IconButton icon={Settings} aria-label="Settings" size="sm" />
-      );
+      const { rerender } = render(<IconButton icon={Settings} aria-label="Settings" size="sm" />);
       expect(screen.getByRole("button")).toHaveClass("p-1");
 
       rerender(<IconButton icon={Settings} aria-label="Settings" size="md" />);
@@ -336,9 +334,7 @@ describe("IconButton", () => {
   describe("event handling", () => {
     it("calls onClick when clicked", () => {
       const handleClick = jest.fn();
-      render(
-        <IconButton icon={Settings} aria-label="Settings" onClick={handleClick} />
-      );
+      render(<IconButton icon={Settings} aria-label="Settings" onClick={handleClick} />);
 
       fireEvent.click(screen.getByRole("button"));
       expect(handleClick).toHaveBeenCalledTimes(1);

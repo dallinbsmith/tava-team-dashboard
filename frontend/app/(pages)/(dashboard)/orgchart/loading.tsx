@@ -73,7 +73,13 @@ export default function OrgChartLoading() {
   );
 }
 
-function OrgNodeSkeleton({ isRoot = false, isSmall = false }: { isRoot?: boolean; isSmall?: boolean }) {
+function OrgNodeSkeleton({
+  isRoot = false,
+  isSmall = false,
+}: {
+  isRoot?: boolean;
+  isSmall?: boolean;
+}) {
   const size = isSmall ? "w-40" : isRoot ? "w-56" : "w-48";
   const padding = isSmall ? "p-3" : "p-4";
 
@@ -81,7 +87,9 @@ function OrgNodeSkeleton({ isRoot = false, isSmall = false }: { isRoot?: boolean
     <div className={`${size} ${padding} bg-theme-elevated border border-theme-border rounded-lg`}>
       <div className="flex items-center gap-3">
         {/* Avatar */}
-        <div className={`${isSmall ? "w-8 h-8" : "w-10 h-10"} bg-theme-muted rounded-full shrink-0`} />
+        <div
+          className={`${isSmall ? "w-8 h-8" : "w-10 h-10"} bg-theme-muted rounded-full shrink-0`}
+        />
         <div className="flex-1 min-w-0">
           {/* Name */}
           <div className={`${isSmall ? "h-4 w-20" : "h-5 w-24"} bg-theme-muted rounded mb-1`} />

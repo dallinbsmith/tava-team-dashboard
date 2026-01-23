@@ -58,33 +58,30 @@ export default function ConfirmationModal({
     };
   }, [isOpen]);
 
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent) => {
-      if (event.key !== "Tab" || !modalRef.current) return;
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key !== "Tab" || !modalRef.current) return;
 
-      const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
+    const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
 
-      if (focusableElements.length === 0) return;
+    if (focusableElements.length === 0) return;
 
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
 
-      if (event.shiftKey) {
-        if (document.activeElement === firstElement) {
-          event.preventDefault();
-          lastElement.focus();
-        }
-      } else {
-        if (document.activeElement === lastElement) {
-          event.preventDefault();
-          firstElement.focus();
-        }
+    if (event.shiftKey) {
+      if (document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
       }
-    },
-    []
-  );
+    } else {
+      if (document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    }
+  }, []);
 
   if (!isOpen) return null;
 
@@ -132,11 +129,16 @@ export default function ConfirmationModal({
             {iconUrl ? (
               <img src={iconUrl} alt="" className="w-10 h-10 object-contain" />
             ) : (
-              <div className={`w-10 h-10 ${styles.iconBg} flex items-center justify-center`} aria-hidden="true">
+              <div
+                className={`w-10 h-10 ${styles.iconBg} flex items-center justify-center`}
+                aria-hidden="true"
+              >
                 <AlertTriangle className={`w-5 h-5 ${styles.icon}`} />
               </div>
             )}
-            <h2 id="confirmation-modal-title" className="text-lg font-semibold text-theme-text">{title}</h2>
+            <h2 id="confirmation-modal-title" className="text-lg font-semibold text-theme-text">
+              {title}
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -149,7 +151,9 @@ export default function ConfirmationModal({
         </div>
 
         <div className="p-6">
-          <p id="confirmation-modal-description" className="text-theme-text-muted">{message}</p>
+          <p id="confirmation-modal-description" className="text-theme-text-muted">
+            {message}
+          </p>
         </div>
 
         <div className="flex justify-end gap-3 p-4 border-t border-theme-border">

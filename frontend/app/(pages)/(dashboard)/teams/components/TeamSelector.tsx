@@ -113,9 +113,7 @@ export default function TeamSelector({
         ) : (
           <Building2 className="w-4 h-4 text-purple-400" />
         )}
-        <span className="flex-1 text-left text-theme-text truncate">
-          {getSelectedLabel()}
-        </span>
+        <span className="flex-1 text-left text-theme-text truncate">{getSelectedLabel()}</span>
         <span className="px-1.5 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted">
           {selectedType === "squad" ? "Squad" : "Dept"}
         </span>
@@ -126,22 +124,25 @@ export default function TeamSelector({
         />
       </button>
 
-      {mounted && isOpen && buttonRef.current && createPortal(
-        <SelectorDropdown
-          buttonRect={buttonRef.current.getBoundingClientRect()}
-          panelRef={panelRef}
-          search={search}
-          onSearchChange={setSearch}
-          squads={squads}
-          departments={departments}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          selectedType={selectedType}
-          selectedId={selectedId}
-          onSelect={handleSelect}
-        />,
-        document.body
-      )}
+      {mounted &&
+        isOpen &&
+        buttonRef.current &&
+        createPortal(
+          <SelectorDropdown
+            buttonRect={buttonRef.current.getBoundingClientRect()}
+            panelRef={panelRef}
+            search={search}
+            onSearchChange={setSearch}
+            squads={squads}
+            departments={departments}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            selectedType={selectedType}
+            selectedId={selectedId}
+            onSelect={handleSelect}
+          />,
+          document.body
+        )}
     </>
   );
 }
@@ -210,9 +211,13 @@ function SelectorDropdown({
         >
           <Users className="w-4 h-4" />
           Squads
-          <span className={`px-1.5 py-0.5 text-xs rounded-full ${
-            activeTab === "squad" ? "bg-primary-500/20 text-primary-300" : "bg-theme-elevated text-theme-text-muted"
-          }`}>
+          <span
+            className={`px-1.5 py-0.5 text-xs rounded-full ${
+              activeTab === "squad"
+                ? "bg-primary-500/20 text-primary-300"
+                : "bg-theme-elevated text-theme-text-muted"
+            }`}
+          >
             {squads?.length || 0}
           </span>
         </button>
@@ -226,9 +231,13 @@ function SelectorDropdown({
         >
           <Building2 className="w-4 h-4" />
           Departments
-          <span className={`px-1.5 py-0.5 text-xs rounded-full ${
-            activeTab === "department" ? "bg-purple-500/20 text-purple-300" : "bg-theme-elevated text-theme-text-muted"
-          }`}>
+          <span
+            className={`px-1.5 py-0.5 text-xs rounded-full ${
+              activeTab === "department"
+                ? "bg-purple-500/20 text-purple-300"
+                : "bg-theme-elevated text-theme-text-muted"
+            }`}
+          >
             {departments?.length || 0}
           </span>
         </button>
@@ -253,16 +262,13 @@ function SelectorDropdown({
       <div className="flex-1 overflow-y-auto max-h-64">
         {hasNoResults ? (
           <div className="px-4 py-8 text-center text-theme-text-muted">
-            <p className="text-sm">
-              No {activeTab === "squad" ? "squads" : "departments"} found
-            </p>
+            <p className="text-sm">No {activeTab === "squad" ? "squads" : "departments"} found</p>
           </div>
         ) : activeTab === "squad" ? (
           // Squad list
           <div className="py-1">
             {filteredSquads.map((squad) => {
-              const isSelected =
-                selectedType === "squad" && selectedId === squad.id.toString();
+              const isSelected = selectedType === "squad" && selectedId === squad.id.toString();
               return (
                 <button
                   key={`squad-${squad.id}`}
@@ -275,9 +281,7 @@ function SelectorDropdown({
                 >
                   <Users className="w-4 h-4 text-primary-400 flex-shrink-0" />
                   <span className="flex-1 truncate">{squad.name}</span>
-                  {isSelected && (
-                    <Check className="w-4 h-4 text-primary-400 flex-shrink-0" />
-                  )}
+                  {isSelected && <Check className="w-4 h-4 text-primary-400 flex-shrink-0" />}
                 </button>
               );
             })}
@@ -286,8 +290,7 @@ function SelectorDropdown({
           // Department list
           <div className="py-1">
             {filteredDepartments.map((dept) => {
-              const isSelected =
-                selectedType === "department" && selectedId === dept;
+              const isSelected = selectedType === "department" && selectedId === dept;
               return (
                 <button
                   key={`dept-${dept}`}
@@ -300,9 +303,7 @@ function SelectorDropdown({
                 >
                   <Building2 className="w-4 h-4 text-purple-400 flex-shrink-0" />
                   <span className="flex-1 truncate">{dept}</span>
-                  {isSelected && (
-                    <Check className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                  )}
+                  {isSelected && <Check className="w-4 h-4 text-purple-400 flex-shrink-0" />}
                 </button>
               );
             })}

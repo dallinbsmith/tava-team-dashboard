@@ -11,20 +11,18 @@ interface AppProvidersProps {
   children: React.ReactNode;
 }
 
-export function AppProviders({ children }: AppProvidersProps) {
+export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
     <Auth0Provider>
       <QueryProvider>
         <NuqsAdapter>
           <ImpersonationProvider>
             <CurrentUserProvider>
-              <OrganizationProvider>
-                {children}
-              </OrganizationProvider>
+              <OrganizationProvider>{children}</OrganizationProvider>
             </CurrentUserProvider>
           </ImpersonationProvider>
         </NuqsAdapter>
       </QueryProvider>
     </Auth0Provider>
   );
-}
+};

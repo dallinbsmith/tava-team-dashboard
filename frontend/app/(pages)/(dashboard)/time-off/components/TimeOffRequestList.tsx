@@ -67,10 +67,11 @@ export default function TimeOffRequestList({
         <div className="flex gap-2 mb-4 flex-wrap">
           <button
             onClick={() => onFilterChange(null)}
-            className={`px-3 py-1.5 text-sm rounded-full transition-colors ${filterStatus === null
+            className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+              filterStatus === null
                 ? "bg-amber-600 text-white"
                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-              }`}
+            }`}
           >
             All
           </button>
@@ -78,10 +79,11 @@ export default function TimeOffRequestList({
             <button
               key={status}
               onClick={() => onFilterChange(status)}
-              className={`px-3 py-1.5 text-sm rounded-full capitalize transition-colors ${filterStatus === status
+              className={`px-3 py-1.5 text-sm rounded-full capitalize transition-colors ${
+                filterStatus === status
                   ? "bg-amber-600 text-white"
                   : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                }`}
+              }`}
             >
               {status}
             </button>

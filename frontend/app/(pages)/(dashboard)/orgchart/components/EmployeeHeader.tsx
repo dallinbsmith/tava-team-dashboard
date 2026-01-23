@@ -21,7 +21,12 @@ interface EmployeeHeaderProps {
   onAvatarUpdate?: (newAvatarUrl: string) => void;
 }
 
-export default function EmployeeHeader({ employee, canEdit, onEditClick, onAvatarUpdate }: EmployeeHeaderProps) {
+export default function EmployeeHeader({
+  employee,
+  canEdit,
+  onEditClick,
+  onAvatarUpdate,
+}: EmployeeHeaderProps) {
   const router = useRouter();
   const { currentUser, refetch } = useCurrentUser();
   const { refetchEmployees, refetchAllUsers } = useOrganization();
@@ -68,7 +73,7 @@ export default function EmployeeHeader({ employee, canEdit, onEditClick, onAvata
           userName={`${employee.first_name} ${employee.last_name}`}
           onUpload={handleAvatarUpload}
           canEdit={canEdit}
-          />
+        />
         <div>
           <h1 className="text-3xl font-bold text-white">
             {employee.first_name} {employee.last_name}
@@ -87,9 +92,7 @@ export default function EmployeeHeader({ employee, canEdit, onEditClick, onAvata
                 <Pencil className="w-4 h-4" />
                 Edit Profile
               </button>
-              <span className="text-white/50 text-sm">
-                or click avatar to change photo
-              </span>
+              <span className="text-white/50 text-sm">or click avatar to change photo</span>
             </div>
           )}
         </div>

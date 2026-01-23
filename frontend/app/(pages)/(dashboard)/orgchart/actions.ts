@@ -26,9 +26,9 @@ import {
 /**
  * Server Action: Create a new org chart draft
  */
-export async function createDraftAction(
+export const createDraftAction = async (
   data: CreateDraftRequest
-): Promise<ActionResult<OrgChartDraft>> {
+): Promise<ActionResult<OrgChartDraft>> => {
   try {
     const res = await authPost("/api/orgchart/drafts", data);
 
@@ -44,15 +44,15 @@ export async function createDraftAction(
     console.error("createDraftAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to create draft");
   }
-}
+};
 
 /**
  * Server Action: Update an org chart draft
  */
-export async function updateDraftAction(
+export const updateDraftAction = async (
   id: number,
   data: UpdateDraftRequest
-): Promise<ActionResult<OrgChartDraft>> {
+): Promise<ActionResult<OrgChartDraft>> => {
   try {
     const res = await authPut(`/api/orgchart/drafts/${id}`, data);
 
@@ -68,14 +68,12 @@ export async function updateDraftAction(
     console.error("updateDraftAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to update draft");
   }
-}
+};
 
 /**
  * Server Action: Delete an org chart draft
  */
-export async function deleteDraftAction(
-  id: number
-): Promise<ActionResult<void>> {
+export const deleteDraftAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/orgchart/drafts/${id}`);
 
@@ -90,14 +88,12 @@ export async function deleteDraftAction(
     console.error("deleteDraftAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to delete draft");
   }
-}
+};
 
 /**
  * Server Action: Publish an org chart draft (apply all changes)
  */
-export async function publishDraftAction(
-  id: number
-): Promise<ActionResult<void>> {
+export const publishDraftAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authPost(`/api/orgchart/drafts/${id}/publish`);
 
@@ -113,7 +109,7 @@ export async function publishDraftAction(
     console.error("publishDraftAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to publish draft");
   }
-}
+};
 
 // ============================================
 // Draft Change Actions
@@ -122,10 +118,10 @@ export async function publishDraftAction(
 /**
  * Server Action: Add a change to a draft
  */
-export async function addDraftChangeAction(
+export const addDraftChangeAction = async (
   draftId: number,
   change: AddDraftChangeRequest
-): Promise<ActionResult<DraftChange>> {
+): Promise<ActionResult<DraftChange>> => {
   try {
     const res = await authPost(`/api/orgchart/drafts/${draftId}/changes`, change);
 
@@ -141,15 +137,15 @@ export async function addDraftChangeAction(
     console.error("addDraftChangeAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to add change");
   }
-}
+};
 
 /**
  * Server Action: Remove a change from a draft
  */
-export async function removeDraftChangeAction(
+export const removeDraftChangeAction = async (
   draftId: number,
   userId: number
-): Promise<ActionResult<void>> {
+): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/orgchart/drafts/${draftId}/changes/${userId}`);
 
@@ -164,7 +160,7 @@ export async function removeDraftChangeAction(
     console.error("removeDraftChangeAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to remove change");
   }
-}
+};
 
 // ============================================
 // Squad Actions
@@ -173,9 +169,7 @@ export async function removeDraftChangeAction(
 /**
  * Server Action: Create a new squad
  */
-export async function createSquadAction(
-  name: string
-): Promise<ActionResult<Squad>> {
+export const createSquadAction = async (name: string): Promise<ActionResult<Squad>> => {
   try {
     const res = await authPost("/api/squads", { name });
 
@@ -191,14 +185,12 @@ export async function createSquadAction(
     console.error("createSquadAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to create squad");
   }
-}
+};
 
 /**
  * Server Action: Delete a squad
  */
-export async function deleteSquadAction(
-  id: number
-): Promise<ActionResult<void>> {
+export const deleteSquadAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/squads/${id}`);
 
@@ -213,7 +205,7 @@ export async function deleteSquadAction(
     console.error("deleteSquadAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to delete squad");
   }
-}
+};
 
 // ============================================
 // Department Actions
@@ -222,9 +214,7 @@ export async function deleteSquadAction(
 /**
  * Server Action: Delete a department
  */
-export async function deleteDepartmentAction(
-  name: string
-): Promise<ActionResult<void>> {
+export const deleteDepartmentAction = async (name: string): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/departments/${encodeURIComponent(name)}`);
 
@@ -239,4 +229,4 @@ export async function deleteDepartmentAction(
     console.error("deleteDepartmentAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to delete department");
   }
-}
+};

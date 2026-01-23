@@ -79,11 +79,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser({ first_name: "Jane", last_name: "Smith" }));
         render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -94,11 +90,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser({ title: "Senior Developer" }));
         render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -109,11 +101,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -146,11 +134,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser({ role: "supervisor" }));
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -162,11 +146,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser({ role: "admin" }));
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -180,11 +160,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -196,11 +172,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -212,11 +184,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -228,11 +196,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -244,11 +208,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser({ title: "Engineer" }));
         render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -264,11 +224,7 @@ describe("OrgChartTree", () => {
         );
         render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -282,11 +238,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={true}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={true} />
           </DndContext>
         );
 
@@ -298,11 +250,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={false}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={false} />
           </DndContext>
         );
 
@@ -314,11 +262,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={true}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={true} />
           </DndContext>
         );
 
@@ -330,11 +274,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={false}
-              isDraftMode={true}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={false} isDraftMode={true} />
           </DndContext>
         );
 
@@ -348,11 +288,7 @@ describe("OrgChartTree", () => {
         const node = createMockNode(createMockUser());
         const { container } = render(
           <DndContext>
-            <DraggableEmployeeCard
-              node={node}
-              isBeingDragged={true}
-              isDraftMode={true}
-            />
+            <DraggableEmployeeCard node={node} isBeingDragged={true} isDraftMode={true} />
           </DndContext>
         );
 
@@ -530,9 +466,7 @@ describe("OrgChartTree", () => {
     it("applies department change", () => {
       const user = createMockUser({ department: "Engineering" });
       const trees = [createMockNode(user)];
-      const changes: DraftChange[] = [
-        { user_id: 1, new_department: "Product" },
-      ];
+      const changes: DraftChange[] = [{ user_id: 1, new_department: "Product" }];
 
       const result = applyDraftChangesToTree(trees, changes);
 
@@ -542,9 +476,7 @@ describe("OrgChartTree", () => {
     it("applies role change", () => {
       const user = createMockUser({ role: "employee" });
       const trees = [createMockNode(user)];
-      const changes: DraftChange[] = [
-        { user_id: 1, new_role: "supervisor" },
-      ];
+      const changes: DraftChange[] = [{ user_id: 1, new_role: "supervisor" }];
 
       const result = applyDraftChangesToTree(trees, changes);
 
@@ -558,9 +490,7 @@ describe("OrgChartTree", () => {
         { id: 1, name: "Frontend Team" },
         { id: 2, name: "Backend Team" },
       ];
-      const changes: DraftChange[] = [
-        { user_id: 1, new_squad_ids: [1, 2] },
-      ];
+      const changes: DraftChange[] = [{ user_id: 1, new_squad_ids: [1, 2] }];
 
       const result = applyDraftChangesToTree(trees, changes, squads);
 
@@ -622,9 +552,7 @@ describe("OrgChartTree", () => {
     it("does not modify original trees", () => {
       const user = createMockUser({ department: "Engineering" });
       const trees = [createMockNode(user)];
-      const changes: DraftChange[] = [
-        { user_id: 1, new_department: "Product" },
-      ];
+      const changes: DraftChange[] = [{ user_id: 1, new_department: "Product" }];
 
       applyDraftChangesToTree(trees, changes);
 

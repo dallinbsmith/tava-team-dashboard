@@ -130,12 +130,7 @@ export default function CreateEventModal({ isOpen, onClose, onCreated }: CreateE
   };
 
   return (
-    <BaseModal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Create Event"
-      maxWidth="max-w-md"
-    >
+    <BaseModal isOpen={isOpen} onClose={handleClose} title="Create Event" maxWidth="max-w-md">
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormError error={error} />
 

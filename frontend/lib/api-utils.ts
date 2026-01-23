@@ -11,10 +11,10 @@
  * @param fallbackMessage - Message to use if error extraction fails
  * @returns The error message from the response or the fallback
  */
-export async function extractErrorMessage(
+export const extractErrorMessage = async (
   response: Response,
   fallbackMessage: string
-): Promise<string> {
+): Promise<string> => {
   try {
     const text = await response.text();
     // Try to parse as JSON to get a structured error message
@@ -33,7 +33,7 @@ export async function extractErrorMessage(
     console.error("Failed to extract error message from response:", error);
     return fallbackMessage;
   }
-}
+};
 
 /**
  * Parses an unknown error value into a user-friendly error message.
@@ -43,7 +43,7 @@ export async function extractErrorMessage(
  * @param context - Optional context string describing the operation
  * @returns A user-friendly error message
  */
-export function parseErrorMessage(error: unknown, context?: string): string {
+export const parseErrorMessage = (error: unknown, context?: string): string => {
   const prefix = context ? `${context}: ` : "";
 
   if (error instanceof Error) {
@@ -59,5 +59,4 @@ export function parseErrorMessage(error: unknown, context?: string): string {
   }
 
   return prefix + "An unexpected error occurred";
-}
-
+};

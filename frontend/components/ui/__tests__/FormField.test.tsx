@@ -236,7 +236,16 @@ describe("InputField", () => {
     it("has base input styling", () => {
       render(<InputField {...defaultProps} />);
       const input = screen.getByRole("textbox");
-      expect(input).toHaveClass("w-full", "px-3", "py-2", "border", "border-theme-border", "bg-theme-elevated", "text-theme-text", "rounded");
+      expect(input).toHaveClass(
+        "w-full",
+        "px-3",
+        "py-2",
+        "border",
+        "border-theme-border",
+        "bg-theme-elevated",
+        "text-theme-text",
+        "rounded"
+      );
     });
 
     it("has focus styling classes", () => {

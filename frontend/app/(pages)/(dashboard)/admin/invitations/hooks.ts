@@ -1,11 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  getInvitations,
-  createInvitation,
-  revokeInvitation,
-} from "./api";
+import { getInvitations, createInvitation, revokeInvitation } from "./api";
 import { CreateInvitationRequest } from "./types";
 import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 
@@ -14,14 +10,14 @@ export const invitationKeys = {
   list: () => ["invitations", "list"] as const,
 };
 
-export function useInvitations() {
+export const useInvitations = () => {
   return useQuery({
     queryKey: invitationKeys.list(),
     queryFn: getInvitations,
   });
-}
+};
 
-export function useCreateInvitation() {
+export const useCreateInvitation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -30,9 +26,9 @@ export function useCreateInvitation() {
       await refetchQueries(queryClient, queryKeyGroups.invitations());
     },
   });
-}
+};
 
-export function useRevokeInvitation() {
+export const useRevokeInvitation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -41,4 +37,4 @@ export function useRevokeInvitation() {
       await refetchQueries(queryClient, queryKeyGroups.invitations());
     },
   });
-}
+};

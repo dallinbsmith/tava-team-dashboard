@@ -8,7 +8,6 @@ export interface UseAsyncOperationOptions<T> {
   resetErrorOnStart?: boolean;
 }
 
-
 export interface UseAsyncOperationReturn<T, Args extends unknown[]> {
   execute: (...args: Args) => Promise<T | undefined>;
   loading: boolean;
@@ -41,16 +40,11 @@ export interface UseAsyncOperationReturn<T, Args extends unknown[]> {
  * {error && <p className="text-red-500">{error}</p>}
  * ```
  */
-export function useAsyncOperation<T, Args extends unknown[] = []>(
+export const useAsyncOperation = <T, Args extends unknown[] = []>(
   operation: (...args: Args) => Promise<T>,
   options: UseAsyncOperationOptions<T> = {}
-): UseAsyncOperationReturn<T, Args> {
-  const {
-    onSuccess,
-    onError,
-    successMessage,
-    resetErrorOnStart = true,
-  } = options;
+): UseAsyncOperationReturn<T, Args> => {
+  const { onSuccess, onError, successMessage, resetErrorOnStart = true } = options;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,9 +69,7 @@ export function useAsyncOperation<T, Args extends unknown[] = []>(
         const result = await operation(...args);
         if (successMessage) {
           const message =
-            typeof successMessage === "function"
-              ? successMessage(result)
-              : successMessage;
+            typeof successMessage === "function" ? successMessage(result) : successMessage;
           setSuccess(message);
         }
 
@@ -105,7 +97,7 @@ export function useAsyncOperation<T, Args extends unknown[] = []>(
     clearSuccess,
     clearMessages,
   };
-}
+};
 
 /**
  * A simpler version of useAsyncOperation that only tracks loading state.
@@ -121,12 +113,12 @@ export function useAsyncOperation<T, Args extends unknown[] = []>(
  * );
  * ```
  */
-export function useAsyncLoading<T, Args extends unknown[] = []>(
+export const useAsyncLoading = <T, Args extends unknown[] = []>(
   operation: (...args: Args) => Promise<T>
 ): {
   execute: (...args: Args) => Promise<T | undefined>;
   loading: boolean;
-} {
+} => {
   const [loading, setLoading] = useState(false);
 
   const execute = useCallback(
@@ -145,6 +137,6 @@ export function useAsyncLoading<T, Args extends unknown[] = []>(
   );
 
   return { execute, loading };
-}
+};
 
 export default useAsyncOperation;

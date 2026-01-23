@@ -141,15 +141,10 @@ export default function ManageDepartmentsModal({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div
-          className="absolute inset-0 bg-black/50"
-          onClick={onClose}
-        />
+        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
         <div className="relative bg-theme-surface border border-theme-border w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between p-4 border-b border-theme-border">
-            <h2 className="text-lg font-semibold text-theme-text">
-              Manage Departments
-            </h2>
+            <h2 className="text-lg font-semibold text-theme-text">Manage Departments</h2>
             <button
               onClick={onClose}
               className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
@@ -168,16 +163,15 @@ export default function ManageDepartmentsModal({
             {/* Add new department section - informational */}
             <div className="space-y-2">
               <p className="text-sm text-theme-text-muted">
-                Departments are created by assigning them to employees. Use the employee edit form to add new departments.
+                Departments are created by assigning them to employees. Use the employee edit form
+                to add new departments.
               </p>
             </div>
 
             {/* Department list */}
             <div className="border border-theme-border">
               {loading ? (
-                <div className="p-4 text-center text-theme-text-muted">
-                  Loading departments...
-                </div>
+                <div className="p-4 text-center text-theme-text-muted">Loading departments...</div>
               ) : sortedDepartments.length === 0 ? (
                 <div className="p-4 text-center text-theme-text-muted">
                   No departments yet. Assign a department to an employee to create one.
@@ -234,7 +228,8 @@ export default function ManageDepartmentsModal({
                               <span className="text-theme-text truncate">{department}</span>
                               {selectedDepartment === department && !loadingUsers && (
                                 <span className="text-xs text-theme-text-muted">
-                                  ({departmentUsers.length} {departmentUsers.length === 1 ? "user" : "users"})
+                                  ({departmentUsers.length}{" "}
+                                  {departmentUsers.length === 1 ? "user" : "users"})
                                 </span>
                               )}
                             </div>

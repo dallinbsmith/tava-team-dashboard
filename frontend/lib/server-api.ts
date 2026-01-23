@@ -8,7 +8,7 @@ import { Invitation } from "@/app/(pages)/(dashboard)/admin/invitations/types";
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 
-async function get<T>(path: string): Promise<T> {
+const get = async <T>(path: string): Promise<T> => {
   const result = await auth0.getAccessToken();
   const accessToken = result?.token;
   if (!accessToken) throw new Error("Unauthorized");
@@ -20,7 +20,7 @@ async function get<T>(path: string): Promise<T> {
 
   if (!res.ok) throw new Error(await res.text().catch(() => `Failed to fetch ${path}`));
   return res.json();
-}
+};
 
 export const getUserByIdServer = (id: number) => get<User>(`/users/${id}`);
 export const getCurrentUserServer = () => get<User>("/me");

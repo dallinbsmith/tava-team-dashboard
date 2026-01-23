@@ -14,7 +14,7 @@ interface OrgChartContentProps {
  * Async server component that fetches org chart data.
  * Wrap this in Suspense to enable streaming.
  */
-export async function OrgChartContent({ canEdit }: OrgChartContentProps) {
+export const OrgChartContent = async ({ canEdit }: OrgChartContentProps) => {
   // Fetch all org chart data in parallel
   const [treeResult, drafts, squads, departments] = await Promise.all([
     getOrgTreeServer(),
@@ -35,4 +35,4 @@ export async function OrgChartContent({ canEdit }: OrgChartContentProps) {
       canEdit={canEdit}
     />
   );
-}
+};

@@ -21,7 +21,14 @@ export default function ManageSquadsModal({
   onSquadsChanged,
 }: ManageSquadsModalProps) {
   // Use squads query hook which includes mutations with automatic cache invalidation
-  const { squads, isLoading: squadsLoading, addSquad, updateSquad, removeSquad, isMutating } = useSquadsQuery();
+  const {
+    squads,
+    isLoading: squadsLoading,
+    addSquad,
+    updateSquad,
+    removeSquad,
+    isMutating,
+  } = useSquadsQuery();
 
   const [error, setError] = useState<string | null>(null);
   const [newSquadName, setNewSquadName] = useState("");
@@ -144,15 +151,10 @@ export default function ManageSquadsModal({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div
-          className="absolute inset-0 bg-black/50"
-          onClick={onClose}
-        />
+        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
         <div className="relative bg-theme-surface border border-theme-border w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden flex flex-col">
           <div className="flex items-center justify-between p-4 border-b border-theme-border">
-            <h2 className="text-lg font-semibold text-theme-text">
-              Manage Squads
-            </h2>
+            <h2 className="text-lg font-semibold text-theme-text">Manage Squads</h2>
             <button
               onClick={onClose}
               className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
@@ -196,9 +198,7 @@ export default function ManageSquadsModal({
             {/* Squad list */}
             <div className="border border-theme-border">
               {squadsLoading ? (
-                <div className="p-4 text-center text-theme-text-muted">
-                  Loading squads...
-                </div>
+                <div className="p-4 text-center text-theme-text-muted">Loading squads...</div>
               ) : sortedSquads.length === 0 ? (
                 <div className="p-4 text-center text-theme-text-muted">
                   No squads yet. Create one above.

@@ -22,7 +22,8 @@ export default function CalendarError({ error, reset }: ErrorProps) {
 
   // Determine error type for contextual messaging
   const isJiraError = error.message?.toLowerCase().includes("jira");
-  const isNetworkError = error.message?.toLowerCase().includes("fetch") ||
+  const isNetworkError =
+    error.message?.toLowerCase().includes("fetch") ||
     error.message?.toLowerCase().includes("network");
 
   return (
@@ -32,9 +33,7 @@ export default function CalendarError({ error, reset }: ErrorProps) {
           <AlertTriangle className="w-6 h-6 text-red-400" />
         </div>
 
-        <h2 className="text-lg font-semibold text-theme-text mb-2">
-          Unable to Load Calendar
-        </h2>
+        <h2 className="text-lg font-semibold text-theme-text mb-2">Unable to Load Calendar</h2>
 
         <p className="text-theme-text-muted mb-4">
           {isJiraError
@@ -73,9 +72,7 @@ export default function CalendarError({ error, reset }: ErrorProps) {
         )}
 
         {error.digest && (
-          <p className="text-xs text-theme-text-muted mb-4 font-mono">
-            Error ID: {error.digest}
-          </p>
+          <p className="text-xs text-theme-text-muted mb-4 font-mono">Error ID: {error.digest}</p>
         )}
 
         <div className="flex gap-3 justify-center">

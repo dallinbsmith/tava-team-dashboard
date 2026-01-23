@@ -3,7 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Avatar from "./Avatar";
-import { LayoutDashboard, LogOut, Mail, Settings, GitBranch, Calendar, Palmtree, Menu, X, Users } from "lucide-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  Mail,
+  Settings,
+  GitBranch,
+  Calendar,
+  Palmtree,
+  Menu,
+  X,
+  Users,
+} from "lucide-react";
 
 interface SidebarProps {
   user: {
@@ -22,16 +33,12 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
 
   return (
     <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onToggle}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onToggle} />}
 
       <aside
-        className={`fixed left-0 top-0 h-full w-64 bg-theme-sidebar border-r border-theme-border flex flex-col z-50 transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-          }`}
+        className={`fixed left-0 top-0 h-full w-64 bg-theme-sidebar border-r border-theme-border flex flex-col z-50 transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
       >
         <div className="px-3 py-3 border-b border-theme-border flex items-center justify-between">
           <div className="ml-2">
@@ -58,13 +65,18 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
               <Link
                 href="/"
                 onClick={onToggle}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/"
-                  ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
-                  : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
-                  }`}
+                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                  pathname === "/"
+                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
+                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
+                }`}
               >
                 <LayoutDashboard className="w-5 h-5" />
-                {role === "admin" ? "Overview" : role === "supervisor" || role === "admin" ? "My Team" : "My Profile"}
+                {role === "admin"
+                  ? "Overview"
+                  : role === "supervisor" || role === "admin"
+                    ? "My Team"
+                    : "My Profile"}
               </Link>
             </li>
 
@@ -72,10 +84,11 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
               <Link
                 href="/calendar"
                 onClick={onToggle}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/calendar"
-                  ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
-                  : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
-                  }`}
+                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                  pathname === "/calendar"
+                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
+                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
+                }`}
               >
                 <Calendar className="w-5 h-5" />
                 Calendar
@@ -86,10 +99,11 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
               <Link
                 href="/time-off"
                 onClick={onToggle}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/time-off"
-                  ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
-                  : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
-                  }`}
+                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                  pathname === "/time-off"
+                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
+                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
+                }`}
               >
                 <Palmtree className="w-5 h-5" />
                 Time Off
@@ -101,10 +115,11 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
                 <Link
                   href="/admin/invitations"
                   onClick={onToggle}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/admin/invitations"
-                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
-                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
-                    }`}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                    pathname === "/admin/invitations"
+                      ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
+                      : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
+                  }`}
                 >
                   <Mail className="w-5 h-5" />
                   Invitations
@@ -116,10 +131,11 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
               <Link
                 href="/orgchart"
                 onClick={onToggle}
-                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/orgchart"
-                  ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
-                  : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
-                  }`}
+                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                  pathname === "/orgchart"
+                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
+                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
+                }`}
               >
                 <GitBranch className="w-5 h-5" />
                 Org Chart
@@ -131,10 +147,11 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
                 <Link
                   href="/teams"
                   onClick={onToggle}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/teams"
-                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
-                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
-                    }`}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                    pathname === "/teams"
+                      ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
+                      : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
+                  }`}
                 >
                   <Users className="w-5 h-5" />
                   Teams
@@ -147,10 +164,11 @@ export default function Sidebar({ user, role, isOpen = false, onToggle }: Sideba
                 <Link
                   href="/settings"
                   onClick={onToggle}
-                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${pathname === "/settings"
-                    ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
-                    : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
-                    }`}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors ${
+                    pathname === "/settings"
+                      ? "bg-theme-sidebar-active text-primary-400 border-l-2 border-primary-500"
+                      : "text-theme-text-muted hover:bg-theme-sidebar-hover hover:text-theme-text"
+                  }`}
                 >
                   <Settings className="w-5 h-5" />
                   Settings

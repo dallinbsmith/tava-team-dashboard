@@ -13,7 +13,7 @@ const protectedRoutes = [
   "/orgchart",
 ];
 
-export async function middleware(request: NextRequest) {
+export const middleware = async (request: NextRequest) => {
   // Let Auth0 handle its routes (/auth/login, /auth/logout, /auth/callback, etc.)
   const authResponse = await auth0.middleware(request);
 
@@ -24,7 +24,8 @@ export async function middleware(request: NextRequest) {
 
   // Check if this is a protected route
   const isProtectedRoute = protectedRoutes.some(
-    (route) => request.nextUrl.pathname === route || request.nextUrl.pathname.startsWith(route + "/")
+    (route) =>
+      request.nextUrl.pathname === route || request.nextUrl.pathname.startsWith(route + "/")
   );
 
   if (isProtectedRoute) {
@@ -38,7 +39,7 @@ export async function middleware(request: NextRequest) {
   }
 
   return authResponse;
-}
+};
 
 export const config = {
   matcher: [

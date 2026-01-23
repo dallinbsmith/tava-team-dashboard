@@ -5,7 +5,13 @@ export { Button, IconButton } from "./Button";
 export type { ButtonProps, ButtonVariant, ButtonSize, IconButtonProps } from "./Button";
 
 export { StatusBadge, RoleBadge } from "./StatusBadge";
-export type { StatusBadgeProps, BadgeVariant, BadgeSize, RoleBadgeProps, UserRole } from "./StatusBadge";
+export type {
+  StatusBadgeProps,
+  BadgeVariant,
+  BadgeSize,
+  RoleBadgeProps,
+  UserRole,
+} from "./StatusBadge";
 
 export { EmptyState, NoResults } from "./EmptyState";
 export type { EmptyStateProps, NoResultsProps } from "./EmptyState";

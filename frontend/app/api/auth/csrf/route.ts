@@ -9,7 +9,7 @@ import { randomBytes } from "crypto";
 const CSRF_COOKIE_NAME = "csrf_token";
 const CSRF_TOKEN_LENGTH = 32;
 
-export async function GET() {
+export const GET = async () => {
   const cookieStore = await cookies();
   let csrfToken = cookieStore.get(CSRF_COOKIE_NAME)?.value;
 
@@ -28,4 +28,4 @@ export async function GET() {
   });
 
   return response;
-}
+};

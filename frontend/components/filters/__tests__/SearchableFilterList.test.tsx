@@ -140,13 +140,7 @@ describe("SearchableFilterList", () => {
 
     it("calls onChange with allValue when item is deselected", async () => {
       const onChange = jest.fn();
-      render(
-        <SearchableFilterList
-          {...defaultProps}
-          selectedValue="Cherry"
-          onChange={onChange}
-        />
-      );
+      render(<SearchableFilterList {...defaultProps} selectedValue="Cherry" onChange={onChange} />);
 
       // Click on Cherry (already selected) to deselect
       fireEvent.click(screen.getByText("Cherry"));
@@ -183,9 +177,7 @@ describe("SearchableFilterList", () => {
     });
 
     it("applies custom maxHeight class", () => {
-      const { container } = render(
-        <SearchableFilterList {...defaultProps} maxHeight="max-h-64" />
-      );
+      const { container } = render(<SearchableFilterList {...defaultProps} maxHeight="max-h-64" />);
 
       const scrollContainer = container.querySelector(".max-h-64");
       expect(scrollContainer).toBeInTheDocument();

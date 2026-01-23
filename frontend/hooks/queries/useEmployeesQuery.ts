@@ -42,9 +42,7 @@ export interface UseEmployeesQueryResult {
 // 5 minutes in milliseconds
 const DEFAULT_STALE_TIME = 5 * 60 * 1000;
 
-export function useEmployeesQuery(
-  options: UseEmployeesQueryOptions = {}
-): UseEmployeesQueryResult {
+export const useEmployeesQuery = (options: UseEmployeesQueryOptions = {}): UseEmployeesQueryResult => {
   const { staleTime = DEFAULT_STALE_TIME } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
@@ -82,7 +80,7 @@ export function useEmployeesQuery(
     refetch,
     invalidate,
   };
-}
+};
 
 export interface UseEmployeeQueryOptions {
   /** The employee ID to fetch */
@@ -113,9 +111,7 @@ export interface UseEmployeeQueryResult {
  * const { employee, isLoading } = useEmployeeQuery({ id: 123 });
  * ```
  */
-export function useEmployeeQuery(
-  options: UseEmployeeQueryOptions
-): UseEmployeeQueryResult {
+export const useEmployeeQuery = (options: UseEmployeeQueryOptions): UseEmployeeQueryResult => {
   const { id, staleTime = DEFAULT_STALE_TIME, enabled = true } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
 
@@ -147,6 +143,6 @@ export function useEmployeeQuery(
       : null,
     refetch,
   };
-}
+};
 
 export default useEmployeesQuery;

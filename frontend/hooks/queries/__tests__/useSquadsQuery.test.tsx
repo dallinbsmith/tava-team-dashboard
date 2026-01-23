@@ -36,7 +36,9 @@ jest.mock("@/lib/queryUtils", () => ({
     squadRelated: jest.fn().mockReturnValue([["squads"], ["employees"]]),
   },
 }));
-const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<typeof queryUtils.refetchQueries>;
+const mockRefetchQueries = queryUtils.refetchQueries as jest.MockedFunction<
+  typeof queryUtils.refetchQueries
+>;
 
 // Test fixtures
 const mockSquads: Squad[] = [

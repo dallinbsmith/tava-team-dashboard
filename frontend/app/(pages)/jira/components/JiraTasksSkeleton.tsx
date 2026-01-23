@@ -2,7 +2,7 @@ interface JiraTasksSkeletonProps {
   compact?: boolean;
 }
 
-export function JiraTasksSkeleton({ compact = false }: JiraTasksSkeletonProps) {
+export const JiraTasksSkeleton = ({ compact = false }: JiraTasksSkeletonProps) => {
   const itemCount = compact ? 4 : 6;
 
   return (
@@ -55,4 +55,4 @@ export function JiraTasksSkeleton({ compact = false }: JiraTasksSkeletonProps) {
       </div>
     </div>
   );
-}
+};

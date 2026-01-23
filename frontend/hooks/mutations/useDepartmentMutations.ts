@@ -22,7 +22,7 @@ export interface UseRenameDepartmentOptions {
  * renameDept({ oldName: 'Engineering', newName: 'Product Engineering' });
  * ```
  */
-export function useRenameDepartment(options: UseRenameDepartmentOptions = {}) {
+export const useRenameDepartment = (options: UseRenameDepartmentOptions = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -30,9 +30,7 @@ export function useRenameDepartment(options: UseRenameDepartmentOptions = {}) {
       renameDepartment(oldName, newName),
     onMutate: async ({ oldName, newName }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.departments.all() });
-      const previousDepartments = queryClient.getQueryData<string[]>(
-        queryKeys.departments.all()
-      );
+      const previousDepartments = queryClient.getQueryData<string[]>(queryKeys.departments.all());
 
       queryClient.setQueryData<string[]>(queryKeys.departments.all(), (old) =>
         old ? old.map((d) => (d === oldName ? newName : d)) : []
@@ -42,10 +40,7 @@ export function useRenameDepartment(options: UseRenameDepartmentOptions = {}) {
     },
     onError: (error: Error, _variables, context) => {
       if (context?.previousDepartments) {
-        queryClient.setQueryData(
-          queryKeys.departments.all(),
-          context.previousDepartments
-        );
+        queryClient.setQueryData(queryKeys.departments.all(), context.previousDepartments);
       }
       options.onError?.(error);
     },
@@ -54,7 +49,7 @@ export function useRenameDepartment(options: UseRenameDepartmentOptions = {}) {
       options.onSuccess?.();
     },
   });
-}
+};
 
 export interface UseDeleteDepartmentOptions {
   onSuccess?: () => void;
@@ -78,16 +73,14 @@ export interface UseDeleteDepartmentOptions {
  * deleteDept('Engineering');
  * ```
  */
-export function useDeleteDepartment(options: UseDeleteDepartmentOptions = {}) {
+export const useDeleteDepartment = (options: UseDeleteDepartmentOptions = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (departmentName: string) => deleteDepartment(departmentName),
     onMutate: async (departmentName) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.departments.all() });
-      const previousDepartments = queryClient.getQueryData<string[]>(
-        queryKeys.departments.all()
-      );
+      const previousDepartments = queryClient.getQueryData<string[]>(queryKeys.departments.all());
 
       queryClient.setQueryData<string[]>(queryKeys.departments.all(), (old) =>
         old ? old.filter((d) => d !== departmentName) : []
@@ -97,10 +90,7 @@ export function useDeleteDepartment(options: UseDeleteDepartmentOptions = {}) {
     },
     onError: (error: Error, _departmentName, context) => {
       if (context?.previousDepartments) {
-        queryClient.setQueryData(
-          queryKeys.departments.all(),
-          context.previousDepartments
-        );
+        queryClient.setQueryData(queryKeys.departments.all(), context.previousDepartments);
       }
       options.onError?.(error);
     },
@@ -109,4 +99,4 @@ export function useDeleteDepartment(options: UseDeleteDepartmentOptions = {}) {
       options.onSuccess?.();
     },
   });
-}
+};

@@ -21,17 +21,15 @@ export default function TeamsPageClient() {
   const { squads, departments, allUsers, loading: orgLoading } = useOrganization();
 
   // Check effective user's role (respects impersonation)
-  const effectiveIsSupervisorOrAdmin = currentUser?.role === "supervisor" || currentUser?.role === "admin";
+  const effectiveIsSupervisorOrAdmin =
+    currentUser?.role === "supervisor" || currentUser?.role === "admin";
 
   // URL state for selection type and ID
   const [selectionType, setSelectionType] = useQueryState(
     "type",
     parseAsStringLiteral(selectionTypes).withDefault("squad")
   );
-  const [selectedId, setSelectedId] = useQueryState(
-    "id",
-    parseAsString.withDefault("")
-  );
+  const [selectedId, setSelectedId] = useQueryState("id", parseAsString.withDefault(""));
 
   // Set default selection when data is loaded
   useEffect(() => {
@@ -63,7 +61,8 @@ export default function TeamsPageClient() {
         </div>
         <h1 className="text-xl font-semibold text-theme-text mb-2">Access Denied</h1>
         <p className="text-theme-text-muted text-center max-w-md">
-          You don&apos;t have permission to view this page. Only supervisors and administrators can access team management.
+          You don&apos;t have permission to view this page. Only supervisors and administrators can
+          access team management.
         </p>
         <button
           onClick={() => router.push("/")}
@@ -91,9 +90,7 @@ export default function TeamsPageClient() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-theme-text">Teams</h1>
-          <p className="text-theme-text-muted mt-1">
-            View team time-off, tasks, and organization
-          </p>
+          <p className="text-theme-text-muted mt-1">View team time-off, tasks, and organization</p>
         </div>
         <TeamSelector
           squads={squads}
@@ -107,9 +104,7 @@ export default function TeamsPageClient() {
       {/* Content */}
       {!selectedId ? (
         <div className="text-center py-16 bg-theme-surface border border-theme-border">
-          <p className="text-theme-text-muted">
-            Select a team or department to view details
-          </p>
+          <p className="text-theme-text-muted">Select a team or department to view details</p>
         </div>
       ) : (
         <>

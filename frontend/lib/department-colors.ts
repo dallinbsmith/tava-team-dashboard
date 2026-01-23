@@ -76,18 +76,18 @@ const DEFAULT_COLORS: DepartmentColors = {
   border: "border-gray-400",
 };
 
-export function getDepartmentColors(department: string): DepartmentColors {
+export const getDepartmentColors = (department: string): DepartmentColors => {
   return DEPARTMENT_COLORS[department] || DEFAULT_COLORS;
-}
+};
 
-export function getDepartmentBgColor(department: string): string {
+export const getDepartmentBgColor = (department: string): string => {
   return getDepartmentColors(department).bg;
-}
+};
 
-export function getDepartmentTextColor(department: string): string {
+export const getDepartmentTextColor = (department: string): string => {
   return getDepartmentColors(department).text;
-}
+};
 
-export function getDepartmentBorderColor(department: string): string {
+export const getDepartmentBorderColor = (department: string): string => {
   return getDepartmentColors(department).border;
-}
+};

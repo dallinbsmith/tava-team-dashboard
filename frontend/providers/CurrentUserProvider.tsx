@@ -23,12 +23,18 @@ interface CurrentUserContextType {
 
 const CurrentUserContext = createContext<CurrentUserContextType | undefined>(undefined);
 
-export function CurrentUserProvider({ children }: { children: ReactNode }) {
+export const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
   const { user: auth0User, isLoading: authLoading } = useUser();
   const isAuthenticated = !!auth0User && !authLoading;
 
   // Get impersonation state
-  const { impersonatedUserId, impersonatedUser, setImpersonatedUser, isImpersonating, endImpersonation } = useImpersonation();
+  const {
+    impersonatedUserId,
+    impersonatedUser,
+    setImpersonatedUser,
+    isImpersonating,
+    endImpersonation,
+  } = useImpersonation();
 
   // Use custom hook with centralized query key for the real user
   const {
@@ -41,10 +47,7 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
   } = useCurrentUserQuery();
 
   // Fetch impersonated user data if needed
-  const {
-    data: fetchedImpersonatedUser,
-    isLoading: impersonatedUserLoading,
-  } = useQuery({
+  const { data: fetchedImpersonatedUser, isLoading: impersonatedUserLoading } = useQuery({
     queryKey: ["impersonatedUser", impersonatedUserId],
     queryFn: () => getUserById(impersonatedUserId!),
     enabled: isAuthenticated && impersonatedUserId !== null && !impersonatedUser,
@@ -71,7 +74,8 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
   const effectiveUser = isImpersonating && impersonatedUser ? impersonatedUser : realUser;
 
   // Compute effective user's supervisor/admin status (respects impersonation)
-  const effectiveIsSupervisorOrAdmin = effectiveUser?.role === "admin" || effectiveUser?.role === "supervisor";
+  const effectiveIsSupervisorOrAdmin =
+    effectiveUser?.role === "admin" || effectiveUser?.role === "supervisor";
 
   const value: CurrentUserContextType = {
     currentUser: effectiveUser,
@@ -86,12 +90,8 @@ export function CurrentUserProvider({ children }: { children: ReactNode }) {
     refetch,
   };
 
-  return (
-    <CurrentUserContext.Provider value={value}>
-      {children}
-    </CurrentUserContext.Provider>
-  );
-}
+  return <CurrentUserContext.Provider value={value}>{children}</CurrentUserContext.Provider>;
+};
 
 // Default context for when hook is used outside provider (e.g., during HMR)
 const defaultCurrentUserContext: CurrentUserContextType = {
@@ -104,13 +104,13 @@ const defaultCurrentUserContext: CurrentUserContextType = {
   isSupervisorOrAdmin: false,
   effectiveIsSupervisorOrAdmin: false,
   isImpersonating: false,
-  refetch: async () => { },
+  refetch: async () => {},
 };
 
-export function useCurrentUser() {
+export const useCurrentUser = () => {
   const context = useContext(CurrentUserContext);
   if (context === undefined) {
     return defaultCurrentUserContext;
   }
   return context;
-}
+};

@@ -126,11 +126,7 @@ describe("QueryProvider", () => {
       const TestComponent = () => {
         const queryClient = useQueryClient();
         const defaultOptions = queryClient.getDefaultOptions();
-        return (
-          <div data-testid="stale-time">
-            {defaultOptions.queries?.staleTime}
-          </div>
-        );
+        return <div data-testid="stale-time">{defaultOptions.queries?.staleTime}</div>;
       };
 
       render(
@@ -147,11 +143,7 @@ describe("QueryProvider", () => {
       const TestComponent = () => {
         const queryClient = useQueryClient();
         const defaultOptions = queryClient.getDefaultOptions();
-        return (
-          <div data-testid="gc-time">
-            {defaultOptions.queries?.gcTime}
-          </div>
-        );
+        return <div data-testid="gc-time">{defaultOptions.queries?.gcTime}</div>;
       };
 
       render(
@@ -168,11 +160,7 @@ describe("QueryProvider", () => {
       const TestComponent = () => {
         const queryClient = useQueryClient();
         const defaultOptions = queryClient.getDefaultOptions();
-        return (
-          <div data-testid="retry">
-            {defaultOptions.queries?.retry}
-          </div>
-        );
+        return <div data-testid="retry">{defaultOptions.queries?.retry}</div>;
       };
 
       render(

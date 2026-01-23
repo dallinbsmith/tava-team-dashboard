@@ -95,12 +95,12 @@ const sizeStyles: Record<BadgeSize, string> = {
  * <StatusBadge variant="pending">Pending Review</StatusBadge>
  * ```
  */
-export function StatusBadge({
+export const StatusBadge = ({
   children,
   variant = "default",
   size = "md",
   className = "",
-}: StatusBadgeProps) {
+}: StatusBadgeProps) => {
   const styles = variantStyles[variant];
 
   return (
@@ -115,7 +115,7 @@ export function StatusBadge({
       {children}
     </span>
   );
-}
+};
 
 /**
  * RoleBadge Component
@@ -142,10 +142,10 @@ const roleLabels: Record<UserRole, string> = {
   employee: "Employee",
 };
 
-export function RoleBadge({ role, size = "sm", className = "" }: RoleBadgeProps) {
+export const RoleBadge = ({ role, size = "sm", className = "" }: RoleBadgeProps) => {
   return (
     <StatusBadge variant={roleVariants[role]} size={size} className={className}>
       {roleLabels[role]}
     </StatusBadge>
   );
-}
+};

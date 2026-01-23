@@ -17,11 +17,7 @@ import {
   getDepartments,
   deleteDepartment,
 } from "./api";
-import {
-  CreateDraftRequest,
-  UpdateDraftRequest,
-  AddDraftChangeRequest,
-} from "./types";
+import { CreateDraftRequest, UpdateDraftRequest, AddDraftChangeRequest } from "./types";
 import { refetchQueries, queryKeyGroups } from "@/lib/queryUtils";
 
 export const orgChartKeys = {
@@ -34,22 +30,22 @@ export const orgChartKeys = {
 };
 
 // Drafts
-export function useOrgChartDrafts() {
+export const useOrgChartDrafts = () => {
   return useQuery({
     queryKey: orgChartKeys.drafts(),
     queryFn: getOrgChartDrafts,
   });
-}
+};
 
-export function useOrgChartDraft(id: number) {
+export const useOrgChartDraft = (id: number) => {
   return useQuery({
     queryKey: orgChartKeys.draft(id),
     queryFn: () => getOrgChartDraft(id),
     enabled: id > 0,
   });
-}
+};
 
-export function useCreateOrgChartDraft() {
+export const useCreateOrgChartDraft = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -58,20 +54,21 @@ export function useCreateOrgChartDraft() {
       await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
-}
+};
 
-export function useUpdateOrgChartDraft() {
+export const useUpdateOrgChartDraft = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateDraftRequest }) => updateOrgChartDraft(id, data),
+    mutationFn: ({ id, data }: { id: number; data: UpdateDraftRequest }) =>
+      updateOrgChartDraft(id, data),
     onSuccess: async () => {
       await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
-}
+};
 
-export function useDeleteOrgChartDraft() {
+export const useDeleteOrgChartDraft = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -80,9 +77,9 @@ export function useDeleteOrgChartDraft() {
       await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
-}
+};
 
-export function useAddDraftChange() {
+export const useAddDraftChange = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -92,9 +89,9 @@ export function useAddDraftChange() {
       await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
-}
+};
 
-export function useRemoveDraftChange() {
+export const useRemoveDraftChange = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -104,9 +101,9 @@ export function useRemoveDraftChange() {
       await refetchQueries(queryClient, queryKeyGroups.orgChartDrafts());
     },
   });
-}
+};
 
-export function usePublishDraft() {
+export const usePublishDraft = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -116,25 +113,25 @@ export function usePublishDraft() {
       await refetchQueries(queryClient, queryKeyGroups.orgChartPublish());
     },
   });
-}
+};
 
 // Tree
-export function useOrgTree() {
+export const useOrgTree = () => {
   return useQuery({
     queryKey: orgChartKeys.tree(),
     queryFn: getOrgTree,
   });
-}
+};
 
 // Squads
-export function useSquads() {
+export const useSquads = () => {
   return useQuery({
     queryKey: orgChartKeys.squads(),
     queryFn: getSquads,
   });
-}
+};
 
-export function useCreateSquad() {
+export const useCreateSquad = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -143,9 +140,9 @@ export function useCreateSquad() {
       await refetchQueries(queryClient, queryKeyGroups.squadRelated());
     },
   });
-}
+};
 
-export function useDeleteSquad() {
+export const useDeleteSquad = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -154,17 +151,17 @@ export function useDeleteSquad() {
       await refetchQueries(queryClient, queryKeyGroups.squadRelated());
     },
   });
-}
+};
 
 // Departments
-export function useDepartments() {
+export const useDepartments = () => {
   return useQuery({
     queryKey: orgChartKeys.departments(),
     queryFn: getDepartments,
   });
-}
+};
 
-export function useDeleteDepartment() {
+export const useDeleteDepartment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -173,4 +170,4 @@ export function useDeleteDepartment() {
       await refetchQueries(queryClient, queryKeyGroups.departmentRelated());
     },
   });
-}
+};

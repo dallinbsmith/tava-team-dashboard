@@ -39,9 +39,7 @@ export default function TeamMembersWidget({
     return [...members].sort((a, b) => {
       if (a.role === "supervisor" && b.role !== "supervisor") return -1;
       if (a.role !== "supervisor" && b.role === "supervisor") return 1;
-      return `${a.first_name} ${a.last_name}`.localeCompare(
-        `${b.first_name} ${b.last_name}`
-      );
+      return `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`);
     });
   }, [members]);
 
@@ -86,10 +84,7 @@ export default function TeamMembersWidget({
                 key={member.id}
                 className="flex flex-col p-3 bg-theme-elevated border border-theme-border hover:border-primary-500/50 transition-all group"
               >
-                <Link
-                  href={`/employee/${member.id}`}
-                  className="flex items-center gap-3"
-                >
+                <Link href={`/employee/${member.id}`} className="flex items-center gap-3">
                   <Avatar
                     s3AvatarUrl={member.avatar_url}
                     firstName={member.first_name}

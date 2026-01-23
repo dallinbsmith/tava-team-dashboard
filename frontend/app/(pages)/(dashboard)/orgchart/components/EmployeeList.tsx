@@ -8,15 +8,12 @@ import EmployeeTable from "./EmployeeTable";
 import FilterButton from "./FilterButton";
 import Pagination from "@/shared/common/Pagination";
 import GroupedSection from "@/shared/common/GroupedSection";
+import { Search, Users, X, LayoutGrid, List, Building2 } from "lucide-react";
 import {
-  Search,
-  Users,
-  X,
-  LayoutGrid,
-  List,
-  Building2,
-} from "lucide-react";
-import { getDepartmentTextColor, getDepartmentBgColor, getDepartmentBorderColor } from "@/lib/department-colors";
+  getDepartmentTextColor,
+  getDepartmentBgColor,
+  getDepartmentBorderColor,
+} from "@/lib/department-colors";
 
 interface EmployeeListProps {
   employees: User[];
@@ -118,9 +115,7 @@ export default function EmployeeList({
         <div className="w-16 h-16 bg-red-900/50 rounded-lg flex items-center justify-center mx-auto mb-4">
           <X className="w-8 h-8 text-red-400" />
         </div>
-        <h3 className="text-lg font-semibold text-red-300 mb-2">
-          Failed to Load Employees
-        </h3>
+        <h3 className="text-lg font-semibold text-red-300 mb-2">Failed to Load Employees</h3>
         <p className="text-red-400">{error}</p>
       </div>
     );
@@ -130,7 +125,6 @@ export default function EmployeeList({
     <div className="space-y-3 sm:space-y-4">
       {/* Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-
         {/* Search Input */}
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-muted" />
@@ -171,30 +165,33 @@ export default function EmployeeList({
           <div className="flex border border-theme-border rounded-full overflow-hidden bg-theme-elevated">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 transition-colors ${state.viewMode === "grid"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
+              className={`p-2 transition-colors ${
+                state.viewMode === "grid"
+                  ? "bg-primary-500 text-white"
+                  : "text-theme-text-muted hover:bg-theme-surface"
+              }`}
               title="Grid"
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 border-l border-theme-border transition-colors ${state.viewMode === "list"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
+              className={`p-2 border-l border-theme-border transition-colors ${
+                state.viewMode === "list"
+                  ? "bg-primary-500 text-white"
+                  : "text-theme-text-muted hover:bg-theme-surface"
+              }`}
               title="List"
             >
               <List className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode("department")}
-              className={`p-2 border-l border-theme-border transition-colors ${state.viewMode === "department"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
+              className={`p-2 border-l border-theme-border transition-colors ${
+                state.viewMode === "department"
+                  ? "bg-primary-500 text-white"
+                  : "text-theme-text-muted hover:bg-theme-surface"
+              }`}
               title="Department"
             >
               <Building2 className="w-4 h-4" />
@@ -216,15 +213,9 @@ export default function EmployeeList({
               : "p-0.5 hover:bg-accent-500/30 rounded-full transition-colors";
 
             return (
-              <span
-                key={index}
-                className={chipClass}
-              >
+              <span key={index} className={chipClass}>
                 {filter.value}
-                <button
-                  onClick={filter.onRemove}
-                  className={buttonClass}
-                >
+                <button onClick={filter.onRemove} className={buttonClass}>
                   <X className="w-3 h-3" />
                 </button>
               </span>
@@ -236,7 +227,7 @@ export default function EmployeeList({
       {/* Results Info */}
       <div className="flex items-center justify-between text-xs text-theme-text-muted px-1">
         <span className="truncate">
-          {sortedEmployees.length} {sortedEmployees.length === 1 ? 'employee' : 'employees'}
+          {sortedEmployees.length} {sortedEmployees.length === 1 ? "employee" : "employees"}
         </span>
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <span className="hidden sm:inline">Show:</span>
@@ -256,14 +247,16 @@ export default function EmployeeList({
 
       {/* Content */}
       {/* Check for empty results based on view mode */}
-      {(state.viewMode === "department" ? allDepartmentsWithEmployees.length === 0 : paginatedEmployees.length === 0) ? (
+      {(
+        state.viewMode === "department"
+          ? allDepartmentsWithEmployees.length === 0
+          : paginatedEmployees.length === 0
+      ) ? (
         <div className="text-center py-12 bg-theme-elevated border border-theme-border rounded-lg">
           <div className="w-12 h-12 bg-theme-surface flex items-center justify-center mx-auto mb-3 rounded-full">
             <Users className="w-6 h-6 text-theme-text-muted" />
           </div>
-          <h3 className="text-sm font-semibold text-theme-text">
-            No results
-          </h3>
+          <h3 className="text-sm font-semibold text-theme-text">No results</h3>
           <p className="text-xs text-theme-text-muted mt-1 mb-4">
             Try adjusting your search or filters
           </p>
@@ -288,7 +281,11 @@ export default function EmployeeList({
               <GroupedSection
                 title={currentDepartment.department}
                 count={currentDepartment.employees.length}
-                indicator={<div className={`w-3 h-3 rounded-full ${getDepartmentBgColor(currentDepartment.department)}`} />}
+                indicator={
+                  <div
+                    className={`w-3 h-3 rounded-full ${getDepartmentBgColor(currentDepartment.department)}`}
+                  />
+                }
               >
                 {currentDepartment.employees.map((employee) => (
                   <a
@@ -311,9 +308,7 @@ export default function EmployeeList({
                         <div className="flex items-center gap-3 mt-1 text-sm text-theme-text-muted">
                           <span>{employee.email}</span>
                           {employee.title && (
-                            <span className="text-theme-text-subtle">
-                              {employee.title}
-                            </span>
+                            <span className="text-theme-text-subtle">{employee.title}</span>
                           )}
                         </div>
                       </div>

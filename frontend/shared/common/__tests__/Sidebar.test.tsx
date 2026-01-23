@@ -9,7 +9,12 @@ import Sidebar from "../Sidebar";
 
 // Mock next/link
 jest.mock("next/link", () => {
-  return function MockLink({ href, children, onClick, className }: {
+  return function MockLink({
+    href,
+    children,
+    onClick,
+    className,
+  }: {
     href: string;
     children: React.ReactNode;
     onClick?: () => void;
@@ -32,7 +37,11 @@ jest.mock("next/navigation", () => ({
 // Mock Avatar component
 jest.mock("../Avatar", () => {
   return function MockAvatar({ firstName, lastName }: { firstName: string; lastName: string }) {
-    return <div data-testid="avatar">{firstName} {lastName}</div>;
+    return (
+      <div data-testid="avatar">
+        {firstName} {lastName}
+      </div>
+    );
   };
 });
 

@@ -55,10 +55,7 @@ describe("BaseModal", () => {
 
     it("renders footer when provided", () => {
       render(
-        <BaseModal
-          {...defaultProps}
-          footer={<button data-testid="footer-button">Save</button>}
-        />
+        <BaseModal {...defaultProps} footer={<button data-testid="footer-button">Save</button>} />
       );
       expect(screen.getByTestId("footer-button")).toBeInTheDocument();
     });
@@ -198,13 +195,8 @@ describe("BaseModal", () => {
   });
 
   describe("maxWidth options", () => {
-    const maxWidthOptions: Array<"max-w-sm" | "max-w-md" | "max-w-lg" | "max-w-xl" | "max-w-2xl"> = [
-      "max-w-sm",
-      "max-w-md",
-      "max-w-lg",
-      "max-w-xl",
-      "max-w-2xl",
-    ];
+    const maxWidthOptions: Array<"max-w-sm" | "max-w-md" | "max-w-lg" | "max-w-xl" | "max-w-2xl"> =
+      ["max-w-sm", "max-w-md", "max-w-lg", "max-w-xl", "max-w-2xl"];
 
     it.each(maxWidthOptions)("applies %s class when specified", (maxWidth) => {
       render(<BaseModal {...defaultProps} maxWidth={maxWidth} />);
@@ -264,9 +256,7 @@ describe("BaseModal", () => {
   describe("event listener cleanup", () => {
     it("removes keydown listener when modal closes", () => {
       const onClose = jest.fn();
-      const { rerender } = render(
-        <BaseModal {...defaultProps} isOpen={true} onClose={onClose} />
-      );
+      const { rerender } = render(<BaseModal {...defaultProps} isOpen={true} onClose={onClose} />);
 
       // Close the modal
       rerender(<BaseModal {...defaultProps} isOpen={false} onClose={onClose} />);

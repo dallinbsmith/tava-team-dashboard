@@ -39,7 +39,11 @@ jest.mock("@/shared/common/Avatar", () => {
     size?: string;
     className?: string;
   }) {
-    return <div data-testid="avatar" data-firstname={firstName} data-lastname={lastName}>Avatar</div>;
+    return (
+      <div data-testid="avatar" data-firstname={firstName} data-lastname={lastName}>
+        Avatar
+      </div>
+    );
   };
 });
 

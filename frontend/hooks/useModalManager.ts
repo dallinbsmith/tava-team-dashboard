@@ -60,10 +60,10 @@ export interface ModalState<T extends string | null, D = undefined> {
  * @template T - Union type of modal identifiers (must include null for closed state)
  * @template D - Optional data type to pass to modals
  */
-export function useModalManager<
+export const useModalManager = <
   T extends string | null = string | null,
   D = undefined,
->(): ModalState<T, D> {
+>(): ModalState<T, D> => {
   const [active, setActive] = useState<T>(null as T);
   const [data, setData] = useState<D | undefined>(undefined);
 
@@ -106,6 +106,6 @@ export function useModalManager<
     }),
     [active, data, open, close, isOpen, toggle]
   );
-}
+};
 
 export default useModalManager;

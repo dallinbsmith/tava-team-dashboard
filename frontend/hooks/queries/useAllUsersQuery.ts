@@ -47,9 +47,7 @@ export interface UseAllUsersQueryResult {
  * );
  * ```
  */
-export function useAllUsersQuery(
-  options: UseAllUsersQueryOptions = {}
-): UseAllUsersQueryResult {
+export const useAllUsersQuery = (options: UseAllUsersQueryOptions = {}): UseAllUsersQueryResult => {
   const { staleTime = DEFAULT_STALE_TIME } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
   const queryClient = useQueryClient();
@@ -87,7 +85,7 @@ export function useAllUsersQuery(
     refetch,
     invalidate,
   };
-}
+};
 
 export interface UseDepartmentsQueryOptions {
   /** Override the default stale time (5 minutes) */
@@ -116,9 +114,9 @@ export interface UseDepartmentsQueryResult {
  * const { departments, isLoading } = useDepartmentsQuery();
  * ```
  */
-export function useDepartmentsQuery(
+export const useDepartmentsQuery = (
   options: UseDepartmentsQueryOptions = {}
-): UseDepartmentsQueryResult {
+): UseDepartmentsQueryResult => {
   const { staleTime = DEFAULT_STALE_TIME } = options;
   const { user: auth0User, isLoading: authLoading } = useUser();
 
@@ -150,6 +148,6 @@ export function useDepartmentsQuery(
       : null,
     refetch,
   };
-}
+};
 
 export default useAllUsersQuery;

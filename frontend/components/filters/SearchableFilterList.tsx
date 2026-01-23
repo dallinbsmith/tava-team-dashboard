@@ -26,10 +26,7 @@ export default function SearchableFilterList({
   const debouncedSearch = useDebouncedValue(search, 300);
 
   const filteredItems = useMemo(
-    () =>
-      items.filter((item) =>
-        item.toLowerCase().includes(debouncedSearch.toLowerCase())
-      ),
+    () => items.filter((item) => item.toLowerCase().includes(debouncedSearch.toLowerCase())),
     [items, debouncedSearch]
   );
 

@@ -57,8 +57,8 @@ export default function EditEmployeeModal({
   useEffect(() => {
     if (isOpen) {
       // Filter out any squad IDs that no longer exist
-      const validSquadIds = (employee.squads?.map((s) => s.id) || []).filter(
-        (id) => availableSquads.some((s) => s.id === id)
+      const validSquadIds = (employee.squads?.map((s) => s.id) || []).filter((id) =>
+        availableSquads.some((s) => s.id === id)
       );
 
       setFormData({
@@ -156,9 +156,7 @@ export default function EditEmployeeModal({
     }));
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -169,15 +167,10 @@ export default function EditEmployeeModal({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div
-          className="absolute inset-0 bg-black/50"
-          onClick={onClose}
-        />
+        <div className="absolute inset-0 bg-black/50" onClick={onClose} />
         <div className="relative bg-theme-surface border border-theme-border w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-between p-4 border-b border-theme-border">
-            <h2 className="text-lg font-semibold text-theme-text">
-              Edit Employee
-            </h2>
+            <h2 className="text-lg font-semibold text-theme-text">Edit Employee</h2>
             <button
               onClick={onClose}
               className="p-1 text-theme-text-muted hover:text-theme-text transition-colors"
@@ -301,9 +294,7 @@ export default function EditEmployeeModal({
 
             <div className="relative">
               <div className="flex items-center justify-between mb-1">
-                <label className="block text-sm font-medium text-theme-text-muted">
-                  Squads
-                </label>
+                <label className="block text-sm font-medium text-theme-text-muted">Squads</label>
                 {canManage && (
                   <button
                     type="button"
@@ -350,8 +341,9 @@ export default function EditEmployeeModal({
                     : `${formData.squadIds.length} squad${formData.squadIds.length !== 1 ? "s" : ""} selected`}
                 </span>
                 <ChevronDown
-                  className={`w-4 h-4 ml-2 shrink-0 text-theme-text-muted transition-transform ${squadDropdownOpen ? "rotate-180" : ""
-                    }`}
+                  className={`w-4 h-4 ml-2 shrink-0 text-theme-text-muted transition-transform ${
+                    squadDropdownOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
 
@@ -371,10 +363,11 @@ export default function EditEmployeeModal({
                         className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-theme-surface transition-colors"
                       >
                         <div
-                          className={`w-4 h-4 border flex items-center justify-center ${formData.squadIds.includes(squad.id)
+                          className={`w-4 h-4 border flex items-center justify-center ${
+                            formData.squadIds.includes(squad.id)
                               ? "bg-primary-500 border-primary-500"
                               : "border-theme-border"
-                            }`}
+                          }`}
                         >
                           {formData.squadIds.includes(squad.id) && (
                             <Check className="w-3 h-3 text-white" />

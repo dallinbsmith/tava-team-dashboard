@@ -38,10 +38,7 @@ export default function ConfirmationModal({
             <AlertCircle className="w-5 h-5 text-amber-500" />
             {title}
           </h2>
-          <button
-            onClick={onCancel}
-            className="p-1 text-theme-text-muted hover:text-theme-text"
-          >
+          <button onClick={onCancel} className="p-1 text-theme-text-muted hover:text-theme-text">
             <X className="w-5 h-5" />
           </button>
         </div>

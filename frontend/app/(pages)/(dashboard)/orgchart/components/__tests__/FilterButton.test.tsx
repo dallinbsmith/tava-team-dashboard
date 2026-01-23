@@ -25,9 +25,15 @@ jest.mock("@/components", () => ({
     onClearAll: () => void;
   }) => (
     <div data-testid="filter-dropdown" data-is-open={isOpen} data-count={activeFilterCount}>
-      <button onClick={onToggle} data-testid="toggle-button">Toggle</button>
-      <button onClick={onClose} data-testid="close-button">Close</button>
-      <button onClick={onClearAll} data-testid="clear-all-button">Clear All</button>
+      <button onClick={onToggle} data-testid="toggle-button">
+        Toggle
+      </button>
+      <button onClick={onClose} data-testid="close-button">
+        Close
+      </button>
+      <button onClick={onClearAll} data-testid="clear-all-button">
+        Clear All
+      </button>
       {isOpen && <div data-testid="dropdown-content">{children}</div>}
     </div>
   ),
@@ -43,7 +49,9 @@ jest.mock("@/components", () => ({
     onToggle: () => void;
   }) => (
     <div data-testid={`filter-section-${title.toLowerCase()}`} data-expanded={isExpanded}>
-      <button onClick={onToggle} data-testid={`toggle-${title.toLowerCase()}`}>{title}</button>
+      <button onClick={onToggle} data-testid={`toggle-${title.toLowerCase()}`}>
+        {title}
+      </button>
       {isExpanded && children}
     </div>
   ),
@@ -57,11 +65,7 @@ jest.mock("@/components", () => ({
     onChange: (checked: boolean) => void;
   }) => (
     <label data-testid={`checkbox-${label.toLowerCase()}`}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       {label}
     </label>
   ),
@@ -78,14 +82,12 @@ jest.mock("@/components", () => ({
   }) => (
     <div data-testid={`searchable-list-${placeholder.toLowerCase().replace(/\s+/g, "-")}`}>
       <input placeholder={placeholder} data-testid="search-input" />
-      <select
-        value={selectedValue}
-        onChange={(e) => onChange(e.target.value)}
-        data-testid="select"
-      >
+      <select value={selectedValue} onChange={(e) => onChange(e.target.value)} data-testid="select">
         <option value="all">All</option>
         {items.map((item) => (
-          <option key={item} value={item}>{item}</option>
+          <option key={item} value={item}>
+            {item}
+          </option>
         ))}
       </select>
     </div>
@@ -184,7 +186,9 @@ describe("FilterButton", () => {
 
     it("calls onRoleChange with all when supervisor unchecked", () => {
       const onRoleChange = jest.fn();
-      render(<FilterButton {...defaultProps} roleFilter="supervisor" onRoleChange={onRoleChange} />);
+      render(
+        <FilterButton {...defaultProps} roleFilter="supervisor" onRoleChange={onRoleChange} />
+      );
 
       const checkbox = screen.getByTestId("checkbox-supervisor").querySelector("input")!;
       fireEvent.click(checkbox);
@@ -206,7 +210,10 @@ describe("FilterButton", () => {
   describe("department section", () => {
     it("is collapsed by default", () => {
       render(<FilterButton {...defaultProps} />);
-      expect(screen.getByTestId("filter-section-department")).toHaveAttribute("data-expanded", "false");
+      expect(screen.getByTestId("filter-section-department")).toHaveAttribute(
+        "data-expanded",
+        "false"
+      );
     });
 
     it("shows department list when expanded", () => {
@@ -225,7 +232,9 @@ describe("FilterButton", () => {
       // Expand department section
       fireEvent.click(screen.getByTestId("toggle-department"));
 
-      const select = screen.getByTestId("searchable-list-search-departments").querySelector("select")!;
+      const select = screen
+        .getByTestId("searchable-list-search-departments")
+        .querySelector("select")!;
       fireEvent.change(select, { target: { value: "Engineering" } });
 
       expect(onDepartmentChange).toHaveBeenCalledWith("Engineering");
@@ -334,7 +343,10 @@ describe("FilterButton", () => {
 
       // Section states should be maintained
       expect(screen.getByTestId("filter-section-role")).toHaveAttribute("data-expanded", "false");
-      expect(screen.getByTestId("filter-section-department")).toHaveAttribute("data-expanded", "true");
+      expect(screen.getByTestId("filter-section-department")).toHaveAttribute(
+        "data-expanded",
+        "true"
+      );
     });
   });
 });

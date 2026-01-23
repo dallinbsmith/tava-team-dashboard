@@ -26,7 +26,9 @@ jest.mock("@/providers/OrganizationProvider", () => ({
 
 // Mock server actions
 jest.mock("../actions", () => ({
-  createDraftAction: jest.fn().mockResolvedValue({ success: true, data: { id: 1, name: "Test Draft", changes: [] } }),
+  createDraftAction: jest
+    .fn()
+    .mockResolvedValue({ success: true, data: { id: 1, name: "Test Draft", changes: [] } }),
   deleteDraftAction: jest.fn().mockResolvedValue({ success: true }),
   publishDraftAction: jest.fn().mockResolvedValue({ success: true }),
   addDraftChangeAction: jest.fn().mockResolvedValue({ success: true }),
@@ -70,7 +72,9 @@ jest.mock("../components/ManageSquadsModal", () => {
 
 jest.mock("../components/ManageDepartmentsModal", () => {
   return function MockManageDepartmentsModal({ isOpen }: { isOpen: boolean }) {
-    return isOpen ? <div data-testid="manage-departments-modal">Manage Departments Modal</div> : null;
+    return isOpen ? (
+      <div data-testid="manage-departments-modal">Manage Departments Modal</div>
+    ) : null;
   };
 });
 
@@ -105,7 +109,12 @@ describe("OrgChartPageClient", () => {
 
   const createMockOrgTree = (): OrgTreeNode[] => {
     const admin = createMockUser({ id: 1, role: "admin", first_name: "Admin", last_name: "Boss" });
-    const employee = createMockUser({ id: 2, role: "employee", first_name: "John", last_name: "Doe" });
+    const employee = createMockUser({
+      id: 2,
+      role: "employee",
+      first_name: "John",
+      last_name: "Doe",
+    });
     return [
       {
         user: admin,
@@ -228,7 +237,9 @@ describe("OrgChartPageClient", () => {
       const { container } = render(<OrgChartPageClient {...defaultProps} />);
 
       // Buttons container should have responsive flex direction
-      const buttonContainer = container.querySelector(".flex.flex-col.sm\\:flex-row.items-stretch.sm\\:items-center");
+      const buttonContainer = container.querySelector(
+        ".flex.flex-col.sm\\:flex-row.items-stretch.sm\\:items-center"
+      );
       expect(buttonContainer).toBeInTheDocument();
     });
 

@@ -3,25 +3,15 @@
 import { User, Squad } from "@/shared/types/user";
 import { OrgTreeNode, DraftChange } from "../types";
 import Avatar from "@/shared/common/Avatar";
-import {
-  useDraggable,
-  useDroppable,
-} from "@dnd-kit/core";
-import {
-  ChevronDown,
-  ChevronRight,
-  GripVertical,
-  Shield,
-  AlertCircle,
-  Pencil,
-} from "lucide-react";
+import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { ChevronDown, ChevronRight, GripVertical, Shield, AlertCircle, Pencil } from "lucide-react";
 
 // Helper function to apply draft changes to the org tree for preview
-export function applyDraftChangesToTree(
+export const applyDraftChangesToTree = (
   trees: OrgTreeNode[],
   changes: DraftChange[],
   squads: Squad[] = []
-): OrgTreeNode[] {
+): OrgTreeNode[] => {
   if (changes.length === 0) {
     return trees;
   }
@@ -53,15 +43,16 @@ export function applyDraftChangesToTree(
     if (!node) continue;
 
     // Apply supervisor change
-    if (change.new_supervisor_id !== undefined && change.new_supervisor_id !== change.original_supervisor_id) {
+    if (
+      change.new_supervisor_id !== undefined &&
+      change.new_supervisor_id !== change.original_supervisor_id
+    ) {
       const newSupervisor = change.new_supervisor_id ? nodeMap.get(change.new_supervisor_id) : null;
 
       // Remove from current parent
       const currentParent = parentMap.get(userId);
       if (currentParent) {
-        currentParent.children = currentParent.children.filter(
-          (child) => child.user.id !== userId
-        );
+        currentParent.children = currentParent.children.filter((child) => child.user.id !== userId);
       } else {
         // Node is at root level - remove from clonedTrees array
         clonedTrees = clonedTrees.filter((tree) => tree.user.id !== userId);
@@ -76,7 +67,8 @@ export function applyDraftChangesToTree(
 
     // Apply department change - preserve original for comparison
     if (change.new_department !== undefined) {
-      (node.user as unknown as { originalDepartment: string }).originalDepartment = node.user.department || "";
+      (node.user as unknown as { originalDepartment: string }).originalDepartment =
+        node.user.department || "";
       node.user.department = change.new_department;
     }
 
@@ -96,10 +88,10 @@ export function applyDraftChangesToTree(
   }
 
   return clonedTrees;
-}
+};
 
 // Draggable employee card
-export function DraggableEmployeeCard({
+export const DraggableEmployeeCard = ({
   node,
   pendingChange,
   isBeingDragged,
@@ -111,7 +103,7 @@ export function DraggableEmployeeCard({
   isBeingDragged: boolean;
   isDraftMode: boolean;
   onEditClick?: (user: User) => void;
-}) {
+}) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `employee-${node.user.id}`,
     data: { user: node.user },
@@ -132,15 +124,16 @@ export function DraggableEmployeeCard({
     <div
       ref={setNodeRef}
       onClick={handleClick}
-      className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-theme-surface border transition-all rounded-lg ${hasChange
-        ? "border-purple-400 ring-2 ring-purple-500/30"
-        : isDraftMode
-          ? "border-theme-border hover:border-primary-400 hover:shadow-sm cursor-pointer"
-          : "border-theme-border"
-        } ${isDragging || isBeingDragged ? "opacity-50" : ""}`}
+      className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-theme-surface border transition-all rounded-lg ${
+        hasChange
+          ? "border-purple-400 ring-2 ring-purple-500/30"
+          : isDraftMode
+            ? "border-theme-border hover:border-primary-400 hover:shadow-sm cursor-pointer"
+            : "border-theme-border"
+      } ${isDragging || isBeingDragged ? "opacity-50" : ""}`}
     >
       {/* Drag handle - only show in draft mode */}
-      {isDraftMode &&
+      {isDraftMode && (
         <div
           {...attributes}
           {...listeners}
@@ -148,7 +141,7 @@ export function DraggableEmployeeCard({
         >
           <GripVertical className="w-5 h-5" />
         </div>
-      }
+      )}
 
       {/* Avatar */}
       <Avatar
@@ -165,12 +158,8 @@ export function DraggableEmployeeCard({
           <span className="font-medium text-theme-text truncate text-sm sm:text-base">
             {node.user.first_name} {node.user.last_name}
           </span>
-          {node.user.role === "admin" && (
-            <Shield className="w-4 h-4 text-amber-400" />
-          )}
-          {node.user.role === "supervisor" && (
-            <Shield className="w-4 h-4 text-purple-400" />
-          )}
+          {node.user.role === "admin" && <Shield className="w-4 h-4 text-amber-400" />}
+          {node.user.role === "supervisor" && <Shield className="w-4 h-4 text-purple-400" />}
         </div>
         <div className="text-xs sm:text-sm text-theme-text-muted">
           <span className="truncate">
@@ -186,7 +175,7 @@ export function DraggableEmployeeCard({
         {/* Squad display - simple list, detailed changes shown in Pending Changes panel */}
         {node.user.squads && node.user.squads.length > 0 && (
           <div className="hidden sm:flex flex-wrap gap-1 mt-1">
-            {node.user.squads.map(squad => (
+            {node.user.squads.map((squad) => (
               <span
                 key={squad.id}
                 className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border rounded"
@@ -214,10 +203,10 @@ export function DraggableEmployeeCard({
       )}
     </div>
   );
-}
+};
 
 // Droppable supervisor zone
-export function DroppableSupervisorZone({
+export const DroppableSupervisorZone = ({
   node,
   children,
   isExpanded,
@@ -237,7 +226,7 @@ export function DroppableSupervisorZone({
   draggedUserId: number | null;
   isDraftMode: boolean;
   onEditClick?: (user: User) => void;
-}) {
+}) => {
   const { isOver, setNodeRef } = useDroppable({
     id: `supervisor-${node.user.id}`,
     data: { supervisor: node.user },
@@ -245,25 +234,27 @@ export function DroppableSupervisorZone({
   });
 
   const hasChildren = node.children && node.children.length > 0;
-  const canReceiveDrop = isDraftMode && draggedUserId !== null && draggedUserId !== node.user.id && (node.user.role === "supervisor" || node.user.role === "admin");
+  const canReceiveDrop =
+    isDraftMode &&
+    draggedUserId !== null &&
+    draggedUserId !== node.user.id &&
+    (node.user.role === "supervisor" || node.user.role === "admin");
 
   return (
-    <div className={`${level > 0 ? "ml-3 sm:ml-6 border-l-2 border-theme-border pl-2 sm:pl-4" : ""}`}>
+    <div
+      className={`${level > 0 ? "ml-3 sm:ml-6 border-l-2 border-theme-border pl-2 sm:pl-4" : ""}`}
+    >
       {/* Supervisor header with drop zone */}
       <div
         ref={setNodeRef}
-        className={`rounded-lg transition-all ${isOver && canReceiveDrop
-          ? "ring-2 ring-primary-500 ring-offset-2 bg-primary-900/30"
-          : ""
-          }`}
+        className={`rounded-lg transition-all ${
+          isOver && canReceiveDrop ? "ring-2 ring-primary-500 ring-offset-2 bg-primary-900/30" : ""
+        }`}
       >
         <div className="flex items-center gap-2 mb-2">
           {/* Expand/Collapse */}
           {hasChildren ? (
-            <button
-              onClick={onToggleExpand}
-              className="p-1 hover:bg-theme-elevated rounded"
-            >
+            <button onClick={onToggleExpand} className="p-1 hover:bg-theme-elevated rounded">
               {isExpanded ? (
                 <ChevronDown className="w-4 h-4 text-theme-text-muted" />
               ) : (
@@ -289,10 +280,11 @@ export function DroppableSupervisorZone({
         {/* Drop hint when dragging - only show in draft mode */}
         {canReceiveDrop && (
           <div
-            className={`ml-6 p-2 border-2 border-dashed rounded text-center text-sm transition-all ${isOver
-              ? "border-primary-500 bg-primary-900/30 text-primary-300"
-              : "border-theme-border text-theme-text-muted"
-              }`}
+            className={`ml-6 p-2 border-2 border-dashed rounded text-center text-sm transition-all ${
+              isOver
+                ? "border-primary-500 bg-primary-900/30 text-primary-300"
+                : "border-theme-border text-theme-text-muted"
+            }`}
           >
             Drop here to move under {node.user.first_name}
           </div>
@@ -300,15 +292,13 @@ export function DroppableSupervisorZone({
       </div>
 
       {/* Children */}
-      {hasChildren && isExpanded && (
-        <div className="mt-2 space-y-2">{children}</div>
-      )}
+      {hasChildren && isExpanded && <div className="mt-2 space-y-2">{children}</div>}
     </div>
   );
-}
+};
 
 // Recursive tree renderer
-export function OrgTreeRenderer({
+export const OrgTreeRenderer = ({
   node,
   level,
   pendingChanges,
@@ -326,7 +316,7 @@ export function OrgTreeRenderer({
   draggedUserId: number | null;
   isDraftMode: boolean;
   onEditClick?: (user: User) => void;
-}) {
+}) => {
   const isExpanded = expandedNodes.has(node.user.id);
 
   return (
@@ -355,10 +345,10 @@ export function OrgTreeRenderer({
       ))}
     </DroppableSupervisorZone>
   );
-}
+};
 
 // Drag overlay - shows the card being dragged
-export function DragOverlayCard({ user }: { user: User }) {
+export const DragOverlayCard = ({ user }: { user: User }) => {
   return (
     <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-theme-surface border border-primary-400 shadow-xl rounded-lg opacity-90 max-w-xs sm:max-w-sm">
       <GripVertical className="w-4 sm:w-5 h-4 sm:h-5 text-theme-text-muted flex-shrink-0" />
@@ -373,8 +363,10 @@ export function DragOverlayCard({ user }: { user: User }) {
         <div className="font-medium text-theme-text text-sm sm:text-base truncate">
           {user.first_name} {user.last_name}
         </div>
-        <div className="text-xs sm:text-sm text-theme-text-muted truncate">{user.title || user.role.charAt(0).toUpperCase() + user.role.slice(1)}</div>
+        <div className="text-xs sm:text-sm text-theme-text-muted truncate">
+          {user.title || user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+        </div>
       </div>
     </div>
   );
-}
+};

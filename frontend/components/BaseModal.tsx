@@ -50,7 +50,7 @@ export interface BaseModalProps {
  * </BaseModal>
  * ```
  */
-export function BaseModal({
+export const BaseModal = ({
   isOpen,
   onClose,
   title,
@@ -61,7 +61,7 @@ export function BaseModal({
   closeOnBackdropClick = true,
   closeOnEscape = true,
   className = "",
-}: BaseModalProps) {
+}: BaseModalProps) => {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (closeOnEscape && event.key === "Escape") {
@@ -110,9 +110,7 @@ export function BaseModal({
             <h3 id="modal-title" className="text-lg font-semibold text-theme-text">
               {title}
             </h3>
-            {subtitle && (
-              <p className="text-sm text-theme-text-muted mt-1">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-sm text-theme-text-muted mt-1">{subtitle}</p>}
           </div>
           <button
             onClick={onClose}
@@ -123,13 +121,11 @@ export function BaseModal({
           </button>
         </div>
         <div className="p-6">{children}</div>
-        {footer && (
-          <div className="px-6 py-4 border-t border-theme-border">{footer}</div>
-        )}
+        {footer && <div className="px-6 py-4 border-t border-theme-border">{footer}</div>}
       </div>
     </div>
   );
-}
+};
 
 /**
  * ConfirmModal Component
@@ -161,7 +157,7 @@ export interface ConfirmModalProps {
   isLoading?: boolean;
 }
 
-export function ConfirmModal({
+export const ConfirmModal = ({
   isOpen,
   onClose,
   onConfirm,
@@ -171,7 +167,7 @@ export function ConfirmModal({
   cancelText = "Cancel",
   confirmVariant = "primary",
   isLoading = false,
-}: ConfirmModalProps) {
+}: ConfirmModalProps) => {
   const handleConfirm = async () => {
     await onConfirm();
   };
@@ -182,18 +178,9 @@ export function ConfirmModal({
       : "bg-primary-600 hover:bg-primary-700 text-white";
 
   return (
-    <BaseModal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={title}
-      maxWidth="max-w-sm"
-    >
+    <BaseModal isOpen={isOpen} onClose={onClose} title={title} maxWidth="max-w-sm">
       <div className="mb-6">
-        {typeof message === "string" ? (
-          <p className="text-theme-text-muted">{message}</p>
-        ) : (
-          message
-        )}
+        {typeof message === "string" ? <p className="text-theme-text-muted">{message}</p> : message}
       </div>
       <div className="flex gap-3">
         <button
@@ -213,6 +200,6 @@ export function ConfirmModal({
       </div>
     </BaseModal>
   );
-}
+};
 
 export default BaseModal;

@@ -86,7 +86,9 @@ function TestConsumer() {
       <div data-testid="is-admin">{String(isAdmin)}</div>
       <div data-testid="is-supervisor">{String(isSupervisor)}</div>
       <div data-testid="is-supervisor-or-admin">{String(isSupervisorOrAdmin)}</div>
-      <div data-testid="effective-is-supervisor-or-admin">{String(effectiveIsSupervisorOrAdmin)}</div>
+      <div data-testid="effective-is-supervisor-or-admin">
+        {String(effectiveIsSupervisorOrAdmin)}
+      </div>
       <div data-testid="is-impersonating">{String(isImpersonating)}</div>
     </div>
   );
@@ -357,9 +359,7 @@ describe("ImpersonationProvider", () => {
 
   it("provides default non-impersonating state", () => {
     const { result } = renderHook(() => useImpersonation(), {
-      wrapper: ({ children }) => (
-        <ImpersonationProvider>{children}</ImpersonationProvider>
-      ),
+      wrapper: ({ children }) => <ImpersonationProvider>{children}</ImpersonationProvider>,
     });
 
     expect(result.current.isImpersonating).toBe(false);

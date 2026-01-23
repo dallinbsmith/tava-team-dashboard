@@ -53,44 +53,48 @@
      ======================================== */
 
   /* Background colors */
-  --bg-base: 17 24 39;           /* gray-900 - Main app background */
-  --bg-surface: 31 41 55;        /* gray-800 - Cards, panels */
-  --bg-elevated: 55 65 81;       /* gray-700 - Dropdowns, popovers */
-  --bg-muted: 75 85 99;          /* gray-600 - Disabled, subtle backgrounds */
-  --bg-subtle: 107 114 128;      /* gray-500 - Very subtle backgrounds */
+  --bg-base: 17 24 39; /* gray-900 - Main app background */
+  --bg-surface: 31 41 55; /* gray-800 - Cards, panels */
+  --bg-elevated: 55 65 81; /* gray-700 - Dropdowns, popovers */
+  --bg-muted: 75 85 99; /* gray-600 - Disabled, subtle backgrounds */
+  --bg-subtle: 107 114 128; /* gray-500 - Very subtle backgrounds */
 
   /* Sidebar specific */
-  --bg-sidebar: 17 24 39;        /* gray-900 - Sidebar background */
-  --bg-sidebar-hover: 31 41 55;  /* gray-800 - Sidebar hover state */
+  --bg-sidebar: 17 24 39; /* gray-900 - Sidebar background */
+  --bg-sidebar-hover: 31 41 55; /* gray-800 - Sidebar hover state */
   --bg-sidebar-active: 55 65 81; /* gray-700 - Sidebar active state */
 
   /* Text colors */
-  --text-base: 243 244 246;      /* gray-100 - Primary text */
-  --text-muted: 156 163 175;     /* gray-400 - Secondary text */
-  --text-subtle: 107 114 128;    /* gray-500 - Tertiary/disabled text */
-  --text-inverted: 17 24 39;     /* gray-900 - Text on light backgrounds */
+  --text-base: 243 244 246; /* gray-100 - Primary text */
+  --text-muted: 156 163 175; /* gray-400 - Secondary text */
+  --text-subtle: 107 114 128; /* gray-500 - Tertiary/disabled text */
+  --text-inverted: 17 24 39; /* gray-900 - Text on light backgrounds */
 
   /* Border colors */
-  --border-base: 55 65 81;       /* gray-700 - Default borders */
-  --border-muted: 75 85 99;      /* gray-600 - Subtle borders */
-  --border-subtle: 107 114 128;  /* gray-500 - Very subtle borders */
+  --border-base: 55 65 81; /* gray-700 - Default borders */
+  --border-muted: 75 85 99; /* gray-600 - Subtle borders */
+  --border-subtle: 107 114 128; /* gray-500 - Very subtle borders */
 
   /* Input colors */
-  --input-bg: 31 41 55;          /* gray-800 - Input background */
-  --input-border: 75 85 99;      /* gray-600 - Input border */
+  --input-bg: 31 41 55; /* gray-800 - Input background */
+  --input-border: 75 85 99; /* gray-600 - Input border */
   --input-border-focus: 14 165 233; /* primary-500 - Input focus border */
 
   /* Interactive states */
-  --hover-overlay: 255 255 255;  /* White overlay for hover (use with low opacity) */
-  --focus-ring: 14 165 233;      /* primary-500 - Focus ring color */
+  --hover-overlay: 255 255 255; /* White overlay for hover (use with low opacity) */
+  --focus-ring: 14 165 233; /* primary-500 - Focus ring color */
 
   /* Divider */
-  --divider: 55 65 81;           /* gray-700 - Horizontal/vertical dividers */
+  --divider: 55 65 81; /* gray-700 - Horizontal/vertical dividers */
 
   /* Typography */
-  --font-primary: var(--font-manrope), 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-secondary: var(--font-manrope), 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --font-primary:
+    var(--font-manrope), "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --font-secondary:
+    var(--font-manrope), "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
   /* Font Sizes */
   --text-xs: 0.75rem;
@@ -148,11 +152,19 @@
     @apply antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-secondary);
   }
 
-  code, pre, kbd, samp {
+  code,
+  pre,
+  kbd,
+  samp {
     font-family: var(--font-mono);
   }
 
@@ -213,7 +225,9 @@
     background-color: rgb(var(--input-bg));
     border: 1px solid rgb(var(--input-border));
     color: rgb(var(--text-base));
-    transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+    transition:
+      border-color var(--transition-normal),
+      box-shadow var(--transition-normal);
   }
 
   .input-field::placeholder {
@@ -227,20 +241,42 @@
   }
 
   /* Surface utilities */
-  .bg-base { background-color: rgb(var(--bg-base)); }
-  .bg-surface { background-color: rgb(var(--bg-surface)); }
-  .bg-elevated { background-color: rgb(var(--bg-elevated)); }
-  .bg-muted { background-color: rgb(var(--bg-muted)); }
+  .bg-base {
+    background-color: rgb(var(--bg-base));
+  }
+  .bg-surface {
+    background-color: rgb(var(--bg-surface));
+  }
+  .bg-elevated {
+    background-color: rgb(var(--bg-elevated));
+  }
+  .bg-muted {
+    background-color: rgb(var(--bg-muted));
+  }
 
-  .text-base-color { color: rgb(var(--text-base)); }
-  .text-muted { color: rgb(var(--text-muted)); }
-  .text-subtle { color: rgb(var(--text-subtle)); }
+  .text-base-color {
+    color: rgb(var(--text-base));
+  }
+  .text-muted {
+    color: rgb(var(--text-muted));
+  }
+  .text-subtle {
+    color: rgb(var(--text-subtle));
+  }
 
-  .border-base { border-color: rgb(var(--border-base)); }
-  .border-muted { border-color: rgb(var(--border-muted)); }
-  .border-subtle { border-color: rgb(var(--border-subtle)); }
+  .border-base {
+    border-color: rgb(var(--border-base));
+  }
+  .border-muted {
+    border-color: rgb(var(--border-muted));
+  }
+  .border-subtle {
+    border-color: rgb(var(--border-subtle));
+  }
 
-  .divide-base > * + * { border-color: rgb(var(--divider)); }
+  .divide-base > * + * {
+    border-color: rgb(var(--divider));
+  }
 }
 
 /* Calendar dark mode overrides */

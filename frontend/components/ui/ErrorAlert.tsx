@@ -72,14 +72,14 @@ const variantStyles: Record<
  * </ErrorAlert>
  * ```
  */
-export function ErrorAlert({
+export const ErrorAlert = ({
   children,
   variant = "error",
   title,
   dismissible = false,
   onDismiss,
   className = "",
-}: ErrorAlertProps) {
+}: ErrorAlertProps) => {
   const styles = variantStyles[variant];
   const Icon = styles.icon;
 
@@ -108,15 +108,14 @@ export function ErrorAlert({
       )}
     </div>
   );
-}
-
+};
 
 export interface FormErrorProps {
   error?: string | null;
   className?: string;
 }
 
-export function FormError({ error, className = "" }: FormErrorProps) {
+export const FormError = ({ error, className = "" }: FormErrorProps) => {
   if (!error) return null;
 
   return (
@@ -127,4 +126,4 @@ export function FormError({ error, className = "" }: FormErrorProps) {
       {error}
     </div>
   );
-}
+};

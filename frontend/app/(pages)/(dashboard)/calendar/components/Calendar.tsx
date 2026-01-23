@@ -2,7 +2,16 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Calendar as BigCalendar, dateFnsLocalizer, View } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
+import {
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  startOfMonth,
+  endOfMonth,
+  addMonths,
+  subMonths,
+} from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarEvent, CalendarEventType } from "../types";
@@ -103,7 +112,7 @@ export default function Calendar({
   onViewTask,
   onViewMeeting,
   onViewTimeOff,
-  compact = false
+  compact = false,
 }: CalendarProps) {
   const { effectiveIsSupervisorOrAdmin } = useCurrentUser();
   const [events, setEvents] = useState<CalendarComponentEvent[]>([]);
@@ -149,95 +158,103 @@ export default function Calendar({
     }
   }, []);
 
-  const hasAnyAction = onCreateTask || onCreateEvent || onCreateMeeting || onRequestTimeOff || onCreateTimeOffForEmployee;
+  const hasAnyAction =
+    onCreateTask ||
+    onCreateEvent ||
+    onCreateMeeting ||
+    onRequestTimeOff ||
+    onCreateTimeOffForEmployee;
 
-  const fetchEvents = useCallback(async (showRefresh = false) => {
-    if (showRefresh) {
-      setRefreshing(true);
-    }
-    setError(null);
+  const fetchEvents = useCallback(
+    async (showRefresh = false) => {
+      if (showRefresh) {
+        setRefreshing(true);
+      }
+      setError(null);
 
-    try {
-      const start = startOfMonth(subMonths(date, 1));
-      const end = endOfMonth(addMonths(date, 1));
+      try {
+        const start = startOfMonth(subMonths(date, 1));
+        const end = endOfMonth(addMonths(date, 1));
 
-      // First fetch calendar events with metadata to check Jira connection status
-      const calendarData = await getCalendarEventsWithMetadata(start, end);
-      const calendarEvents = calendarData.events || [];
-      const isJiraConnected = calendarData.jira_connected;
+        // First fetch calendar events with metadata to check Jira connection status
+        const calendarData = await getCalendarEventsWithMetadata(start, end);
+        const calendarEvents = calendarData.events || [];
+        const isJiraConnected = calendarData.jira_connected;
 
-      // Only fetch epics if Jira is connected, and team time off if enabled
-      const [epics, teamTimeOff] = await Promise.all([
-        isJiraConnected
-          ? getJiraEpics().catch(() => [] as JiraIssue[])
-          : Promise.resolve([] as JiraIssue[]),
-        showTeamTimeOff
-          ? getTeamTimeOff().catch(() => [] as TimeOffRequest[])
-          : Promise.resolve([] as TimeOffRequest[]),
-      ]);
+        // Only fetch epics if Jira is connected, and team time off if enabled
+        const [epics, teamTimeOff] = await Promise.all([
+          isJiraConnected
+            ? getJiraEpics().catch(() => [] as JiraIssue[])
+            : Promise.resolve([] as JiraIssue[]),
+          showTeamTimeOff
+            ? getTeamTimeOff().catch(() => [] as TimeOffRequest[])
+            : Promise.resolve([] as TimeOffRequest[]),
+        ]);
 
-      // Convert epics to calendar events and filter by date range
-      const epicEvents = (epics || [])
-        .map(epicToCalendarEvent)
-        .filter((event): event is CalendarEvent => {
-          if (!event) return false;
-          const eventStart = new Date(event.start);
-          const eventEnd = event.end ? new Date(event.end) : eventStart;
-          return eventEnd >= start && eventStart <= end;
-        });
+        // Convert epics to calendar events and filter by date range
+        const epicEvents = (epics || [])
+          .map(epicToCalendarEvent)
+          .filter((event): event is CalendarEvent => {
+            if (!event) return false;
+            const eventStart = new Date(event.start);
+            const eventEnd = event.end ? new Date(event.end) : eventStart;
+            return eventEnd >= start && eventStart <= end;
+          });
 
-      // Convert team time off to calendar events and filter by date range
-      const teamTimeOffEvents = (teamTimeOff || [])
-        .filter((timeOff) => timeOff.status === "approved") // Only show approved time off
-        .map(timeOffToCalendarEvent)
-        .filter((event) => {
-          const eventStart = new Date(event.start);
-          const eventEnd = event.end ? new Date(event.end) : eventStart;
-          return eventEnd >= start && eventStart <= end;
-        });
+        // Convert team time off to calendar events and filter by date range
+        const teamTimeOffEvents = (teamTimeOff || [])
+          .filter((timeOff) => timeOff.status === "approved") // Only show approved time off
+          .map(timeOffToCalendarEvent)
+          .filter((event) => {
+            const eventStart = new Date(event.start);
+            const eventEnd = event.end ? new Date(event.end) : eventStart;
+            return eventEnd >= start && eventStart <= end;
+          });
 
-      // Combine all events (dedupe team time off that might already be in calendar events)
-      const existingTimeOffIds = new Set(
-        (calendarEvents || [])
-          .filter((e) => e.type === "time_off" && e.time_off_request)
-          .map((e) => e.time_off_request!.id)
-      );
-      const uniqueTeamTimeOffEvents = teamTimeOffEvents.filter(
-        (e) => !existingTimeOffIds.has(e.time_off_request!.id)
-      );
+        // Combine all events (dedupe team time off that might already be in calendar events)
+        const existingTimeOffIds = new Set(
+          (calendarEvents || [])
+            .filter((e) => e.type === "time_off" && e.time_off_request)
+            .map((e) => e.time_off_request!.id)
+        );
+        const uniqueTeamTimeOffEvents = teamTimeOffEvents.filter(
+          (e) => !existingTimeOffIds.has(e.time_off_request!.id)
+        );
 
-      const allEvents = [...(calendarEvents || []), ...epicEvents, ...uniqueTeamTimeOffEvents];
+        const allEvents = [...(calendarEvents || []), ...epicEvents, ...uniqueTeamTimeOffEvents];
 
-      const mapped = allEvents.map((event) => {
-        // For time_off events, include the employee name in the title
-        let title = event.title;
-        if (event.type === "time_off" && event.time_off_request?.user) {
-          const user = event.time_off_request.user;
-          const name = `${user.first_name} ${user.last_name}`.trim();
-          if (name) {
-            title = `${name}: ${title}`;
+        const mapped = allEvents.map((event) => {
+          // For time_off events, include the employee name in the title
+          let title = event.title;
+          if (event.type === "time_off" && event.time_off_request?.user) {
+            const user = event.time_off_request.user;
+            const name = `${user.first_name} ${user.last_name}`.trim();
+            if (name) {
+              title = `${name}: ${title}`;
+            }
           }
-        }
 
-        return {
-          id: event.id,
-          title,
-          start: new Date(event.start),
-          end: event.end ? new Date(event.end) : new Date(event.start),
-          allDay: event.all_day,
-          resource: event,
-        };
-      });
+          return {
+            id: event.id,
+            title,
+            start: new Date(event.start),
+            end: event.end ? new Date(event.end) : new Date(event.start),
+            allDay: event.all_day,
+            resource: event,
+          };
+        });
 
-      setEvents(mapped);
-    } catch (e) {
-      console.error("Failed to fetch calendar events:", e);
-      setError("Failed to load calendar events");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [date, showTeamTimeOff]);
+        setEvents(mapped);
+      } catch (e) {
+        console.error("Failed to fetch calendar events:", e);
+        setError("Failed to load calendar events");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [date, showTeamTimeOff]
+  );
 
   useEffect(() => {
     fetchEvents();
@@ -251,34 +268,37 @@ export default function Calendar({
     setView(newView);
   }, []);
 
-  const handleSelectEvent = useCallback((event: CalendarComponentEvent) => {
-    const resource = event.resource;
+  const handleSelectEvent = useCallback(
+    (event: CalendarComponentEvent) => {
+      const resource = event.resource;
 
-    // Handle internal events (task, meeting, time_off) with view modals
-    if (resource.type === "task" && resource.task && onViewTask) {
-      onViewTask(resource.task.id);
-      return;
-    }
-    if (resource.type === "meeting" && resource.meeting && onViewMeeting) {
-      onViewMeeting(resource.meeting.id);
-      return;
-    }
-    if (resource.type === "time_off" && resource.time_off_request && onViewTimeOff) {
-      onViewTimeOff(resource.time_off_request.id);
-      return;
-    }
+      // Handle internal events (task, meeting, time_off) with view modals
+      if (resource.type === "task" && resource.task && onViewTask) {
+        onViewTask(resource.task.id);
+        return;
+      }
+      if (resource.type === "meeting" && resource.meeting && onViewMeeting) {
+        onViewMeeting(resource.meeting.id);
+        return;
+      }
+      if (resource.type === "time_off" && resource.time_off_request && onViewTimeOff) {
+        onViewTimeOff(resource.time_off_request.id);
+        return;
+      }
 
-    // For external events (jira, epic) or if no specific handler, open URL or use generic handler
-    if (resource.url) {
-      window.open(resource.url, "_blank");
-      return;
-    }
+      // For external events (jira, epic) or if no specific handler, open URL or use generic handler
+      if (resource.url) {
+        window.open(resource.url, "_blank");
+        return;
+      }
 
-    // Fallback to generic event click handler
-    if (onEventClick) {
-      onEventClick(resource);
-    }
-  }, [onEventClick, onViewTask, onViewMeeting, onViewTimeOff]);
+      // Fallback to generic event click handler
+      if (onEventClick) {
+        onEventClick(resource);
+      }
+    },
+    [onEventClick, onViewTask, onViewMeeting, onViewTimeOff]
+  );
 
   const handleSelectSlot = useCallback(() => {
     if (onCreateTask) {
@@ -286,196 +306,236 @@ export default function Calendar({
     }
   }, [onCreateTask]);
 
-  const eventStyleGetter = useCallback((event: CalendarComponentEvent) => {
-    const type = event.resource.type as CalendarEventType;
-    let backgroundColor = "#3b82f6";
-    let borderColor = "#60a5fa";
+  const eventStyleGetter = useCallback(
+    (event: CalendarComponentEvent) => {
+      const type = event.resource.type as CalendarEventType;
+      let backgroundColor = "#3b82f6";
+      let borderColor = "#60a5fa";
 
-    switch (type) {
-      case "jira":
-        backgroundColor = "#0052cc";
-        borderColor = "#2684ff";
-        break;
-      case "epic":
-        backgroundColor = "#6366f1";
-        borderColor = "#818cf8";
-        break;
-      case "task":
-        backgroundColor = "#059669";
-        borderColor = "#34d399";
-        break;
-      case "meeting":
-        backgroundColor = "#7c3aed";
-        borderColor = "#a78bfa";
-        break;
-      case "time_off":
-        backgroundColor = "#d97706";
-        borderColor = "#fbbf24";
-        break;
-    }
+      switch (type) {
+        case "jira":
+          backgroundColor = "#0052cc";
+          borderColor = "#2684ff";
+          break;
+        case "epic":
+          backgroundColor = "#6366f1";
+          borderColor = "#818cf8";
+          break;
+        case "task":
+          backgroundColor = "#059669";
+          borderColor = "#34d399";
+          break;
+        case "meeting":
+          backgroundColor = "#7c3aed";
+          borderColor = "#a78bfa";
+          break;
+        case "time_off":
+          backgroundColor = "#d97706";
+          borderColor = "#fbbf24";
+          break;
+      }
 
-    return {
-      style: {
-        backgroundColor,
-        borderLeft: `2px solid ${borderColor}`,
-        borderTop: "none",
-        borderRight: "none",
-        borderBottom: "none",
-        borderRadius: "3px",
-        color: "white",
-        fontSize: compact ? "10px" : "11px",
-        padding: compact ? "1px 4px" : "2px 6px",
-        fontWeight: 500,
-        lineHeight: "1.3",
-      },
-    };
-  }, [compact]);
+      return {
+        style: {
+          backgroundColor,
+          borderLeft: `2px solid ${borderColor}`,
+          borderTop: "none",
+          borderRight: "none",
+          borderBottom: "none",
+          borderRadius: "3px",
+          color: "white",
+          fontSize: compact ? "10px" : "11px",
+          padding: compact ? "1px 4px" : "2px 6px",
+          fontWeight: 500,
+          lineHeight: "1.3",
+        },
+      };
+    },
+    [compact]
+  );
 
-  const CustomToolbar = useCallback(({ label }: { label: string }) => (
-    <div className="flex items-center justify-between mb-6 pb-4 border-b border-theme-border">
-      {/* Left: Navigation */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => handleNavigate(view === "month" ? subMonths(date, 1) : new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000))}
-          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => handleNavigate(new Date())}
-          className="px-3 py-1.5 text-sm font-medium text-theme-text hover:bg-theme-elevated rounded-lg transition-colors min-w-[140px] text-center"
-        >
-          {label}
-        </button>
-        <button
-          onClick={() => handleNavigate(view === "month" ? addMonths(date, 1) : new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000))}
-          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
-        <button
-          onClick={() => fetchEvents(true)}
-          disabled={refreshing}
-          className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors disabled:opacity-50 ml-1"
-          title="Refresh"
-        >
-          <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-        </button>
-      </div>
-
-      {/* Right: Controls */}
-      <div className="flex items-center gap-2">
-        {effectiveIsSupervisorOrAdmin && (
-          <div className="flex bg-theme-surface border border-theme-border rounded-lg overflow-hidden">
-            <button
-              onClick={() => setShowTeamTimeOff(false)}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                !showTeamTimeOff
-                  ? "bg-theme-elevated text-theme-text"
-                  : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-              }`}
-            >
-              Mine
-            </button>
-            <button
-              onClick={() => setShowTeamTimeOff(true)}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-theme-border ${
-                showTeamTimeOff
-                  ? "bg-theme-elevated text-theme-text"
-                  : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-              }`}
-            >
-              Team
-            </button>
-          </div>
-        )}
-        <div className="flex bg-theme-surface border border-theme-border rounded-lg overflow-hidden">
+  const CustomToolbar = useCallback(
+    ({ label }: { label: string }) => (
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-theme-border">
+        {/* Left: Navigation */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => handleViewChange("month")}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors ${view === "month"
-                ? "bg-theme-elevated text-theme-text"
-                : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-              }`}
+            onClick={() =>
+              handleNavigate(
+                view === "month"
+                  ? subMonths(date, 1)
+                  : new Date(date.getTime() - 7 * 24 * 60 * 60 * 1000)
+              )
+            }
+            className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors"
           >
-            Month
+            <ChevronLeft className="w-5 h-5" />
           </button>
           <button
-            onClick={() => handleViewChange("week")}
-            className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-theme-border ${view === "week"
-                ? "bg-theme-elevated text-theme-text"
-                : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
-              }`}
+            onClick={() => handleNavigate(new Date())}
+            className="px-3 py-1.5 text-sm font-medium text-theme-text hover:bg-theme-elevated rounded-lg transition-colors min-w-[140px] text-center"
           >
-            Week
+            {label}
+          </button>
+          <button
+            onClick={() =>
+              handleNavigate(
+                view === "month"
+                  ? addMonths(date, 1)
+                  : new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000)
+              )
+            }
+            className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => fetchEvents(true)}
+            disabled={refreshing}
+            className="p-2 text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors disabled:opacity-50 ml-1"
+            title="Refresh"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
           </button>
         </div>
-        {hasAnyAction && (
-          <div className="relative" ref={addMenuRef}>
-            <button
-              onClick={() => setAddMenuOpen(!addMenuOpen)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Add
-            </button>
-            {addMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-theme-surface border border-theme-border rounded-lg shadow-lg z-50 overflow-hidden">
-                {onCreateTask && (
-                  <button
-                    onClick={() => handleAction(onCreateTask)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                  >
-                    <CheckSquare className="w-4 h-4 text-green-400" />
-                    Task
-                  </button>
-                )}
-                {onCreateEvent && (
-                  <button
-                    onClick={() => handleAction(onCreateEvent)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                  >
-                    <CalendarIcon className="w-4 h-4 text-blue-400" />
-                    Event
-                  </button>
-                )}
-                {onCreateMeeting && (
-                  <button
-                    onClick={() => handleAction(onCreateMeeting)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                  >
-                    <Users className="w-4 h-4 text-purple-400" />
-                    Meeting
-                  </button>
-                )}
-                {onRequestTimeOff && (
-                  <button
-                    onClick={() => handleAction(onRequestTimeOff)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                  >
-                    <Palmtree className="w-4 h-4 text-amber-400" />
-                    Request Time Off
-                  </button>
-                )}
-                {onCreateTimeOffForEmployee && (
-                  <button
-                    onClick={() => handleAction(onCreateTimeOffForEmployee)}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
-                  >
-                    <UserPlus className="w-4 h-4 text-amber-400" />
-                    Time Off for Employee
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  ), [view, date, refreshing, addMenuOpen, hasAnyAction, onCreateTask, onCreateEvent, onCreateMeeting, onRequestTimeOff, onCreateTimeOffForEmployee, handleAction, handleNavigate, handleViewChange, fetchEvents, effectiveIsSupervisorOrAdmin, showTeamTimeOff]);
 
-  const components = useMemo(() => ({
-    toolbar: CustomToolbar,
-  }), [CustomToolbar]);
+        {/* Right: Controls */}
+        <div className="flex items-center gap-2">
+          {effectiveIsSupervisorOrAdmin && (
+            <div className="flex bg-theme-surface border border-theme-border rounded-lg overflow-hidden">
+              <button
+                onClick={() => setShowTeamTimeOff(false)}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                  !showTeamTimeOff
+                    ? "bg-theme-elevated text-theme-text"
+                    : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
+                }`}
+              >
+                Mine
+              </button>
+              <button
+                onClick={() => setShowTeamTimeOff(true)}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-theme-border ${
+                  showTeamTimeOff
+                    ? "bg-theme-elevated text-theme-text"
+                    : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
+                }`}
+              >
+                Team
+              </button>
+            </div>
+          )}
+          <div className="flex bg-theme-surface border border-theme-border rounded-lg overflow-hidden">
+            <button
+              onClick={() => handleViewChange("month")}
+              className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                view === "month"
+                  ? "bg-theme-elevated text-theme-text"
+                  : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
+              }`}
+            >
+              Month
+            </button>
+            <button
+              onClick={() => handleViewChange("week")}
+              className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-theme-border ${
+                view === "week"
+                  ? "bg-theme-elevated text-theme-text"
+                  : "text-theme-text-muted hover:text-theme-text hover:bg-theme-elevated"
+              }`}
+            >
+              Week
+            </button>
+          </div>
+          {hasAnyAction && (
+            <div className="relative" ref={addMenuRef}>
+              <button
+                onClick={() => setAddMenuOpen(!addMenuOpen)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add
+              </button>
+              {addMenuOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-theme-surface border border-theme-border rounded-lg shadow-lg z-50 overflow-hidden">
+                  {onCreateTask && (
+                    <button
+                      onClick={() => handleAction(onCreateTask)}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
+                    >
+                      <CheckSquare className="w-4 h-4 text-green-400" />
+                      Task
+                    </button>
+                  )}
+                  {onCreateEvent && (
+                    <button
+                      onClick={() => handleAction(onCreateEvent)}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
+                    >
+                      <CalendarIcon className="w-4 h-4 text-blue-400" />
+                      Event
+                    </button>
+                  )}
+                  {onCreateMeeting && (
+                    <button
+                      onClick={() => handleAction(onCreateMeeting)}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
+                    >
+                      <Users className="w-4 h-4 text-purple-400" />
+                      Meeting
+                    </button>
+                  )}
+                  {onRequestTimeOff && (
+                    <button
+                      onClick={() => handleAction(onRequestTimeOff)}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
+                    >
+                      <Palmtree className="w-4 h-4 text-amber-400" />
+                      Request Time Off
+                    </button>
+                  )}
+                  {onCreateTimeOffForEmployee && (
+                    <button
+                      onClick={() => handleAction(onCreateTimeOffForEmployee)}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-theme-text hover:bg-theme-elevated transition-colors"
+                    >
+                      <UserPlus className="w-4 h-4 text-amber-400" />
+                      Time Off for Employee
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    ),
+    [
+      view,
+      date,
+      refreshing,
+      addMenuOpen,
+      hasAnyAction,
+      onCreateTask,
+      onCreateEvent,
+      onCreateMeeting,
+      onRequestTimeOff,
+      onCreateTimeOffForEmployee,
+      handleAction,
+      handleNavigate,
+      handleViewChange,
+      fetchEvents,
+      effectiveIsSupervisorOrAdmin,
+      showTeamTimeOff,
+    ]
+  );
+
+  const components = useMemo(
+    () => ({
+      toolbar: CustomToolbar,
+    }),
+    [CustomToolbar]
+  );
 
   // Filter events based on visible types
   const filteredEvents = useMemo(() => {
@@ -591,7 +651,9 @@ export default function Calendar({
 
           .rbc-event {
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
+            transition:
+              transform 0.1s,
+              box-shadow 0.1s;
           }
 
           .rbc-event:hover {
@@ -777,7 +839,9 @@ export default function Calendar({
             }`}
             title={visibleTypes.has("epic") ? "Hide epics" : "Show epics"}
           >
-            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("epic") ? "bg-[#6366f1]" : "bg-[#6366f1]/40"}`}></span>
+            <span
+              className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("epic") ? "bg-[#6366f1]" : "bg-[#6366f1]/40"}`}
+            ></span>
             <span>Epic</span>
           </button>
           <button
@@ -789,7 +853,9 @@ export default function Calendar({
             }`}
             title={visibleTypes.has("jira") ? "Hide Jira tasks" : "Show Jira tasks"}
           >
-            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("jira") ? "bg-[#0052cc]" : "bg-[#0052cc]/40"}`}></span>
+            <span
+              className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("jira") ? "bg-[#0052cc]" : "bg-[#0052cc]/40"}`}
+            ></span>
             <span>Jira</span>
           </button>
           <button
@@ -801,7 +867,9 @@ export default function Calendar({
             }`}
             title={visibleTypes.has("task") ? "Hide tasks" : "Show tasks"}
           >
-            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("task") ? "bg-[#059669]" : "bg-[#059669]/40"}`}></span>
+            <span
+              className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("task") ? "bg-[#059669]" : "bg-[#059669]/40"}`}
+            ></span>
             <span>Task</span>
           </button>
           <button
@@ -813,7 +881,9 @@ export default function Calendar({
             }`}
             title={visibleTypes.has("meeting") ? "Hide meetings" : "Show meetings"}
           >
-            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("meeting") ? "bg-[#7c3aed]" : "bg-[#7c3aed]/40"}`}></span>
+            <span
+              className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("meeting") ? "bg-[#7c3aed]" : "bg-[#7c3aed]/40"}`}
+            ></span>
             <span>Meeting</span>
           </button>
           <button
@@ -825,7 +895,9 @@ export default function Calendar({
             }`}
             title={visibleTypes.has("time_off") ? "Hide time off" : "Show time off"}
           >
-            <span className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("time_off") ? "bg-[#d97706]" : "bg-[#d97706]/40"}`}></span>
+            <span
+              className={`w-3 h-3 rounded shadow-sm ${visibleTypes.has("time_off") ? "bg-[#d97706]" : "bg-[#d97706]/40"}`}
+            ></span>
             <span>Time Off</span>
           </button>
         </div>

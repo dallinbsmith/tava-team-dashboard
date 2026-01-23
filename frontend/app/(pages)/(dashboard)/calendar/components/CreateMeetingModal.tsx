@@ -14,7 +14,11 @@ interface CreateMeetingModalProps {
   onCreated: () => void;
 }
 
-export default function CreateMeetingModal({ isOpen, onClose, onCreated }: CreateMeetingModalProps) {
+export default function CreateMeetingModal({
+  isOpen,
+  onClose,
+  onCreated,
+}: CreateMeetingModalProps) {
   const { allUsers, allUsersLoading } = useOrganization();
 
   const defaultStartTime = setMinutes(setHours(startOfHour(addDays(new Date(), 1)), 10), 0);
@@ -121,12 +125,7 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
   };
 
   return (
-    <BaseModal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Create Meeting"
-      maxWidth="max-w-lg"
-    >
+    <BaseModal isOpen={isOpen} onClose={handleClose} title="Create Meeting" maxWidth="max-w-lg">
       {allUsersLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
@@ -169,9 +168,7 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">
-                Start *
-              </label>
+              <label className="block text-sm font-medium text-theme-text mb-1">Start *</label>
               <div className="space-y-2">
                 <input
                   type="date"
@@ -189,9 +186,7 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-theme-text mb-1">
-                End *
-              </label>
+              <label className="block text-sm font-medium text-theme-text mb-1">End *</label>
               <div className="space-y-2">
                 <input
                   type="date"
@@ -218,8 +213,9 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
               {allUsers.map((user) => (
                 <label
                   key={user.id}
-                  className={`flex items-center px-3 py-2 cursor-pointer hover:bg-theme-elevated ${attendeeIds.includes(user.id) ? "bg-primary-600/20" : ""
-                    }`}
+                  className={`flex items-center px-3 py-2 cursor-pointer hover:bg-theme-elevated ${
+                    attendeeIds.includes(user.id) ? "bg-primary-600/20" : ""
+                  }`}
                 >
                   <input
                     type="checkbox"
@@ -230,9 +226,7 @@ export default function CreateMeetingModal({ isOpen, onClose, onCreated }: Creat
                   <span className="ml-2 text-sm text-theme-text">
                     {user.first_name} {user.last_name}
                   </span>
-                  <span className="ml-auto text-xs text-theme-text-muted">
-                    {user.department}
-                  </span>
+                  <span className="ml-auto text-xs text-theme-text-muted">{user.department}</span>
                 </label>
               ))}
             </div>

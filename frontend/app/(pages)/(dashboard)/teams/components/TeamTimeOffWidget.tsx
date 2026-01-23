@@ -176,9 +176,7 @@ function TimeOffItem({ request }: TimeOffItemProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-theme-text truncate">
-            {request.user
-              ? `${request.user.first_name} ${request.user.last_name}`
-              : "Unknown User"}
+            {request.user ? `${request.user.first_name} ${request.user.last_name}` : "Unknown User"}
           </span>
           <span className="px-1.5 py-0.5 text-xs font-medium bg-amber-900/40 text-amber-300">
             {TIME_OFF_TYPE_LABELS[request.request_type]}

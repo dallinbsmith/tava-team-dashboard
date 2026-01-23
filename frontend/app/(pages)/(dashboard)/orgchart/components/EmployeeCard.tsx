@@ -8,13 +8,12 @@ interface EmployeeCardProps {
 }
 
 export default function EmployeeCard({ employee }: EmployeeCardProps) {
-
   const formattedDate = employee.date_started
     ? new Date(employee.date_started).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
     : "N/A";
 
   return (
@@ -37,7 +36,9 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
             />
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold text-theme-text group-hover:text-primary-400 transition-colors flex items-center gap-2 text-sm sm:text-base">
-                <span className="truncate">{employee.first_name} {employee.last_name}</span>
+                <span className="truncate">
+                  {employee.first_name} {employee.last_name}
+                </span>
                 {employee.role === "admin" && (
                   <Shield className="w-4 h-4 text-amber-400" aria-label="Admin" />
                 )}
@@ -45,12 +46,10 @@ export default function EmployeeCard({ employee }: EmployeeCardProps) {
                   <Shield className="w-4 h-4 text-purple-400" aria-label="Supervisor" />
                 )}
               </h3>
-              <div className="text-sm text-theme-text-muted mt-1">
-                {employee.title}
-              </div>
+              <div className="text-sm text-theme-text-muted mt-1">{employee.title}</div>
               {(employee.squads?.length ?? 0) > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {(employee.squads ?? []).map(squad => (
+                  {(employee.squads ?? []).map((squad) => (
                     <span
                       key={squad.id}
                       className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border"

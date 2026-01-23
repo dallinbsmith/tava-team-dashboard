@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import {
-  getOrgTree,
-  getOrgChartDrafts,
-  getOrgChartDraft,
-  getDepartments,
-} from "@/lib/api";
+import { getOrgTree, getOrgChartDrafts, getOrgChartDraft, getDepartments } from "@/lib/api";
 import {
   createDraftAction,
   deleteDraftAction,
@@ -54,13 +49,13 @@ interface OrgChartPageClientProps {
   canEdit: boolean;
 }
 
-export function OrgChartPageClient({
+export const OrgChartPageClient = ({
   initialOrgTrees,
   initialDrafts,
   initialSquads,
   initialDepartments,
   canEdit,
-}: OrgChartPageClientProps) {
+}: OrgChartPageClientProps) => {
   const { refetchSquads } = useOrganization();
 
   const [orgTrees, setOrgTrees] = useState<OrgTreeNode[]>(initialOrgTrees || []);
@@ -72,7 +67,9 @@ export function OrgChartPageClient({
   const [error, setError] = useState<string | null>(null);
   const [activeUser, setActiveUser] = useState<User | null>(null);
   const [editingEmployee, setEditingEmployee] = useState<User | null>(null);
-  const [availableDepartments, setAvailableDepartments] = useState<string[]>(initialDepartments || []);
+  const [availableDepartments, setAvailableDepartments] = useState<string[]>(
+    initialDepartments || []
+  );
   const [showManageDepartmentsModal, setShowManageDepartmentsModal] = useState(false);
   const [showManageSquadsModal, setShowManageSquadsModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<{
@@ -199,10 +196,7 @@ export function OrgChartPageClient({
         const result = await publishDraftAction(id);
         if (result.success) {
           // Refresh data after successful publish
-          const [treeResult, draftsList] = await Promise.all([
-            getOrgTree(),
-            getOrgChartDrafts(),
-          ]);
+          const [treeResult, draftsList] = await Promise.all([getOrgTree(), getOrgChartDrafts()]);
           const trees = Array.isArray(treeResult) ? treeResult : [treeResult];
           setOrgTrees(trees);
           setDrafts(draftsList);
@@ -325,11 +319,7 @@ export function OrgChartPageClient({
   const isDraftMode = canEdit && currentDraft !== null;
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="h-full">
         <div className="mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -368,9 +358,15 @@ export function OrgChartPageClient({
             <Eye className="w-4 h-4 flex-shrink-0" />
             <span>
               {canEdit ? (
-                <><strong>View Only Mode:</strong> Create or select a draft from the sidebar to enable drag-and-drop editing.</>
+                <>
+                  <strong>View Only Mode:</strong> Create or select a draft from the sidebar to
+                  enable drag-and-drop editing.
+                </>
               ) : (
-                <><strong>View Only:</strong> You can view the organization structure but cannot make changes.</>
+                <>
+                  <strong>View Only:</strong> You can view the organization structure but cannot
+                  make changes.
+                </>
               )}
             </span>
           </div>
@@ -379,10 +375,11 @@ export function OrgChartPageClient({
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 h-auto lg:h-[calc(100vh-220px)]">
           {/* Org Tree */}
           <div
-            className={`flex-1 min-h-[400px] lg:min-h-0 p-3 sm:p-4 overflow-y-auto rounded transition-all ${isDraftMode
-              ? "border-2 border-purple-500/50 ring-2 ring-purple-500/20"
-              : "bg-theme-surface border border-theme-border"
-              }`}
+            className={`flex-1 min-h-[400px] lg:min-h-0 p-3 sm:p-4 overflow-y-auto rounded transition-all ${
+              isDraftMode
+                ? "border-2 border-purple-500/50 ring-2 ring-purple-500/20"
+                : "bg-theme-surface border border-theme-border"
+            }`}
           >
             {isDraftMode && (
               <div className="mb-4 flex items-center gap-3 p-3 rounded-lg text-purple-300">
@@ -425,7 +422,9 @@ export function OrgChartPageClient({
 
           {/* Sidebar - only show for users who can edit */}
           {canEdit && (
-            <div className={`${showSidebar ? "w-full lg:w-96 xl:w-[420px]" : "w-0 overflow-hidden"} transition-all duration-300 flex-shrink-0`}>
+            <div
+              className={`${showSidebar ? "w-full lg:w-96 xl:w-[420px]" : "w-0 overflow-hidden"} transition-all duration-300 flex-shrink-0`}
+            >
               {/* Mobile sidebar toggle */}
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
@@ -445,35 +444,33 @@ export function OrgChartPageClient({
               </button>
               <div className={`${showSidebar ? "block" : "hidden"} h-full overflow-y-auto`}>
                 <DraftManager
-                drafts={drafts}
-                currentDraft={currentDraft}
-                setCurrentDraft={setCurrentDraft}
-                onSelectDraft={handleSelectDraft}
-                onCreateDraft={handleCreateDraft}
-                onDeleteDraft={handleDeleteDraft}
-                onPublish={handlePublish}
-                onRemoveChange={handleRemoveChange}
-                isLoading={actionLoading}
-                squads={squads}
-                allUsers={(() => {
-                  const users: User[] = [];
-                  const collectUsers = (node: OrgTreeNode) => {
-                    users.push(node.user);
-                    node.children.forEach(collectUsers);
-                  };
-                  orgTrees.forEach(collectUsers);
-                  return users;
-                })()}
-              />
+                  drafts={drafts}
+                  currentDraft={currentDraft}
+                  setCurrentDraft={setCurrentDraft}
+                  onSelectDraft={handleSelectDraft}
+                  onCreateDraft={handleCreateDraft}
+                  onDeleteDraft={handleDeleteDraft}
+                  onPublish={handlePublish}
+                  onRemoveChange={handleRemoveChange}
+                  isLoading={actionLoading}
+                  squads={squads}
+                  allUsers={(() => {
+                    const users: User[] = [];
+                    const collectUsers = (node: OrgTreeNode) => {
+                      users.push(node.user);
+                      node.children.forEach(collectUsers);
+                    };
+                    orgTrees.forEach(collectUsers);
+                    return users;
+                  })()}
+                />
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <DragOverlay>
-        {activeUser ? <DragOverlayCard user={activeUser} /> : null}
-      </DragOverlay>
+      <DragOverlay>{activeUser ? <DragOverlayCard user={activeUser} /> : null}</DragOverlay>
 
       {editingEmployee && (
         <DraftEditModal
@@ -482,7 +479,9 @@ export function OrgChartPageClient({
           departments={availableDepartments}
           isOpen={!!editingEmployee}
           onClose={() => setEditingEmployee(null)}
-          onSave={(newDepartment, newSquadIds, newRole) => handleDepartmentAndSquadChange(editingEmployee.id, newDepartment, newSquadIds, newRole)}
+          onSave={(newDepartment, newSquadIds, newRole) =>
+            handleDepartmentAndSquadChange(editingEmployee.id, newDepartment, newSquadIds, newRole)
+          }
         />
       )}
 
@@ -514,4 +513,4 @@ export function OrgChartPageClient({
       />
     </DndContext>
   );
-}
+};

@@ -9,18 +9,10 @@ import { getMyJiraTasks, getTeamJiraTasks, getJiraSettings } from "../api";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { useOrganization } from "@/providers/OrganizationProvider";
 import Avatar from "@/shared/common/Avatar";
-import {
-  getStatusColor,
-  getPriorityColor,
-  DueDateDisplay,
-} from "@/lib/jira-utils";
+import { getStatusColor, getPriorityColor, DueDateDisplay } from "@/lib/jira-utils";
 import { JIRA_LIMITS } from "@/lib/constants";
 import TimeOffIndicator from "@/app/(pages)/(dashboard)/time-off/components/TimeOffIndicator";
-import {
-  FilterDropdown,
-  FilterSection,
-  SearchableFilterList,
-} from "@/components";
+import { FilterDropdown, FilterSection, SearchableFilterList } from "@/components";
 import {
   CheckSquare,
   ExternalLink,
@@ -71,7 +63,11 @@ interface DisplayTask {
 
 export default function JiraTasks({ compact = false }: JiraTasksProps) {
   const { loading: userLoading, effectiveIsSupervisorOrAdmin } = useCurrentUser();
-  const { departments: departmentsInput, squads: squadsInput, allUsers: allUsersInput } = useOrganization();
+  const {
+    departments: departmentsInput,
+    squads: squadsInput,
+    allUsers: allUsersInput,
+  } = useOrganization();
 
   // Memoize organization data to prevent useMemo dependency warnings
   const allUsers = useMemo(() => allUsersInput || [], [allUsersInput]);
@@ -247,45 +243,50 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
     setIndividualFilter("all");
   };
 
-  const fetchTasks = useCallback(async (showRefresh = false) => {
-    if (showRefresh) {
-      setRefreshing(true);
-    }
-    setError(null);
-
-    try {
-      const jiraSettings = await getJiraSettings();
-      setSettings(jiraSettings);
-
-      if (jiraSettings.org_configured) {
-        // Fetch both my tasks and team tasks
-        const [myIssues, teamIssues] = await Promise.all([
-          getMyJiraTasks(compact ? JIRA_LIMITS.TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT),
-          getTeamJiraTasks(compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT),
-        ]);
-        setMyTasks(myIssues || []);
-        setTeamTasks(teamIssues || []);
+  const fetchTasks = useCallback(
+    async (showRefresh = false) => {
+      if (showRefresh) {
+        setRefreshing(true);
       }
-    } catch (e) {
-      console.error("Failed to fetch Jira tasks:", e);
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      // Detect token expiration or auth errors
-      if (
-        errorMessage.includes("401") ||
-        errorMessage.includes("403") ||
-        errorMessage.toLowerCase().includes("token") ||
-        errorMessage.toLowerCase().includes("unauthorized") ||
-        errorMessage.toLowerCase().includes("refresh")
-      ) {
-        setError("jira_reconnect");
-      } else {
-        setError("Failed to load tasks");
+      setError(null);
+
+      try {
+        const jiraSettings = await getJiraSettings();
+        setSettings(jiraSettings);
+
+        if (jiraSettings.org_configured) {
+          // Fetch both my tasks and team tasks
+          const [myIssues, teamIssues] = await Promise.all([
+            getMyJiraTasks(compact ? JIRA_LIMITS.TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT),
+            getTeamJiraTasks(
+              compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT
+            ),
+          ]);
+          setMyTasks(myIssues || []);
+          setTeamTasks(teamIssues || []);
+        }
+      } catch (e) {
+        console.error("Failed to fetch Jira tasks:", e);
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        // Detect token expiration or auth errors
+        if (
+          errorMessage.includes("401") ||
+          errorMessage.includes("403") ||
+          errorMessage.toLowerCase().includes("token") ||
+          errorMessage.toLowerCase().includes("unauthorized") ||
+          errorMessage.toLowerCase().includes("refresh")
+        ) {
+          setError("jira_reconnect");
+        } else {
+          setError("Failed to load tasks");
+        }
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [compact]);
+    },
+    [compact]
+  );
 
   useEffect(() => {
     if (!userLoading) {
@@ -322,7 +323,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
           <p className="text-theme-text-muted mb-2">Jira is not configured for your organization</p>
           {effectiveIsSupervisorOrAdmin ? (
             <>
-              <p className="text-sm text-theme-text-muted mb-4">Connect your Jira account to track tasks and issues</p>
+              <p className="text-sm text-theme-text-muted mb-4">
+                Connect your Jira account to track tasks and issues
+              </p>
               <Link
                 href="/settings"
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors"
@@ -332,7 +335,9 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
               </Link>
             </>
           ) : (
-            <p className="text-sm text-theme-text-muted">Contact your administrator to set up Jira integration</p>
+            <p className="text-sm text-theme-text-muted">
+              Contact your administrator to set up Jira integration
+            </p>
           )}
         </div>
       </div>
@@ -349,7 +354,8 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
           <h2 className="text-sm font-semibold text-theme-text">Jira Tasks</h2>
           {filteredTasks.length > 0 && (
             <span className="px-1.5 py-0.5 text-xs font-medium bg-primary-900/50 text-primary-300">
-              {filteredTasks.length}{activeFilterCount > 0 && ` / ${totalTasks}`}
+              {filteredTasks.length}
+              {activeFilterCount > 0 && ` / ${totalTasks}`}
             </span>
           )}
         </div>
@@ -485,9 +491,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                   }`}
                 >
                   <span>All Epics</span>
-                  {epicFilter === "all" && (
-                    <span className="ml-auto text-primary-400">✓</span>
-                  )}
+                  {epicFilter === "all" && <span className="ml-auto text-primary-400">✓</span>}
                 </button>
                 <button
                   onClick={() => setEpicFilter("no-epic")}
@@ -498,9 +502,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                   }`}
                 >
                   <span>No Epic</span>
-                  {epicFilter === "no-epic" && (
-                    <span className="ml-auto text-primary-400">✓</span>
-                  )}
+                  {epicFilter === "no-epic" && <span className="ml-auto text-primary-400">✓</span>}
                 </button>
                 {epics.map((epic) => (
                   <button
@@ -553,20 +555,22 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
           <div className="flex border border-theme-border overflow-hidden bg-theme-elevated">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 transition-colors ${viewMode === "grid"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
+              className={`p-2 transition-colors ${
+                viewMode === "grid"
+                  ? "bg-primary-500 text-white"
+                  : "text-theme-text-muted hover:bg-theme-surface"
+              }`}
               title="Grid view"
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 border-l border-theme-border transition-colors ${viewMode === "list"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
+              className={`p-2 border-l border-theme-border transition-colors ${
+                viewMode === "list"
+                  ? "bg-primary-500 text-white"
+                  : "text-theme-text-muted hover:bg-theme-surface"
+              }`}
               title="List view"
             >
               <List className="w-4 h-4" />
@@ -669,9 +673,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
 
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-mono text-primary-400">{task.key}</span>
-                <span
-                  className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
-                >
+                <span className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}>
                   {task.status}
                 </span>
                 {task.priority && (
@@ -679,9 +681,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                     {task.priority}
                   </span>
                 )}
-                {task.time_off_impact && (
-                  <TimeOffIndicator impact={task.time_off_impact} compact />
-                )}
+                {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
               </div>
 
               <h3 className="font-medium text-theme-text text-sm line-clamp-2 mb-3 group-hover:text-primary-400 transition-colors">
@@ -740,9 +740,7 @@ export default function JiraTasks({ compact = false }: JiraTasksProps) {
                     {task.priority}
                   </span>
                 )}
-                {task.time_off_impact && (
-                  <TimeOffIndicator impact={task.time_off_impact} compact />
-                )}
+                {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
                 {task.due_date && (
                   <span className="flex items-center gap-1 text-xs text-theme-text-muted whitespace-nowrap">
                     <Clock className="w-3 h-3" />

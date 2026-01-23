@@ -23,14 +23,20 @@ jest.mock("@/hooks", () => ({
   useRenameDepartment: jest.fn(),
 }));
 import { useDeleteDepartment, useRenameDepartment } from "@/hooks";
-const mockUseDeleteDepartment = useDeleteDepartment as jest.MockedFunction<typeof useDeleteDepartment>;
-const mockUseRenameDepartment = useRenameDepartment as jest.MockedFunction<typeof useRenameDepartment>;
+const mockUseDeleteDepartment = useDeleteDepartment as jest.MockedFunction<
+  typeof useDeleteDepartment
+>;
+const mockUseRenameDepartment = useRenameDepartment as jest.MockedFunction<
+  typeof useRenameDepartment
+>;
 
 // Mock API
 jest.mock("@/lib/api", () => ({
   getUsersByDepartment: jest.fn(),
 }));
-const mockGetUsersByDepartment = api.getUsersByDepartment as jest.MockedFunction<typeof api.getUsersByDepartment>;
+const mockGetUsersByDepartment = api.getUsersByDepartment as jest.MockedFunction<
+  typeof api.getUsersByDepartment
+>;
 
 // Mock Avatar component
 jest.mock("@/shared/common/Avatar", () => {
@@ -239,7 +245,9 @@ describe("ManageDepartmentsModal", () => {
       render(<ManageDepartmentsModal {...defaultProps} />, {
         wrapper: createWrapper(queryClient),
       });
-      expect(screen.getByText(/Departments are created by assigning them to employees/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Departments are created by assigning them to employees/)
+      ).toBeInTheDocument();
     });
   });
 
@@ -257,10 +265,9 @@ describe("ManageDepartmentsModal", () => {
 
     it("calls onClose when backdrop clicked", () => {
       const onClose = jest.fn();
-      const { container } = render(
-        <ManageDepartmentsModal {...defaultProps} onClose={onClose} />,
-        { wrapper: createWrapper(queryClient) }
-      );
+      const { container } = render(<ManageDepartmentsModal {...defaultProps} onClose={onClose} />, {
+        wrapper: createWrapper(queryClient),
+      });
 
       const backdrop = container.querySelector(".absolute.inset-0.bg-black\\/50");
       fireEvent.click(backdrop!);

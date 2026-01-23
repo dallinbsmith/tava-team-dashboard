@@ -20,22 +20,24 @@ export const jiraKeys = {
   all: ["jira"] as const,
   settings: () => ["jira", "settings"] as const,
   myTasks: (maxResults?: number) => ["jira", "myTasks", maxResults ?? 50] as const,
-  userTasks: (userId: number, maxResults?: number) => ["jira", "userTasks", userId, maxResults ?? 50] as const,
+  userTasks: (userId: number, maxResults?: number) =>
+    ["jira", "userTasks", userId, maxResults ?? 50] as const,
   teamTasks: (maxPerUser?: number) => ["jira", "teamTasks", maxPerUser ?? 20] as const,
   projects: () => ["jira", "projects"] as const,
-  projectTasks: (projectKey: string, maxResults?: number) => ["jira", "projectTasks", projectKey, maxResults ?? 50] as const,
+  projectTasks: (projectKey: string, maxResults?: number) =>
+    ["jira", "projectTasks", projectKey, maxResults ?? 50] as const,
   epics: (maxResults?: number) => ["jira", "epics", maxResults ?? 100] as const,
   users: () => ["jira", "users"] as const,
 };
 
-export function useJiraSettings() {
+export const useJiraSettings = () => {
   return useQuery({
     queryKey: jiraKeys.settings(),
     queryFn: getJiraSettings,
   });
-}
+};
 
-export function useDisconnectJira() {
+export const useDisconnectJira = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -44,68 +46,68 @@ export function useDisconnectJira() {
       queryClient.invalidateQueries({ queryKey: jiraKeys.all });
     },
   });
-}
+};
 
-export function useMyJiraTasks(maxResults?: number) {
+export const useMyJiraTasks = (maxResults?: number) => {
   return useQuery({
     queryKey: jiraKeys.myTasks(maxResults),
     queryFn: () => getMyJiraTasks(maxResults),
   });
-}
+};
 
-export function useUserJiraTasks(userId: number, maxResults?: number) {
+export const useUserJiraTasks = (userId: number, maxResults?: number) => {
   return useQuery({
     queryKey: jiraKeys.userTasks(userId, maxResults),
     queryFn: () => getUserJiraTasks(userId, maxResults),
     enabled: userId > 0,
   });
-}
+};
 
-export function useTeamJiraTasks(maxPerUser?: number) {
+export const useTeamJiraTasks = (maxPerUser?: number) => {
   return useQuery({
     queryKey: jiraKeys.teamTasks(maxPerUser),
     queryFn: () => getTeamJiraTasks(maxPerUser),
   });
-}
+};
 
-export function useJiraProjects() {
+export const useJiraProjects = () => {
   return useQuery({
     queryKey: jiraKeys.projects(),
     queryFn: getJiraProjects,
   });
-}
+};
 
-export function useProjectJiraTasks(projectKey: string, maxResults?: number) {
+export const useProjectJiraTasks = (projectKey: string, maxResults?: number) => {
   return useQuery({
     queryKey: jiraKeys.projectTasks(projectKey, maxResults),
     queryFn: () => getProjectJiraTasks(projectKey, maxResults),
     enabled: !!projectKey,
   });
-}
+};
 
-export function useJiraEpics(maxResults?: number) {
+export const useJiraEpics = (maxResults?: number) => {
   return useQuery({
     queryKey: jiraKeys.epics(maxResults),
     queryFn: () => getJiraEpics(maxResults),
   });
-}
+};
 
-export function useJiraOAuthAuthorizeURL() {
+export const useJiraOAuthAuthorizeURL = () => {
   return useQuery({
     queryKey: ["jira", "oauth", "authorize"],
     queryFn: getJiraOAuthAuthorizeURL,
     enabled: false, // Only fetch when explicitly requested
   });
-}
+};
 
-export function useJiraUsers() {
+export const useJiraUsers = () => {
   return useQuery({
     queryKey: jiraKeys.users(),
     queryFn: getJiraUsers,
   });
-}
+};
 
-export function useAutoMatchJiraUsers() {
+export const useAutoMatchJiraUsers = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -114,9 +116,9 @@ export function useAutoMatchJiraUsers() {
       queryClient.invalidateQueries({ queryKey: jiraKeys.users() });
     },
   });
-}
+};
 
-export function useUpdateUserJiraMapping() {
+export const useUpdateUserJiraMapping = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -126,4 +128,4 @@ export function useUpdateUserJiraMapping() {
       queryClient.invalidateQueries({ queryKey: jiraKeys.users() });
     },
   });
-}
+};

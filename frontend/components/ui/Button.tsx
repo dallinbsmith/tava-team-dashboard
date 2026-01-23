@@ -6,8 +6,10 @@ import { Loader2, LucideIcon } from "lucide-react";
 export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "success";
 export type ButtonSize = "sm" | "md" | "lg";
 
-export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
+export interface ButtonProps extends Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "children"
+> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
@@ -19,8 +21,7 @@ export interface ButtonProps
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: "bg-primary-600 hover:bg-primary-700 text-white",
-  secondary:
-    "bg-theme-elevated border border-theme-border text-theme-text hover:bg-theme-surface",
+  secondary: "bg-theme-elevated border border-theme-border text-theme-text hover:bg-theme-surface",
   danger: "bg-red-600 hover:bg-red-700 text-white",
   ghost: "text-theme-text hover:bg-theme-elevated",
   success: "bg-emerald-600 hover:bg-emerald-700 text-white",
@@ -111,9 +112,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = "Button";
 
-
-export interface IconButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
+export interface IconButtonProps extends Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "children"
+> {
   icon: LucideIcon;
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -121,16 +123,7 @@ export interface IconButtonProps
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
-  (
-    {
-      icon: Icon,
-      variant = "ghost",
-      size = "md",
-      className = "",
-      ...props
-    },
-    ref
-  ) => {
+  ({ icon: Icon, variant = "ghost", size = "md", className = "", ...props }, ref) => {
     const sizeClasses: Record<ButtonSize, string> = {
       sm: "p-1",
       md: "p-1.5",

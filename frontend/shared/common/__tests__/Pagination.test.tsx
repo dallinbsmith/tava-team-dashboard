@@ -96,7 +96,9 @@ describe("Pagination", () => {
 
     it("does not call onPageChange when disabled", () => {
       const onPageChange = jest.fn();
-      render(<Pagination {...defaultProps} currentPage={5} totalPages={5} onPageChange={onPageChange} />);
+      render(
+        <Pagination {...defaultProps} currentPage={5} totalPages={5} onPageChange={onPageChange} />
+      );
 
       const nextButton = screen.getByTitle("Next");
       fireEvent.click(nextButton);

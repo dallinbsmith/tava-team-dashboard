@@ -30,9 +30,7 @@ export default function GroupedSection({
           {count}
         </span>
       </div>
-      <div className="divide-y divide-theme-border/50">
-        {children}
-      </div>
+      <div className="divide-y divide-theme-border/50">{children}</div>
     </div>
   );
 }

@@ -25,11 +25,56 @@ const createMockUser = (overrides: Partial<User> = {}): User => ({
 });
 
 const mockEmployees: User[] = [
-  createMockUser({ id: 1, first_name: "Alice", last_name: "Anderson", email: "alice@example.com", role: "admin", department: "Engineering", date_started: "2022-01-15" }),
-  createMockUser({ id: 2, first_name: "Bob", last_name: "Brown", email: "bob@example.com", role: "employee", department: "Marketing", date_started: "2023-03-20" }),
-  createMockUser({ id: 3, first_name: "Charlie", last_name: "Clark", email: "charlie@example.com", role: "supervisor", department: "Engineering", date_started: "2021-06-10", squads: [{ id: 1, name: "Frontend" }] }),
-  createMockUser({ id: 4, first_name: "Diana", last_name: "Davis", email: "diana@example.com", role: "employee", department: "Design", date_started: "2024-01-05", squads: [{ id: 2, name: "Backend" }] }),
-  createMockUser({ id: 5, first_name: "Eve", last_name: "Evans", email: "eve@example.com", role: "employee", department: "Marketing", squads: [{ id: 1, name: "Frontend" }, { id: 3, name: "DevOps" }] }),
+  createMockUser({
+    id: 1,
+    first_name: "Alice",
+    last_name: "Anderson",
+    email: "alice@example.com",
+    role: "admin",
+    department: "Engineering",
+    date_started: "2022-01-15",
+  }),
+  createMockUser({
+    id: 2,
+    first_name: "Bob",
+    last_name: "Brown",
+    email: "bob@example.com",
+    role: "employee",
+    department: "Marketing",
+    date_started: "2023-03-20",
+  }),
+  createMockUser({
+    id: 3,
+    first_name: "Charlie",
+    last_name: "Clark",
+    email: "charlie@example.com",
+    role: "supervisor",
+    department: "Engineering",
+    date_started: "2021-06-10",
+    squads: [{ id: 1, name: "Frontend" }],
+  }),
+  createMockUser({
+    id: 4,
+    first_name: "Diana",
+    last_name: "Davis",
+    email: "diana@example.com",
+    role: "employee",
+    department: "Design",
+    date_started: "2024-01-05",
+    squads: [{ id: 2, name: "Backend" }],
+  }),
+  createMockUser({
+    id: 5,
+    first_name: "Eve",
+    last_name: "Evans",
+    email: "eve@example.com",
+    role: "employee",
+    department: "Marketing",
+    squads: [
+      { id: 1, name: "Frontend" },
+      { id: 3, name: "DevOps" },
+    ],
+  }),
 ];
 
 describe("useEmployeeList", () => {
@@ -275,7 +320,9 @@ describe("useEmployeeList", () => {
       });
 
       expect(result.current.filteredEmployees.length).toBe(2);
-      expect(result.current.filteredEmployees.every((e) => e.department === "Engineering")).toBe(true);
+      expect(result.current.filteredEmployees.every((e) => e.department === "Engineering")).toBe(
+        true
+      );
     });
 
     it("shows all when filter is 'all'", () => {

@@ -10,12 +10,7 @@ import Avatar from "@/shared/common/Avatar";
 import { getStatusColor, DueDateDisplay } from "@/lib/jira-utils";
 import { JIRA_LIMITS } from "@/lib/constants";
 import TimeOffIndicator from "@/app/(pages)/(dashboard)/time-off/components/TimeOffIndicator";
-import {
-  FilterDropdown,
-  FilterSection,
-  FilterCheckbox,
-  SearchableFilterList,
-} from "@/components";
+import { FilterDropdown, FilterSection, FilterCheckbox, SearchableFilterList } from "@/components";
 import {
   Users,
   ExternalLink,
@@ -123,30 +118,35 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const fetchTasks = useCallback(async (showRefresh = false) => {
-    if (showRefresh) {
-      setRefreshing(true);
-    }
-    setError(null);
-
-    try {
-      if (effectiveIsSupervisorOrAdmin) {
-        const jiraSettings = await getJiraSettings();
-        setSettings(jiraSettings);
-
-        if (jiraSettings.org_configured) {
-          const issues = await getTeamJiraTasks(compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT);
-          setTasks(issues || []);
-        }
+  const fetchTasks = useCallback(
+    async (showRefresh = false) => {
+      if (showRefresh) {
+        setRefreshing(true);
       }
-    } catch (e) {
-      console.error("Failed to fetch team Jira tasks:", e);
-      setError("Failed to load team tasks");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [effectiveIsSupervisorOrAdmin, compact]);
+      setError(null);
+
+      try {
+        if (effectiveIsSupervisorOrAdmin) {
+          const jiraSettings = await getJiraSettings();
+          setSettings(jiraSettings);
+
+          if (jiraSettings.org_configured) {
+            const issues = await getTeamJiraTasks(
+              compact ? JIRA_LIMITS.TEAM_TASKS_COMPACT : JIRA_LIMITS.TEAM_TASKS_DEFAULT
+            );
+            setTasks(issues || []);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch team Jira tasks:", e);
+        setError("Failed to load team tasks");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [effectiveIsSupervisorOrAdmin, compact]
+  );
 
   useEffect(() => {
     if (!userLoading) {
@@ -206,7 +206,8 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
           <h2 className="text-lg font-semibold text-theme-text">Team Tasks</h2>
           {filteredTasks.length > 0 && (
             <span className="px-2 py-0.5 text-xs font-medium bg-primary-900/50 text-primary-300">
-              {filteredTasks.length}{activeFilterCount > 0 && ` / ${tasks.length}`}
+              {filteredTasks.length}
+              {activeFilterCount > 0 && ` / ${tasks.length}`}
             </span>
           )}
         </div>
@@ -276,20 +277,22 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
           <div className="flex border border-theme-border overflow-hidden bg-theme-elevated">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 transition-colors ${viewMode === "grid"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
+              className={`p-2 transition-colors ${
+                viewMode === "grid"
+                  ? "bg-primary-500 text-white"
+                  : "text-theme-text-muted hover:bg-theme-surface"
+              }`}
               title="Grid view"
             >
               <LayoutGrid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2 border-l border-theme-border transition-colors ${viewMode === "list"
-                ? "bg-primary-500 text-white"
-                : "text-theme-text-muted hover:bg-theme-surface"
-                }`}
+              className={`p-2 border-l border-theme-border transition-colors ${
+                viewMode === "list"
+                  ? "bg-primary-500 text-white"
+                  : "text-theme-text-muted hover:bg-theme-surface"
+              }`}
               title="List view"
             >
               <List className="w-4 h-4" />
@@ -331,7 +334,9 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
           ) : (
             <>
               <p>No tasks found for your team</p>
-              <p className="text-sm mt-1">Tasks assigned to your direct reports in Jira will appear here</p>
+              <p className="text-sm mt-1">
+                Tasks assigned to your direct reports in Jira will appear here
+              </p>
             </>
           )}
         </div>
@@ -364,14 +369,10 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
 
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-mono text-primary-400">{task.key}</span>
-                <span
-                  className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}
-                >
+                <span className={`px-2 py-0.5 text-xs font-medium ${getStatusColor(task.status)}`}>
                   {task.status}
                 </span>
-                {task.time_off_impact && (
-                  <TimeOffIndicator impact={task.time_off_impact} compact />
-                )}
+                {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
               </div>
 
               <h3 className="font-medium text-theme-text text-sm line-clamp-2 mb-3 group-hover:text-primary-400 transition-colors">
@@ -419,9 +420,7 @@ export default function TeamJiraTasks({ compact = false }: TeamJiraTasksProps) {
                 >
                   {task.status}
                 </span>
-                {task.time_off_impact && (
-                  <TimeOffIndicator impact={task.time_off_impact} compact />
-                )}
+                {task.time_off_impact && <TimeOffIndicator impact={task.time_off_impact} compact />}
                 {task.due_date && (
                   <span className="flex items-center gap-1 text-xs text-theme-text-muted whitespace-nowrap">
                     <Clock className="w-3 h-3" />

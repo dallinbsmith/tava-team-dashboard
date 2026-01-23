@@ -4,12 +4,7 @@ export type { BaseModalProps, ConfirmModalProps } from "./BaseModal";
 export { CreateEmployeeModal } from "./CreateEmployeeModal";
 
 // Filter Components
-export {
-  FilterSection,
-  FilterCheckbox,
-  FilterDropdown,
-  SearchableFilterList,
-} from "./filters";
+export { FilterSection, FilterCheckbox, FilterDropdown, SearchableFilterList } from "./filters";
 
 export type {
   FilterSectionProps,

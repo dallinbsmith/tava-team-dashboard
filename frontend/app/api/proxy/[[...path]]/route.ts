@@ -15,22 +15,22 @@ import { NextRequest } from "next/server";
  *   /api/proxy/jira/tasks  -> /api/jira/tasks
  */
 
-export async function GET(request: NextRequest) {
+export const GET = async (request: NextRequest) => {
   return proxyToBackend(request);
-}
+};
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   return proxyToBackend(request);
-}
+};
 
-export async function PUT(request: NextRequest) {
+export const PUT = async (request: NextRequest) => {
   return proxyToBackend(request);
-}
+};
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = async (request: NextRequest) => {
   return proxyToBackend(request);
-}
+};
 
-export async function PATCH(request: NextRequest) {
+export const PATCH = async (request: NextRequest) => {
   return proxyToBackend(request);
-}
+};

@@ -28,7 +28,10 @@ interface ViewMeetingModalProps {
   onUpdated: () => void;
 }
 
-const RESPONSE_STATUS: Record<ResponseStatus, { label: string; color: string; icon: typeof Check }> = {
+const RESPONSE_STATUS: Record<
+  ResponseStatus,
+  { label: string; color: string; icon: typeof Check }
+> = {
   pending: { label: "Pending", color: "text-yellow-400", icon: HelpCircle },
   accepted: { label: "Accepted", color: "text-green-400", icon: Check },
   declined: { label: "Declined", color: "text-red-400", icon: X },
@@ -87,7 +90,8 @@ export default function ViewMeetingModal({
     }
   }, [isOpen, meetingId]);
 
-  const canEdit = meeting && (meeting.created_by_id === currentUser?.id || currentUser?.role === "admin");
+  const canEdit =
+    meeting && (meeting.created_by_id === currentUser?.id || currentUser?.role === "admin");
 
   const currentUserAttendee = meeting?.attendees?.find((a) => a.user_id === currentUser?.id);
   const isAttendee = !!currentUserAttendee;
@@ -178,7 +182,12 @@ export default function ViewMeetingModal({
   const getRecurrenceText = () => {
     if (!meeting?.recurrence_type) return null;
     const interval = meeting.recurrence_interval || 1;
-    const typeText = meeting.recurrence_type === "daily" ? "day" : meeting.recurrence_type === "weekly" ? "week" : "month";
+    const typeText =
+      meeting.recurrence_type === "daily"
+        ? "day"
+        : meeting.recurrence_type === "weekly"
+          ? "week"
+          : "month";
     return `Every ${interval > 1 ? `${interval} ${typeText}s` : typeText}`;
   };
 
@@ -306,7 +315,9 @@ export default function ViewMeetingModal({
         // Delete confirmation
         <div className="space-y-4">
           <div className="p-4 bg-red-900/30 border border-red-500/30 rounded">
-            <p className="text-red-300 font-medium">Are you sure you want to delete this meeting?</p>
+            <p className="text-red-300 font-medium">
+              Are you sure you want to delete this meeting?
+            </p>
             <p className="text-red-400 text-sm mt-1">This action cannot be undone.</p>
           </div>
 

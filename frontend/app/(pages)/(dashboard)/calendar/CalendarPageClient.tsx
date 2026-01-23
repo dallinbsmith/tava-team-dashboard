@@ -14,20 +14,30 @@ import ViewTimeOffModal from "./components/ViewTimeOffModal";
 import { useCurrentUser } from "@/providers/CurrentUserProvider";
 import { User } from "@/shared/types/user";
 
-type ModalType = "task" | "event" | "meeting" | "timeOff" | "timeOffForEmployee" | "viewTask" | "viewMeeting" | "viewTimeOff" | null;
+type ModalType =
+  | "task"
+  | "event"
+  | "meeting"
+  | "timeOff"
+  | "timeOffForEmployee"
+  | "viewTask"
+  | "viewMeeting"
+  | "viewTimeOff"
+  | null;
 
 interface CalendarPageClientProps {
   initialCurrentUser: User;
 }
 
-export function CalendarPageClient({ initialCurrentUser }: CalendarPageClientProps) {
+export const CalendarPageClient = ({ initialCurrentUser }: CalendarPageClientProps) => {
   // Use provider for impersonation support, fall back to initial server data
-  const { currentUser, effectiveIsSupervisorOrAdmin: providerIsSupervisorOrAdmin } = useCurrentUser();
+  const { currentUser, effectiveIsSupervisorOrAdmin: providerIsSupervisorOrAdmin } =
+    useCurrentUser();
 
   // Use provider value if available (handles impersonation), otherwise compute from initial data
   const effectiveIsSupervisorOrAdmin = currentUser
     ? providerIsSupervisorOrAdmin
-    : (initialCurrentUser.role === "supervisor" || initialCurrentUser.role === "admin");
+    : initialCurrentUser.role === "supervisor" || initialCurrentUser.role === "admin";
 
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -158,4 +168,4 @@ export function CalendarPageClient({ initialCurrentUser }: CalendarPageClientPro
       )}
     </div>
   );
-}
+};

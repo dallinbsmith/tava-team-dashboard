@@ -9,7 +9,12 @@ export interface FilterSectionProps {
   children: React.ReactNode;
 }
 
-export default function FilterSection({ title, isExpanded, onToggle, children }: FilterSectionProps) {
+export default function FilterSection({
+  title,
+  isExpanded,
+  onToggle,
+  children,
+}: FilterSectionProps) {
   return (
     <div className="border-b border-theme-border last:border-b-0">
       <button

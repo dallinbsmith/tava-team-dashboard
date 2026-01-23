@@ -27,9 +27,7 @@ import {
 /**
  * Server Action: Create a new task
  */
-export async function createTaskAction(
-  data: CreateTaskRequest
-): Promise<ActionResult<Task>> {
+export const createTaskAction = async (data: CreateTaskRequest): Promise<ActionResult<Task>> => {
   try {
     const res = await authPost("/api/calendar/tasks", data);
 
@@ -46,15 +44,15 @@ export async function createTaskAction(
     console.error("createTaskAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to create task");
   }
-}
+};
 
 /**
  * Server Action: Update a task
  */
-export async function updateTaskAction(
+export const updateTaskAction = async (
   id: number,
   data: UpdateTaskRequest
-): Promise<ActionResult<Task>> {
+): Promise<ActionResult<Task>> => {
   try {
     const res = await authPut(`/api/calendar/tasks/${id}`, data);
 
@@ -71,14 +69,12 @@ export async function updateTaskAction(
     console.error("updateTaskAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to update task");
   }
-}
+};
 
 /**
  * Server Action: Delete a task
  */
-export async function deleteTaskAction(
-  id: number
-): Promise<ActionResult<void>> {
+export const deleteTaskAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/calendar/tasks/${id}`);
 
@@ -94,7 +90,7 @@ export async function deleteTaskAction(
     console.error("deleteTaskAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to delete task");
   }
-}
+};
 
 // ============================================
 // Meeting Actions
@@ -103,9 +99,9 @@ export async function deleteTaskAction(
 /**
  * Server Action: Create a new meeting
  */
-export async function createMeetingAction(
+export const createMeetingAction = async (
   data: CreateMeetingRequest
-): Promise<ActionResult<Meeting>> {
+): Promise<ActionResult<Meeting>> => {
   try {
     const res = await authPost("/api/calendar/meetings", data);
 
@@ -122,15 +118,15 @@ export async function createMeetingAction(
     console.error("createMeetingAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to create meeting");
   }
-}
+};
 
 /**
  * Server Action: Update a meeting
  */
-export async function updateMeetingAction(
+export const updateMeetingAction = async (
   id: number,
   data: UpdateMeetingRequest
-): Promise<ActionResult<Meeting>> {
+): Promise<ActionResult<Meeting>> => {
   try {
     const res = await authPut(`/api/calendar/meetings/${id}`, data);
 
@@ -147,14 +143,12 @@ export async function updateMeetingAction(
     console.error("updateMeetingAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to update meeting");
   }
-}
+};
 
 /**
  * Server Action: Delete a meeting
  */
-export async function deleteMeetingAction(
-  id: number
-): Promise<ActionResult<void>> {
+export const deleteMeetingAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/calendar/meetings/${id}`);
 
@@ -170,15 +164,15 @@ export async function deleteMeetingAction(
     console.error("deleteMeetingAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to delete meeting");
   }
-}
+};
 
 /**
  * Server Action: Respond to a meeting invitation
  */
-export async function respondToMeetingAction(
+export const respondToMeetingAction = async (
   meetingId: number,
   response: ResponseStatus
-): Promise<ActionResult<void>> {
+): Promise<ActionResult<void>> => {
   try {
     const res = await authPost(`/api/calendar/meetings/${meetingId}/respond`, { response });
 
@@ -194,4 +188,4 @@ export async function respondToMeetingAction(
     console.error("respondToMeetingAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to respond to meeting");
   }
-}
+};

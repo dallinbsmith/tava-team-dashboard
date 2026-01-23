@@ -1,8 +1,5 @@
 // Employee Mutations
-export {
-  useUpdateEmployee,
-  useDeactivateEmployee,
-} from "./useEmployeeMutations";
+export { useUpdateEmployee, useDeactivateEmployee } from "./useEmployeeMutations";
 export type {
   UpdateEmployeeVariables,
   UseUpdateEmployeeOptions,
@@ -11,4 +8,7 @@ export type {
 
 // Department Mutations
 export { useDeleteDepartment, useRenameDepartment } from "./useDepartmentMutations";
-export type { UseDeleteDepartmentOptions, UseRenameDepartmentOptions } from "./useDepartmentMutations";
+export type {
+  UseDeleteDepartmentOptions,
+  UseRenameDepartmentOptions,
+} from "./useDepartmentMutations";

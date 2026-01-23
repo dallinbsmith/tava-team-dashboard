@@ -36,10 +36,7 @@ export default function CalendarLoading() {
           {/* Calendar cells - 5 weeks */}
           <div className="grid grid-cols-7 gap-px">
             {Array.from({ length: 35 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-24 bg-theme-elevated rounded p-2"
-              >
+              <div key={i} className="h-24 bg-theme-elevated rounded p-2">
                 <div className="h-4 w-6 bg-theme-muted rounded mb-2" />
                 {/* Random event placeholders */}
                 {i % 5 === 0 && <div className="h-5 w-full bg-theme-muted rounded mb-1" />}

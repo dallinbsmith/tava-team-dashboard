@@ -9,10 +9,7 @@ import { extractErrorMessage, parseErrorMessage } from "../api-utils";
  * Helper to create a mock Response object
  * (Response is not available in jsdom by default)
  */
-function createMockResponse(
-  body: string,
-  options: { status?: number } = {}
-): Response {
+function createMockResponse(body: string, options: { status?: number } = {}): Response {
   return {
     ok: (options.status || 200) >= 200 && (options.status || 200) < 300,
     status: options.status || 200,
@@ -27,30 +24,27 @@ describe("extractErrorMessage", () => {
 
   describe("JSON response handling", () => {
     it("extracts error field from JSON response", async () => {
-      const response = createMockResponse(
-        JSON.stringify({ error: "User not found" }),
-        { status: 404 }
-      );
+      const response = createMockResponse(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+      });
 
       const message = await extractErrorMessage(response, fallbackMessage);
       expect(message).toBe("User not found");
     });
 
     it("extracts message field from JSON response", async () => {
-      const response = createMockResponse(
-        JSON.stringify({ message: "Invalid credentials" }),
-        { status: 401 }
-      );
+      const response = createMockResponse(JSON.stringify({ message: "Invalid credentials" }), {
+        status: 401,
+      });
 
       const message = await extractErrorMessage(response, fallbackMessage);
       expect(message).toBe("Invalid credentials");
     });
 
     it("extracts detail field from JSON response", async () => {
-      const response = createMockResponse(
-        JSON.stringify({ detail: "Rate limit exceeded" }),
-        { status: 429 }
-      );
+      const response = createMockResponse(JSON.stringify({ detail: "Rate limit exceeded" }), {
+        status: 429,
+      });
 
       const message = await extractErrorMessage(response, fallbackMessage);
       expect(message).toBe("Rate limit exceeded");
@@ -100,10 +94,9 @@ describe("extractErrorMessage", () => {
     });
 
     it("handles JSON with no recognized error fields", async () => {
-      const response = createMockResponse(
-        JSON.stringify({ status: "error", code: 500 }),
-        { status: 500 }
-      );
+      const response = createMockResponse(JSON.stringify({ status: "error", code: 500 }), {
+        status: 500,
+      });
 
       const message = await extractErrorMessage(response, fallbackMessage);
       // Falls through to return the raw text since no error/message/detail
@@ -121,9 +114,7 @@ describe("parseErrorMessage", () => {
 
     it("extracts message with context prefix", () => {
       const error = new Error("Connection refused");
-      expect(parseErrorMessage(error, "Database")).toBe(
-        "Database: Connection refused"
-      );
+      expect(parseErrorMessage(error, "Database")).toBe("Database: Connection refused");
     });
   });
 
@@ -133,9 +124,7 @@ describe("parseErrorMessage", () => {
     });
 
     it("returns string with context prefix", () => {
-      expect(parseErrorMessage("Not authorized", "API")).toBe(
-        "API: Not authorized"
-      );
+      expect(parseErrorMessage("Not authorized", "API")).toBe("API: Not authorized");
     });
   });
 
@@ -152,9 +141,7 @@ describe("parseErrorMessage", () => {
 
     it("handles object with message and context", () => {
       const error = { message: "Record not found" };
-      expect(parseErrorMessage(error, "User lookup")).toBe(
-        "User lookup: Record not found"
-      );
+      expect(parseErrorMessage(error, "User lookup")).toBe("User lookup: Record not found");
     });
   });
 
@@ -172,9 +159,7 @@ describe("parseErrorMessage", () => {
     });
 
     it("returns fallback for object without message", () => {
-      expect(parseErrorMessage({ code: 500 })).toBe(
-        "An unexpected error occurred"
-      );
+      expect(parseErrorMessage({ code: 500 })).toBe("An unexpected error occurred");
     });
 
     it("returns fallback for empty object", () => {
@@ -199,9 +184,7 @@ describe("parseErrorMessage", () => {
     });
 
     it("handles array (no message property)", () => {
-      expect(parseErrorMessage(["error1", "error2"])).toBe(
-        "An unexpected error occurred"
-      );
+      expect(parseErrorMessage(["error1", "error2"])).toBe("An unexpected error occurred");
     });
 
     it("handles boolean", () => {

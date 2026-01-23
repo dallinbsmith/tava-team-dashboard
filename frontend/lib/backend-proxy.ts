@@ -12,7 +12,7 @@ export interface ProxyOptions {
 const jsonError = (error: string, status: number, details?: string) =>
   NextResponse.json(details ? { error, details } : { error }, { status });
 
-async function getToken(requireAuth: boolean): Promise<string | null | "error"> {
+const getToken = async (requireAuth: boolean): Promise<string | null | "error"> => {
   if (!requireAuth) return null;
   try {
     const result = await auth0.getAccessToken();
@@ -21,18 +21,20 @@ async function getToken(requireAuth: boolean): Promise<string | null | "error"> 
     console.error("Failed to get access token:", e);
     return "error";
   }
-}
+};
 
-async function getBody(request: NextRequest): Promise<string | undefined> {
+const getBody = async (request: NextRequest): Promise<string | undefined> => {
   if (request.method === "GET" || request.method === "HEAD") return undefined;
   try {
     return await request.text();
   } catch {
     return undefined;
   }
-}
+};
 
-async function parseResponse(res: Response): Promise<{ body: string | object; contentType: string | null } | null> {
+const parseResponse = async (
+  res: Response
+): Promise<{ body: string | object; contentType: string | null } | null> => {
   const contentType = res.headers.get("content-type");
   try {
     const body = contentType?.includes("application/json") ? await res.json() : await res.text();
@@ -41,10 +43,13 @@ async function parseResponse(res: Response): Promise<{ body: string | object; co
     console.error("Proxy: Failed to parse response:", e);
     return null;
   }
-}
+};
 
 /** Proxies a request to the Go backend with server-side token handling. */
-export async function proxyToBackend(request: NextRequest, options: ProxyOptions = {}): Promise<NextResponse> {
+export const proxyToBackend = async (
+  request: NextRequest,
+  options: ProxyOptions = {}
+): Promise<NextResponse> => {
   const { requireAuth = true, method, backendPath } = options;
 
   try {
@@ -63,7 +68,11 @@ export async function proxyToBackend(request: NextRequest, options: ProxyOptions
     if (impersonateHeader) headers["X-Impersonate-User-Id"] = impersonateHeader;
 
     console.log(`Proxy: Fetching ${backendUrl}`);
-    const res = await fetch(backendUrl, { method: method || request.method, headers, body: await getBody(request) });
+    const res = await fetch(backendUrl, {
+      method: method || request.method,
+      headers,
+      body: await getBody(request),
+    });
     console.log(`Proxy: Backend responded with status ${res.status}`);
 
     // Handle 204 No Content responses - return empty response with no body
@@ -75,19 +84,26 @@ export async function proxyToBackend(request: NextRequest, options: ProxyOptions
     if (!parsed) return jsonError("Failed to parse backend response", 502);
 
     return typeof parsed.body === "string"
-      ? new NextResponse(parsed.body, { status: res.status, headers: { "Content-Type": parsed.contentType || "text/plain" } })
+      ? new NextResponse(parsed.body, {
+          status: res.status,
+          headers: { "Content-Type": parsed.contentType || "text/plain" },
+        })
       : NextResponse.json(parsed.body, { status: res.status });
   } catch (error) {
     console.error("Proxy error:", error);
-    return jsonError("Internal server error", 500, error instanceof Error ? error.message : "Unknown error");
+    return jsonError(
+      "Internal server error",
+      500,
+      error instanceof Error ? error.message : "Unknown error"
+    );
   }
-}
+};
 
 /**
  * Creates a simple proxy handler for a specific backend path pattern.
  */
-export function createProxyHandler(options: ProxyOptions = {}) {
-  return async function handler(request: NextRequest) {
+export const createProxyHandler = (options: ProxyOptions = {}) => {
+  return async (request: NextRequest) => {
     return proxyToBackend(request, options);
   };
-}
+};

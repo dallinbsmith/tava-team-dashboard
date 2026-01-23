@@ -34,12 +34,12 @@ interface SettingsPageClientProps {
   isAdmin: boolean;
 }
 
-export function SettingsPageClient({
+export const SettingsPageClient = ({
   initialJiraSettings,
   initialJiraUsers,
   initialAllUsers,
   isAdmin,
-}: SettingsPageClientProps) {
+}: SettingsPageClientProps) => {
   const searchParams = useSearchParams();
 
   const [jiraSettings, setJiraSettings] = useState(initialJiraSettings);
@@ -150,15 +150,16 @@ export function SettingsPageClient({
     await updateMappingOp.execute({ userId, jiraAccountId });
   };
 
-  const unmappedEmployees = allUsers.filter(emp =>
-    !jiraUsers.some(ju => ju.mapped_user_id === emp.id)
+  const unmappedEmployees = allUsers.filter(
+    (emp) => !jiraUsers.some((ju) => ju.mapped_user_id === emp.id)
   );
 
   const isConnected = jiraSettings?.org_configured;
 
-  const filteredJiraUsers = jiraUsers.filter(u =>
-    u.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredJiraUsers = jiraUsers.filter(
+    (u) =>
+      u.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -276,8 +277,9 @@ export function SettingsPageClient({
                         <AlertCircle className="w-5 h-5 text-blue-400 mt-0.5" />
                         <div>
                           <p className="text-sm text-blue-300">
-                            Connect your organization&apos;s Jira account using OAuth. Once connected, all employees&apos;
-                            Jira tasks will be visible on their dashboards (after matching their accounts).
+                            Connect your organization&apos;s Jira account using OAuth. Once
+                            connected, all employees&apos; Jira tasks will be visible on their
+                            dashboards (after matching their accounts).
                           </p>
                         </div>
                       </div>
@@ -302,8 +304,8 @@ export function SettingsPageClient({
                       <AlertCircle className="w-5 h-5 text-yellow-400 mt-0.5" />
                       <div>
                         <p className="text-sm text-yellow-300">
-                          Jira OAuth is not configured on the server. Please contact your system administrator
-                          to set up the Jira OAuth integration.
+                          Jira OAuth is not configured on the server. Please contact your system
+                          administrator to set up the Jira OAuth integration.
                         </p>
                       </div>
                     </div>
@@ -314,7 +316,8 @@ export function SettingsPageClient({
                   <AlertCircle className="w-5 h-5 text-theme-text-muted mt-0.5" />
                   <div>
                     <p className="text-sm text-theme-text-muted">
-                      Jira is not connected for your organization. Contact an administrator to set up the integration.
+                      Jira is not connected for your organization. Contact an administrator to set
+                      up the integration.
                     </p>
                   </div>
                 </div>
@@ -351,7 +354,9 @@ export function SettingsPageClient({
                 disabled={fetchJiraUsersOp.loading}
                 className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-theme-text-muted hover:bg-theme-elevated transition-colors disabled:opacity-50"
               >
-                <RefreshCw className={`w-4 h-4 ${fetchJiraUsersOp.loading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`w-4 h-4 ${fetchJiraUsersOp.loading ? "animate-spin" : ""}`}
+                />
               </button>
             </div>
           </div>
@@ -437,8 +442,9 @@ export function SettingsPageClient({
 
             <div className="mt-4 pt-4 border-t border-theme-border">
               <p className="text-sm text-theme-text-muted">
-                <strong>Tip:</strong> Use &quot;Auto-match by email&quot; to automatically link Jira users to employees
-                with matching email addresses. Unmatched users can be manually mapped.
+                <strong>Tip:</strong> Use &quot;Auto-match by email&quot; to automatically link Jira
+                users to employees with matching email addresses. Unmatched users can be manually
+                mapped.
               </p>
             </div>
           </div>
@@ -458,4 +464,4 @@ export function SettingsPageClient({
       />
     </div>
   );
-}
+};

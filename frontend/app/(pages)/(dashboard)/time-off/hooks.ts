@@ -22,29 +22,29 @@ export const timeOffKeys = {
 };
 
 // Queries
-export function useMyTimeOffRequests(status?: TimeOffStatus) {
+export const useMyTimeOffRequests = (status?: TimeOffStatus) => {
   return useQuery({
     queryKey: timeOffKeys.my(status),
     queryFn: () => getMyTimeOffRequests(status),
   });
-}
+};
 
-export function usePendingTimeOffRequests() {
+export const usePendingTimeOffRequests = () => {
   return useQuery({
     queryKey: timeOffKeys.pending(),
     queryFn: getPendingTimeOffRequests,
   });
-}
+};
 
-export function useTeamTimeOff() {
+export const useTeamTimeOff = () => {
   return useQuery({
     queryKey: timeOffKeys.team(),
     queryFn: getTeamTimeOff,
   });
-}
+};
 
 // Mutations
-export function useCreateTimeOffRequest() {
+export const useCreateTimeOffRequest = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -54,9 +54,9 @@ export function useCreateTimeOffRequest() {
       await refetchQueries(queryClient, queryKeyGroups.timeOffRelated());
     },
   });
-}
+};
 
-export function useCancelTimeOffRequest() {
+export const useCancelTimeOffRequest = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -66,9 +66,9 @@ export function useCancelTimeOffRequest() {
       await refetchQueries(queryClient, queryKeyGroups.timeOffRelated());
     },
   });
-}
+};
 
-export function useReviewTimeOffRequest() {
+export const useReviewTimeOffRequest = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -79,4 +79,4 @@ export function useReviewTimeOffRequest() {
       await refetchQueries(queryClient, queryKeyGroups.timeOffRelated());
     },
   });
-}
+};

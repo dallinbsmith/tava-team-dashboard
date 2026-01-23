@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import { Role } from "@/shared/types/user";
-import {
-  FilterDropdown,
-  FilterSection,
-  FilterCheckbox,
-  SearchableFilterList,
-} from "@/components";
+import { FilterDropdown, FilterSection, FilterCheckbox, SearchableFilterList } from "@/components";
 
 export interface FilterButtonProps {
   // Filter state

@@ -19,9 +19,7 @@ const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 jest.mock("@/lib/api", () => ({
   getCurrentUser: jest.fn(),
 }));
-const mockGetCurrentUser = api.getCurrentUser as jest.MockedFunction<
-  typeof api.getCurrentUser
->;
+const mockGetCurrentUser = api.getCurrentUser as jest.MockedFunction<typeof api.getCurrentUser>;
 
 // Test fixtures
 const createMockUser = (overrides: Partial<User> = {}): User => ({

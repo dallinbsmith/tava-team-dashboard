@@ -5,7 +5,17 @@ import { BaseModal } from "./BaseModal";
 import { createEmployeeGraphQL, CreateEmployeeInput } from "@/lib/graphql";
 import { parseErrorMessage, parseSquadErrorMessage } from "@/lib/errors";
 import { User, Squad } from "@/shared/types/user";
-import { CheckCircle, ChevronDown, X, Plus, Building2, Users, User as UserIcon, Shield, Calendar } from "lucide-react";
+import {
+  CheckCircle,
+  ChevronDown,
+  X,
+  Plus,
+  Building2,
+  Users,
+  User as UserIcon,
+  Shield,
+  Calendar,
+} from "lucide-react";
 
 interface CreateEmployeeModalProps {
   isOpen: boolean;
@@ -16,14 +26,14 @@ interface CreateEmployeeModalProps {
   onAddSquad: (name: string) => Promise<Squad>;
 }
 
-export function CreateEmployeeModal({
+export const CreateEmployeeModal = ({
   isOpen,
   onClose,
   onCreated,
   squads,
   departments,
   onAddSquad,
-}: CreateEmployeeModalProps) {
+}: CreateEmployeeModalProps) => {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [createdEmployee, setCreatedEmployee] = useState<User | null>(null);
@@ -145,7 +155,8 @@ export function CreateEmployeeModal({
 
         <div className="bg-theme-elevated p-4 mb-4">
           <p className="text-sm text-theme-text-muted">
-            The employee will receive an invitation to set their password and will also be added to your Jira workspace (if configured).
+            The employee will receive an invitation to set their password and will also be added to
+            your Jira workspace (if configured).
           </p>
         </div>
 
@@ -163,15 +174,11 @@ export function CreateEmployeeModal({
     <BaseModal isOpen={isOpen} onClose={handleClose} title="Add New Employee">
       <form onSubmit={handleCreateEmployee}>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-theme-text mb-1">
-            Email Address
-          </label>
+          <label className="block text-sm font-medium text-theme-text mb-1">Email Address</label>
           <input
             type="email"
             value={newEmployee.email}
-            onChange={(e) =>
-              setNewEmployee({ ...newEmployee, email: e.target.value })
-            }
+            onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
             className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             placeholder="employee@company.com"
             required
@@ -180,30 +187,22 @@ export function CreateEmployeeModal({
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-theme-text mb-1">
-              First Name
-            </label>
+            <label className="block text-sm font-medium text-theme-text mb-1">First Name</label>
             <input
               type="text"
               value={newEmployee.first_name}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, first_name: e.target.value })
-              }
+              onChange={(e) => setNewEmployee({ ...newEmployee, first_name: e.target.value })}
               className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="John"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-theme-text mb-1">
-              Last Name
-            </label>
+            <label className="block text-sm font-medium text-theme-text mb-1">Last Name</label>
             <input
               type="text"
               value={newEmployee.last_name}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, last_name: e.target.value })
-              }
+              onChange={(e) => setNewEmployee({ ...newEmployee, last_name: e.target.value })}
               className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Doe"
               required
@@ -220,9 +219,7 @@ export function CreateEmployeeModal({
           <input
             type="date"
             value={newEmployee.date_started || ""}
-            onChange={(e) =>
-              setNewEmployee({ ...newEmployee, date_started: e.target.value })
-            }
+            onChange={(e) => setNewEmployee({ ...newEmployee, date_started: e.target.value })}
             className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
         </div>
@@ -239,7 +236,9 @@ export function CreateEmployeeModal({
               onClick={() => setDepartmentDropdownOpen(!departmentDropdownOpen)}
               className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text text-left flex items-center justify-between focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
-              <span className={newEmployee.department ? "text-theme-text" : "text-theme-text-muted"}>
+              <span
+                className={newEmployee.department ? "text-theme-text" : "text-theme-text-muted"}
+              >
                 {newEmployee.department || "Select department..."}
               </span>
               <ChevronDown
@@ -261,9 +260,7 @@ export function CreateEmployeeModal({
                 </div>
 
                 {departments
-                  .filter((dept) =>
-                    dept.toLowerCase().includes(departmentSearch.toLowerCase())
-                  )
+                  .filter((dept) => dept.toLowerCase().includes(departmentSearch.toLowerCase()))
                   .map((dept) => (
                     <button
                       key={dept}
@@ -280,9 +277,7 @@ export function CreateEmployeeModal({
                   ))}
 
                 {departmentSearch.trim() &&
-                  !departments.some(
-                    (d) => d.toLowerCase() === departmentSearch.toLowerCase()
-                  ) && (
+                  !departments.some((d) => d.toLowerCase() === departmentSearch.toLowerCase()) && (
                     <button
                       type="button"
                       onClick={() => {
@@ -402,30 +397,27 @@ export function CreateEmployeeModal({
 
         {/* Role Radio Buttons */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-theme-text mb-2">
-            Role
-          </label>
+          <label className="block text-sm font-medium text-theme-text mb-2">Role</label>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => setNewEmployee({ ...newEmployee, role: "employee" })}
-              className={`p-3 border text-left transition-colors ${newEmployee.role === "employee"
+              className={`p-3 border text-left transition-colors ${
+                newEmployee.role === "employee"
                   ? "border-primary-500 bg-primary-500/10"
                   : "border-theme-border bg-theme-elevated hover:border-theme-text-muted"
-                }`}
+              }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 <UserIcon
-                  className={`w-4 h-4 ${newEmployee.role === "employee"
-                      ? "text-primary-400"
-                      : "text-theme-text-muted"
-                    }`}
+                  className={`w-4 h-4 ${
+                    newEmployee.role === "employee" ? "text-primary-400" : "text-theme-text-muted"
+                  }`}
                 />
                 <span
-                  className={`font-medium ${newEmployee.role === "employee"
-                      ? "text-primary-400"
-                      : "text-theme-text"
-                    }`}
+                  className={`font-medium ${
+                    newEmployee.role === "employee" ? "text-primary-400" : "text-theme-text"
+                  }`}
                 >
                   Employee
                 </span>
@@ -436,23 +428,22 @@ export function CreateEmployeeModal({
             <button
               type="button"
               onClick={() => setNewEmployee({ ...newEmployee, role: "supervisor" })}
-              className={`p-3 border text-left transition-colors ${newEmployee.role === "supervisor"
+              className={`p-3 border text-left transition-colors ${
+                newEmployee.role === "supervisor"
                   ? "border-primary-500 bg-primary-500/10"
                   : "border-theme-border bg-theme-elevated hover:border-theme-text-muted"
-                }`}
+              }`}
             >
               <div className="flex items-center gap-2 mb-1">
                 <Shield
-                  className={`w-4 h-4 ${newEmployee.role === "supervisor"
-                      ? "text-primary-400"
-                      : "text-theme-text-muted"
-                    }`}
+                  className={`w-4 h-4 ${
+                    newEmployee.role === "supervisor" ? "text-primary-400" : "text-theme-text-muted"
+                  }`}
                 />
                 <span
-                  className={`font-medium ${newEmployee.role === "supervisor"
-                      ? "text-primary-400"
-                      : "text-theme-text"
-                    }`}
+                  className={`font-medium ${
+                    newEmployee.role === "supervisor" ? "text-primary-400" : "text-theme-text"
+                  }`}
                 >
                   Supervisor
                 </span>
@@ -487,6 +478,6 @@ export function CreateEmployeeModal({
       </form>
     </BaseModal>
   );
-}
+};
 
 export default CreateEmployeeModal;

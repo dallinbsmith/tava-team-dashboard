@@ -161,7 +161,9 @@ describe("CreateEmployeeModal", () => {
       fireEvent.click(screen.getByText("Engineering"));
 
       // Dropdown options should not be visible (search input is only in dropdown)
-      expect(screen.queryByPlaceholderText("Search or create department...")).not.toBeInTheDocument();
+      expect(
+        screen.queryByPlaceholderText("Search or create department...")
+      ).not.toBeInTheDocument();
     });
 
     it("filters departments by search", async () => {
@@ -244,7 +246,7 @@ describe("CreateEmployeeModal", () => {
       fireEvent.click(screen.getByText("Select squads..."));
 
       // Select Frontend Team
-      const frontendLabel = screen.getAllByText("Frontend Team").find(el => el.closest("label"));
+      const frontendLabel = screen.getAllByText("Frontend Team").find((el) => el.closest("label"));
       fireEvent.click(frontendLabel!);
 
       // Close dropdown
@@ -271,9 +273,12 @@ describe("CreateEmployeeModal", () => {
       await userEvent.type(newSquadInput, "New Team");
 
       // Click add button
-      const addButton = screen.getAllByRole("button").find(
-        btn => btn.querySelector("svg")?.classList.contains("lucide-plus") && btn.closest(".border-t")
-      );
+      const addButton = screen
+        .getAllByRole("button")
+        .find(
+          (btn) =>
+            btn.querySelector("svg")?.classList.contains("lucide-plus") && btn.closest(".border-t")
+        );
       fireEvent.click(addButton!);
 
       await waitFor(() => {
@@ -459,7 +464,10 @@ describe("CreateEmployeeModal", () => {
       render(<CreateEmployeeModal {...defaultProps} />);
 
       // Fill out form
-      await userEvent.type(screen.getByPlaceholderText("employee@company.com"), "existing@example.com");
+      await userEvent.type(
+        screen.getByPlaceholderText("employee@company.com"),
+        "existing@example.com"
+      );
       await userEvent.type(screen.getByPlaceholderText("John"), "Test");
       await userEvent.type(screen.getByPlaceholderText("Doe"), "User");
 
@@ -586,8 +594,8 @@ describe("CreateEmployeeModal", () => {
       fireEvent.click(screen.getByText("Select squads..."));
 
       // Select two squads
-      const frontendLabel = screen.getAllByText("Frontend Team").find(el => el.closest("label"));
-      const backendLabel = screen.getAllByText("Backend Team").find(el => el.closest("label"));
+      const frontendLabel = screen.getAllByText("Frontend Team").find((el) => el.closest("label"));
+      const backendLabel = screen.getAllByText("Backend Team").find((el) => el.closest("label"));
 
       fireEvent.click(frontendLabel!);
       fireEvent.click(backendLabel!);

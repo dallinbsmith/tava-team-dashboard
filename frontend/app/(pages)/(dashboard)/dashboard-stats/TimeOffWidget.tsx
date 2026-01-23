@@ -35,7 +35,8 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
   const [actionError, setActionError] = useState<string | null>(null);
 
   // Fetch data for upcoming time off
-  const { data: myApprovedTimeOff, isLoading: myApprovedLoading } = useMyTimeOffRequests("approved");
+  const { data: myApprovedTimeOff, isLoading: myApprovedLoading } =
+    useMyTimeOffRequests("approved");
   const { data: teamTimeOff, isLoading: teamLoading } = useTeamTimeOff();
 
   // Fetch data for pending requests
@@ -294,44 +295,48 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
           </div>
         )}
 
-      {actionError && (
-        <ErrorAlert
-          variant="error"
-          title="Action failed"
-          dismissible
-          onDismiss={() => setActionError(null)}
-          className="mx-4 my-2"
-        >
-          {actionError}
-        </ErrorAlert>
-      )}
+        {actionError && (
+          <ErrorAlert
+            variant="error"
+            title="Action failed"
+            dismissible
+            onDismiss={() => setActionError(null)}
+            className="mx-4 my-2"
+          >
+            {actionError}
+          </ErrorAlert>
+        )}
 
-      {/* Content */}
-      {isLoading ? (
-        <div className="text-center py-8 px-4 text-theme-text-muted">
-          <div className="w-6 h-6 border-2 border-theme-border border-t-primary-500 rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-sm">Loading...</p>
-        </div>
-      ) : currentData.length === 0 ? (
-        <div className="text-center py-8 px-4 text-theme-text-muted">
-          {activeTab === "upcoming" ? (
-            <>
-              <Calendar className="w-10 h-10 mx-auto mb-3 text-theme-text-subtle" />
-              <p className="text-sm">
-                {isSupervisorOrAdmin ? "No upcoming team time off" : "No upcoming time off"}
-              </p>
-            </>
-          ) : (
-            <>
-              <Clock className="w-10 h-10 mx-auto mb-3 text-theme-text-subtle" />
-              <p className="text-sm">
-                {isSupervisorOrAdmin ? "No pending requests to review" : "No pending requests"}
-              </p>
-            </>
-          )}
-        </div>
-      ) : (
-          <div className="divide-y divide-theme-border" role="list" aria-label={`${activeTab} time off requests`}>
+        {/* Content */}
+        {isLoading ? (
+          <div className="text-center py-8 px-4 text-theme-text-muted">
+            <div className="w-6 h-6 border-2 border-theme-border border-t-primary-500 rounded-full animate-spin mx-auto mb-2" />
+            <p className="text-sm">Loading...</p>
+          </div>
+        ) : currentData.length === 0 ? (
+          <div className="text-center py-8 px-4 text-theme-text-muted">
+            {activeTab === "upcoming" ? (
+              <>
+                <Calendar className="w-10 h-10 mx-auto mb-3 text-theme-text-subtle" />
+                <p className="text-sm">
+                  {isSupervisorOrAdmin ? "No upcoming team time off" : "No upcoming time off"}
+                </p>
+              </>
+            ) : (
+              <>
+                <Clock className="w-10 h-10 mx-auto mb-3 text-theme-text-subtle" />
+                <p className="text-sm">
+                  {isSupervisorOrAdmin ? "No pending requests to review" : "No pending requests"}
+                </p>
+              </>
+            )}
+          </div>
+        ) : (
+          <div
+            className="divide-y divide-theme-border"
+            role="list"
+            aria-label={`${activeTab} time off requests`}
+          >
             {paginatedData.map((request) => {
               const isSelected = selectedRequests.has(request.id);
               const isProcessing = processingIds.has(request.id);
@@ -341,8 +346,8 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
               const userName = request.user
                 ? `${request.user.first_name} ${request.user.last_name}`
                 : isSupervisorOrAdmin
-                ? "Unknown User"
-                : `${currentUser?.first_name} ${currentUser?.last_name}`;
+                  ? "Unknown User"
+                  : `${currentUser?.first_name} ${currentUser?.last_name}`;
 
               const isCurrentlyOnLeave =
                 activeTab === "upcoming" &&
@@ -357,8 +362,8 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
                     isSelected
                       ? "bg-primary-900/20"
                       : isCurrentlyOnLeave
-                      ? "bg-green-900/10"
-                      : "hover:bg-theme-elevated/50"
+                        ? "bg-green-900/10"
+                        : "hover:bg-theme-elevated/50"
                   } ${isProcessing ? "opacity-50" : ""}`}
                 >
                   {/* Checkbox for supervisors/admins on pending tab */}
@@ -451,7 +456,7 @@ export default function TimeOffWidget({ animate = true }: TimeOffWidgetProps) {
               );
             })}
           </div>
-      )}
+        )}
       </div>
 
       {/* Footer - always anchored to bottom */}

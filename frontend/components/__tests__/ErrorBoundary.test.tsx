@@ -160,9 +160,7 @@ describe("ErrorBoundary", () => {
     it("renders custom fallback function with error", () => {
       render(
         <ErrorBoundary
-          fallback={(error) => (
-            <div data-testid="custom-fallback">Error: {error.message}</div>
-          )}
+          fallback={(error) => <div data-testid="custom-fallback">Error: {error.message}</div>}
         >
           <ThrowError />
         </ErrorBoundary>
@@ -374,12 +372,7 @@ describe("QueryErrorFallback", () => {
 
   describe("retry button", () => {
     it("renders retry button when resetErrorBoundary provided", () => {
-      render(
-        <QueryErrorFallback
-          error={new Error("Test error")}
-          resetErrorBoundary={jest.fn()}
-        />
-      );
+      render(<QueryErrorFallback error={new Error("Test error")} resetErrorBoundary={jest.fn()} />);
 
       expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument();
     });
@@ -419,12 +412,7 @@ describe("QueryErrorFallback", () => {
     });
 
     it("retry button has primary text color", () => {
-      render(
-        <QueryErrorFallback
-          error={new Error("Test error")}
-          resetErrorBoundary={jest.fn()}
-        />
-      );
+      render(<QueryErrorFallback error={new Error("Test error")} resetErrorBoundary={jest.fn()} />);
 
       const button = screen.getByRole("button", { name: /retry/i });
       expect(button).toHaveClass("text-primary-400");

@@ -155,7 +155,13 @@ describe("FullPageSpinner", () => {
     it("has full page layout", () => {
       const { container } = render(<FullPageSpinner />);
       const wrapper = container.firstChild;
-      expect(wrapper).toHaveClass("min-h-screen", "flex", "flex-col", "items-center", "justify-center");
+      expect(wrapper).toHaveClass(
+        "min-h-screen",
+        "flex",
+        "flex-col",
+        "items-center",
+        "justify-center"
+      );
     });
   });
 
@@ -254,7 +260,11 @@ describe("Skeleton", () => {
 
     it("merges custom className with default classes", () => {
       const { container } = render(<Skeleton className="my-custom-class" />);
-      expect(container.firstChild).toHaveClass("animate-pulse", "bg-theme-border", "my-custom-class");
+      expect(container.firstChild).toHaveClass(
+        "animate-pulse",
+        "bg-theme-border",
+        "my-custom-class"
+      );
     });
   });
 });
@@ -268,7 +278,13 @@ describe("SkeletonCard", () => {
 
     it("has card styling", () => {
       const { container } = render(<SkeletonCard />);
-      expect(container.firstChild).toHaveClass("bg-theme-surface", "border", "border-theme-border", "p-4", "rounded-lg");
+      expect(container.firstChild).toHaveClass(
+        "bg-theme-surface",
+        "border",
+        "border-theme-border",
+        "p-4",
+        "rounded-lg"
+      );
     });
 
     it("renders avatar skeleton", () => {

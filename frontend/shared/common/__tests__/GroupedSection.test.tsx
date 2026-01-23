@@ -103,10 +103,7 @@ describe("GroupedSection", () => {
 
     it("renders indicator when provided", () => {
       render(
-        <GroupedSection
-          {...defaultProps}
-          indicator={<span data-testid="indicator">●</span>}
-        />
+        <GroupedSection {...defaultProps} indicator={<span data-testid="indicator">●</span>} />
       );
       expect(screen.getByTestId("indicator")).toBeInTheDocument();
     });
@@ -115,9 +112,7 @@ describe("GroupedSection", () => {
       render(
         <GroupedSection
           {...defaultProps}
-          indicator={
-            <div data-testid="indicator" className="w-2 h-2 bg-green-500 rounded-full" />
-          }
+          indicator={<div data-testid="indicator" className="w-2 h-2 bg-green-500 rounded-full" />}
         />
       );
       const indicator = screen.getByTestId("indicator");

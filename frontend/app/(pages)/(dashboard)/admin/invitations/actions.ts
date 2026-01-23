@@ -14,9 +14,9 @@ import {
 /**
  * Server Action: Create a new invitation
  */
-export async function createInvitationAction(
+export const createInvitationAction = async (
   data: CreateInvitationRequest
-): Promise<ActionResult<Invitation>> {
+): Promise<ActionResult<Invitation>> => {
   try {
     const res = await authPost("/api/invitations", data);
 
@@ -32,14 +32,12 @@ export async function createInvitationAction(
     console.error("createInvitationAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to create invitation");
   }
-}
+};
 
 /**
  * Server Action: Revoke an invitation
  */
-export async function revokeInvitationAction(
-  id: number
-): Promise<ActionResult<void>> {
+export const revokeInvitationAction = async (id: number): Promise<ActionResult<void>> => {
   try {
     const res = await authDelete(`/api/invitations/${id}`);
 
@@ -54,4 +52,4 @@ export async function revokeInvitationAction(
     console.error("revokeInvitationAction error:", e);
     return failure(e instanceof Error ? e.message : "Failed to revoke invitation");
   }
-}
+};

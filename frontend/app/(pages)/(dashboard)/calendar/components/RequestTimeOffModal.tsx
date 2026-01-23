@@ -21,7 +21,11 @@ const TIME_OFF_TYPES: TimeOffType[] = [
   "other",
 ];
 
-export default function RequestTimeOffModal({ isOpen, onClose, onCreated }: RequestTimeOffModalProps) {
+export default function RequestTimeOffModal({
+  isOpen,
+  onClose,
+  onCreated,
+}: RequestTimeOffModalProps) {
   const [requestType, setRequestType] = useState<TimeOffType>("vacation");
   const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(addDays(new Date(), 1), "yyyy-MM-dd"));
@@ -87,12 +91,7 @@ export default function RequestTimeOffModal({ isOpen, onClose, onCreated }: Requ
   }));
 
   return (
-    <BaseModal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title="Request Time Off"
-      maxWidth="max-w-md"
-    >
+    <BaseModal isOpen={isOpen} onClose={handleClose} title="Request Time Off" maxWidth="max-w-md">
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormError error={error} />
 

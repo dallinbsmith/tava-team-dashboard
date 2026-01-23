@@ -1,4 +1,4 @@
-export function TimeOffWidgetSkeleton() {
+export const TimeOffWidgetSkeleton = () => {
   return (
     <div className="bg-theme-surface border border-theme-border overflow-hidden flex flex-col h-full animate-pulse">
       {/* Header */}
@@ -37,4 +37,4 @@ export function TimeOffWidgetSkeleton() {
       </div>
     </div>
   );
-}
+};

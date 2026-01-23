@@ -209,7 +209,15 @@ describe("FormError", () => {
     it("has error styling classes", () => {
       render(<FormError error="Error message" />);
       const alert = screen.getByRole("alert");
-      expect(alert).toHaveClass("p-3", "bg-red-900/30", "border", "border-red-500/30", "text-red-400", "text-sm", "rounded");
+      expect(alert).toHaveClass(
+        "p-3",
+        "bg-red-900/30",
+        "border",
+        "border-red-500/30",
+        "text-red-400",
+        "text-sm",
+        "rounded"
+      );
     });
   });
 

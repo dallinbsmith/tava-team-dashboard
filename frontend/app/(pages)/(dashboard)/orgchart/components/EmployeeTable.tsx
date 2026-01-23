@@ -88,7 +88,7 @@ export default function EmployeeTable({
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-1 h-10 rounded-full ${employee.department ? getDepartmentBgColor(employee.department) : 'bg-theme-border'}`}
+                    className={`w-1 h-10 rounded-full ${employee.department ? getDepartmentBgColor(employee.department) : "bg-theme-border"}`}
                   />
                   <Avatar
                     s3AvatarUrl={employee.avatar_url}
@@ -107,9 +107,7 @@ export default function EmployeeTable({
                         <Shield className="w-3.5 h-3.5 text-purple-400" />
                       )}
                     </div>
-                    <div className="text-xs text-theme-text-muted md:hidden">
-                      {employee.email}
-                    </div>
+                    <div className="text-xs text-theme-text-muted md:hidden">{employee.email}</div>
                   </div>
                 </div>
               </td>
@@ -122,7 +120,7 @@ export default function EmployeeTable({
               <td className="px-4 py-3 text-theme-text-muted hidden xl:table-cell">
                 {(employee.squads?.length ?? 0) > 0 ? (
                   <div className="flex flex-wrap gap-1">
-                    {(employee.squads ?? []).slice(0, 2).map(s => (
+                    {(employee.squads ?? []).slice(0, 2).map((s) => (
                       <span
                         key={s.id}
                         className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-theme-elevated text-theme-text-muted border border-theme-border rounded"
@@ -142,12 +140,13 @@ export default function EmployeeTable({
               </td>
               <td className="px-4 py-3 hidden sm:table-cell">
                 <span
-                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${employee.role === "supervisor"
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                    employee.role === "supervisor"
                       ? "bg-purple-900/30 text-purple-300 border border-purple-500/30"
                       : employee.role === "admin"
                         ? "bg-amber-900/30 text-amber-300 border border-amber-500/30"
                         : "bg-primary-900/30 text-primary-300 border border-primary-500/30"
-                    }`}
+                  }`}
                 >
                   {employee.title || employee.role.charAt(0).toUpperCase() + employee.role.slice(1)}
                 </span>

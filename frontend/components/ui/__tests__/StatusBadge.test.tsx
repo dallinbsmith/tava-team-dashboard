@@ -5,13 +5,7 @@
 
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import {
-  StatusBadge,
-  RoleBadge,
-  BadgeVariant,
-  BadgeSize,
-  UserRole,
-} from "../StatusBadge";
+import { StatusBadge, RoleBadge, BadgeVariant, BadgeSize, UserRole } from "../StatusBadge";
 
 describe("StatusBadge", () => {
   describe("rendering", () => {

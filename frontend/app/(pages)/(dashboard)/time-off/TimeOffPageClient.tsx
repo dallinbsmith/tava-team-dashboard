@@ -3,10 +3,7 @@
 import { useState, useCallback, useEffect, useTransition } from "react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { TimeOffRequest } from "./types";
-import {
-  getMyTimeOffRequests,
-  getPendingTimeOffRequests,
-} from "@/lib/api";
+import { getMyTimeOffRequests, getPendingTimeOffRequests } from "@/lib/api";
 import { cancelTimeOffRequestAction } from "./actions";
 import TimeOffRequestForm from "./components/TimeOffRequestForm";
 import TimeOffRequestList from "./components/TimeOffRequestList";
@@ -22,16 +19,18 @@ interface TimeOffPageClientProps {
   isSupervisorOrAdmin: boolean;
 }
 
-export function TimeOffPageClient({
+export const TimeOffPageClient = ({
   initialMyRequests,
   initialPendingRequests,
   isSupervisorOrAdmin: serverIsSupervisorOrAdmin,
-}: TimeOffPageClientProps) {
+}: TimeOffPageClientProps) => {
   // Use effective user from context (respects impersonation)
   const { currentUser: effectiveUser, effectiveIsSupervisorOrAdmin } = useCurrentUser();
 
   // Use context values if available, otherwise fall back to server-provided values
-  const isSupervisorOrAdmin = effectiveUser ? effectiveIsSupervisorOrAdmin : serverIsSupervisorOrAdmin;
+  const isSupervisorOrAdmin = effectiveUser
+    ? effectiveIsSupervisorOrAdmin
+    : serverIsSupervisorOrAdmin;
 
   const [myRequests, setMyRequests] = useState(initialMyRequests);
   const [pendingRequests, setPendingRequests] = useState(initialPendingRequests);
@@ -183,7 +182,11 @@ export function TimeOffPageClient({
           filterStatus={filterStatus}
           onFilterChange={setFilterStatus}
           showUser={isSupervisorOrAdmin}
-          emptyMessage={isSupervisorOrAdmin ? "No time off requests" : "You haven't made any time off requests yet"}
+          emptyMessage={
+            isSupervisorOrAdmin
+              ? "No time off requests"
+              : "You haven't made any time off requests yet"
+          }
         />
       </div>
 
@@ -196,4 +199,4 @@ export function TimeOffPageClient({
       )}
     </div>
   );
-}
+};

@@ -122,12 +122,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               <AlertTriangle className="w-5 h-5 text-red-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-theme-text">
-                Something went wrong
-              </h2>
-              <p className="text-sm text-theme-text-muted">
-                An unexpected error occurred
-              </p>
+              <h2 className="text-lg font-semibold text-theme-text">Something went wrong</h2>
+              <p className="text-sm text-theme-text-muted">An unexpected error occurred</p>
             </div>
           </div>
 
@@ -191,13 +187,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
  * A fallback component designed for React Query errors.
  * Shows the error message with a retry button.
  */
-export function QueryErrorFallback({
+export const QueryErrorFallback = ({
   error,
   resetErrorBoundary,
 }: {
   error: Error;
   resetErrorBoundary?: () => void;
-}) {
+}) => {
   return (
     <div className="p-6 bg-theme-surface border border-theme-border">
       <div className="flex items-start gap-3">
@@ -205,9 +201,7 @@ export function QueryErrorFallback({
           <AlertTriangle className="w-4 h-4 text-red-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-theme-text mb-1">
-            Failed to load data
-          </h3>
+          <h3 className="text-sm font-medium text-theme-text mb-1">Failed to load data</h3>
           <p className="text-sm text-theme-text-muted mb-3">{error.message}</p>
           {resetErrorBoundary && (
             <button
@@ -222,6 +216,6 @@ export function QueryErrorFallback({
       </div>
     </div>
   );
-}
+};
 
 export default ErrorBoundary;

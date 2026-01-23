@@ -41,12 +41,12 @@ interface UseTeamTimeOffResult {
   refetch: () => Promise<void>;
 }
 
-export function useTeamTimeOff({
+export const useTeamTimeOff = ({
   type,
   id,
   allUsers,
   enabled = true,
-}: UseTeamTimeOffOptions): UseTeamTimeOffResult {
+}: UseTeamTimeOffOptions): UseTeamTimeOffResult => {
   const { user: auth0User, isLoading: authLoading } = useUser();
 
   const isAuthenticated = !!auth0User && !authLoading;
@@ -94,8 +94,7 @@ export function useTeamTimeOff({
 
     // Sort upcoming by start date
     upcomingList.sort(
-      (a, b) =>
-        new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+      (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
     );
 
     return { currentlyOnLeave: onLeave, upcoming: upcomingList };
@@ -117,7 +116,7 @@ export function useTeamTimeOff({
       : null,
     refetch,
   };
-}
+};
 
 interface UseTeamTasksOptions {
   type: SelectionType;
@@ -134,12 +133,12 @@ interface UseTeamTasksResult {
   refetch: () => Promise<void>;
 }
 
-export function useTeamTasks({
+export const useTeamTasks = ({
   type,
   id,
   allUsers,
   enabled = true,
-}: UseTeamTasksOptions): UseTeamTasksResult {
+}: UseTeamTasksOptions): UseTeamTasksResult => {
   const { user: auth0User, isLoading: authLoading } = useUser();
 
   const isAuthenticated = !!auth0User && !authLoading;
@@ -163,10 +162,7 @@ export function useTeamTasks({
   }, [allTasks, allUsers, type, id]);
 
   // Categorize tasks
-  const categorized = useMemo(
-    () => categorizeTasks(filteredTasks),
-    [filteredTasks]
-  );
+  const categorized = useMemo(() => categorizeTasks(filteredTasks), [filteredTasks]);
 
   const refetch = useCallback(async () => {
     await queryRefetch();
@@ -183,7 +179,7 @@ export function useTeamTasks({
       : null,
     refetch,
   };
-}
+};
 
 interface UseTeamMembersOptions {
   type: SelectionType;
@@ -196,18 +192,15 @@ interface UseTeamMembersResult {
   count: number;
 }
 
-export function useTeamMembers({
+export const useTeamMembers = ({
   type,
   id,
   allUsers,
-}: UseTeamMembersOptions): UseTeamMembersResult {
-  const members = useMemo(
-    () => filterMembersByTeam(allUsers, type, id),
-    [allUsers, type, id]
-  );
+}: UseTeamMembersOptions): UseTeamMembersResult => {
+  const members = useMemo(() => filterMembersByTeam(allUsers, type, id), [allUsers, type, id]);
 
   return {
     members,
     count: members.length,
   };
-}
+};

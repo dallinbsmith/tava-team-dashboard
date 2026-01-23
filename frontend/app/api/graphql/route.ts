@@ -8,16 +8,13 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
  * The access token is added server-side from Auth0 session cookies,
  * keeping it secure and never exposed to client JavaScript.
  */
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   try {
     const result = await auth0.getAccessToken();
     const accessToken = result?.token;
 
     if (!accessToken) {
-      return NextResponse.json(
-        { errors: [{ message: "Unauthorized" }] },
-        { status: 401 }
-      );
+      return NextResponse.json({ errors: [{ message: "Unauthorized" }] }, { status: 401 });
     }
 
     const body = await request.text();
@@ -38,9 +35,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("GraphQL proxy error:", error);
-    return NextResponse.json(
-      { errors: [{ message: "Internal server error" }] },
-      { status: 500 }
-    );
+    return NextResponse.json({ errors: [{ message: "Internal server error" }] }, { status: 500 });
   }
-}
+};

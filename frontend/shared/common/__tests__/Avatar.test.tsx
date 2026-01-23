@@ -10,7 +10,12 @@ import Avatar from "../Avatar";
 // Mock next/image
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: ({ src, alt, onError, ...props }: {
+  default: ({
+    src,
+    alt,
+    onError,
+    ...props
+  }: {
     src: string;
     alt: string;
     onError?: () => void;
@@ -123,12 +128,7 @@ describe("Avatar", () => {
     });
 
     it("falls back to initials when all images fail", () => {
-      render(
-        <Avatar
-          {...defaultProps}
-          s3AvatarUrl="https://s3.example.com/avatar.jpg"
-        />
-      );
+      render(<Avatar {...defaultProps} s3AvatarUrl="https://s3.example.com/avatar.jpg" />);
 
       const img = screen.getByTestId("avatar-image");
       fireEvent.error(img);

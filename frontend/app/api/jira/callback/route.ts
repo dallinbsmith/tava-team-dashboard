@@ -5,7 +5,7 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
 
 // This handles the OAuth callback from Atlassian
 // It receives the code and state, then forwards them to the backend
-export async function GET(request: NextRequest) {
+export const GET = async (request: NextRequest) => {
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get("code");
@@ -69,4 +69,4 @@ export async function GET(request: NextRequest) {
     settingsUrl.searchParams.set("jira_error_description", "An internal error occurred");
     return NextResponse.redirect(settingsUrl);
   }
-}
+};

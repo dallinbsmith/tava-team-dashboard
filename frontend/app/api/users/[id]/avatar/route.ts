@@ -3,10 +3,7 @@ import { NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export const POST = async (request: Request, { params }: { params: Promise<{ id: string }> }) => {
   const { id } = await params;
 
   try {
@@ -40,9 +37,6 @@ export async function POST(
     return NextResponse.json(data);
   } catch (error) {
     console.error("Avatar upload error:", error);
-    return NextResponse.json(
-      { error: "Failed to upload avatar" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to upload avatar" }, { status: 500 });
   }
-}
+};

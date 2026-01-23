@@ -28,11 +28,11 @@ interface InvitationsPageClientProps {
   initialDepartments: string[];
 }
 
-export function InvitationsPageClient({
+export const InvitationsPageClient = ({
   initialInvitations,
   initialSquads,
   initialDepartments,
-}: InvitationsPageClientProps) {
+}: InvitationsPageClientProps) => {
   // Use organization provider for mutations (addSquad), fall back to initial data for display
   const { squads: providerSquads, addSquad, departments: providerDepartments } = useOrganization();
 
@@ -96,9 +96,7 @@ export function InvitationsPageClient({
       const result = await revokeInvitationAction(id);
       if (result.success) {
         setInvitations(
-          invitations.map((inv) =>
-            inv.id === id ? { ...inv, status: "revoked" as const } : inv
-          )
+          invitations.map((inv) => (inv.id === id ? { ...inv, status: "revoked" as const } : inv))
         );
       } else {
         setError(result.error);
@@ -169,9 +167,7 @@ export function InvitationsPageClient({
   };
 
   const getSelectedSquads = () => {
-    return squads.filter((s) =>
-      (newInvitation.squad_ids || []).includes(s.id)
-    );
+    return squads.filter((s) => (newInvitation.squad_ids || []).includes(s.id));
   };
 
   return (
@@ -221,7 +217,8 @@ export function InvitationsPageClient({
             <p>No invitations yet</p>
             <p className="text-sm mt-1">Send your first invitation to get started</p>
           </div>
-        ) : invitations.filter((inv) => !showOnlyPending || inv.status === "pending").length === 0 ? (
+        ) : invitations.filter((inv) => !showOnlyPending || inv.status === "pending").length ===
+          0 ? (
           <div className="px-6 py-12 text-center text-theme-text-muted">
             <CheckCircle className="w-12 h-12 mx-auto mb-4 text-theme-text-subtle" />
             <p>No pending invitations</p>
@@ -231,8 +228,8 @@ export function InvitationsPageClient({
                 className="text-primary-400 hover:text-primary-300"
               >
                 Show all invitations
-              </button>
-              {" "}to see past invitations
+              </button>{" "}
+              to see past invitations
             </p>
           </div>
         ) : (
@@ -240,49 +237,50 @@ export function InvitationsPageClient({
             {invitations
               .filter((inv) => !showOnlyPending || inv.status === "pending")
               .map((invitation) => (
-              <div key={invitation.id} className="px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-theme-elevated flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-theme-text-muted" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-theme-text">{invitation.email}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${invitation.role === "admin"
-                          ? "bg-amber-900/40 text-amber-300 border-amber-500/30"
-                          : "bg-purple-900/40 text-purple-300 border-purple-500/30"
+                <div key={invitation.id} className="px-6 py-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-theme-elevated flex items-center justify-center">
+                      <Mail className="w-5 h-5 text-theme-text-muted" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-theme-text">{invitation.email}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${
+                            invitation.role === "admin"
+                              ? "bg-amber-900/40 text-amber-300 border-amber-500/30"
+                              : "bg-purple-900/40 text-purple-300 border-purple-500/30"
                           }`}
-                      >
-                        <Shield className="w-3 h-3" />
-                        {invitation.role}
-                      </span>
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${getStatusColor(
-                          invitation.status
-                        )}`}
-                      >
-                        {getStatusIcon(invitation.status)}
-                        {invitation.status}
-                      </span>
+                        >
+                          <Shield className="w-3 h-3" />
+                          {invitation.role}
+                        </span>
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${getStatusColor(
+                            invitation.status
+                          )}`}
+                        >
+                          {getStatusIcon(invitation.status)}
+                          {invitation.status}
+                        </span>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-theme-text-muted">
+                      {new Date(invitation.created_at).toLocaleDateString()}
+                    </span>
+                    {invitation.status === "pending" && (
+                      <button
+                        onClick={() => handleRevokeInvitation(invitation.id)}
+                        className="px-3 py-1 text-sm text-red-400 hover:bg-red-900/30 transition-colors"
+                      >
+                        Revoke
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-theme-text-muted">
-                    {new Date(invitation.created_at).toLocaleDateString()}
-                  </span>
-                  {invitation.status === "pending" && (
-                    <button
-                      onClick={() => handleRevokeInvitation(invitation.id)}
-                      className="px-3 py-1 text-sm text-red-400 hover:bg-red-900/30 transition-colors"
-                    >
-                      Revoke
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
         )}
       </div>
@@ -303,7 +301,9 @@ export function InvitationsPageClient({
                   </div>
                   <h4 className="text-lg font-medium text-theme-text">Invitation Sent!</h4>
                   <p className="text-sm text-theme-text-muted mt-1">
-                    An email has been sent to <span className="text-theme-text font-medium">{createdInvitation.email}</span> with instructions to join.
+                    An email has been sent to{" "}
+                    <span className="text-theme-text font-medium">{createdInvitation.email}</span>{" "}
+                    with instructions to join.
                   </p>
                 </div>
 
@@ -330,9 +330,7 @@ export function InvitationsPageClient({
                   <input
                     type="email"
                     value={newInvitation.email}
-                    onChange={(e) =>
-                      setNewInvitation({ ...newInvitation, email: e.target.value })
-                    }
+                    onChange={(e) => setNewInvitation({ ...newInvitation, email: e.target.value })}
                     className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="Enter email address"
                     required
@@ -340,9 +338,7 @@ export function InvitationsPageClient({
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-theme-text mb-1">
-                    Role
-                  </label>
+                  <label className="block text-sm font-medium text-theme-text mb-1">Role</label>
                   <select
                     value={newInvitation.role}
                     onChange={(e) =>
@@ -373,10 +369,16 @@ export function InvitationsPageClient({
                       onClick={() => setDepartmentDropdownOpen(!departmentDropdownOpen)}
                       className="w-full px-3 py-2 border border-theme-border bg-theme-elevated text-theme-text text-left flex items-center justify-between focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     >
-                      <span className={newInvitation.department ? "text-theme-text" : "text-theme-text-muted"}>
+                      <span
+                        className={
+                          newInvitation.department ? "text-theme-text" : "text-theme-text-muted"
+                        }
+                      >
                         {newInvitation.department || "Select department..."}
                       </span>
-                      <ChevronDown className={`w-4 h-4 ml-2 shrink-0 transition-transform ${departmentDropdownOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`w-4 h-4 ml-2 shrink-0 transition-transform ${departmentDropdownOpen ? "rotate-180" : ""}`}
+                      />
                     </button>
 
                     {departmentDropdownOpen && (
@@ -419,9 +421,7 @@ export function InvitationsPageClient({
                 </div>
 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-theme-text mb-1">
-                    Squads
-                  </label>
+                  <label className="block text-sm font-medium text-theme-text mb-1">Squads</label>
 
                   {/* Selected squads */}
                   {getSelectedSquads().length > 0 && (
@@ -457,7 +457,9 @@ export function InvitationsPageClient({
                           ? "Select squads..."
                           : `${getSelectedSquads().length} squad${getSelectedSquads().length > 1 ? "s" : ""} selected`}
                       </span>
-                      <ChevronDown className={`w-4 h-4 ml-2 shrink-0 transition-transform ${squadDropdownOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`w-4 h-4 ml-2 shrink-0 transition-transform ${squadDropdownOpen ? "rotate-180" : ""}`}
+                      />
                     </button>
 
                     {squadDropdownOpen && (
@@ -467,19 +469,25 @@ export function InvitationsPageClient({
                             key={squad.id}
                             type="button"
                             onClick={() => toggleSquad(squad.id)}
-                            className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-theme-elevated ${(newInvitation.squad_ids || []).includes(squad.id)
-                              ? "bg-primary-900/20"
-                              : ""
-                              }`}
+                            className={`w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-theme-elevated ${
+                              (newInvitation.squad_ids || []).includes(squad.id)
+                                ? "bg-primary-900/20"
+                                : ""
+                            }`}
                           >
                             <div
-                              className={`w-4 h-4 border flex items-center justify-center ${(newInvitation.squad_ids || []).includes(squad.id)
-                                ? "border-primary-500 bg-primary-500"
-                                : "border-theme-border"
-                                }`}
+                              className={`w-4 h-4 border flex items-center justify-center ${
+                                (newInvitation.squad_ids || []).includes(squad.id)
+                                  ? "border-primary-500 bg-primary-500"
+                                  : "border-theme-border"
+                              }`}
                             >
                               {(newInvitation.squad_ids || []).includes(squad.id) && (
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <svg
+                                  className="w-3 h-3 text-white"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
                                   <path
                                     fillRule="evenodd"
                                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -571,4 +579,4 @@ export function InvitationsPageClient({
       />
     </>
   );
-}
+};

@@ -224,10 +224,9 @@ describe("ManageSquadsModal", () => {
 
     it("calls onClose when backdrop clicked", () => {
       const onClose = jest.fn();
-      const { container } = render(
-        <ManageSquadsModal {...defaultProps} onClose={onClose} />,
-        { wrapper: createWrapper(queryClient) }
-      );
+      const { container } = render(<ManageSquadsModal {...defaultProps} onClose={onClose} />, {
+        wrapper: createWrapper(queryClient),
+      });
 
       const backdrop = container.querySelector(".absolute.inset-0.bg-black\\/50");
       fireEvent.click(backdrop!);
@@ -332,7 +331,9 @@ describe("ManageSquadsModal", () => {
       fireEvent.click(deleteButtons[2]); // Frontend Team (last alphabetically)
 
       expect(screen.getByTestId("confirmation-modal")).toBeInTheDocument();
-      expect(screen.getByText(/Are you sure you want to delete "Frontend Team"/)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Are you sure you want to delete "Frontend Team"/)
+      ).toBeInTheDocument();
     });
 
     it("calls removeSquad when confirmed", async () => {
